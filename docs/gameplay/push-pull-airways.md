@@ -161,3 +161,22 @@ Do not begin with unrestricted cross-realm broadcast or autonomous action execut
 This document is an additive architecture proposal. It does not modify existing channel behavior, execute network operations, or grant new permissions. Implementation requires separate reviewed code, tests, and explicit authorization. Existing source history remains intact.
 
 **Channel covenant:** Push only what you are authorized to send. Pull only what you are permitted to receive. Ask before acting for another. Preserve the origin of every consequential event, and keep connection distinct from control.
+
+
+## 13. Local reference implementation
+
+The first local reference implementation is in `python/channel_router.py`.
+
+It provides:
+- SQLite-backed channel registry and explicit owner-managed membership grants.
+- Separate publish and read permissions.
+- Local push and pull operations; no sockets or cross-realm transport.
+- Idempotency keys that reject reuse with different event content.
+- Per-recipient delivery states and explicit accept/decline decisions.
+- Revocation that blocks future pulls and marks pending deliveries revoked.
+- Durable event history and database reopen/recovery behavior.
+- Append-only triggers for event and decision records.
+
+Automated coverage is in `tests/test_channel_router.py`, including authorization, push/pull delivery, idempotency, consent, decline, revocation, recovery, and bounded pull limits.
+
+**Boundary:** This implementation records and routes action requests; it does not execute arbitrary payloads. A future domain-specific executor must independently revalidate permission and acceptance immediately before performing a consequential state change. Realm-to-realm networking remains disabled and out of scope until the local tests pass and a separate security review approves the transport design.
