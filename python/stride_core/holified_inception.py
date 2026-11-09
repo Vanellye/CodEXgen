@@ -7,6 +7,7 @@ persist data, or perform consequential actions.
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+import json
 from typing import Any, Iterable, Mapping, Optional
 
 from .faculty_engine import assess_perception, generate_ideas
@@ -14,7 +15,7 @@ from .faculty_engine import assess_perception, generate_ideas
 
 EVIDENCE_LABELS = {
     "observed", "verified", "inferred", "hypothesis",
-    "simulated", "fictional", "unknown", "disputed",
+    "simulated", "fictional", "unknown", "disputed", "recorded",
 }
 
 
@@ -210,4 +211,75 @@ def read_beyond_present(
             "human_review_recommended": True,
             "limitations": "Only supplied context and local Stride faculty helpers are used.",
         },
+    )
+
+
+
+@dataclass(frozen=True)
+class HolifiedTemporalReport:
+    """A supplied-context reading plus separately retained JOB history."""
+    reading: HolifiedReport
+    history: Any
+    historical_context: tuple[ContextItem, ...]
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "reading": self.reading.to_dict(),
+            "history": self.history.to_dict(),
+            "historical_context": [asdict(item) for item in self.historical_context],
+        }
+
+
+def read_with_job_history(
+    present: str,
+    store: Any,
+    job_ids: Iterable[str],
+    *,
+    authorized: bool = False,
+    context: Iterable[ContextItem | Mapping[str, Any]] = (),
+    observations: Optional[dict[str, float]] = None,
+    creative_concepts: Iterable[str] = (),
+    reverse: bool = False,
+    limit_per_job: int = 500,
+) -> HolifiedTemporalReport:
+    """Optionally add explicitly authorized, read-only JOB event history.
+
+    JOB history is fetched only when this function is called with
+    authorized=True and explicit JOB identifiers. The original reader remains
+    independently usable with supplied context alone.
+    """
+    from .job_history import recall_job_history
+
+    history = recall_job_history(
+        store,
+        job_ids,
+        authorized=authorized,
+        reverse=reverse,
+        limit_per_job=limit_per_job,
+    )
+    historical = tuple(
+        ContextItem(
+            item_id=f"job-history:{event.job_id}:{event.sequence}",
+            content=json.dumps({
+                "event_type": event.event_type,
+                "recorded_at": event.recorded_at,
+                "payload": dict(event.payload),
+                "source_ref": event.source_ref,
+            }, ensure_ascii=False, sort_keys=True),
+            evidence="recorded",
+            source=event.source_ref,
+        )
+        for event in history.events
+    )
+    supplied = tuple(context)
+    reading = read_beyond_present(
+        present,
+        (*supplied, *historical),
+        observations=observations,
+        creative_concepts=creative_concepts,
+    )
+    return HolifiedTemporalReport(
+        reading=reading,
+        history=history,
+        historical_context=historical,
     )
