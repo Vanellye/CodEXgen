@@ -76,6 +76,18 @@ jobs:
       - name: Run Pantheon smoke tests
         run: ctest --test-dir build/pantheon --output-on-failure
 
+  framework-portable:
+    name: Platform-independent framework C++11 contracts
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure portable framework
+        run: cmake -S framework -B build/framework -DCMAKE_BUILD_TYPE=Release
+      - name: Build portable framework
+        run: cmake --build build/framework --parallel 2
+      - name: Run framework contract tests
+        run: ctest --test-dir build/framework --output-on-failure
+
   android-java-views:
     name: Android Views Java source compatibility
     runs-on: ubuntu-22.04
