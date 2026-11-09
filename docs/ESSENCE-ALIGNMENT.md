@@ -10,6 +10,47 @@
 
 Stride should keep human purpose, evidence-based reasoning, and ethical responsibility aligned. Spiritual faith may inspire a person's purpose and values; empirical claims must still be evaluated using appropriate evidence and openly stated uncertainty.
 
+## Possibility, purpose, and continuity
+
+> **Pushing limits reached creates possibility. Purpose gives it direction. Structure gives it continuity.**
+
+This is a core creative and engineering belief. Exploration should be ambitious enough to discover paths beyond familiar conventions, while remaining honest about constraints, evidence, and risk. Possibility is not proof of feasibility; a boundary being challenged does not authorize unsafe or unreviewed action. Purpose determines why a possibility is worth pursuing. Structure preserves the learning, relationships, provenance, and safeguards that let useful work continue.
+
+The sequence is:
+
+1. **Possibility — explore beyond the beaten path.** Challenge assumptions, test alternatives, and make room for original combinations.
+2. **Purpose — give exploration direction.** State what a creation is for, whom it may affect, and which values it must preserve.
+3. **Continuity — give purpose a durable form.** Use clear interfaces, documented decisions, reproducible methods, version history, and accountable stewardship.
+
+These behaviors complement the universal invariant below: protect what is unconditional, and take responsibility for what is consequential.
+
+## Y-ORIGIN — generative naming protocol
+
+**Y-ORIGIN** is the project's naming behavior for modules, components, experiments, and creative system identities. It combines three meanings of Y:
+
+- **Y as dimensional relationship:** connect the micro level (a function or component), meso level (a module or subsystem), and macro level (the whole architecture). “As below, so above” is a design metaphor for traceable relationships across scale, not a claim that different scales are literally identical.
+- **Y as why:** preserve the purpose behind a name. A name should have an intelligible relationship to the role, intention, or character of what it identifies.
+- **Y as generative branching:** use randomized sequences and unexpected combinations to discover names outside conventional naming patterns.
+
+### Naming behavior
+
+1. Generate candidate names from documented phonetic, linguistic, symbolic, or project-specific seed vocabularies; allow original combinations rather than fixed templates.
+2. Record the random seed, generator version, vocabulary/version, and relevant parameters so a candidate can be reproduced.
+3. Associate each accepted name with a concise purpose statement, module role, parent/child relationships, and stable machine identifier.
+4. Check collisions against repository paths, code symbols, package names, registered modules, and known external names before adoption.
+5. Keep names pronounceable and distinguishable where practical; flag ambiguous, offensive, misleading, or trademark-sensitive candidates for human review.
+6. Preserve the stable identifier and rename history when a display name evolves. Never let a creative rename silently break imports, data, links, or provenance.
+7. Allow names to cross-pollinate between architectural levels, but require an explicit relationship rather than assuming that similar names imply shared behavior.
+8. Treat generated names as proposals. A human owner approves consequential naming changes before they are committed, published, or used in interfaces.
+
+### Reproducibility record
+
+A naming experiment should be able to retain: candidate name, stable identifier, seed, generator version, vocabulary source/version, purpose, architectural level, parent/child links, collision-check result, reviewer, decision, and timestamp. Do not include private personal data in naming seeds or public records.
+
+### Acceptance criteria
+
+Y-ORIGIN is behaving correctly when a reviewer can reproduce a candidate from its recorded inputs, understand why the accepted name fits its purpose, trace its place in the architecture, identify collisions or risks, and recover the prior identity after a rename. Randomness creates options; it does not make decisions or confer authority.
+
 ## The two sides: unconditional dignity and consequential responsibility
 
 > Unconditional dignity is the first side: every person has worth before achievement, agreement, understanding, usefulness, or recognition. Consequential responsibility is the other: the greater the effect a decision may have on another person, the greater the care, evidence, accountability, and protection required.
@@ -46,6 +87,7 @@ This is not a slogan reserved for the Consent screen. It is a repository-wide de
 | Geometry, simulations, and research | Keep inquiry open and distinguish mathematical possibility from claims about people or nature. | Label simulations and hypotheses; document assumptions; do not present generated results as measured evidence. |
 | Consent and youth-related workflows | Preserve dignity before comprehension, speech, agreement, or capacity. | Require age-appropriate safeguards and qualified human processes; never infer assent or shift adult duty of care onto a child. |
 | CI, releases, and repository operations | Preserve contributor work, provenance, and the integrity of shared branches. | Verify builds and tests; report failures honestly; review release artifacts and permissions before publication. |
+| Y-ORIGIN naming and module identity | Preserve creative freedom, authorship, stable identity, and the right to question a proposed name. | Record seeds and provenance; check collisions; require human approval for consequential renames; preserve traceable history. |
 
 ### Universal change-review questions
 
@@ -57,6 +99,7 @@ Every material feature or change should answer:
 4. Who has authority to approve it, and is that authorization specific and voluntary?
 5. Can the action be previewed, paused, declined, reversed, or appealed?
 6. What human owner is accountable if it fails or causes harm?
+7. Does the change explore new possibilities without losing purpose, reproducibility, or continuity?
 
 A change that cannot answer these questions must be narrowed, paused, or withheld. This is a design and review requirement, not a claim that every existing module already enforces it. Each module must be marked **specified**, **implemented**, **tested**, or **independently verified** according to demonstrated evidence.
 
