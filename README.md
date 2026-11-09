@@ -4,7 +4,11 @@
 
 > **Guiding invariant:** We protect what is unconditional, and we take responsibility for what is consequential.
 >
-> Across every module, preserve human dignity, agency, privacy, and the right to decline; scale evidence, authorization, review, reversibility, and human accountability to the impact of each action. See [Essence Alignment](docs/ESSENCE-ALIGNMENT.md).
+> Across every module, preserve human dignity, agency, privacy, and the right to decline; scale evidence, authorization, review, reversibility, and human accountability to the impact of each action.
+>
+> **Creative operating belief:** Pushing limits reached creates possibility. Purpose gives it direction. Structure gives it continuity.
+>
+> **Y-ORIGIN** applies this belief to module identity: randomized, reproducible naming sequences explore unconventional possibilities; purpose gives accepted names meaning; stable identifiers, provenance, collision checks, and rename history preserve continuity. Its Y connects micro, meso, and macro architecture, asks why each component exists, and supports generative branching. See [Essence Alignment](docs/ESSENCE-ALIGNMENT.md).
 
 ## What is included
 
@@ -19,7 +23,7 @@
 
 All Pantheon Node.js target processes share the exact **Node.js 11.15.0** runtime contract. The version is pinned in `.nvmrc`, `.node-version`, and `pantheon/node-runtime.json`; the root npm test checks the active process before a node is allowed to proceed. CI runs that check under the same pinned runtime.
 
-Node.js 11 is end-of-life and receives no security fixes. This pin is retained as an explicit compatibility requirement, not a security recommendation. Keep network-facing nodes isolated, minimize dependencies, and do not expose untrusted workloads to this runtime. The native Pantheon C++11 runtime and Android API 11 profile are separate version constraints.
+Node.js 11 is end-of-life and receives no security fixes. This pin is retained as an explicit compatibility requirement, not a security recommendation. Keep network-facing nodes isolated, minimize dependencies, and do not expose untrusted workloads to this runtime.
 
 Use Node Version Manager to select the shared runtime:
 
