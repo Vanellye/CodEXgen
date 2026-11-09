@@ -67,7 +67,8 @@ class PantheonEngineTests(unittest.TestCase):
         marker = self.root / "must_not_exist.txt"
         source = self.source / "side_effect.py"
         source.write_text(
-            f"from pathlib import Path\\nPath({str(marker)!r}).write_text('executed')\\n",
+            "from pathlib import Path" + chr(10)
+            + f"Path({str(marker)!r}).write_text('executed')" + chr(10),
             encoding="utf-8",
         )
         analyze_approved_files(self.source, ["side_effect.py"])
