@@ -6,7 +6,7 @@ This is the reading map for the project's technical notes, principles, and explo
 
 | Document | What it covers |
 |---|---|
-| [Essence Alignment](ESSENCE-ALIGNMENT.md) | Foundational Stride commitments for purpose, wisdom, evidence, balance, responsible propagation, and human stewardship |
+| [Essence Alignment](ESSENCE-ALIGNMENT.md) | Foundational Stride commitments for purpose, wisdom, evidence, balance, responsible propagation, and human stewardship |\n| [Stride Consent & Human Review](STRIDE-CONSENT-REVIEW.md) | Seven-layer assent checks, pause/decline paths, human-review declaration, local audit records, and implementation gaps |
 | [Android API 11 profile](ANDROID_API11_PROFILE.md) | Active Android compatibility contract, build toolchain, preserved features, and security limits |
 | [JGit Compatibility Checkpoint](JGIT-COMPATIBILITY-CHECKPOINT.md) | JGit 3.7.1 dependency anchor, shared app-process bridge access, and authorization boundaries |
 | [Higher Powers, Energies & Faculties](HIGHER-POWERS-ENERGIES-FACULTIES.md) | Software faculties, signal-plan metadata, examples, and scientific boundaries |
