@@ -2,6 +2,12 @@
 
 Catalog geometric objects and constructions in a consistent, reusable way.
 
+## Shape atlas
+
+![Geometric shape atlas](../visuals/shape-atlas.svg)
+
+The atlas is schematic and not to scale. It introduces common plane figures and solids; it is not an exhaustive classification.
+
 ## Suggested organization
 
 - **2D:** points, lines, angles, polygons, circles, conics, curves, and plane regions.
