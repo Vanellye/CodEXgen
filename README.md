@@ -9,12 +9,14 @@
 > **Creative operating belief:** Pushing limits reached creates possibility. Purpose gives it direction. Structure gives it continuity.
 >
 > **Y-ORIGIN** applies this belief to module identity: randomized, reproducible naming sequences explore unconventional possibilities; purpose gives accepted names meaning; stable identifiers, provenance, collision checks, and rename history preserve continuity. Its Y connects micro, meso, and macro architecture, asks why each component exists, and supports generative branching. See [Essence Alignment](docs/ESSENCE-ALIGNMENT.md).
+>
+> **Resonance stewardship:** let faith inspire purpose, compassion, humility, and service; let technical propagation remain voluntary, traceable, privacy-preserving, and evidence-based. See [Resonance Stewardship](docs/RESONANCE-STEWARDSHIP.md).
 
 ## What is included
 
 - **CodeGen** — a native Android Views screen for local code scaffolding.
 - **Git Freedom Bridge** — local repository work, branch operations, selected-file commits, and guarded GitHub workflows.
-- **Data Resonance** — app-local SQLite observations with optional labels, units, timestamps, and frequency metadata.
+- **Data Resonance** — app-local SQLite observations with optional labels, units, timestamps, and frequency metadata. Its current frequency and biomarker fields are annotations, not biological controls; see [Resonance Stewardship](docs/RESONANCE-STEWARDSHIP.md).
 - **Olpirt + Pons** — a native dependency-contract audit through JNI.
 - **Stride / Python** — exploratory perception, creativity, adaptive-feedback, signal simulation, and a local-first JOB engine for resumable journeys, branching, event history, and purpose-scoped metrics. See [Universal Workflow — JOBs](docs/UNIVERSAL-WORKFLOW-JOBS.md).
 - **Geometry & Design** — a separate library for mathematical reasoning, shape studies, and constructive designs; it is kept distinct from measured graphs and observation records.
