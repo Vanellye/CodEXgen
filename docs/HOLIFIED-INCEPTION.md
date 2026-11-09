@@ -1,6 +1,6 @@
 # Holified Inception — Contextual Perception Layer
 
-**Status:** Cognitive-layer specification; implementation pending  
+**Status:** Cognitive-layer specification; first independent reader implemented, execution verification pending  
 **Working branch:** `olpirt/stride-next`  
 **Lineage:** Legacy Preservation & Independent Peering Protocol; Counterclockwise Temporal Reconciliation  
 **Purpose:** Read beyond the immediate page of the present while preserving the distinction between evidence, interpretation, uncertainty, and imagination.
@@ -47,7 +47,7 @@ Every material output statement must carry one of these labels:
 
 Confidence is not a substitute for these labels. If a confidence score is later implemented, it must expose its basis and must not imply calibrated probability unless calibration has been measured.
 
-## Temporal and provenance contract
+## Temporal and provenance principles
 
 - Use the [Counterclockwise Temporal Reconciliation](TEMPORAL-RECONCILIATION.md) model to inspect prior events and later recorded consequences.
 - Preserve original records and exact source references; corrections are append-only annotations or new derived views.
@@ -56,7 +56,7 @@ Confidence is not a substitute for these labels. If a confidence score is later 
 - Every derived claim should retain links to the evidence and transformation that produced it.
 - A rewind is read-only. Replaying context must not repeat external side effects.
 
-## Connection and perception contract
+## Connection and perception principles
 
 A relationship map should record:
 - source node and destination node;
@@ -80,7 +80,7 @@ When the layer identifies a possible misunderstanding or wrong claim, it should:
 
 Challenge claims, not people's dignity. Do not treat disagreement, age, branch isolation, or missing CI as proof of defect or bad intent.
 
-## Output contract
+## Output shape
 
 A Holified Inception response should contain, as applicable:
 
