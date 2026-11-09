@@ -1,0 +1,33 @@
+{
+  "fixture_version": "1",
+  "name": "basic-success-and-recovery",
+  "initial_state": {"mode": "baseline"},
+  "checkpoint_before_execution": true,
+  "steps": [
+    {
+      "module": "fixture.echo",
+      "input": "fixture-input",
+      "grants": ["ReadLocalState"],
+      "recovery": "None",
+      "expect_status": "Ok"
+    },
+    {
+      "set_state": {"mode": "mutated"}
+    },
+    {
+      "module": "fixture.failure",
+      "input": "",
+      "grants": [],
+      "recovery": "RestoreCheckpoint",
+      "expect_status": "ModuleFailure",
+      "expect_state": {"mode": "baseline"}
+    }
+  ],
+  "expected_trace": [
+    "run_started",
+    "module_completed",
+    "run_started",
+    "recovery_requested",
+    "state_restored"
+  ]
+}
