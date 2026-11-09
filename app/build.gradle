@@ -1,0 +1,50 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion '29.0.3'
+
+    defaultConfig {
+        applicationId 'com.vanellye.codexgen'
+        minSdkVersion 11
+        targetSdkVersion 29
+        versionCode 3
+        versionName '1.2-android-views-api11'
+        ndk {
+            abiFilters 'armeabi-v7a'
+        }
+        externalNativeBuild {
+            cmake {
+                arguments '-DANDROID_PLATFORM=android-11'
+                cppFlags '-std=c++11'
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_6
+        targetCompatibility JavaVersion.VERSION_1_6
+    }
+
+    externalNativeBuild {
+        cmake {
+            path 'src/main/cpp/CMakeLists.txt'
+            version '3.10.2'
+        }
+    }
+
+    ndkVersion '16.1.4479499'
+
+    buildTypes {
+        debug { minifyEnabled false }
+        release { minifyEnabled false }
+    }
+
+    lintOptions { abortOnError false }
+}
+
+dependencies {
+    // JGit 3.7 is the final JGit line with a Java 5/6-era baseline.
+    // Remote HTTPS operations are runtime-gated on older Android TLS stacks.
+    implementation 'org.eclipse.jgit:org.eclipse.jgit:3.7.1.201504261725-r'
+}
