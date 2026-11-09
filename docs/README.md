@@ -6,6 +6,7 @@ This is the reading map for the project's technical notes, principles, and explo
 
 | Document | What it covers |
 |---|---|
+| [Essence Alignment](ESSENCE-ALIGNMENT.md) | Foundational Stride commitments for purpose, wisdom, evidence, balance, responsible propagation, and human stewardship |
 | [Android API 11 profile](ANDROID_API11_PROFILE.md) | Active Android compatibility contract, build toolchain, preserved features, and security limits |
 | [Higher Powers, Energies & Faculties](HIGHER-POWERS-ENERGIES-FACULTIES.md) | Software faculties, signal-plan metadata, examples, and scientific boundaries |
 | [Rise & Shine + Wisdom + Medium Signal Lab](RISE-WISDOM-MEDIUM-LAB.md) | Lifecycle-to-Wisdom bridge and simulation-only optical, acoustic, digital-signal, and photon models |
