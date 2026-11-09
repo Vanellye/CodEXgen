@@ -19,6 +19,7 @@ The [Geometry & Design library](../geometry/README.md) keeps mathematical and co
 |---|---|
 | [Geometrical Intellect](../geometry/intellect/README.md) | Definitions, reasoning, derivations, proofs, conjectures, design rationale, and worked mathematical studies |
 | [Mathematical Studies](../geometry/intellect/studies/README.md) | Euclidean, spherical and hyperbolic, fractal, and higher-dimensional geometry |
+| [Interactive Mathematical Laboratory](../geometry/lab/README.md) | Browser-based parameter exploration for curvature, fractals, coordinate dimensions, and projections |
 | [Geometrical Shapes](../geometry/shapes/README.md) | Shape catalog, properties, dimensions, symmetry, and constructions |
 | [Geometrical Designs](../geometry/designs/README.md) | Patterns, compositions, tessellations, spatial layouts, and design studies |
 
