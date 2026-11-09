@@ -2,6 +2,7 @@ package com.vanellye.codexgen.gitbridge;
 
 import android.content.Context;
 import android.os.Build;
+import android.net.Uri;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,16 +30,35 @@ public final class GitFreedomBridge {
         public String authorName = "CodEXgen Contributor";
         public String authorEmail = "";
     }
+    private final Context appContext;
     private final File repoDir;
     private final TokenVault vault;
     private String sessionToken;
 
     public GitFreedomBridge(Context context) {
         Context app = context.getApplicationContext();
+        appContext = app;
         repoDir = new File(app.getFilesDir(), "git-bridge/CodEXgen");
         vault = new TokenVault(app);
     }
     public String localPath() { return repoDir.getAbsolutePath(); }
+    public int importWorkspaceTree(Uri treeUri) throws Exception {
+        if (Build.VERSION.SDK_INT < 19)
+            throw new IllegalStateException("Folder import requires Android API 19 or newer; use the in-app file editor on API 11-18.");
+        if (!new File(repoDir, ".git").isDirectory())
+            throw new IllegalStateException("Prepare or initialize the local repository before importing a workspace.");
+        try {
+            Class<?> type = Class.forName("com.vanellye.codexgen.gitbridge.Api19WorkspaceTreeImporter");
+            Object importer = type.getConstructor(Context.class).newInstance(appContext);
+            java.lang.reflect.Method copy = type.getMethod("copy", Uri.class, File.class);
+            return ((Integer)copy.invoke(importer, treeUri, repoDir)).intValue();
+        } catch (java.lang.reflect.InvocationTargetException error) {
+            Throwable cause = error.getCause();
+            if (cause instanceof Exception) throw (Exception)cause;
+            throw new IllegalStateException(cause == null ? "Workspace import failed." : cause.getMessage());
+        }
+    }
+
     public void saveToken(String token, char[] passphrase) throws Exception {
         vault.save(token, passphrase);
         sessionToken = token;
