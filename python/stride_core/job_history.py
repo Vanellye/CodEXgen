@@ -76,6 +76,8 @@ def recall_job_history(
     if isinstance(limit_per_job, bool) or not isinstance(limit_per_job, int) or not 1 <= limit_per_job <= 5000:
         raise ValueError("limit_per_job must be an integer from 1 to 5000")
 
+    if isinstance(job_ids, (str, bytes)):
+        raise ValueError("job_ids must be an iterable of explicit JOB identifiers, not a string")
     selected = tuple(dict.fromkeys(job_ids))
     if not selected or len(selected) > 100:
         raise ValueError("select between 1 and 100 explicit JOB identifiers")
