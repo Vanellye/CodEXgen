@@ -1,4 +1,11 @@
 const { test, expect } = require("@playwright/test");
+const crypto = require("crypto");
+
+function canonical(value) {
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return "[" + value.map(canonical).join(",") + "]";
+  return "{" + Object.keys(value).sort().map(key => JSON.stringify(key) + ":" + canonical(value[key])).join(",") + "}";
+}
 
 async function setRange(page, selector, value) {
   await page.locator(selector).evaluate((el, next) => {
@@ -72,6 +79,8 @@ test("experiment recorder saves, exports, persists, imports, and restores settin
   await expect(page.locator("#triangles")).toHaveText("243");
 
   const imported = { ...record, title: "Imported reproducibility check" };
+  delete imported.snapshotSha256;
+  imported.snapshotSha256 = crypto.createHash("sha256").update(canonical(imported)).digest("hex");
   await page.locator("#importFile").setInputFiles({
     name: "imported-experiment.json",
     mimeType: "application/json",

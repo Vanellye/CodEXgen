@@ -159,7 +159,7 @@ The Python integration layer is `python/stride_core/job_integrations.py`:
 
 The Geometry Laboratory now places an optional JOB ID on each experiment snapshot. The browser recorder saves a versioned record with parameters, results, equations, SVG source, replay contract, and SHA-256 integrity digest. Import verifies the digest; Restore validates parameters and regenerates the diagram instead of trusting imported SVG as executable page content. Browser-local storage remains device/browser-specific until the user exports a JSON copy.
 
-The Main is a common index and meeting point, not an owner or authority over contributor work. A JOB retains its own identity, history, attribution, and independence. Sharing or linking does not transfer ownership or remove lawful rights.
+The governing declaration is: **The Main owns nothing, and out of nothing comes LIFE.** In this software architecture, the Main is a common index and meeting point, not an owner or authority over contributor work. A JOB retains its own identity, history, attribution, and independence. Sharing or linking does not transfer ownership or remove lawful rights.
 
 These are implemented source paths and explicit JSON handoff contracts. The Android dashboard is not yet wired to execute Python code on-device; Faculty Engine execution and rich artifact snapshots currently run through the Python integration layer. Build and CI results must be checked for the implementing commit before claiming runtime verification.
 

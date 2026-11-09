@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from datetime import datetime, timezone
 from typing import Any
 
 from stride_core.faculty_engine import run_faculty_suite
@@ -197,18 +198,35 @@ def import_job_snapshot(store: JobStore, snapshot: str | dict[str, Any]) -> dict
 ANDROID_TRANSFER_SCHEMA = "codexgen.android.jobs.v1"
 
 
+def _android_millis(value: Any) -> int:
+    if isinstance(value, (int, float)):
+        return int(value)
+    if isinstance(value, str):
+        try:
+            parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=timezone.utc)
+            return int(parsed.timestamp() * 1000)
+        except ValueError:
+            return 0
+    return 0
+
+
 def export_android_job_transfer(store: JobStore) -> str:
     """Export JOB/event records in the schema used by the native Android dashboard."""
     with store._connect() as db:
         jobs = [dict(row) for row in db.execute(
             "SELECT id,title,purpose,state,stage,parent_id,created_at,updated_at FROM jobs ORDER BY created_at,id"
         ).fetchall()]
+        for job in jobs:
+            job["created_at"] = _android_millis(job["created_at"])
+            job["updated_at"] = _android_millis(job["updated_at"])
         events = []
         for row in db.execute(
             "SELECT job_id,event_type,payload_json,created_at FROM job_events ORDER BY sequence"
         ).fetchall():
             events.append({"job_id": row["job_id"], "event_type": row["event_type"],
-                           "detail": row["payload_json"], "created_at": row["created_at"]})
+                           "detail": row["payload_json"], "created_at": _android_millis(row["created_at"])})
     return json.dumps({"schema": ANDROID_TRANSFER_SCHEMA, "jobs": jobs, "events": events},
                       ensure_ascii=False, sort_keys=True, indent=2)
 
