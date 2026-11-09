@@ -7,6 +7,7 @@ add_library(codexgen_pons SHARED
     jni/olpirt_jni.cpp
     ${PANTHEON_ROOT}/src/runtime.cpp
     ${PANTHEON_ROOT}/src/faculty_engine.cpp
+    ${PANTHEON_ROOT}/src/gateway.cpp
 )
 target_include_directories(codexgen_pons PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include

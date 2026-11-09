@@ -8,6 +8,7 @@ Pantheon is the native execution core for CodEXgen/Stride. The first milestone e
 - **Framework adapter** — translates existing Stride feature maps into Pantheon inputs without changing the legacy Python API.
 - **Android bridge** — the Android JNI target links the same runtime library; no Python interpreter is required by the native core.
 - **Migration modules** — each Python capability is ported separately and compared against Python reference fixtures.
+- **Gateway origin** — the Faculty Engine integration commit is carried as immutable provenance; the Gateway Router ranks authorized and safe execution paths by compatibility, readiness, and reliability.
 - **Compatibility period** — Python remains the reference implementation until native parity tests pass.
 
 ## Port order
@@ -26,6 +27,7 @@ Pantheon is the native execution core for CodEXgen/Stride. The first milestone e
 - Digital frequency values are metadata/simulation inputs only. No biological, DNA/RNA, consciousness, or physical-emission effect is claimed.
 - Existing SQLite schemas and serialized records must be preserved or migrated with versioned, tested migrations.
 - Do not delete Python source until parity tests and an explicit removal review pass.
+- See [Gateway Origin](GATEWAY_ORIGIN.md) for the provenance and routing policy.
 
 ## Verification
 

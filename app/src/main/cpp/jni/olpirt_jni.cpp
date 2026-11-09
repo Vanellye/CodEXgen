@@ -1,6 +1,7 @@
 #include <jni.h>
 #include "olpirt/freedom_bridge.hpp"
 #include "pantheon/runtime.hpp"
+#include "pantheon/gateway.hpp"
 #include <set>
 #include <string>
 #include <vector>
@@ -22,6 +23,14 @@ Java_com_vanellye_codexgen_nativebridge_OlpirtNativeBridge_nativeStatus(
     const std::string summary = freedom.exportSummary(report) +
         "boundary=VelumAetheris\n" +
         std::string("container=") + pantheon::Runtime::version() + " (C++11)\n" +
+        std::string("gateway_origin=") + pantheon::gatewayOriginCommit() + "\n" +
+        "gateway_policy=rank-compatible-authorized-safe-routes\n" +
         "mode=declared-contract-audit; runtime provider bindings not yet verified\n";
     return env->NewStringUTF(summary.c_str());
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_vanellye_codexgen_nativebridge_OlpirtNativeBridge_nativeGatewayOrigin(
+    JNIEnv* env, jobject /* thiz */) {
+    return env->NewStringUTF(pantheon::gatewayOriginCommit());
 }
