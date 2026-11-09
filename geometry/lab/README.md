@@ -39,6 +39,12 @@ An n-cube's vertices are all vectors in {−1,+1}ⁿ. Edges join pairs differing
 
 The projection workspace rotates sign-vector vertices in a selected coordinate plane, then maps them into a two-dimensional orthographic view using a deterministic pair of view directions. A projection can overlap distinct vertices and edges and does not preserve all distances or angles. It must not be mistaken for the original n-dimensional object.
 
+## Experiment recorder
+
+The recorder above each workspace can save a named experiment to browser-local storage, restore its parameter settings, export a portable JSON record, import a prior JSON record, and export the active SVG diagram separately. A JSON record includes the active workspace, all adjustable parameter values, displayed result labels and values, equation text, timestamp, and SVG markup. The browser retains the five most recent local records; export JSON for durable backup or sharing. Imported SVG is retained as record data but is not injected into the page; restoring regenerates the diagram from validated parameter values.
+
+Browser automation lives in `tests/browser/geometry-lab.spec.cjs` and is configured by `playwright.config.cjs`. The `geometry-browser-tests` GitHub Actions job installs Chromium and exercises workspace rendering, parameter changes, geometric counts, record export/import, local persistence, and restore behavior.
+
 ## Reproducibility and boundaries
 
 - All calculations run in the browser using JavaScript and SVG; no remote service is called.
