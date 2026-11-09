@@ -29,7 +29,7 @@ public final class MainActivity extends Activity {
     private GitFreedomBridge git;
     private DataResonanceStore data;
     private EditText repositoryUrl, baseBranch, featureBranch, authorName, authorEmail;
-    private EditText tokenField, vaultPass, commitMessage;
+    private EditText tokenField, vaultPass, commitMessage, prTitle, prBody;
     private EditText channelField, valueField, unitField, biomarkerField, frequencyField, notesField;
     private TextView gitStatus;
     private LinearLayout changedFiles;
@@ -241,6 +241,20 @@ public final class MainActivity extends Activity {
             public void onClick(View v){
                 readConfig();
                 runWork(gitStatus,new Work(){public String run() throws Exception{return git.pushNormal(config);}});
+            }
+        });
+        prTitle=field(body,"Draft pull request title","CodEXgen API 11 Views compatibility",InputType.TYPE_CLASS_TEXT);
+        prBody=new EditText(this);
+        prBody.setHint("Draft pull request description");
+        prBody.setMinLines(3);
+        prBody.setGravity(Gravity.TOP);
+        body.addView(prBody,new LinearLayout.LayoutParams(-1,dp(100)));
+        button(body,"Create / find draft pull request",new View.OnClickListener(){
+            public void onClick(View v){
+                readConfig();
+                final String title=prTitle.getText().toString();
+                final String description=prBody.getText().toString();
+                runWork(gitStatus,new Work(){public String run() throws Exception{return git.createDraftPullRequest(config,title,description);}});
             }
         });
         button(body,"Clear saved token",new View.OnClickListener(){
