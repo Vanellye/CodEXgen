@@ -343,3 +343,42 @@ The workflow does not replace the existing platform CI on `olpirt/stride-next`. 
 - The plan was added as a new document on `olpirt/stride-next`.
 - No merge commits, content splices, branch deletions, force pushes, or protection-setting changes were made.
 - Original branch names and prior commits remain available for inspection. The added workflow commits advance branch heads but do not rewrite their histories.
+
+
+### First independent CI results — 11 branch heads
+
+All 11 newly added workflows were triggered. At the time of this results refresh, all 11 completed.
+
+**Results:**
+- Source integrity / whitespace: **11/11 passed**.
+- Android debug APK build: **11/11 passed**.
+- Python syntax compilation: **5/11 passed; 6/11 failed**.
+- No `tests/` directory was present on these inspected branch trees, so unittest discovery did not execute a project unit-test suite.
+
+Overall workflow result: **5 branches passed all jobs; 6 branches failed the Python syntax job**. The Android debug build and Git integrity checks passed on every branch.
+
+| Branch | Workflow result | Run |
+|---|---|---|
+| `Vanellye-patch-1` | failure — Python syntax | [42709791717](https://github.com/Vanellye/CodEXgen/actions/runs/42709791717) |
+| `edify` | failure — Python syntax | [42709796729](https://github.com/Vanellye/CodEXgen/actions/runs/42709796729) |
+| `fiction-body` | success | [42709801094](https://github.com/Vanellye/CodEXgen/actions/runs/42709801094) |
+| `fiction-creation` | success | [42709806342](https://github.com/Vanellye/CodEXgen/actions/runs/42709806342) |
+| `fiction-mind` | success | [42709811894](https://github.com/Vanellye/CodEXgen/actions/runs/42709811894) |
+| `heroes-raw` | failure — Python syntax | [42709828670](https://github.com/Vanellye/CodEXgen/actions/runs/42709828670) |
+| `history` | failure — Python syntax | [42709834083](https://github.com/Vanellye/CodEXgen/actions/runs/42709834083) |
+| `hypotheticals` | success | [42709842087](https://github.com/Vanellye/CodEXgen/actions/runs/42709842087) |
+| `main` | failure — Python syntax | [42709847269](https://github.com/Vanellye/CodEXgen/actions/runs/42709847269) |
+| `main-11-of-38` | failure — Python syntax | [42709852964](https://github.com/Vanellye/CodEXgen/actions/runs/42709852964) |
+| `mold` | success | [42709860085](https://github.com/Vanellye/CodEXgen/actions/runs/42709860085) |
+
+The six Python failures point to `hypotheticals/bio_resonance_fiction.py:27`, where the expression `int(level * 2ơ)` is invalid Python syntax. The character `ơ` is being used inside a numeric expression rather than as a string/display marker. This is a reproducible syntax defect in those six branch snapshots. It has **not** been automatically rewritten: a fix should preserve numeric semantics and keep visual markers at the presentation boundary.
+
+The five passing branches are not thereby proven secure or fully tested. Their Python syntax, Git integrity, and Android debug build passed the stated workflow scope; no dedicated Python unit tests, secret scan, dependency audit, or full release build was run by this workflow.
+
+### Next repair gate
+
+1. Review the six affected `bio_resonance_fiction.py` variants and identify whether the intended operation is numeric multiplication or string formatting.
+2. Propose a minimal fix that keeps the numeric factor numeric and moves `ơ` into an output formatter, if that is the intended presentation.
+3. Add tests before changing any of the six branch contents.
+4. Apply fixes only through separate reviewable commits after approval; do not rewrite history.
+5. Re-run independent CI and verify all 11 branches again.
