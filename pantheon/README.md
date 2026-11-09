@@ -12,6 +12,10 @@ Pantheon separates upstream purpose/evidence preparation from downstream executi
 
 The [Search & Rescue four-lane workflow](search-rescue/README.md) keeps Search, Coordination, Verification, and Rescue distinct, with explicit acknowledged handoffs and no silent lane overrides. It is a design specification only, not a deployed emergency, case-management, or dispatch service.
 
+## Firmware & Framework
+
+The [Firmware layer](../firmware/README.md) defines portable device-side observation and health contracts; no board or flashable image is selected. The [Framework layer](../framework/README.md) defines reusable application, module, adapter, and developer contracts. See [Pantheon Firmware & Framework Architecture](FIRMWARE-FRAMEWORK-ARCHITECTURE.md) for cross-layer boundaries, release gates, and implementation status.
+
 ## Architecture
 
 - **Core runtime** — deterministic module registration and execution with explicit input/output records.
