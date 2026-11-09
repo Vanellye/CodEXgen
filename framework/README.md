@@ -76,3 +76,23 @@ contracts and tests are stable.
 
 An adapter may implement platform services; it may not change policy,
 self-grant module capabilities, suppress audit requirements, or bypass WARDEN.
+
+
+## Portable host simulator
+
+The host simulator executes registered modules against deterministic in-memory host state. It is intended for contract validation, not as an OS process sandbox or a model of physical hardware.
+
+- Test modules and fixed inputs are registered as deterministic fixtures; the basic scenario is described in `fixtures/host-simulator/basic.json`.
+- The event trace records monotonically increasing sequence numbers, event kinds, module IDs, status, selected recovery action, and a human-readable detail.
+- An explicit checkpoint snapshots simulator-owned key/value state. A failed execution can restore only that snapshot; it cannot roll back arbitrary module side effects.
+- If recovery is absent or the requested checkpoint does not exist, the simulator enters safe hold and rejects subsequent executions.
+- Clearing safe hold is an explicit host operation. It is not an automatic retry, and it does not erase prior trace events.
+- Replay tests compare event ordering and outcomes across two runs of the same fixture.
+
+### Adapter boundary
+
+ARM and ESP32 adapters must implement the same framework contracts without changing module descriptors, capability checks, trace semantics, or recovery policy. Hardware-specific code may provide clocks, storage, and observation sources through narrow adapter interfaces; it may not self-grant permissions, bypass safe hold, or redefine framework policy. Adapter-specific tests must run the same portable contract suite before hardware-in-the-loop testing is considered.
+
+### Simulator limits
+
+The current simulator is single-process and synchronous. Its checkpoint covers only simulator-owned key/value state. Event traces are in-memory and are not tamper-proof or durable audit storage. Safe-hold clearing is a host API operation, not an authenticated operator workflow. These limitations must be addressed before treating the simulator as a production safety boundary.
