@@ -7,73 +7,75 @@
 #include <unordered_set>
 #include <vector>
 
-namespace codexgen::olpirt {
+namespace codexgen {
+namespace olpirt {
 struct ModuleContract {
     std::string name;
     std::vector<std::string> requires;
 };
 struct LightReport {
-    std::size_t modules = 0;
-    std::size_t dependencyEdges = 0;
-    std::size_t resolvedEdges = 0;
+    std::size_t modules;
+    std::size_t dependencyEdges;
+    std::size_t resolvedEdges;
     std::vector<std::string> missingProviders;
     std::vector<std::string> dependencyCycles;
-    double lightIndex = 100.0;
-    bool ready() const noexcept {
+    double lightIndex;
+    LightReport() : modules(0), dependencyEdges(0), resolvedEdges(0), lightIndex(100.0) {}
+    bool ready() const {
         return missingProviders.empty() && dependencyCycles.empty();
     }
 };
 
-/** Olpirt makes declared software dependency paths visible and auditable. */
-class OlpirtLightBridge final {
+class OlpirtLightBridge {
 public:
     LightReport illuminate(const std::vector<ModuleContract>& modules,
-                           const std::set<std::string>& externalProviders = {}) const {
+                           const std::set<std::string>& externalProviders = std::set<std::string>()) const {
         LightReport report;
         report.modules = modules.size();
-        std::unordered_map<std::string, std::vector<std::string>> graph;
+        std::unordered_map<std::string, std::vector<std::string> > graph;
         std::unordered_set<std::string> names;
-        for (const auto& module : modules) {
-            names.insert(module.name);
-            graph[module.name] = module.requires;
-            report.dependencyEdges += module.requires.size();
+        for (std::vector<ModuleContract>::const_iterator it = modules.begin(); it != modules.end(); ++it) {
+            names.insert(it->name);
+            graph[it->name] = it->requires;
+            report.dependencyEdges += it->requires.size();
         }
-        for (const auto& module : modules) {
-            for (const auto& dependency : module.requires) {
-                if (names.count(dependency) || externalProviders.count(dependency)) {
+        for (std::vector<ModuleContract>::const_iterator it = modules.begin(); it != modules.end(); ++it) {
+            for (std::vector<std::string>::const_iterator dep = it->requires.begin(); dep != it->requires.end(); ++dep) {
+                if (names.count(*dep) || externalProviders.count(*dep)) {
                     ++report.resolvedEdges;
                 } else {
-                    report.missingProviders.push_back(module.name + " -> " + dependency);
+                    report.missingProviders.push_back(it->name + " -> " + *dep);
                 }
             }
         }
 
-        enum class Mark { Visiting, Complete };
+        enum Mark { VISITING, COMPLETE };
         std::unordered_map<std::string, Mark> marks;
         std::vector<std::string> path;
         std::set<std::string> cycles;
         std::function<void(const std::string&)> visit = [&](const std::string& node) {
-            auto mark = marks.find(node);
-            if (mark != marks.end() && mark->second == Mark::Complete) return;
-            if (mark != marks.end() && mark->second == Mark::Visiting) {
-                auto start = std::find(path.begin(), path.end(), node);
+            std::unordered_map<std::string, Mark>::iterator mark = marks.find(node);
+            if (mark != marks.end() && mark->second == COMPLETE) return;
+            if (mark != marks.end() && mark->second == VISITING) {
+                std::vector<std::string>::iterator start = std::find(path.begin(), path.end(), node);
                 std::string cycle;
-                for (auto it = start; it != path.end(); ++it) {
+                for (std::vector<std::string>::iterator p = start; p != path.end(); ++p) {
                     if (!cycle.empty()) cycle += " -> ";
-                    cycle += *it;
+                    cycle += *p;
                 }
                 cycles.insert(cycle + " -> " + node);
                 return;
             }
-            marks[node] = Mark::Visiting;
+            marks[node] = VISITING;
             path.push_back(node);
-            for (const auto& dependency : graph[node]) {
-                if (names.count(dependency)) visit(dependency);
+            const std::vector<std::string>& deps = graph[node];
+            for (std::vector<std::string>::const_iterator dep = deps.begin(); dep != deps.end(); ++dep) {
+                if (names.count(*dep)) visit(*dep);
             }
             path.pop_back();
-            marks[node] = Mark::Complete;
+            marks[node] = COMPLETE;
         };
-        for (const auto& module : modules) visit(module.name);
+        for (std::vector<ModuleContract>::const_iterator it = modules.begin(); it != modules.end(); ++it) visit(it->name);
         report.dependencyCycles.assign(cycles.begin(), cycles.end());
         if (report.dependencyEdges != 0) {
             report.lightIndex = 100.0 * static_cast<double>(report.resolvedEdges) /
@@ -82,4 +84,5 @@ public:
         return report;
     }
 };
-} // namespace codexgen::olpirt
+} // namespace olpirt
+} // namespace codexgen
