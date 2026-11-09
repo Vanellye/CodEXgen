@@ -12,24 +12,11 @@ android {
         targetSdk = 29
         versionCode = 1
         versionName = "1.0-legacy"
-        ndk {
-            abiFilters += listOf("armeabi-v7a", "x86")
-        }
-        externalNativeBuild {
-            cmake { cppFlags += "-std=c++11" }
-        }
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_7
-        targetCompatibility = JavaVersion.VERSION_1_7
-    }
-
-    externalNativeBuild {
-        cmake {
-            path = file("src/main/cpp/CMakeLists.txt")
-            version = "3.22.1"
-        }
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     buildTypes {
