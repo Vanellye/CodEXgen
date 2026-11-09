@@ -83,7 +83,7 @@ def make_server(store: JobStore, token: str, host: str = "127.0.0.1",
                 except Exception as exc:
                     self._reply(400, {"error": str(exc)})
                 return
-                        match = re.fullmatch(r"/v1/jobs/([^/]+)/(faculty|geometry)", self.path)
+            match = re.fullmatch(r"/v1/jobs/([^/]+)/(faculty|geometry)", self.path)
             if not match:
                 self._reply(404, {"error": "not found"})
                 return
