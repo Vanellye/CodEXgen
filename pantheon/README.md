@@ -6,6 +6,10 @@ Pantheon is the native execution core for CodEXgen/Stride. The first milestone e
 
 CodEXgen's universal workflow treats a JOB as a **Journey of Becoming**, not a fixed occupational role or conformity target. The lifecycle is adaptable, supports pause/recovery and independent branches, and preserves purpose, evidence, provenance, consent, and contributor agency. See [Universal Workflow — JOBs](../docs/UNIVERSAL-WORKFLOW-JOBS.md). This is currently a documented design contract; runtime implementation and tests remain separate milestones.
 
+## Workflow separation
+
+Pantheon separates upstream purpose/evidence preparation from downstream execution. See [Workflow Boundary](WORKFLOW-BOUNDARY.md), [Above Pantheon](above/README.md), and [Below Pantheon](below/README.md). Upstream components submit proposals; Pantheon decides within policy; downstream components execute only the scoped authorization and return results as evidence.
+
 ## Architecture
 
 - **Core runtime** — deterministic module registration and execution with explicit input/output records.
