@@ -18,6 +18,48 @@ These are not competing principles. Unconditional dignity is never earned or wit
 
 For children, this means their inherent dignity is not conditional on their ability to understand, speak, choose, or consent. Adults retain the duty to protect; a child's silence, dependence, or compliance cannot be converted into permission.
 
+## Universal design invariant — across every module
+
+> **We protect what is unconditional, and we take responsibility for what is consequential.**
+
+This is not a slogan reserved for the Consent screen. It is a repository-wide design invariant for every current and future CodEXgen / Stride component, interface, data flow, model, automation, native bridge, integration, and release process.
+
+**Protect what is unconditional**
+- Preserve human dignity, agency, privacy, freedom to question, and the right to decline regardless of a person's productivity, status, beliefs, ability, age, or agreement.
+- Never make essential access, respectful treatment, or basic participation conditional on surrendering unnecessary data, accepting a recommendation, volunteering, or expressing assent.
+- Treat children and other people who may need additional safeguards as rights-bearing persons, never as resources, property, training material, or presumed participants.
+
+**Take responsibility for what is consequential**
+- Scale evidence, explanation, authorization, review, reversibility, and human oversight to the foreseeable impact of an action.
+- Before changing or exposing data, publishing code, contacting a remote service, altering a device, making a recommendation that affects a person, or triggering an external action, identify the purpose, affected parties, risks, authority, and recovery path.
+- Pause or fail closed when authorization, evidence, safety, or accountability is missing. Do not let speed, automation, convenience, or optimization override this rule.
+
+### Module-by-module application
+
+| Area | Protect the unconditional | Take responsibility for the consequential |
+|---|---|---|
+| CodeGen and generated code | Preserve user intent, ownership, privacy, and freedom to inspect or reject output. | Show generated changes; validate inputs; require review before execution, overwrite, or external publication. |
+| Git Freedom Bridge | Keep credentials private and branch ownership under user control; no forced collaboration. | Preview changed files; authorize commits and pushes explicitly; protect base branches; retain recoverable history. |
+| Data Resonance and telemetry | Minimize collection; do not infer identity, worth, health, consent, or biological effects from metadata. | Label uncertainty; preserve provenance; separate correlation from causation; require authorization for export or sharing. |
+| AI, adaptive systems, and recommendations | Do not manipulate, coerce, profile sensitive traits, or equate compliance with value. | Explain material recommendations; expose limits; keep consequential decisions reviewable by accountable people. |
+| Native bridges and device integrations | Respect device owner control, least privilege, and private local data. | Validate boundaries and permissions; make external or irreversible effects explicit and authorized. |
+| Geometry, simulations, and research | Keep inquiry open and distinguish mathematical possibility from claims about people or nature. | Label simulations and hypotheses; document assumptions; do not present generated results as measured evidence. |
+| Consent and youth-related workflows | Preserve dignity before comprehension, speech, agreement, or capacity. | Require age-appropriate safeguards and qualified human processes; never infer assent or shift adult duty of care onto a child. |
+| CI, releases, and repository operations | Preserve contributor work, provenance, and the integrity of shared branches. | Verify builds and tests; report failures honestly; review release artifacts and permissions before publication. |
+
+### Universal change-review questions
+
+Every material feature or change should answer:
+
+1. Whose dignity, agency, privacy, or freedom must remain protected?
+2. What consequences could follow, including effects on people who did not initiate the action?
+3. What evidence supports the behavior, and what remains uncertain?
+4. Who has authority to approve it, and is that authorization specific and voluntary?
+5. Can the action be previewed, paused, declined, reversed, or appealed?
+6. What human owner is accountable if it fails or causes harm?
+
+A change that cannot answer these questions must be narrowed, paused, or withheld. This is a design and review requirement, not a claim that every existing module already enforces it. Each module must be marked **specified**, **implemented**, **tested**, or **independently verified** according to demonstrated evidence.
+
 ## Strength principle
 
 > True strength is not obedience without question. It is understanding without intimidation, courage without coercion, and wisdom with compassion.
