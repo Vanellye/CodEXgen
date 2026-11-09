@@ -199,6 +199,68 @@ public final class GitFreedomBridge {
             return "Normal push completed for " + c.featureBranch + ".";
         } finally { git.close(); }
     }
+    public String createDraftPullRequest(Config c, String title, String body) throws Exception {
+        validate(c);
+        requireRemoteTls();
+        if (title == null || title.trim().length() == 0) throw new IllegalArgumentException("Pull request title is required.");
+        requireFeature(open(), c);
+        if (sessionToken == null || sessionToken.length() == 0) throw new IllegalStateException("Unlock the saved token first.");
+        String repoPath = c.repositoryUrl.replace("https://github.com/", "").replace(".git", "");
+        String[] ownerRepo = repoPath.split("/");
+        if (ownerRepo.length != 2) throw new IllegalArgumentException("Repository URL must be https://github.com/owner/repository.git");
+        String baseUrl = "https://api.github.com/repos/" + repoPath + "/pulls";
+        String query = "?head=" + java.net.URLEncoder.encode(ownerRepo[0] + ":" + c.featureBranch, "UTF-8")
+            + "&base=" + java.net.URLEncoder.encode(c.baseBranch, "UTF-8") + "&state=open";
+        String existing = requestGithub(baseUrl + query, "GET", null);
+        org.json.JSONArray open = new org.json.JSONArray(existing);
+        if (open.length() > 0) {
+            org.json.JSONObject first = open.optJSONObject(0);
+            if (first != null) return "Existing pull request: " + first.optString("html_url", "");
+        }
+        org.json.JSONObject payload = new org.json.JSONObject();
+        payload.put("title", title.trim());
+        payload.put("body", body == null ? "" : body);
+        payload.put("head", c.featureBranch);
+        payload.put("base", c.baseBranch);
+        payload.put("draft", true);
+        org.json.JSONObject created = new org.json.JSONObject(requestGithub(baseUrl, "POST", payload));
+        String url = created.optString("html_url", "");
+        if (!url.startsWith("https://github.com/")) throw new IllegalStateException("GitHub did not return a valid pull request URL.");
+        return "Draft pull request created: " + url;
+    }
+
+    private String requestGithub(String address, String method, org.json.JSONObject payload) throws Exception {
+        java.net.HttpURLConnection connection = (java.net.HttpURLConnection)new java.net.URL(address).openConnection();
+        try {
+            connection.setRequestMethod(method);
+            connection.setConnectTimeout(15000);
+            connection.setReadTimeout(20000);
+            connection.setRequestProperty("Accept", "application/vnd.github+json");
+            connection.setRequestProperty("Authorization", "Bearer " + sessionToken);
+            connection.setRequestProperty("X-GitHub-Api-Version", "2022-11-28");
+            if (payload != null) {
+                connection.setDoOutput(true);
+                connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+                byte[] bytes = payload.toString().getBytes("UTF-8");
+                java.io.OutputStream output = connection.getOutputStream();
+                try { output.write(bytes); output.flush(); } finally { output.close(); }
+            }
+            int code = connection.getResponseCode();
+            java.io.InputStream input = (code >= 200 && code < 300) ? connection.getInputStream() : connection.getErrorStream();
+            java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
+            if (input != null) {
+                try {
+                    byte[] buffer = new byte[4096];
+                    int count;
+                    while ((count = input.read(buffer)) != -1) bytes.write(buffer, 0, count);
+                } finally { input.close(); }
+            }
+            String response = new String(bytes.toByteArray(), "UTF-8");
+            if (code < 200 || code >= 300) throw new IllegalStateException("GitHub API request failed (" + code + "): " + response);
+            return response;
+        } finally { connection.disconnect(); }
+    }
+
     private void requireFeature(Git git, Config c) throws Exception {
         String branch = git.getRepository().getBranch();
         if (!c.featureBranch.equals(branch))
