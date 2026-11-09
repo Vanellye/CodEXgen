@@ -21,10 +21,8 @@ jobs:
     name: Python engines and tests
     runs-on: ubuntu-latest
     steps:
-      - name: Check out source
-        uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: pip
@@ -36,69 +34,31 @@ jobs:
       - name: Run platform unit tests
         run: python -m unittest discover -s tests -v
 
-  legacy-api11:
-    name: Android API 11 baseline APK
+  android-api11-views:
+    name: Android API 11 Views and C++11 JNI
     runs-on: ubuntu-latest
     steps:
-      - name: Check out source
-        uses: actions/checkout@v4
-      - name: Set up JDK 17
+      - uses: actions/checkout@v4
+      - name: Set up JDK 8 for legacy Gradle and Java 6 bytecode
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '8'
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
         with:
           packages: 'platform-tools'
-      - name: Install API 29 platform
-        run: sdkmanager "platforms;android-29" "build-tools;29.0.3"
+      - name: Install API 29 and legacy native toolchains
+        run: |
+          sdkmanager "platforms;android-29" "build-tools;29.0.3" "cmake;3.10.2" "ndk;16.1.4479499"
       - name: Enable Gradle wrapper
         run: chmod +x ./gradlew
-      - name: Assemble API 11 baseline
-        run: ./gradlew --no-daemon --stacktrace :legacy-android:assembleDebug
+      - name: Assemble API 11 Views APK
+        run: ./gradlew --no-daemon --stacktrace :app:assembleDebug
       - name: Upload API 11 APK
         uses: actions/upload-artifact@v4
         with:
-          name: codexgen-api11-legacy-debug-apk
-          path: legacy-android/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
-          retention-days: 14
-
-  modern-android:
-    name: Modern Android app and native bridge
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out source
-        uses: actions/checkout@v4
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v4
-        with:
-          packages: 'platform-tools'
-      - name: Install Android and native toolchains
-        run: |
-          sdkmanager "platforms;android-35" "build-tools;35.0.0" "cmake;3.22.1" "ndk;26.3.11579264"
-      - name: Enable Gradle wrapper
-        run: chmod +x ./gradlew
-      - name: Assemble modern APK and run lint
-        run: ./gradlew --no-daemon --stacktrace :app:assembleDebug :app:lintDebug
-      - name: Upload modern APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: codexgen-modern-debug-apk
+          name: codexgen-android-api11-views-debug-apk
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
-          retention-days: 14
-      - name: Upload lint report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: codexgen-android-lint-report
-          path: app/build/reports/lint-results-debug.html
-          if-no-files-found: ignore
           retention-days: 14
