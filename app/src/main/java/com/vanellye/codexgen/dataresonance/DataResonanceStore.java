@@ -47,6 +47,47 @@ public final class DataResonanceStore extends SQLiteOpenHelper {
         } finally { c.close(); }
         return out.toString();
     }
+    public static final class Correlation {
+        public final int sampleCount;
+        public final Double pearsonR;
+        public Correlation(int count, Double value) {
+            sampleCount = count; pearsonR = value;
+        }
+    }
+    /** Exploratory Pearson r over chronological sample order; not causal or clinical. */
+    public Correlation correlation(String channelA, String channelB) {
+        java.util.List<Double> a = valuesFor(channelA);
+        java.util.List<Double> b = valuesFor(channelB);
+        int n = Math.min(a.size(), b.size());
+        if (n < 2) return new Correlation(n, null);
+        int startA = a.size() - n;
+        int startB = b.size() - n;
+        double meanA = 0.0, meanB = 0.0;
+        int i;
+        for (i = 0; i < n; i++) {
+            meanA += a.get(startA + i).doubleValue();
+            meanB += b.get(startB + i).doubleValue();
+        }
+        meanA /= n; meanB /= n;
+        double numerator = 0.0, sumA = 0.0, sumB = 0.0;
+        for (i = 0; i < n; i++) {
+            double x = a.get(startA + i).doubleValue() - meanA;
+            double y = b.get(startB + i).doubleValue() - meanB;
+            numerator += x * y; sumA += x * x; sumB += y * y;
+        }
+        double denominator = Math.sqrt(sumA * sumB);
+        return new Correlation(n, denominator == 0.0 ? null : Double.valueOf(numerator / denominator));
+    }
+    private java.util.List<Double> valuesFor(String channel) {
+        java.util.List<Double> values = new java.util.ArrayList<Double>();
+        Cursor c = getReadableDatabase().query("observations",
+            new String[]{"sample_value"}, "channel = ?",
+            new String[]{channel == null ? "" : channel.trim()},
+            null, null, "timestamp_ms ASC");
+        try { while (c.moveToNext()) values.add(Double.valueOf(c.getDouble(0))); }
+        finally { c.close(); }
+        return values;
+    }
     public int count() {
         Cursor c = getReadableDatabase().rawQuery("SELECT COUNT(*) FROM observations", null);
         try { return c.moveToFirst() ? c.getInt(0) : 0; }
