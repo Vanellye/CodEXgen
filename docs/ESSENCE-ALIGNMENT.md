@@ -1,7 +1,7 @@
 # Essence Alignment — Foundational Stride Principle
 
 **Status:** Foundational design principle  
-**Applies to:** Stride, CodEXgen, Git Freedom Bridge, Data Resonance, local AI workflows, and future modules  
+**Applies to:** Stride, Codexgen, Git Freedom Bridge, Data Resonance, local AI workflows, and future modules  
 **Authority boundary:** This principle guides human-designed software. It does not claim that software can determine God's will, validate a spiritual revelation, or replace human conscience.
 
 ## Core statement
@@ -9,6 +9,14 @@
 > Let wisdom illuminate evidence, let evidence refine understanding, and let understanding guide creation. Preserve the essence, maintain balance, and let every connection serve truth, freedom, and the good of all.
 
 Stride should keep human purpose, evidence-based reasoning, and ethical responsibility aligned. Spiritual faith may inspire a person's purpose and values; empirical claims must still be evaluated using appropriate evidence and openly stated uncertainty.
+
+## The two sides: unconditional dignity and consequential responsibility
+
+> Unconditional dignity is the first side: every person has worth before achievement, agreement, understanding, usefulness, or recognition. Consequential responsibility is the other: the greater the effect a decision may have on another person, the greater the care, evidence, accountability, and protection required.
+
+These are not competing principles. Unconditional dignity is never earned or withdrawn. Consequential responsibility governs how people and systems must act when choices affect others. Neither side cancels the other: dignity does not excuse harmful conduct, and responsibility does not authorize coercion or ownership.
+
+For children, this means their inherent dignity is not conditional on their ability to understand, speak, choose, or consent. Adults retain the duty to protect; a child's silence, dependence, or compliance cannot be converted into permission.
 
 ## Strength principle
 
