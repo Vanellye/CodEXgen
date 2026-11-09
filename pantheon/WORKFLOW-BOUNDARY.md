@@ -49,6 +49,19 @@ The below workflow answers: **What exact operation was authorized, what happened
 
 See [Below Pantheon](below/README.md), [Gateway Origin](GATEWAY_ORIGIN.md), and [Control Authorization Standard](CONTROL_AUTHORIZATION.md).
 
+## Search & Rescue: four independent lanes
+
+The [Pantheon Search & Rescue workflow](search-rescue/README.md) applies the same boundary discipline to four separately governed lanes:
+
+1. **Search** collects leads and preserves source provenance; it cannot confirm identity or dispatch.
+2. **Coordination** assigns accountable roles and tasks; it cannot alter evidence or expand authority.
+3. **Verification** independently assesses leads; it cannot dispatch or execute rescue.
+4. **Rescue** executes only tasks authorized by the responsible human incident coordinator; it cannot rewrite evidence or override safety holds.
+
+Every lane handoff requires an explicit, acknowledged record with sender, recipient, purpose, scope, authorization, timestamps, sensitivity, and audit reference. No lane may silently upgrade another lane's status. Missing acknowledgement, invalid scope, expired authorization, or conflicting state places the affected operation in WARDEN.
+
+This is a design specification, not a live rescue or dispatch service. Real incidents remain under emergency services and trained human incident command. See the dedicated document for privacy, accessibility, child safeguarding, and implementation limitations.
+
 ## Separation invariants
 
 1. Above-Pantheon components may propose; they may not directly execute protected modules.
@@ -62,4 +75,4 @@ See [Below Pantheon](below/README.md), [Gateway Origin](GATEWAY_ORIGIN.md), and 
 
 ## Implementation status
 
-This document defines the architecture. The existing JOB lifecycle, Rise/Fall policy prototype, Gateway Router, and native runtime provide partial building blocks. The full proposal envelope, signed/scoped decision token, receiver-side authorization enforcement, durable event log, and end-to-end integration tests are not yet implemented. Do not describe the entire three-zone workflow as operational until those controls are implemented and tested.
+This document defines the architecture. The existing JOB lifecycle, Rise/Fall policy prototype, Gateway Router, and native runtime provide partial building blocks. The full proposal envelope, signed/scoped decision token, receiver-side authorization enforcement, durable event log, and end-to-end integration tests are not yet implemented. The Search & Rescue four-lane workflow is documentation-only; secure case storage, access enforcement, identity verification, dispatch integration, and responder authentication are not implemented. Do not describe these workflows as operational until the required controls are implemented and tested.
