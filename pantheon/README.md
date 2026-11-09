@@ -10,6 +10,8 @@ CodEXgen's universal workflow treats a JOB as a **Journey of Becoming**, not a f
 
 Pantheon separates upstream purpose/evidence preparation from downstream execution. See [Workflow Boundary](WORKFLOW-BOUNDARY.md), [Above Pantheon](above/README.md), and [Below Pantheon](below/README.md). Upstream components submit proposals; Pantheon decides within policy; downstream components execute only the scoped authorization and return results as evidence.
 
+The [Search & Rescue four-lane workflow](search-rescue/README.md) keeps Search, Coordination, Verification, and Rescue distinct, with explicit acknowledged handoffs and no silent lane overrides. It is a design specification only, not a deployed emergency, case-management, or dispatch service.
+
 ## Architecture
 
 - **Core runtime** — deterministic module registration and execution with explicit input/output records.
