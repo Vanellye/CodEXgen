@@ -47,14 +47,12 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Locate runner Android SDK tools
-        run: |
-          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
-          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
-          test -x "$SDKMANAGER"
-          yes | "$SDKMANAGER" --licenses >/dev/null || true
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools'
       - name: Install API 29 platform
-        run: "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-29" "build-tools;29.0.3"
+        run: sdkmanager "platforms;android-29" "build-tools;29.0.3"
       - name: Enable Gradle wrapper
         run: chmod +x ./gradlew
       - name: Assemble API 11 baseline
@@ -78,15 +76,13 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Locate runner Android SDK tools
-        run: |
-          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
-          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
-          test -x "$SDKMANAGER"
-          yes | "$SDKMANAGER" --licenses >/dev/null || true
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools'
       - name: Install Android and native toolchains
         run: |
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" "build-tools;35.0.0" "cmake;3.22.1" "ndk;26.3.11579264"
+          sdkmanager "platforms;android-35" "build-tools;35.0.0" "cmake;3.22.1" "ndk;26.3.11579264"
       - name: Enable Gradle wrapper
         run: chmod +x ./gradlew
       - name: Assemble modern APK and run lint
