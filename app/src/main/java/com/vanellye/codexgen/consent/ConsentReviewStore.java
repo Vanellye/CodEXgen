@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-/** Local audit trail for readiness review; stores no participant name or sensitive narrative. */
+/** Local audit trail; avoid sensitive details in the short purpose summary. */
 public final class ConsentReviewStore extends SQLiteOpenHelper {
     public ConsentReviewStore(Context context) {
         super(context.getApplicationContext(), "stride_consent_review.db", null, 1);
@@ -18,7 +18,7 @@ public final class ConsentReviewStore extends SQLiteOpenHelper {
     public long record(String outcome, boolean[] layers, String reviewer, String purpose) {
         if (!"ASSENTED".equals(outcome) && !"DECLINED".equals(outcome) && !"PAUSED".equals(outcome))
             throw new IllegalArgumentException("Invalid review outcome.");
-        if (layers == null || layers.length != 7) throw new IllegalArgumentException("Exactly seven layer flags are required.");
+        if (layers == null || layers.length != 7) throw new IllegalArgumentException("Exactly seven layer flags are required.");\n        String safeReviewer = reviewer == null ? "" : reviewer.trim();\n        String safePurpose = purpose == null ? "" : purpose.trim();\n        if (safeReviewer.length() > 120) throw new IllegalArgumentException("Reviewer field is limited to 120 characters.");\n        if (safePurpose.length() > 500) throw new IllegalArgumentException("Purpose summary is limited to 500 characters.");
         ContentValues values = new ContentValues();
         values.put("created_at", Long.valueOf(System.currentTimeMillis()));
         values.put("outcome", outcome);
