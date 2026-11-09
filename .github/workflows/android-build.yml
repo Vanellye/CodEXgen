@@ -20,7 +20,7 @@ jobs:
 
   geometry-browser-tests:
     name: Geometry Laboratory browser automation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Set up Node.js
