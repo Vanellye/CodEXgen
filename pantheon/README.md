@@ -2,6 +2,10 @@
 
 Pantheon is the native execution core for CodEXgen/Stride. The first milestone establishes a C++11 runtime contract, a Stride framework adapter, and a host-testable foundation. It does not yet claim that every Python module has been ported.
 
+## Universal workflow — JOBs
+
+CodEXgen's universal workflow treats a JOB as a **Journey of Becoming**, not a fixed occupational role or conformity target. The lifecycle is adaptable, supports pause/recovery and independent branches, and preserves purpose, evidence, provenance, consent, and contributor agency. See [Universal Workflow — JOBs](../docs/UNIVERSAL-WORKFLOW-JOBS.md). This is currently a documented design contract; runtime implementation and tests remain separate milestones.
+
 ## Architecture
 
 - **Core runtime** — deterministic module registration and execution with explicit input/output records.
