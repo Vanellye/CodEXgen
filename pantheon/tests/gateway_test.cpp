@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cmath>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 int main() {
@@ -43,6 +44,10 @@ int main() {
     assert(decision.selectedGateway == "local-native");
     assert(decision.routes.size() == 2);
     assert(decision.confidence > 0.5);
+    const double localWeight = 0.30 * 1.0 + 0.30 * 0.9 + 0.40 * 0.95;
+    const double remoteWeight = 0.30 * 0.8 + 0.30 * 0.8 + 0.40 * 0.7;
+    assert(std::fabs(decision.routes[0].probability -
+                     localWeight / (localWeight + remoteWeight)) < 1e-12);
     assert(std::fabs(decision.routes[0].probability +
                      decision.routes[1].probability - 1.0) < 1e-12);
 

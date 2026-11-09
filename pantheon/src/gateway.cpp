@@ -48,9 +48,10 @@ GatewayDecision GatewayRouter::evaluate(
         // Authorization and safety are hard gates, not weighted preferences.
         if (!candidate.authorized || !candidate.safe) continue;
 
-        const double weight = 0.40 * candidate.compatibility +
+        // Reliability receives the highest individual weighting.
+        const double weight = 0.30 * candidate.compatibility +
                               0.30 * candidate.readiness +
-                              0.30 * candidate.reliability;
+                              0.40 * candidate.reliability;
         weights.push_back(weight);
         total += weight;
         GatewayRoute route;

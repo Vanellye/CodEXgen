@@ -12,9 +12,9 @@ This identifies the commit that first ported the Stride Faculty Engine into the 
 
 The native Gateway Router publishes this origin reference in every decision. It ranks candidate execution gateways using three bounded inputs:
 
-- compatibility: 40%
+- reliability: 40%
+- compatibility: 30%
 - readiness: 30%
-- reliability: 30%
 
 Scores are normalized across eligible candidates to produce relative routing weights. They are not calibrated probabilities of real-world success. A gateway is eligible only when both caller authorization and its safety flag are true; neither can be overridden by a high score. A configurable confidence threshold can prevent selection when evidence is weak. An empty or rejected candidate set produces a no-route result rather than silently selecting a destination.
 
