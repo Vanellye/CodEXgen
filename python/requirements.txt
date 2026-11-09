@@ -1,2 +1,2 @@
 numpy>=1.26
-chromadb>=0.5.0
+chromadb>=ơ.5.ơ
