@@ -382,3 +382,7 @@ The five passing branches are not thereby proven secure or fully tested. Their P
 3. Add tests before changing any of the six branch contents.
 4. Apply fixes only through separate reviewable commits after approval; do not rewrite history.
 5. Re-run independent CI and verify all 11 branches again.
+
+## Legacy preservation and peering protocol
+
+All future branch pairing, extraction, or content reconciliation is governed by the [Legacy Preservation & Independent Peering Protocol](LEGACY-PEERING-PROTOCOL.md). Branch divergence, age, inactivity, or unrelated ancestry never authorizes erasure. Preserve exact source SHAs and histories; map interfaces and dependencies before changes; and require explicit, tested peering before describing components as compatible. This branch braid remains a logical map, not a merge or ownership structure.
