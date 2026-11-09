@@ -22,6 +22,14 @@ The lifecycle is a reusable map, not a mandatory conveyor belt. A JOB may revisi
 
 A workflow engine should represent transitions explicitly and permit user-authorized alternatives. It must not infer consent from inactivity, silence, a score, or a previous approval.
 
+## Automatic operation and numerical measures
+
+**Automatic:** the system may automatically perform reversible, local, low-impact housekeeping that the user has enabled—such as timestamps, indexing, draft summaries, checkpoint creation, validation, and reminders. Automation must expose what it did, retain provenance, and provide a pause or disable path. It may recommend a next step, prepare a change, or queue an action for review. It must not silently publish, transmit private data, delete or overwrite user work, change permissions, spend money, contact others, or execute another consequential action. Those actions require specific authorization at the point of action, with scope and consequences visible.
+
+**Numerical:** use numbers to describe work and system behavior, never to define a person's worth or enforce sameness. A JOB may record measurable indicators when they serve its declared purpose—for example elapsed time, iteration count, test pass/fail totals, reproducibility variance, resource use, unresolved issues, or recovery time. Each metric must include its unit, collection method, time window, source, and limitations. Baselines and targets are optional and must be chosen with the contributor or responsible project owner.
+
+No single composite score may silently decide whether a person, idea, branch, or JOB is valuable. Do not optimize only for speed, volume, or conformity. Preserve qualitative review and allow a contributor to challenge, annotate, or decline a metric that is irrelevant, misleading, or invasive. Missing data is not failure; a metric is not evidence beyond what its method supports.
+
 ## JOB record
 
 Every JOB should support this common envelope. Domain-specific fields belong in typed extensions rather than forcing every activity into one rigid schema.
