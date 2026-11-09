@@ -1,0 +1,10 @@
+# DEPRECATED CONCATENATED DUMP
+# This file previously mixed Kotlin Compose + three Python modules in one blob,
+# which made it unrunnable. Sources were split and fixed under:
+#   compose/CodeGenUiState.kt
+#   compose/CodeGenViewModel.kt
+#   compose/CodeGenScreen.kt
+#   python/adaptive_governance.py
+#   python/semantic_vector_memory.py
+#   python/code_generator.py
+# See README.md for notes. Cold.html was an identical copy of this dump.
