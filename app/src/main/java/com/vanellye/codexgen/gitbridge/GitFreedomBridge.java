@@ -43,12 +43,12 @@ public final class GitFreedomBridge {
     }
     public String localPath() { return repoDir.getAbsolutePath(); }
     public int importWorkspaceTree(Uri treeUri) throws Exception {
-        if (Build.VERSION.SDK_INT < 19)
-            throw new IllegalStateException("Folder import requires Android API 19 or newer; use the in-app file editor on API 11-18.");
+        if (Build.VERSION.SDK_INT < 21)
+            throw new IllegalStateException("Folder import requires Android API 21 or newer; use the in-app file editor on API 11-20.");
         if (!new File(repoDir, ".git").isDirectory())
             throw new IllegalStateException("Prepare or initialize the local repository before importing a workspace.");
         try {
-            Class<?> type = Class.forName("com.vanellye.codexgen.gitbridge.Api19WorkspaceTreeImporter");
+            Class<?> type = Class.forName("com.vanellye.codexgen.gitbridge.Api21WorkspaceTreeImporter");
             Object importer = type.getConstructor(Context.class).newInstance(appContext);
             java.lang.reflect.Method copy = type.getMethod("copy", Uri.class, File.class);
             return ((Integer)copy.invoke(importer, treeUri, repoDir)).intValue();
