@@ -3,9 +3,9 @@
 #include <sstream>
 #include <string>
 
-namespace codexgen::olpirt {
-/** Portable, plain-text dependency audit; provider implementations remain replaceable. */
-class FreedomBridge final {
+namespace codexgen {
+namespace olpirt {
+class FreedomBridge {
 public:
     std::string exportSummary(const LightReport& report) const {
         std::ostringstream out;
@@ -15,9 +15,10 @@ public:
             << "resolved_edges=" << report.resolvedEdges << "\n"
             << "light_index=" << report.lightIndex << "%\n"
             << "ready=" << (report.ready() ? "true" : "false") << "\n";
-        for (const auto& item : report.missingProviders) out << "missing=" << item << "\n";
-        for (const auto& item : report.dependencyCycles) out << "cycle=" << item << "\n";
+        for (std::vector<std::string>::const_iterator it = report.missingProviders.begin(); it != report.missingProviders.end(); ++it) out << "missing=" << *it << "\n";
+        for (std::vector<std::string>::const_iterator it = report.dependencyCycles.begin(); it != report.dependencyCycles.end(); ++it) out << "cycle=" << *it << "\n";
         return out.str();
     }
 };
-} // namespace codexgen::olpirt
+} // namespace olpirt
+} // namespace codexgen
