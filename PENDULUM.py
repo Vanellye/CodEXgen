@@ -51,4 +51,4 @@ for i, f in enumerate(files):
             print(f"{side} mentioned {f}")
     else:
         mint += 1
-print(f"[PENDULUM] mint: {mint}  mentioned: {mentioned}  load-bearing: {bearing}  heroes ¡: {heroes}")
+print(f"[PENDULUM] mint: {mint}  mentioned: {mentioned}  load-bearing: {bearing}  heroes 7: {heroes}")
