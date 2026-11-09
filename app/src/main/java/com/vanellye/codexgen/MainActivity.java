@@ -46,7 +46,8 @@ public final class MainActivity extends Activity {
     public void onCreate(Bundle state) {
         super.onCreate(state);
         git = GitFreedomBridge.shared(this);
-        data = new DataResonanceStore(this);\n        consentReviews = new ConsentReviewStore(this);
+        data = new DataResonanceStore(this);
+        consentReviews = new ConsentReviewStore(this);
         config = new GitFreedomBridge.Config();
         buildShell();
         showCodeGen();
@@ -72,7 +73,8 @@ public final class MainActivity extends Activity {
                 public void onClick(View v) {
                     if(index==0) showCodeGen();
                     else if(index==1) showGit();
-                    else if(index==2) showResonance();
+                    else if(index==2) showConsent();
+                    else if(index==3) showResonance();
                     else showOlpirt();
                 }
             });
