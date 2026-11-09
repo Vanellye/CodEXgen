@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
                 Surface(Modifier.fillMaxSize()) {
                     Column(Modifier.fillMaxSize()) {
                         Row(Modifier.fillMaxWidth().padding(4.dp)) {
-                            listOf("CodeGen", "Git", "Resonance").forEach { item ->
+                            listOf("CodeGen", "Git", "Resonance", "Olpirt").forEach { item ->
                                 Button(
                                     onClick = { destination = item },
                                     modifier = Modifier.weight(1f).padding(2.dp)
@@ -40,6 +40,7 @@ class MainActivity : ComponentActivity() {
                         when (destination) {
                             "Git" -> GitBridgeScreen()
                             "Resonance" -> DataResonanceScreen()
+                            "Olpirt" -> OlpirtScreen()
                             else -> CodeGenRoute(Modifier.weight(1f))
                         }
                     }

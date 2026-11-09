@@ -14,6 +14,9 @@ android {
         targetSdk = 35
         versionCode = 2
         versionName = "1.1-stride"
+        externalNativeBuild {
+            cmake { cppFlags += "-std=c++17" }
+        }
     }
 
     buildTypes {
@@ -33,6 +36,13 @@ android {
 
     kotlinOptions { jvmTarget = "17" }
     buildFeatures { compose = true }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
 
     packaging {
         resources {
