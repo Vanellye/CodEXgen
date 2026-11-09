@@ -31,6 +31,14 @@ The assent action is blocked unless:
 
 Decline and pause are first-class outcomes. Decline does not require reviewer confirmation. Pause records no assent and says that the workflow may be revisited only if the person chooses. The voluntary-choice checkbox is cleared after recording an outcome.
 
+## Childhood innocence and consequential decisions
+
+The Consent screen displays the project's childhood-innocence principle: every child has dignity before understanding, choice, or speech; silence is not permission; vulnerability is not availability; dependence is not ownership. The spiritual phrase “bearing the mark of God's thumb” is presented as a faith-based value statement, not as a technical or scientific claim.
+
+For child-related consequential decisions, the design requires protection, patience, truth, compassion, and accountable human care. Seek meaningful, age-appropriate assent where possible and legally required adult permission; neither substitutes for the other. A child's assent does not transfer the adult duty of care to the child. Pause when safety, understanding, voluntariness, or authority is unclear. Never infer consent from silence, compliance, behavioral data, or biometrics.
+
+**Important implementation boundary:** this is currently principle text and a general-purpose consent interface. The app does not identify a participant's age, enforce guardian authorization, verify reviewer independence, determine legal capacity, or provide safeguarding escalation. Do not use it as a child-protection or legal-consent system.
+
 ## Local audit record
 
 The app writes a minimal event to the app-private SQLite database `stride_consent_review.db`:
