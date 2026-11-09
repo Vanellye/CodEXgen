@@ -20,7 +20,7 @@ Java_com_vanellye_codexgen_nativebridge_OlpirtNativeBridge_nativeStatus(
     const codexgen::olpirt::FreedomBridge freedom;
     const auto summary = freedom.exportSummary(report) +
         "boundary=VelumAetheris\n"
-        "container=Pons C++17 (header-only)\n"
+        "container=Pons C++11 (header-only)\n"
         "mode=declared-contract-audit; runtime provider bindings not yet verified\n";
     return env->NewStringUTF(summary.c_str());
 }
