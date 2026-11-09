@@ -182,3 +182,112 @@ The approved 11-strand order remains:
 11. `edify`
 
 The two pairs are two-at-a-time logical strands; all 13 source branch refs remain independent and preserved. No branch merge, force-push, deletion, ref movement, or protection-setting change was performed.
+
+
+## Branch ecology: evidence leaves, toxin warnings, and directional directives
+
+This section translates the branch-ecology metaphor into explicit, reviewable repository signals. It is a **design directive**, not a claim that a scan has already found malware, compromised dependencies, or malicious contributors. No branch is deleted or rewritten by this model.
+
+### 1. Leaves: evidence that can wither and fall
+
+A branch's “leaves” are its attached evidence records: CI results, test reports, dependency inventories, security scan results, code review approvals, provenance attestations, and integration notes.
+
+Each leaf must carry:
+- source branch and exact commit SHA;
+- evidence type and producing tool/workflow;
+- timestamp and, where applicable, expiry/freshness window;
+- result (pass, fail, warning, unavailable);
+- link to the raw report or workflow run;
+- scope (which files, packages, targets, and platforms were actually checked).
+
+Lifecycle:
+- **Fresh leaf:** evidence matches the current branch head and is inside its declared freshness window.
+- **Withering leaf:** the branch head moved, the evidence aged beyond its freshness window, or the evidence does not cover the changed files/platform. Keep it visible but mark it stale.
+- **Fallen leaf:** the evidence is superseded or expired. Move it out of the active-health summary into an immutable historical record; do not erase the audit trail.
+- **Bare branch:** no applicable evidence is attached. Show “unknown / unchecked,” never green by default.
+
+A new commit invalidates head-specific CI and review leaves unless the workflow explicitly proves the evidence still applies. Historical success must not be presented as current success.
+
+### 2. Toxin warnings: detect, contain, and prove
+
+A “toxin” is a verified or suspected risk signal in branch content or its supply chain. The warning must identify evidence and confidence; metaphor alone is not a finding.
+
+Check categories:
+- exposed credentials, tokens, private keys, or accidental secret material;
+- known vulnerable or unpinned dependencies and unsafe dependency sources;
+- suspicious build scripts, install hooks, generated binaries, or opaque downloaded artifacts;
+- unsafe deserialization, command execution, path traversal, injection, or permission-boundary bypass;
+- unexpected network egress, telemetry, data export, or changes to authentication/authorization;
+- license/provenance gaps and unreviewed third-party code;
+- tests removed, weakened, skipped, or made non-deterministic around sensitive behavior.
+
+Warning levels:
+- **Red — confirmed:** reproducible scanner/test evidence or manually verified exploitable issue. Block promotion of the affected content; preserve the branch and its evidence.
+- **Amber — suspected:** credible signal needing human triage. Hold integration until resolved or explicitly risk-accepted.
+- **Grey — unknown:** scanner unavailable, scope incomplete, or no result. Do not interpret as clean.
+- **Green — checked:** named checks completed against the exact head with no finding in their stated scope. Green is scoped evidence, not a universal safety guarantee.
+
+Do not call a branch “toxic” based only on its name, theme, commit message, or divergence. Record the finding, affected path/dependency, evidence, severity, confidence, owner, and remediation status. If a confirmed issue appears, quarantine the affected artifact or integration candidate in a separate review workflow; retain the source branch and history. Revoke exposed credentials through their issuing service, not by merely deleting a line from Git history.
+
+### 3. Reaching: show where each branch can lead
+
+For each branch, compute and display its **reach** as a graph of:
+- ancestry reach: merge base, ahead/behind counts, unrelated-history state;
+- content reach: files and components it changes;
+- dependency reach: modules, libraries, build targets, workflows, and platforms affected;
+- integration reach: branches or release targets that could receive its content;
+- risk reach: downstream components exposed by a confirmed or suspected finding.
+
+Every edge must state its evidence and direction. A branch that changes a shared file or dependency can have a wider reach than its commit count suggests. No inferred reach should be treated as an actual merge or deployment.
+
+### 4. Branch directives: give each strand a clear direction
+
+Each branch receives a machine-readable directive with a rationale and exit criteria:
+
+| Directive | Meaning | Exit condition |
+|---|---|---|
+| **GROW** | Continue isolated development and add missing tests/evidence | New head has fresh checks and reviewed scope |
+| **REACH** | Map downstream dependencies and integration consumers | Impact graph and owners reviewed |
+| **HOLD** | Stop promotion while evidence, CI, ancestry, or conflict is unresolved | Required evidence and approvals exist |
+| **WARDEN** | Fail closed when authorization, provenance, integrity, or safety is uncertain | Human review resolves the uncertainty |
+| **REPAIR** | Address a reproducible defect or confirmed security finding in a reviewable change | Fix and regression tests pass |
+| **BRAID-CANDIDATE** | Eligible for content-level reconciliation with its named pair | Pair overlap resolved; tests and approvals complete |
+| **PROMOTION-CANDIDATE** | Eligible for a separately approved target-branch review | All required gates pass; target owner approves |
+
+A directive never authorizes a merge, push, deletion, force update, or protection-setting change. It describes the next safe action only.
+
+### 5. Initial directives from the evidence currently available
+
+These are provisional triage directions, not security scan results:
+
+| Branch / strand | Initial directive | Reason |
+|---|---|---|
+| `fiction-mind` + `fiction-body` | **BRAID-CANDIDATE + HOLD** | Pair diverged 4/4; shared file overlap needs reconciliation; no head check runs |
+| `fiction-creation` + `hypotheticals` | **BRAID-CANDIDATE + HOLD** | Pair diverged 4/5; shared file overlap needs reconciliation; no head check runs |
+| `build-speed` | **REACH + HOLD** | No common ancestor with main; only one passing prebuild check; inspect build configuration impact |
+| `edify` | **WARDEN + HOLD** | Unrelated history and no check runs; validate all executable/data-format changes |
+| `heroes-raw` | **REPAIR / VERIFY + HOLD** | Unrelated history and no check runs; validate restored content and build behavior |
+| `history` | **REACH + HOLD** | 48 commits ahead and 2 behind; inspect broad ancestry and file-level impact |
+| `main` | **WARDEN / BASELINE** | Baseline head has no reported check runs; do not assume verified health |
+| `main-11-of-38` | **REACH + HOLD** | Two commits behind main; establish whether it has any still-needed content before promotion |
+| `mold` | **WARDEN + HOLD** | Unrelated history and no check runs; verify build-critical values and scripts |
+| `olpirt/stride-next` | **REPAIR + HOLD** | Two current Android CI failures; five platform-independent checks pass |
+| `Vanellye-patch-1` | **REACH + HOLD** | Diverged 1/2; inspect its five changed paths and confirm intended target |
+
+No current toxin scan result is available in this audit. Therefore toxin status for every branch is **GREY / UNKNOWN**, not clean and not confirmed compromised.
+
+### 6. Minimum evidence leaf set before a strand can advance
+
+- reproducible build/test results for the branch's changed targets;
+- secret scanning and dependency vulnerability scanning at the exact head;
+- static analysis appropriate to the languages touched;
+- provenance and license review for introduced third-party artifacts;
+- diff/overlap review for paired strands;
+- explicit downstream reach map;
+- human approval recorded against the exact commit SHA.
+
+The evidence dashboard should show stale, fallen, missing, failed, and passed leaves distinctly. It must never hide a failure by averaging it with passing checks.
+
+### 7. Preservation invariant
+
+Leaves may wither, fall out of the active view, and be replaced by fresher evidence. Branch refs and commit history remain intact. “Prune” means remove unsafe content from a future integration candidate or isolate an artifact under review—not delete the original branch. All directives remain advisory until a separately authorized operation is approved.
