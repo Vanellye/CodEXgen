@@ -72,3 +72,46 @@ That makes the expressions syntactically valid, but the chosen numeric semantics
 A branch being newer, larger, or more capable does not make it universally correct. A baseline being called Main does not make it the owner of every contribution. The defensible synthesis is the set of claims that survive provenance checks, interface review, reproducible tests, and human scrutiny.
 
 **No merge, deletion, force update, or source rewrite is performed by this synthesis record.**
+
+## Shared principle: careful memory, free creation
+
+This principle is intended to be reusable by Stride, the Git Freedom Bridge, and future CodEXgen branches without making Main the owner or authority over their identities.
+
+> **Remember what matters. Preserve what happened. Leave room for what has never happened before.**
+
+### Memory responsibilities
+
+- Preserve original records, authorship, timestamps, source references, and provenance.
+- Keep corrections, interpretations, and derived views separate from original events.
+- Cross-reference related work without collapsing distinct branch or contributor identities.
+- Retain decisions, lessons, dependencies, unresolved questions, and review history.
+- Label evidence as verified, proposed, hypothetical, fictional, or unknown.
+- Never silently rewrite or discard historical knowledge.
+
+### Creation responsibilities
+
+- Permit independent branches and experiments to explore directions not already represented in memory.
+- Offer connections as suggestions, not as facts or commands.
+- Allow components and ideas to evolve independently while retaining links to their origins.
+- Do not require creative work to conform to a central branch's structure or vocabulary.
+- Require explicit human authorization for consequential changes to shared state.
+
+### Shared boundary
+
+Memory may inform creation, but must not imprison it. Creation may extend history, but must not falsify it.
+
+Main is a meeting point and shared index, not the owner of branch identity, authorship, or independent work. A branch may adopt this principle, adapt its implementation, or retain a different local expression while preserving provenance and compatibility at explicitly reviewed interfaces.
+
+### Suggested implementation boundaries
+
+These are separable capabilities, not mandatory directories or a central service:
+
+- **Memory:** append-only records and historical references.
+- **Context:** cross-references and relationships between records.
+- **Provenance:** origin, authorship, timestamps, and evidence status.
+- **Imagination:** independent proposals and creative exploration.
+- **Reflection:** comparison, critique, and lessons learned.
+- **Stewardship:** consent, review, and safeguards for consequential actions.
+
+Each branch can implement, replace, or omit a capability independently. Peering requires a documented interface and relevant tests; it does not require shared internal implementation or surrender of branch identity.
+
