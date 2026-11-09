@@ -86,3 +86,17 @@ The Seed Pits preserve failures, defects, near misses, rejected assumptions, rec
 - **Root cause:** Android's CMake target linked `runtime.cpp` but omitted the implementation file `pantheon/src/control_gate.cpp`, although `Runtime::executeControlled` calls that method. Host Pantheon CMake already includes this implementation; the Android target had drifted from it.
 - **Remediation:** add `control_gate.cpp` to the Android JNI shared-library target.
 - **Status:** source correction committed; the next CI run must rebuild, inspect the APK metadata and ABI, verify the debug signature, and publish its checksum before the APK is considered verified.
+
+## Verification amendment — bridge recovery and Android APK verified
+
+- **Verified workflow:** [CI #237](https://github.com/Vanellye/CodEXgen/actions/runs/42709953664), built from commit `07da1600a5e4afe2c0e4e13e68be0214c173bb6e`.
+- **Overall result:** all seven workflow jobs succeeded: Python compatibility engines/tests, Geometry Laboratory browser automation, Node.js 11 runtime contract, Pantheon native C++11 host tests, portable framework C++11 contracts, Android Views Java compilation, and Android API 11 Views/JNI APK assembly.
+- **Bridge/recovery evidence:** all 27 Python tests passed. The HTTP integration test imported an Android JOB, ran Faculty Engine, attached a Geometry Lab experiment, listed both artifacts and their digests, restarted the service over the same SQLite database, verified both artifacts persisted, exported a JOB snapshot, restored it into a fresh database, and rejected a tampered snapshot. The bridge's invalid-token path also returned 401; remote non-TLS binding and weak tokens are rejected.
+- **APK:** workflow artifact `codexgen-android-api11-views-debug-apk`, artifact ID `13715436914`, 1,496,446 bytes (ZIP archive containing APK and checksum). [Open the successful workflow and artifact](https://github.com/Vanellye/CodEXgen/actions/runs/42709953664).
+- **APK identity:** package `com.vanellye.codexgen`; versionCode `3`; versionName `1.2-android-views-api11`; minSdk `11`; targetSdk `29`; launch activity `com.vanellye.codexgen.MainActivity`.
+- **Native payload:** `lib/armeabi-v7a/libcodexgen_pons.so` is present in the APK.
+- **Signature:** `apksigner verify --verbose` succeeded; APK Signature Scheme v1 and v2 are valid with one signer. This is a debug-signed APK, not a release-signing artifact.
+- **APK SHA-256:** `803bf211d7bb4f96f99942d810e7c79394fc882fd69368578cfefb7135104ff2`.
+- **Artifact ZIP SHA-256:** `19694503bffb82647548339b89e129d9457c6f30c663fb9242980bafe310d560`.
+- **Scope and limits:** this verifies CI compilation, APK packaging, package metadata, native ABI presence, and debug signature. It does not claim installation/launch testing on a physical Android device or emulator, and it does not constitute a Play Store release signature. Two later commits on the same branch changed only `docs/BRANCH-BRAID.md` and `docs/RESONANCE-STEWARDSHIP.md`; the Android build inputs were unchanged.
+- **Learning retained:** the earlier Java package/import defects, SDK CMake package mismatch, missing Ubuntu legacy library, wrong bridge test response expectation, and omitted JNI `control_gate.cpp` remain preserved above. Successful remediation is appended as evidence; it does not erase the failures that taught the system how to recover.
