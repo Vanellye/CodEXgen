@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "com.vanellye.codexgen"
-    compileSdk = 35
+    compileSdk = 29
 
     defaultConfig {
         applicationId = "com.vanellye.codexgen"
-        minSdk = 24
-        targetSdk = 35
+        minSdk = 11
+        targetSdk = 29
         versionCode = 2
         versionName = "1.1-stride"
         externalNativeBuild {
