@@ -27,6 +27,9 @@ public final class StrideEngineClient {
     public JSONObject attachGeometry(String jobId, JSONObject experiment) throws Exception {
         return request("POST","/v1/jobs/"+jobId+"/geometry",experiment);
     }
+    public JSONObject importAndroidJob(JSONObject transfer) throws Exception {
+        return request("POST","/v1/jobs/import-android",transfer);
+    }
     public JSONObject listArtifacts(String jobId) throws Exception {
         return request("GET","/v1/jobs/"+jobId+"/artifacts",null);
     }

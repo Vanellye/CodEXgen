@@ -93,6 +93,41 @@ public final class JobStore extends SQLiteOpenHelper {
         }} finally { c.close(); }
         root.put("events", events); return root.toString(2);
     }
+
+    /** Export one JOB and its events for a first-time, non-overwriting Python bridge import. */
+    public synchronized String exportJobJson(String id) throws JSONException {
+        SQLiteDatabase db=getReadableDatabase();
+        Cursor c=db.query("jobs",null,"id=?",new String[]{id},null,null,null);
+        JSONObject job;
+        try {
+            if(!c.moveToFirst()) throw new JSONException("JOB not found.");
+            job=new JSONObject();
+            job.put("id",c.getString(c.getColumnIndexOrThrow("id")));
+            job.put("title",c.getString(c.getColumnIndexOrThrow("title")));
+            job.put("purpose",c.getString(c.getColumnIndexOrThrow("purpose")));
+            job.put("state",c.getString(c.getColumnIndexOrThrow("state")));
+            job.put("stage",c.getString(c.getColumnIndexOrThrow("stage")));
+            int parent=c.getColumnIndexOrThrow("parent_id");
+            job.put("parent_id",c.isNull(parent)?JSONObject.NULL:c.getString(parent));
+            job.put("created_at",c.getLong(c.getColumnIndexOrThrow("created_at")));
+            job.put("updated_at",c.getLong(c.getColumnIndexOrThrow("updated_at")));
+        } finally { c.close(); }
+        JSONArray jobs=new JSONArray(); jobs.put(job);
+        JSONArray events=new JSONArray();
+        Cursor e=db.query("events",null,"job_id=?",new String[]{id},null,null,"id ASC");
+        try { while(e.moveToNext()) {
+            JSONObject item=new JSONObject();
+            item.put("job_id",e.getString(e.getColumnIndexOrThrow("job_id")));
+            item.put("event_type",e.getString(e.getColumnIndexOrThrow("event_type")));
+            item.put("detail",e.getString(e.getColumnIndexOrThrow("detail")));
+            item.put("created_at",e.getLong(e.getColumnIndexOrThrow("created_at")));
+            events.put(item);
+        }} finally { e.close(); }
+        JSONObject root=new JSONObject(); root.put("schema","codexgen.android.jobs.v1");
+        root.put("exported_at",System.currentTimeMillis()); root.put("jobs",jobs); root.put("events",events);
+        return root.toString();
+    }
+
     public synchronized int importJson(String raw) throws JSONException {
         JSONObject root = new JSONObject(raw);
         if (!"codexgen.android.jobs.v1".equals(root.optString("schema"))) throw new JSONException("Unsupported JOB export.");

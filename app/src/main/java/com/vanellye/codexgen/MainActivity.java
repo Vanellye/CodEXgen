@@ -522,6 +522,17 @@ public final class MainActivity extends Activity {
         final TextView bridgeResult=new TextView(this);
         bridgeResult.setText("Bridge is opt-in. Nothing is sent until you press an action button.");
         bridgeResult.setTextIsSelectable(true); body.addView(bridgeResult);
+        button(body,"Import selected local JOB into Stride bridge",new View.OnClickListener(){
+            public void onClick(View v){
+                final String id=selected.getText().toString().trim();
+                final String endpoint=bridgeUrl.getText().toString().trim();
+                final String token=bridgeToken.getText().toString();
+                if(id.length()==0){bridgeResult.setText("Select a JOB ID first.");return;}
+                runWork(bridgeResult,new Work(){public String run() throws Exception{
+                    return new StrideEngineClient(endpoint,token).importAndroidJob(new org.json.JSONObject(jobStore.exportJobJson(id))).toString(2);
+                }});
+            }
+        });
         button(body,"Run Faculty Engine for selected JOB",new View.OnClickListener(){
             public void onClick(View v){
                 final String id=selected.getText().toString().trim();

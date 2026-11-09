@@ -16,7 +16,7 @@ from urllib.parse import unquote
 
 from stride_core.job_engine import JobStore
 from stride_core.job_integrations import (
-    connect_faculty_run, connect_geometry_experiment, list_artifacts,
+    connect_faculty_run, connect_geometry_experiment, list_artifacts, import_android_job_transfer,
 )
 
 MAX_BODY = 2 * 1024 * 1024
@@ -76,7 +76,14 @@ def make_server(store: JobStore, token: str, host: str = "127.0.0.1",
         def do_POST(self):
             if not self._authorized():
                 return
-            match = re.fullmatch(r"/v1/jobs/([^/]+)/(faculty|geometry)", self.path)
+            if self.path == "/v1/jobs/import-android":
+                try:
+                    count = import_android_job_transfer(store, self._body())
+                    self._reply(201, {"imported_jobs": count, "policy": "duplicates are rejected; existing JOBs are never overwritten"})
+                except Exception as exc:
+                    self._reply(400, {"error": str(exc)})
+                return
+                        match = re.fullmatch(r"/v1/jobs/([^/]+)/(faculty|geometry)", self.path)
             if not match:
                 self._reply(404, {"error": "not found"})
                 return
