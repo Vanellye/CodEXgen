@@ -30,7 +30,7 @@ The app uses framework Android Views and platform SQLite APIs. Compose, Kotlin, 
 - Android Keystore APIs are not available on API 11. The API-11 profile encrypts the saved token using a user-entered passphrase, PBKDF2-HMAC-SHA1, AES-CBC, and HMAC-SHA256. The passphrase is not stored; the token must be unlocked for each app session. This is not hardware-backed Keystore protection.
 - The previous Keystore token format is not migrated. Re-enter and re-encrypt the token in this profile.
 - Native output is restricted to armeabi-v7a to retain the API 11 native platform baseline. 64-bit-only devices are not supported by this ABI profile.
-- Workspace-folder import through Android's Storage Access Framework is not available on API 11; the active profile uses app-private local repository storage and an in-app text-file editor for individual files.
+- Workspace-folder import uses framework DocumentsContract on API 21+ without AndroidX DocumentFile. API 11-20 uses app-private local repository storage and the in-app text-file editor for individual files.
 - The old legacy-android module remains in the repository as historical scaffolding but is no longer included in the active Gradle settings.
 
 ## Build
