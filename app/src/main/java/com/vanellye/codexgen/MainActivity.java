@@ -29,7 +29,7 @@ public final class MainActivity extends Activity {
     private GitFreedomBridge git;
     private DataResonanceStore data;
     private EditText repositoryUrl, baseBranch, featureBranch, authorName, authorEmail;
-    private EditText tokenField, vaultPass, commitMessage, prTitle, prBody;
+    private EditText tokenField, vaultPass, commitMessage, prTitle, prBody, localFilePath, localFileContents;
     private EditText channelField, valueField, unitField, biomarkerField, frequencyField, notesField;
     private TextView gitStatus;
     private LinearLayout changedFiles;
@@ -173,6 +173,20 @@ public final class MainActivity extends Activity {
         gitStatus=new TextView(this);
         gitStatus.setText("Local repository: "+git.localPath()+"\nRemote HTTPS transport requires Android API 21 or newer.");
         body.addView(gitStatus);
+        localFilePath=field(body,"New repository-relative file path","notes/stride-session.txt",InputType.TYPE_CLASS_TEXT);
+        localFileContents=new EditText(this);
+        localFileContents.setHint("File contents to save in the local repository");
+        localFileContents.setMinLines(4);
+        localFileContents.setGravity(Gravity.TOP);
+        localFileContents.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        body.addView(localFileContents,new LinearLayout.LayoutParams(-1,dp(120)));
+        button(body,"Write file into local repository",new View.OnClickListener(){
+            public void onClick(View v){
+                final String path=localFilePath.getText().toString();
+                final String contents=localFileContents.getText().toString();
+                runWork(gitStatus,new Work(){public String run() throws Exception{return git.writeLocalFile(path,contents);}});
+            }
+        });
         button(body,"Save encrypted token",new View.OnClickListener(){
             public void onClick(View v){
                 try{
