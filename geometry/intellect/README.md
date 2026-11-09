@@ -12,8 +12,13 @@ It is deliberately separate from the shape gallery, visual design collection, an
 | [Axioms, theorems, lemmas, and proofs](AXIOMS-THEOREMS-PROOFS.md) | Assumptions, formal statements, dependencies, proof strategies, and complete proofs |
 | [Geometric reasoning and derivations](GEOMETRIC-REASONING.md) | Step-by-step arguments, constructions, transformations, and formula derivations |
 | [Dimensions and coordinate systems](DIMENSIONS-COORDINATES.md) | Dimension, bases, coordinate frames, metrics, projections, and coordinate changes |
-| [Conjectures and open questions](CONJECTURES-OPEN-QUESTIONS.md) | Clearly marked unproved claims, questions, counterexamples sought, and proof status |
+| [Conjectures and open questions](CONJECTURES-OPEN-QUESTIONS.md) | Clearly labeled unproved claims, questions, counterexamples sought, and proof status |
 | [Construction and design rationale](CONSTRUCTION-RATIONALE.md) | Why a particular geometry, constraint, transformation, or construction is selected |
+| [Mathematical studies](studies/README.md) | Worked studies in Euclidean, non-Euclidean, fractal, and higher-dimensional geometry |
+
+## Mathematical study collection
+
+Start with the [four-study collection](studies/README.md). It moves from flat Euclidean geometry to curved geometries, fractal dimension, and finite-dimensional Euclidean spaces.
 
 ## Evidence and proof-status labels
 
