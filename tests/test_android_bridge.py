@@ -94,7 +94,7 @@ class AndroidBridgeEndToEndTests(unittest.TestCase):
         status, geometry_result = self.request(
             "POST", "/v1/jobs/android-job-001/geometry", geometry)
         self.assertEqual(status, 201)
-        self.assertEqual(geometry_result["artifact"]["kind"], "geometry_experiment")
+        self.assertEqual(geometry_result["kind"], "geometry_experiment")
 
         status, listing = self.request("GET", "/v1/jobs/android-job-001/artifacts")
         self.assertEqual(status, 200)

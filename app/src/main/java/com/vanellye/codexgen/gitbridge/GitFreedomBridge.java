@@ -126,7 +126,7 @@ public final class GitFreedomBridge {
         try {
             requireClean(git);
             Repository r = git.getRepository();
-            Ref local = r.findRef(c.featureBranch);
+            Ref local = r.getRef(c.featureBranch);
             if (local == null) {
                 git.checkout().setCreateBranch(true).setName(c.featureBranch).call();
             } else {
@@ -153,9 +153,9 @@ public final class GitFreedomBridge {
                 .setRefSpecs(new RefSpec("+refs/heads/*:refs/remotes/origin/*"))
                 .setCredentialsProvider(credentials()).call();
             String remoteFeature = "refs/remotes/origin/" + c.featureBranch;
-            if (git.getRepository().findRef(c.featureBranch) != null) {
+            if (git.getRepository().getRef(c.featureBranch) != null) {
                 git.checkout().setName(c.featureBranch).call();
-            } else if (git.getRepository().findRef(remoteFeature) != null) {
+            } else if (git.getRepository().getRef(remoteFeature) != null) {
                 git.checkout().setCreateBranch(true).setName(c.featureBranch).setStartPoint(remoteFeature).call();
             } else {
                 String remoteBase = "refs/remotes/origin/" + c.baseBranch;
@@ -183,7 +183,7 @@ public final class GitFreedomBridge {
             git.fetch().setRemote("origin")
                 .setRefSpecs(new RefSpec("+refs/heads/*:refs/remotes/origin/*"))
                 .setCredentialsProvider(credentials()).call();
-            Ref remote = git.getRepository().findRef("refs/remotes/origin/" + c.featureBranch);
+            Ref remote = git.getRepository().getRef("refs/remotes/origin/" + c.featureBranch);
             if (remote == null) throw new IllegalStateException("Remote feature branch does not exist.");
             MergeResult result = git.merge().include(remote.getObjectId())
                 .setFastForward(org.eclipse.jgit.api.MergeCommand.FastForwardMode.FF_ONLY).call();

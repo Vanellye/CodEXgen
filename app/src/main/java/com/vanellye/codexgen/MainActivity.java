@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.Gravity;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.inputmethod.InputType;
+import android.text.InputType;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;

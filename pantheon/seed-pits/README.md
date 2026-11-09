@@ -44,3 +44,12 @@ The Seed Pits preserve failures, defects, near misses, rejected assumptions, rec
 - **Follow-up:** [`8443fbb`](https://github.com/Vanellye/CodEXgen/commit/8443fbba754ef14c2bce2d1697fc3ef31f1fe821) corrected test resource handling after confirming the Python JOB store opens short-lived SQLite connections rather than exposing a close method.
 - **Current state:** source remediation is committed; no successful post-remediation CI result or APK artifact has yet been recorded. The CMake 3.22.1 / NDK r16b combination remains an explicit compatibility question until the APK build runs.
 - **Next evidence to append:** CI run URL and conclusion; Python end-to-end test result; Android Java compile result; APK path, package/application ID, version, and SHA-256 digest; whether the APK installs and launches on the declared API range.
+
+
+## Verification amendment — second CI pass exposed legacy API drift
+
+- **Source run:** [CI #231](https://github.com/Vanellye/CodEXgen/actions/runs/42708468400), commit `791dddf6ee88a0d6d74f5b3ff5fc6356db151b79`.
+- **Observed:** the HTTP integration test reached the Geometry endpoint but asserted the wrong response nesting; the endpoint correctly returns the artifact object directly. The test fixture also initially attempted to close a `JobStore` that owns no long-lived connection.
+- **Android Java compile evidence:** `MainActivity.java` imported `InputType` from the wrong Android package. The app also called JGit `Repository.findRef`, which is absent from the pinned JGit 3.7.1 API.
+- **Remediation:** assert the direct Geometry artifact response, use short-lived SQLite connection lifecycle in the test, import `android.text.InputType`, and use JGit 3.7's `Repository.getRef` API.
+- **Status:** these corrections are source changes awaiting the next CI run; no APK success is claimed.
