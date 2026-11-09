@@ -191,7 +191,7 @@ class LocalChannelRouter:
                 return existing["event_id"]
             event_id = str(uuid.uuid4())
             db.execute(
-                "INSERT INTO events VALUES (?,?,?,?,?,?,?,?,?)",
+                "INSERT INTO events VALUES (?,?,?,?,?,?,?,?)",
                 (event_id, channel_id, sender, event_type, encoded,
                  self._now(), int(requires_acceptance), idempotency_key),
             )
