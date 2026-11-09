@@ -505,6 +505,59 @@ public final class MainActivity extends Activity {
         importText.setGravity(Gravity.TOP);
         importText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
         body.addView(importText,new LinearLayout.LayoutParams(-1,dp(120)));
+        label(body,"Faculty Engine + Geometry Lab bridge · requires a separately running Stride Python service");
+        final EditText bridgeUrl=field(body,"Bridge URL (HTTPS, or localhost only)","http://localhost:8765",InputType.TYPE_CLASS_TEXT);
+        final EditText bridgeToken=field(body,"Bridge bearer token (session only)","",InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        final EditText facultyInput=new EditText(this);
+        facultyInput.setHint("Faculty Engine JSON: observations, concepts, prediction, measured, channels");
+        facultyInput.setText("{\\"observations\\":{},\\"concepts\\":[],\\"prediction\\":0.0,\\"measured\\":0.0,\\"channels\\":[]}");
+        facultyInput.setMinLines(4); facultyInput.setGravity(Gravity.TOP);
+        facultyInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        body.addView(facultyInput,new LinearLayout.LayoutParams(-1,dp(112)));
+        final EditText geometryInput=new EditText(this);
+        geometryInput.setHint("Paste Geometry Lab experiment JSON export");
+        geometryInput.setMinLines(5); geometryInput.setGravity(Gravity.TOP);
+        geometryInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        body.addView(geometryInput,new LinearLayout.LayoutParams(-1,dp(140)));
+        final TextView bridgeResult=new TextView(this);
+        bridgeResult.setText("Bridge is opt-in. Nothing is sent until you press an action button.");
+        bridgeResult.setTextIsSelectable(true); body.addView(bridgeResult);
+        button(body,"Run Faculty Engine for selected JOB",new View.OnClickListener(){
+            public void onClick(View v){
+                final String id=selected.getText().toString().trim();
+                final String endpoint=bridgeUrl.getText().toString().trim();
+                final String token=bridgeToken.getText().toString();
+                final String raw=facultyInput.getText().toString();
+                if(id.length()==0){bridgeResult.setText("Select a JOB ID first.");return;}
+                runWork(bridgeResult,new Work(){public String run() throws Exception{
+                    return new StrideEngineClient(endpoint,token).runFaculty(id,new org.json.JSONObject(raw)).toString(2);
+                }});
+            }
+        });
+        button(body,"Attach Geometry Lab experiment to selected JOB",new View.OnClickListener(){
+            public void onClick(View v){
+                final String id=selected.getText().toString().trim();
+                final String endpoint=bridgeUrl.getText().toString().trim();
+                final String token=bridgeToken.getText().toString();
+                final String raw=geometryInput.getText().toString();
+                if(id.length()==0){bridgeResult.setText("Select a JOB ID first.");return;}
+                runWork(bridgeResult,new Work(){public String run() throws Exception{
+                    return new StrideEngineClient(endpoint,token).attachGeometry(id,new org.json.JSONObject(raw)).toString(2);
+                }});
+            }
+        });
+        button(body,"Inspect selected JOB artifacts",new View.OnClickListener(){
+            public void onClick(View v){
+                final String id=selected.getText().toString().trim();
+                final String endpoint=bridgeUrl.getText().toString().trim();
+                final String token=bridgeToken.getText().toString();
+                if(id.length()==0){bridgeResult.setText("Select a JOB ID first.");return;}
+                runWork(bridgeResult,new Work(){public String run() throws Exception{
+                    return new StrideEngineClient(endpoint,token).listArtifacts(id).toString(2);
+                }});
+            }
+        });
+
         button(body,"Create JOB / branch",new View.OnClickListener(){
             public void onClick(View v){
                 try {
@@ -547,7 +600,7 @@ public final class MainActivity extends Activity {
                 } catch(Exception e){status.setText("Recovery rejected: "+e.getMessage());}
             }
         });
-        label(body,"Recovery boundary: export creates an app-private JSON file; move a copy to storage you control. Import is transactional and rejects duplicate IDs rather than overwriting existing journeys. This Android dashboard is a local prototype; Faculty Engine and Geometry Lab artifacts currently connect through the Python integration and JSON handoff.");
+        label(body,"Recovery boundary: export creates an app-private JSON file; move a copy to storage you control. Import is transactional and rejects duplicate IDs rather than overwriting existing journeys. This Android dashboard is a local prototype; Faculty Engine and Geometry Lab can now be called through the optional authenticated Stride Python bridge. The bridge must be running separately; Android never claims the Python engine is embedded.");
         try { listing.setText(jobStore.list().toString(2)); } catch(Exception e){status.setText(e.getMessage());}
     }
 
