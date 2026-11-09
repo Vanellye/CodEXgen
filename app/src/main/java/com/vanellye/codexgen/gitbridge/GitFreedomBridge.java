@@ -203,7 +203,8 @@ public final class GitFreedomBridge {
         validate(c);
         requireRemoteTls();
         if (title == null || title.trim().length() == 0) throw new IllegalArgumentException("Pull request title is required.");
-        requireFeature(open(), c);
+        Git current = open();
+        try { requireFeature(current, c); } finally { current.close(); }
         if (sessionToken == null || sessionToken.length() == 0) throw new IllegalStateException("Unlock the saved token first.");
         String repoPath = c.repositoryUrl.replace("https://github.com/", "").replace(".git", "");
         String[] ownerRepo = repoPath.split("/");
