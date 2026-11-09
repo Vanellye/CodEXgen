@@ -33,3 +33,46 @@ The framework should provide a module template, local simulator, deterministic f
 ## Current status
 
 Pantheon Native Runtime and the Stride adapter are existing project components. This document defines the broader framework target; it does not claim a complete SDK, package manager, plugin sandbox, cross-platform UI, or production release pipeline. See [Firmware Layer](../firmware/README.md) and [Pantheon Firmware & Framework Architecture](../pantheon/FIRMWARE-FRAMEWORK-ARCHITECTURE.md).
+
+
+## Portable core implementation
+
+The current platform-independent C++11 core provides:
+- Versioned module descriptors (id, version, required capabilities).
+- A deterministic registry backed by ordered identifiers.
+- Host-granted capabilities checked before module execution.
+- Duplicate and malformed descriptor rejection.
+- Missing modules and missing permissions fail closed.
+- Module exceptions are contained as ModuleFailure.
+- A standalone CMake build and contract test executable.
+
+Modules declare what they need; they cannot grant themselves capabilities.
+The host supplies grants for each execution request. This runtime is in-process
+and is not a process sandbox. Capability checks are API-level guardrails, not
+an operating-system security boundary.
+
+### Build and test
+
+From the repository root:
+
+    cmake -S framework -B build/framework -DCMAKE_BUILD_TYPE=Release
+    cmake --build build/framework --parallel
+    ctest --test-dir build/framework --output-on-failure
+
+A C++11 compiler and CMake 3.10 or newer are required.
+
+### Deliberate limits
+
+No persistent audit storage, cryptographic identity, package signing, dynamic
+loading, process isolation, scheduling, threading, remote control, or physical
+actuation is implemented. Hardware adapters are deferred until portable
+contracts and tests are stable.
+
+### Adapter sequence
+
+1. Portable host simulator and deterministic fixtures.
+2. ARM adapter behind the same interfaces.
+3. ESP32 adapter behind the same interfaces.
+
+An adapter may implement platform services; it may not change policy,
+self-grant module capabilities, suppress audit requirements, or bypass WARDEN.
