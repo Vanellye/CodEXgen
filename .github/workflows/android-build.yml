@@ -39,11 +39,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK 8 for legacy Gradle and Java 6 bytecode
+      - name: Set up JDK 17 for current Android SDK tools
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '8'
+          java-version: '17'
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
         with:
@@ -51,6 +51,11 @@ jobs:
       - name: Install API 29 and legacy native toolchains
         run: |
           sdkmanager "platforms;android-29" "build-tools;29.0.3" "cmake;3.10.2" "ndk;16.1.4479499"
+      - name: Set up JDK 8 for legacy Gradle and Java 6 bytecode
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
       - name: Enable Gradle wrapper
         run: chmod +x ./gradlew
       - name: Assemble API 11 Views APK
