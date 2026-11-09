@@ -359,6 +359,8 @@ public final class MainActivity extends Activity {
     private void showConsent() {
         LinearLayout body = page("Stride Consent & Human Review");
         label(body, "A supportive pause—not a test of character, faith, intelligence, or worth. Do not continue if any essential point is unclear. A checked item records that it was explained and understood; it does not prove understanding.");
+        label(body, "CHILDHOOD INNOCENCE: Every child enters this world innocent, bearing the mark of God's thumb. No algorithm, institution, parent, guardian, or authority may turn that innocence into presumed consent. A child's dignity exists before understanding, choice, or speech. Silence is not permission; vulnerability is not availability; dependence is not ownership.");
+        label(body, "For every consequential decision involving a child, prioritize protection, patience, truth, compassion, and accountable human care. Seek meaningful, age-appropriate assent where possible and all legally required adult permissions. A child's assent never replaces an adult's duty to protect. Never exploit innocence in the name of progress.");
         label(body, "Proposed purpose / action");
         final EditText purpose = new EditText(this);
         purpose.setHint("Describe what is proposed, why, and who may be affected");
