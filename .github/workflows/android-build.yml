@@ -147,10 +147,26 @@ jobs:
         run: chmod +x ./gradlew
       - name: Assemble API 11 Views APK
         run: ./gradlew --no-daemon --stacktrace :app:assembleDebug
-      - name: Upload API 11 APK
+      - name: Inspect APK package, minimum API, native ABI and signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="$(find app/build/outputs/apk/debug -maxdepth 1 -name '*.apk' -print -quit)"
+          test -n "$APK"
+          test -s "$APK"
+          BADGING="$("$ANDROID_SDK_ROOT/build-tools/29.0.3/aapt" dump badging "$APK")"
+          printf '%s\\n' "$BADGING"
+          grep -F "package: name='com.vanellye.codexgen'" <<< "$BADGING"
+          grep -F "sdkVersion:'11'" <<< "$BADGING"
+          unzip -l "$APK" | grep -F 'lib/armeabi-v7a/libcodexgen_pons.so'
+          "$ANDROID_SDK_ROOT/build-tools/29.0.3/apksigner" verify --verbose "$APK"
+          sha256sum "$APK" | tee "$APK.sha256"
+      - name: Upload API 11 APK and checksum
         uses: actions/upload-artifact@v4
         with:
           name: codexgen-android-api11-views-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: |
+            app/build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/debug/*.apk.sha256
           if-no-files-found: error
           retention-days: 14

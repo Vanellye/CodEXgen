@@ -27,6 +27,7 @@ import com.vanellye.codexgen.dataresonance.DataResonanceStore;
 import com.vanellye.codexgen.nativebridge.OlpirtNativeBridge;
 import com.vanellye.codexgen.consent.ConsentReviewStore;
 import com.vanellye.codexgen.jobs.JobStore;
+import com.vanellye.codexgen.jobs.StrideEngineClient;
 import java.io.File;
 import java.io.FileOutputStream;
 

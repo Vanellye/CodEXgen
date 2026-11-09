@@ -60,3 +60,11 @@ The Seed Pits preserve failures, defects, near misses, rejected assumptions, rec
 - **Observed:** CMake 3.22.1 installed, but the pinned Android Gradle Plugin 3.5.4 could not parse the SDK CMake binary's version string `3.22.1-g37088a8` (`Revision.parseRevision` raised `NumberFormatException`). This failed before native compilation.
 - **Correction:** return the project pin to CMake 3.10.2 and install its exact SDK package identifier `cmake;3.10.2.4988404` rather than the incomplete package identifier `cmake;3.10.2`. This retains the legacy project's intended CMake generation while fixing the package lookup.
 - **Status:** correction committed for the next build attempt; APK assembly remains unverified until CI produces and inspects the artifact.
+
+## Verification amendment — Java bridge client wiring
+
+- **Source run:** [CI #232](https://github.com/Vanellye/CodEXgen/actions/runs/42708912309), commit `eb5071499e85ece0ad51541b65958dc7b7f7e473`.
+- **Passing evidence:** 27 Python tests, including the end-to-end HTTP bridge/persistence/recovery case; browser automation; Node.js runtime contract; native C++11 and portable framework tests.
+- **Observed Android compile defect:** `MainActivity` referenced `StrideEngineClient` from the `.jobs` package without importing it. The Java source job reported four unresolved-symbol errors at the four bridge calls.
+- **Remediation:** add the explicit import. Extend the Android workflow to inspect package ID, minimum SDK, packaged `armeabi-v7a` JNI library, APK signature, and SHA-256 before uploading the APK and checksum.
+- **Status:** pending next CI verification. This is a source correction and verification gate, not yet an APK success claim.
