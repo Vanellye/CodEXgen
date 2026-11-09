@@ -11,6 +11,7 @@ This is the reading map for the project's technical notes, principles, and explo
 | [Resonance Stewardship](RESONANCE-STEWARDSHIP.md) | Faith-inspired purpose, responsible information propagation, Data Resonance boundaries, and evidence distinctions |
 | [Rise & Fall Directives](RISE-FALL-DIRECTIVES.md) | Principle- and evidence-based ơ / ọ / WARDEN policy prototype, decision boundaries, and zero-preservation rules |
 | [Pantheon Workflow Boundary](../pantheon/WORKFLOW-BOUNDARY.md) | Separate upstream governance and evidence preparation from downstream authorized execution |
+| [Pantheon Search & Rescue — Four Lanes](../pantheon/search-rescue/README.md) | Independent Search, Coordination, Verification, and Rescue lanes; acknowledged handoffs, privacy, safeguarding, and failsafe rules |
 | [Stride Consent & Human Review](STRIDE-CONSENT-REVIEW.md) | Seven-layer assent checks, pause/decline paths, human-review declaration, local audit records, and implementation gaps |
 | [Android API 11 profile](ANDROID_API11_PROFILE.md) | Active Android compatibility contract, build toolchain, preserved features, and security limits |
 | [JGit Compatibility Checkpoint](JGIT-COMPATIBILITY-CHECKPOINT.md) | JGit 3.7.1 dependency anchor, shared app-process bridge access, and authorization boundaries |
