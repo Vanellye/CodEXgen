@@ -101,13 +101,15 @@ def recall_job_history(
     collected.sort(key=lambda event: (
         event.recorded_at or "", event.job_id, event.sequence
     ))
+    canonical_events = tuple(collected)
     if reverse:
         collected.reverse()
 
-    # Compare repeated scalar fields within one JOB only. Nested structures,
+    # Compare repeated scalar fields within one JOB only, always in forward
+    # source order even when the returned recall view is reversed. Nested structures,
     # free text and different JOBs are not asserted to be equivalent.
     by_job_field: dict[tuple[str, str], list[HistoricalEvent]] = defaultdict(list)
-    for event in collected:
+    for event in canonical_events:
         for field, value in event.payload.items():
             if value is None or isinstance(value, (dict, list)):
                 continue
