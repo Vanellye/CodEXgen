@@ -17,6 +17,24 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+
+  geometry-browser-tests:
+    name: Geometry Laboratory browser automation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Set up Python static server
+        run: python3 --version
+      - name: Install Playwright and Chromium
+        run: |
+          npm install --no-save @playwright/test@1.52.0
+          npx playwright install --with-deps chromium
+      - name: Run interactive laboratory browser tests
+        run: npx playwright test --config=playwright.config.cjs
   node11-runtime-contract:
     name: Pantheon shared Node.js 11 runtime contract
     runs-on: ubuntu-latest
