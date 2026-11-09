@@ -1,4 +1,4 @@
-name: Android Build
+name: Android Build\n\n# API 11-compatible standalone profile; modern Compose app is built separately.
 
 on:
   push:
@@ -41,13 +41,13 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build debug APK
-        run: ./gradlew --no-daemon --stacktrace :app:assembleDebug
+        run: ./gradlew --no-daemon --stacktrace :legacy-android:assembleDebug
 
       - name: Upload debug APK
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: codexgen-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          name: codexgen-api11-legacy-debug-apk
+          path: legacy-android/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 14
