@@ -25,6 +25,7 @@ The app uses framework Android Views and platform SQLite APIs. Compose, Kotlin, 
 ## Compatibility boundaries
 
 - JGit 3.7.1 is used because the JGit 3.7 line retained a Java 5/6-era baseline. Newer JGit releases require newer Java runtimes.
+- JGit 3.7.1 is an old dependency with published security advisories. The app restricts remote URLs to GitHub HTTPS and sets core.symlinks=false before checkout/merge to mitigate the known symlink checkout class of issue. It does not expose JGit's repo-manifest parser or Amazon S3 transport. This is risk reduction, not a claim that the old dependency is fully patched; use only repositories you trust and obtain a security review before production deployment.
 - Remote HTTPS Git operations are runtime-gated below API 21. The stock TLS stack on Android 3.0/API 11 cannot be assumed to negotiate modern GitHub HTTPS. Local repository operations remain available.
 - Android Keystore APIs are not available on API 11. The API-11 profile encrypts the saved token using a user-entered passphrase, PBKDF2-HMAC-SHA1, AES-CBC, and HMAC-SHA256. The passphrase is not stored; the token must be unlocked for each app session. This is not hardware-backed Keystore protection.
 - The previous Keystore token format is not migrated. Re-enter and re-encrypt the token in this profile.
