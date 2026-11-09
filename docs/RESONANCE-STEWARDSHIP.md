@@ -116,3 +116,7 @@ This practice describes voluntary, age-aware ways a community may nurture spirit
 - Adults remain accountable for age-appropriate safeguarding. A child's assent to a spiritual activity does not replace any required legal or safety protections.
 
 > Invite prayer; model faith; express praise; embody care. Let conviction strengthen responsibility, never become permission to control another.
+
+## Legacy source and peering stewardship
+
+Legacy modules and historical signal/data artifacts follow the [Legacy Preservation & Independent Peering Protocol](LEGACY-PEERING-PROTOCOL.md). Preserve source provenance and immutable historical evidence; document interfaces, dependencies, and observed behavior before extraction; and keep derivatives independently evolvable. Cross-module propagation or peering requires an explicit contract, authorization, traceable origin, and tests scoped to the actual data flow. A digital resonance label remains metadata or simulation unless independently measured; a successful peering test does not establish biological or supernatural effects.
