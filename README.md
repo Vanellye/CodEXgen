@@ -12,7 +12,7 @@
 - **Git Freedom Bridge** — local repository work, branch operations, selected-file commits, and guarded GitHub workflows.
 - **Data Resonance** — app-local SQLite observations with optional labels, units, timestamps, and frequency metadata.
 - **Olpirt + Pons** — a native dependency-contract audit through JNI.
-- **Stride / Python** — exploratory perception, creativity, adaptive-feedback, and signal-simulation modules.
+- **Stride / Python** — exploratory perception, creativity, adaptive-feedback, signal simulation, and a local-first JOB engine for resumable journeys, branching, event history, and purpose-scoped metrics. See [Universal Workflow — JOBs](docs/UNIVERSAL-WORKFLOW-JOBS.md).
 - **Geometry & Design** — a separate library for mathematical reasoning, shape studies, and constructive designs; it is kept distinct from measured graphs and observation records.
 
 ## Shared Pantheon Node.js runtime

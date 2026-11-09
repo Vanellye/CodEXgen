@@ -109,6 +109,44 @@ These states are not a linear ladder. A completed JOB may be reopened by its own
 
 This is illustrative JSON, not a live database record.
 
+## Stride implementation checkpoint
+
+The first executable JOB engine slice is implemented in `python/stride_core/job_engine.py`:
+
+- SQLite-backed local persistence for JOB records.
+- Explicit lifecycle validation for open, active, paused, blocked, adapted, completed, and archived states.
+- Parent/child branch relationships with independent child identifiers.
+- Append-oriented event history for creation, transitions, and metric recording.
+- Numerical observations that retain units, method, time window, source, and limitations; no composite human-worth or conformity score is produced.
+- Completed work requires an explicit reopen flag before returning to active work.
+
+The engine performs local database operations only. It does not publish, transmit private data, delete records, execute device actions, or infer consent. The SQLite database location is selected by the caller; the default is a local file named `stride_jobs.sqlite3`.
+
+Example:
+
+```python
+from stride_core.job_engine import JobMetric, JobStore
+
+store = JobStore("stride_jobs.sqlite3")
+job = store.create_job(
+    "Geometry exploration",
+    "Compare two projection methods",
+    origin="geometry-laboratory",
+)
+store.transition(job["id"], "active", stage="make")
+branch = store.add_branch(
+    job["id"], "Alternative projection",
+    "Explore a second projection independently",
+)
+store.record_metric(job["id"], JobMetric(
+    "render_time", 0.42, "seconds", "monotonic timer",
+    "one render", "local experiment",
+    "single observation; not a quality or person score",
+))
+```
+
+Automated tests are included in `tests/test_job_engine.py` and are run by the existing Python unittest discovery command. Until CI completes successfully for the implementing commit, this is a source-level implementation with tests added—not a claim of verified CI success.
+
 ## Implementation sequence
 
 1. **Contract:** define a versioned JOB schema and transition vocabulary.
