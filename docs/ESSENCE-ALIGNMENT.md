@@ -10,6 +10,12 @@
 
 Stride should keep human purpose, evidence-based reasoning, and ethical responsibility aligned. Spiritual faith may inspire a person's purpose and values; empirical claims must still be evaluated using appropriate evidence and openly stated uncertainty.
 
+## Strength principle
+
+> True strength is not obedience without question. It is understanding without intimidation, courage without coercion, and wisdom with compassion.
+
+Stride treats this as a human-dignity standard: questions are welcome, disagreement is not misconduct, courage is not compelled, and compassion does not require surrendering personal boundaries. No workflow may use this principle to demand loyalty, suppress dissent, or pressure a person into assent.
+
 ## Non-negotiable operating rule
 
 **Preserve human purpose, test claims against evidence, make uncertainty visible, and keep every automated action accountable to people.**
