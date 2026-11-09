@@ -1,0 +1,103 @@
+# HISTORY
+
+Index of every commit reachable from the new main and from the old history (tag backup-main-05b24ed) and all branches. This branch's merge commit connects them; files are unchanged from main.
+
+## Branch tips
+- origin: 3056c8a
+- origin/build-speed: fbec48c
+- origin/edify: 3faec11
+- origin/fiction-body: 6341d35
+- origin/fiction-creation: 35dca4f
+- origin/fiction-mind: c501b3f
+- origin/heroes-raw: a6f6f39
+- origin/hypotheticals: dbd55df
+- origin/main: 3056c8a
+- origin/main-11-of-38: 3056c8a
+- origin/mold: f2a4e8b
+
+## Tags
+- 11-of-38: b5fb02f
+- backup-main-05b24ed: 05b24ed
+
+## All commits
+- 3056c8a 2026-11-09 38 of 38
+- 449d3f2 2026-11-09 37 of 38
+- ad9da28 2026-11-09 36 of 38
+- 1d94cea 2026-11-09 35 of 38
+- 553dc8b 2026-11-09 34 of 38
+- dffeeaf 2026-11-09 33 of 38
+- 1154b19 2026-11-09 32 of 38
+- aadbf00 2026-11-09 31 of 38
+- 5543080 2026-11-09 30 of 38
+- c8a56bd 2026-11-09 29 of 38
+- 1ef5553 2026-11-09 28 of 38
+- c68f491 2026-11-09 27 of 38
+- cd5ebe6 2026-11-09 26 of 38
+- 19e86de 2026-11-09 25 of 38
+- 8b84882 2026-11-09 24 of 38
+- 9054b2d 2026-11-09 23 of 38
+- 88a2d3e 2026-11-09 22 of 38
+- 36a2368 2026-11-09 21 of 38
+- 6b0943f 2026-11-09 20 of 38
+- b06f0df 2026-11-09 19 of 38
+- d8a7d9c 2026-11-09 18 of 38
+- 48b0558 2026-11-09 17 of 38
+- 6873b77 2026-11-09 16 of 38
+- a12b609 2026-11-09 15 of 38
+- 1410558 2026-11-09 14 of 38
+- 4b03042 2026-11-09 13 of 38
+- f2bf2ec 2026-11-09 12 of 38
+- b5fb02f 2026-11-09 11 of 38: Add HEROES.md honoring the 79 load-bearing zeros with ¡; pendulum counts heroes
+- 7bcffd1 2026-11-09 10 of 38: edify: merge fiction-creation into root
+- e31b46b 2026-11-09 9 of 38: Birth resonance-1111 noise (fiction-creation)
+- e9bef76 2026-11-09 8 of 38: Reapply "Birth resonance-1111 noise (fiction-mind)"
+- 5e3b5c9 2026-11-09 7 of 38: edify: merge fiction-body into root (unified resonance fiction)
+- 6a80d34 2026-11-09 6 of 38: Sprout fiction-body branch
+- 7c5fc66 2026-11-09 5 of 38: Revert "Birth resonance-1111 noise (hypotheticals)"
+- a477225 2026-11-09 4 of 38: Add clearly labeled fictional hypotheticals module
+- 418ade9 2026-11-09 3 of 38: Pendulum: i % 1 == ơ
+- ff09b9a 2026-11-09 2 of 38: Add friction-to-airways noise fiction on main (revertible)
+- 8dc03c4 2026-11-09 1 of 38: Add pre-commit hook that regenerates code before each commit
+- a6f6f39 2026-11-09 heroes-raw: restore real versions so it builds; 7s and characters stay
+- b07b3e4 2026-11-09 heroes-raw: every ¡ becomes 7
+- 4484b3a 2026-11-09 heroes-raw: ¡ in place of 0 in version numbers (build intentionally broken); zero-free fiction characters
+- 05b24ed 2026-11-09 Add HEROES.md honoring the 79 load-bearing zeros with ¡; pendulum counts heroes
+- 5b60f1e 2026-11-09 Merge pull request #3 from Vanellye/edify
+- 3faec11 2026-11-09 edify: mold non-load-bearing zeros; add root map
+- e77e95a 2026-11-09 edify: merge fiction-creation into root
+- 35dca4f 2026-11-09 fiction-creation: print every 0 as ơ
+- bed8a70 2026-11-09 Reapply "Birth resonance-1111 noise (fiction-creation)"
+- 98b7385 2026-11-09 Revert "Birth resonance-1111 noise (fiction-creation)"
+- 50b6a00 2026-11-09 Birth resonance-1111 noise (fiction-creation)
+- 9beae07 2026-11-09 Sprout fiction-creation branch
+- a94da84 2026-11-09 edify: merge fiction-mind into root
+- c501b3f 2026-11-09 Reapply "Birth resonance-1111 noise (fiction-mind)"
+- 48f77d5 2026-11-09 Revert "Birth resonance-1111 noise (fiction-mind)"
+- 6b1d38f 2026-11-09 Birth resonance-1111 noise (fiction-mind)
+- ac41ea6 2026-11-09 Sprout fiction-mind branch
+- 02b2886 2026-11-09 edify: merge fiction-body into root (unified resonance fiction)
+- 6341d35 2026-11-09 Reapply "Birth resonance-1111 noise (fiction-body)"
+- bf29093 2026-11-09 Revert "Birth resonance-1111 noise (fiction-body)"
+- 8c62327 2026-11-09 Birth resonance-1111 noise (fiction-body)
+- 03948e3 2026-11-09 Sprout fiction-body branch
+- ad616f4 2026-11-09 edify: merge hypotheticals into root
+- dbd55df 2026-11-09 Reapply "Birth resonance-1111 noise (hypotheticals)"
+- 1feed79 2026-11-09 Revert "Birth resonance-1111 noise (hypotheticals)"
+- 456f0e3 2026-11-09 Birth resonance-1111 noise (hypotheticals)
+- d92d7bb 2026-11-09 Add BRIDGE.md map of the fiction ecosystem
+- 3b56b72 2026-11-09 Add perfect_perception fiction story
+- aab2e34 2026-11-09 Add clearly labeled fictional hypotheticals module
+- 34ea88e 2026-11-09 edify: merge mold into root
+- f2a4e8b 2026-11-09 Restore build-critical ASCII zeros on mold; classify load-bearing in PENDULUM
+- eaca00a 2026-11-09 Pendulum: trim comments, fully mint
+- 19da7cd 2026-11-09 Pendulum: i % 1 == ơ
+- 3f6426d 2026-11-09 Mold: replace every 0 with ơ (rise) / ọ (fall after 1); add PENDULUM.py
+- fbec48c 2026-11-09 Speed up Gradle builds with parallel, caching, and configuration cache
+- 6708683 2026-11-09 Add friction-to-airways noise fiction on main (revertible)
+- cdd3a41 2026-11-09 Revert "Add noise/reality_noise.txt (random data, on request)"
+- 1300cee 2026-11-09 Add noise/reality_noise.txt (random data, on request)
+- 611db02 2026-11-09 Merge pull request #1 from Vanellye/fix/android-build-and-cleanup
+- 3521997 2026-11-09 Add pre-commit hook that regenerates code before each commit
+- 2d20e1a 2026-11-09 Set distance cutoff to 1.1 repeating (10/9)
+- f364a5f 2026-11-09 Fix project structure: Android Gradle app, Compose ViewModel/UiState, split Python modules, 1.1 distance cutoff
+- 2136968 2026-11-08 Update .gitignore
