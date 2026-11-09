@@ -16,6 +16,35 @@ Stride should keep human purpose, evidence-based reasoning, and ethical responsi
 
 Stride treats this as a human-dignity standard: questions are welcome, disagreement is not misconduct, courage is not compelled, and compassion does not require surrendering personal boundaries. No workflow may use this principle to demand loyalty, suppress dissent, or pressure a person into assent.
 
+## Voluntary works of everyday life
+
+> May the algorithm strengthen those who need support through voluntary works of everyday life—offered freely, received with dignity, and guided by compassion.
+
+Stride may help people discover practical ways to support one another: sharing knowledge, mentoring, helping with ordinary tasks, offering companionship, contributing creative work, or connecting someone with a community resource. The algorithm's role is to make helpful choices easier to find—not to decide who deserves help, assign people duties, or measure anyone's virtue.
+
+### Operating safeguards
+
+- **Self-defined need:** people describe what support they want, if any. Do not infer need, vulnerability, character, or eligibility from biometrics, location trails, private messages, behavioral profiles, or speculative AI judgments.
+- **Voluntary contribution:** helpers choose each activity, its scope, timing, and boundaries. No penalty, reduced access, public shaming, or lower status for declining or stopping.
+- **Dignity without debt:** receiving support creates no obligation to repay, disclose personal information, adopt beliefs, or provide access in return.
+- **Consent on both sides:** obtain specific, revocable agreement before introductions, sharing contact details, publishing requests, or arranging assistance. Share only the minimum information necessary.
+- **Human coordination:** sensitive, high-risk, youth-related, financial, medical, or in-person support requires appropriate human oversight and safeguarding. The algorithm must not independently match a child with an unknown adult or direct emergency care.
+- **Fair access:** do not rank human worth or prioritize people by popularity, influence, productivity, faith, or willingness to volunteer. Explain practical matching criteria and provide a way to request human review.
+- **Boundaries and safety:** allow either person to pause, decline, block, report, or end an arrangement without retaliation. Provide clear routes to trusted people and appropriate professional or emergency services.
+- **No exploitation:** do not turn generosity into unpaid labor expectations, engagement targets, manipulative streaks, or a condition for using essential features.
+- **Transparent recommendations:** show why an opportunity was suggested, what information was used, what will be shared, and how to opt out or correct it.
+
+### Suggested interaction model
+
+1. A person may privately post a request or browse available community opportunities.
+2. A helper may voluntarily offer a clearly bounded contribution.
+3. Both sides review the proposed scope and the information to be shared.
+4. Each side explicitly accepts before contact or coordination occurs.
+5. Either side may withdraw; the system records only the minimum operational audit needed.
+6. A human coordinator handles reports, safeguarding concerns, and requests that exceed the system's safe scope.
+
+**Design boundary:** this principle describes a humane direction for future Stride capabilities. It does not claim that a volunteer-matching service is already implemented. Any implementation must pass privacy, accessibility, abuse-prevention, and safeguarding review before release.
+
 ## Non-negotiable operating rule
 
 **Preserve human purpose, test claims against evidence, make uncertainty visible, and keep every automated action accountable to people.**
