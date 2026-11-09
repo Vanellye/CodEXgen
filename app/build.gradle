@@ -15,7 +15,6 @@ android {
         }
         externalNativeBuild {
             cmake {
-                arguments '-DANDROID_PLATFORM=android-11'
                 cppFlags '-std=c++11'
             }
         }
@@ -24,6 +23,7 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_6
         targetCompatibility JavaVersion.VERSION_1_6
+        encoding 'UTF-8'
     }
 
     externalNativeBuild {
