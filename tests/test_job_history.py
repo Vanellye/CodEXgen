@@ -66,6 +66,14 @@ class JobHistoryTests(unittest.TestCase):
         self.assertEqual(state_conflicts[0].status, "conflicting_recorded_values")
         self.assertEqual(state_conflicts[0].earlier_value, "active")
         self.assertEqual(state_conflicts[0].later_value, "paused")
+        reversed_report = recall_job_history(
+            self.store, ["job-history"], authorized=True, reverse=True
+        )
+        reverse_conflict = next(
+            item for item in reversed_report.contradictions if item.field == "to"
+        )
+        self.assertEqual(reverse_conflict.earlier_value, "active")
+        self.assertEqual(reverse_conflict.later_value, "paused")
 
     def test_history_reader_does_not_change_source_event_count(self):
         before = self.store.events("job-history")
