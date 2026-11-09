@@ -54,8 +54,8 @@ public final class GitFreedomBridge {
         return new UsernamePasswordCredentialsProvider("x-access-token", sessionToken);
     }
     private void requireRemoteTls() {
-        if (Build.VERSION.SDK_INT < 16) {
-            throw new IllegalStateException("Remote HTTPS Git is disabled below Android API 16. Local repository operations remain available.");
+        if (Build.VERSION.SDK_INT < 21) {
+            throw new IllegalStateException("Remote HTTPS Git is disabled below Android API 21. Local repository operations remain available.");
         }
     }
     private Git open() throws Exception {
