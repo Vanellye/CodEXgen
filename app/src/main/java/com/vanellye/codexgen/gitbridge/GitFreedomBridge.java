@@ -195,7 +195,7 @@ public final class GitFreedomBridge {
         if (relativePath == null || relativePath.trim().length() == 0)
             throw new IllegalArgumentException("Repository-relative file path is required.");
         String path = relativePath.trim();
-        if (path.startsWith("/") || path.indexOf('\\\\') >= 0)
+        if (path.startsWith("/") || path.indexOf('\\') >= 0)
             throw new IllegalArgumentException("Absolute paths and backslashes are not allowed.");
         String[] parts = path.split("/");
         for (int i = 0; i < parts.length; i++) {
