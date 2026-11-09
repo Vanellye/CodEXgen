@@ -510,7 +510,7 @@ public final class MainActivity extends Activity {
         final EditText bridgeToken=field(body,"Bridge bearer token (session only)","",InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         final EditText facultyInput=new EditText(this);
         facultyInput.setHint("Faculty Engine JSON: observations, concepts, prediction, measured, channels");
-        facultyInput.setText("{\\"observations\\":{},\\"concepts\\":[],\\"prediction\\":0.0,\\"measured\\":0.0,\\"channels\\":[]}");
+        facultyInput.setText("{\"observations\":{},\"concepts\":[],\"prediction\":0.0,\"measured\":0.0,\"channels\":[]}");
         facultyInput.setMinLines(4); facultyInput.setGravity(Gravity.TOP);
         facultyInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
         body.addView(facultyInput,new LinearLayout.LayoutParams(-1,dp(112)));

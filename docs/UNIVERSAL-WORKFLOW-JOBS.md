@@ -211,3 +211,8 @@ Faculty request JSON shape:
 ```
 
 Geometry requests use the Geometry Lab's existing `codexgen-geometry-experiment-v1` export. Endpoints are `POST /v1/jobs/{id}/faculty`, `POST /v1/jobs/{id}/geometry`, and `GET /v1/jobs/{id}/artifacts`. Requests and responses are limited to 2 MB. The bridge does not sync automatically, does not transmit JOB data until a user presses a bridge action, and does not execute biological, device, or physical-world actions. Treat Faculty output as a report for human review, not an authority or proof.
+
+
+## Seed Pits
+
+The protected failure-and-recovery archive is maintained in `pantheon/seed-pits/README.md`. It retains reproducible evidence and linked remediation amendments without turning failure records into contributor rankings.

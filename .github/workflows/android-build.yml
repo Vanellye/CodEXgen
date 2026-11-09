@@ -130,7 +130,7 @@ jobs:
           packages: 'platform-tools'
       - name: Install API 29 and CMake toolchains
         run: |
-          sdkmanager "platforms;android-29" "build-tools;29.0.3" "cmake;3.10.2"
+          sdkmanager "platforms;android-29" "build-tools;29.0.3" "cmake;3.22.1"
       - name: Install archived NDK r16b for API 11
         run: |
           mkdir -p "$ANDROID_SDK_ROOT/ndk/16.1.4479499"

@@ -14,7 +14,7 @@ import java.io.OutputStream;
 /** Loaded reflectively only on API 19+, so API 11 does not resolve DocumentsContract. */
 public final class Api21WorkspaceTreeImporter {
     private final ContentResolver resolver;
-    public Api19WorkspaceTreeImporter(Context context) {
+    public Api21WorkspaceTreeImporter(Context context) {
         resolver = context.getContentResolver();
     }
     public int copy(Uri treeUri, File repositoryDirectory) throws Exception {
