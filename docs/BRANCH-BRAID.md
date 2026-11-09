@@ -291,3 +291,55 @@ The evidence dashboard should show stale, fallen, missing, failed, and passed le
 ### 7. Preservation invariant
 
 Leaves may wither, fall out of the active view, and be replaced by fresher evidence. Branch refs and commit history remain intact. “Prune” means remove unsafe content from a future integration candidate or isolate an artifact under review—not delete the original branch. All directives remain advisory until a separately authorized operation is approved.
+
+
+## Engineering phase update — pair plan and independent CI
+
+**Updated:** 2026-11-09
+
+### File-level integration plan published
+
+A separate, reviewable plan is available at [`docs/PAIR-INTEGRATION-PLAN.md`](PAIR-INTEGRATION-PLAN.md), committed on `olpirt/stride-next` as `afbafa57c08c03cdc447da30620efe045c8d6ffe`.
+
+The plan records:
+- Pair 1: `body_fiction.py` is additive on `fiction-body`; the shared resonance module has different deterministic seed identities on `fiction-mind` and `fiction-body`.
+- Pair 2: `BRIDGE.md` is additive on `hypotheticals`; the shared resonance module has different deterministic seed identities on `fiction-creation` and `hypotheticals`.
+- Cross-pair collision: all four strands converge on `hypotheticals/resonance_noise_fiction.py`. The proposed resolution is one shared module with explicit strand identities and a separate display-only formatter for `ơ`; raw binary output and numeric zeros remain intact.
+- Required tests cover deterministic output, output length, strand identity, binary alphabet invariants, and marker formatting.
+
+This is a file-level design and provenance plan only. No content from the four source branches has been merged or copied into another source branch.
+
+### Independent CI workflows added
+
+The new `.github/workflows/independent-branch-ci.yml` workflow was committed as an ordinary additive commit to each of the 11 branch heads that previously had no check runs:
+
+| Branch | Workflow commit |
+|---|---|
+| `Vanellye-patch-1` | `cf732a008b5642243ab5e4133a5ce882f6513dca` |
+| `edify` | `82e92324383bbcd02e2a3a938e8d7e4dbff4d837` |
+| `fiction-body` | `71ab22da2f04c2b58171e1bafe889cc524a0ed61` |
+| `fiction-creation` | `63d398d8ecad5e686b5570023c065f89e2918790` |
+| `fiction-mind` | `ef62753230622ccbe755e560b0c49b268b882127` |
+| `heroes-raw` | `6dbb03dc9f2b79d8d791a34b5964d7fd031dfa0c` |
+| `history` | `362c7192692d5c48bec1e7374287fb32d3552c6a` |
+| `hypotheticals` | `860fc3e26e147da1aa4ee38659676830ad0ec099` |
+| `main` | `a02629956deda7db4416cdbb1bc9b3c5badf90a0` |
+| `main-11-of-38` | `9ed3ca42e3e9b8862f019bc4069e36d6aafc1380` |
+| `mold` | `11736208aa6c8288a59601da4cce2b841989ff9e` |
+
+The workflow runs three independent jobs:
+1. Git object connectivity and committed whitespace validation.
+2. Python syntax compilation, plus unittest discovery if a `tests/` directory exists.
+3. Android debug APK build using JDK 17, Android platform 35/build-tools 35.0.0, and the branch's Gradle wrapper.
+
+The workflow is present at each of those branch tips and GitHub Actions created one run for each branch. At the time this update was prepared, those 11 runs were still in progress; no pass/fail conclusion is claimed here. Results must be inspected before treating any branch as verified.
+
+The workflow does not replace the existing platform CI on `olpirt/stride-next`. `build-speed` was not modified because its head already had one successful `prebuild` check run; it still has no branch-local workflow file in the inspected tree and should receive broader coverage in a later pass if needed.
+
+### Preservation and write ledger
+
+- 11 existing branch refs received one new ordinary commit adding the CI workflow; no existing commit was amended, rebased, or force-updated.
+- The four fiction source branches retain their prior content and histories; only the CI workflow file was added to their tips.
+- The plan was added as a new document on `olpirt/stride-next`.
+- No merge commits, content splices, branch deletions, force pushes, or protection-setting changes were made.
+- Original branch names and prior commits remain available for inspection. The added workflow commits advance branch heads but do not rewrite their histories.
