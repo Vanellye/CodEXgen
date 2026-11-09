@@ -81,7 +81,12 @@ class CorrectionLedger:
 
     def __init__(self, database: str | Path = ":memory:") -> None:
         self.database = str(database)
-        if self.database != ":memory:":
+        self._uri = self.database == ":memory:"
+        if self._uri:
+            self.database = f"file:stride_corrections_{uuid.uuid4().hex}?mode=memory&cache=shared"
+            self._anchor = sqlite3.connect(self.database, uri=True, timeout=10.0)
+        else:
+            self._anchor = None
             Path(self.database).expanduser().resolve().parent.mkdir(parents=True, exist_ok=True)
         with self._connect() as db:
             db.executescript("""
@@ -112,7 +117,7 @@ class CorrectionLedger:
             """)
 
     def _connect(self) -> sqlite3.Connection:
-        db = sqlite3.connect(self.database, timeout=10.0)
+        db = sqlite3.connect(self.database, timeout=10.0, uri=self._uri)
         db.row_factory = sqlite3.Row
         db.execute("PRAGMA foreign_keys = ON")
         return db
