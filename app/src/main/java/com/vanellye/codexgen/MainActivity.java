@@ -26,6 +26,9 @@ import com.vanellye.codexgen.gitbridge.GitFreedomBridge;
 import com.vanellye.codexgen.dataresonance.DataResonanceStore;
 import com.vanellye.codexgen.nativebridge.OlpirtNativeBridge;
 import com.vanellye.codexgen.consent.ConsentReviewStore;
+import com.vanellye.codexgen.jobs.JobStore;
+import java.io.File;
+import java.io.FileOutputStream;
 
 /** Native Android Views application. No Compose, Kotlin, AndroidX or Lifecycle dependency. */
 public final class MainActivity extends Activity {
@@ -34,6 +37,7 @@ public final class MainActivity extends Activity {
     private GitFreedomBridge git;
     private DataResonanceStore data;
     private ConsentReviewStore consentReviews;
+    private JobStore jobStore;
     private EditText repositoryUrl, baseBranch, featureBranch, authorName, authorEmail;
     private EditText tokenField, vaultPass, commitMessage, prTitle, prBody, localFilePath, localFileContents;
     private EditText channelField, valueField, unitField, biomarkerField, frequencyField, notesField, correlationA, correlationB;
@@ -50,6 +54,7 @@ public final class MainActivity extends Activity {
         git = GitFreedomBridge.shared(this);
         data = new DataResonanceStore(this);
         consentReviews = new ConsentReviewStore(this);
+        jobStore = new JobStore(this);
         config = new GitFreedomBridge.Config();
         buildShell();
         showCodeGen();
@@ -64,7 +69,7 @@ public final class MainActivity extends Activity {
         root.setPadding(dp(8), dp(8), dp(8), dp(8));
         LinearLayout nav = new LinearLayout(this);
         nav.setOrientation(LinearLayout.HORIZONTAL);
-        String[] labels = new String[]{"CodeGen","Git","Consent","Resonance","Olpirt"};
+        String[] labels = new String[]{"CodeGen","Git","Consent","Resonance","Olpirt","JOBs"};
         for (int i=0;i<labels.length;i++) {
             final int index=i;
             Button b = new Button(this);
@@ -77,7 +82,8 @@ public final class MainActivity extends Activity {
                     else if(index==1) showGit();
                     else if(index==2) showConsent();
                     else if(index==3) showResonance();
-                    else showOlpirt();
+                    else if(index==4) showOlpirt();
+                    else showJobs();
                 }
             });
         }
@@ -478,6 +484,73 @@ public final class MainActivity extends Activity {
         return flags;
     }
 
+
+    private void showJobs() {
+        final LinearLayout body=page("Stride · JOB Dashboard");
+        label(body,"A JOB is a Journey of Becoming. The Main is a shared index, not an owner: each journey keeps its own identity, history, and right to remain independent.");
+        final EditText title=field(body,"JOB title","New journey",InputType.TYPE_CLASS_TEXT);
+        final EditText purpose=field(body,"Purpose","What possibility are we exploring?",InputType.TYPE_CLASS_TEXT);
+        final EditText parent=field(body,"Optional parent JOB ID (branch)","",InputType.TYPE_CLASS_TEXT);
+        final TextView status=new TextView(this);
+        status.setText("Local app-private SQLite · no network publishing");
+        body.addView(status);
+        final TextView listing=new TextView(this);
+        listing.setTextIsSelectable(true);
+        listing.setText("No JOBs loaded.");
+        body.addView(listing,new LinearLayout.LayoutParams(-1,-2));
+        final EditText selected=field(body,"JOB ID for pause / resume / complete","",InputType.TYPE_CLASS_TEXT);
+        final EditText importText=new EditText(this);
+        importText.setHint("Paste a previously exported JOB JSON file here to recover it");
+        importText.setMinLines(4);
+        importText.setGravity(Gravity.TOP);
+        importText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        body.addView(importText,new LinearLayout.LayoutParams(-1,dp(120)));
+        button(body,"Create JOB / branch",new View.OnClickListener(){
+            public void onClick(View v){
+                try {
+                    String p=parent.getText().toString().trim();
+                    String id=jobStore.create(title.getText().toString(),purpose.getText().toString(),p.length()==0?null:p);
+                    selected.setText(id);
+                    status.setText("Created locally: "+id);
+                    listing.setText(jobStore.list().toString(2));
+                } catch(Exception e){status.setText("Could not create JOB: "+e.getMessage());}
+            }
+        });
+        button(body,"Refresh JOB list",new View.OnClickListener(){
+            public void onClick(View v){try{listing.setText(jobStore.list().toString(2));}catch(Exception e){status.setText(e.getMessage());}}
+        });
+        button(body,"Pause selected JOB",new View.OnClickListener(){
+            public void onClick(View v){if(jobStore.transition(selected.getText().toString().trim(),"paused")){status.setText("JOB paused. Its history remains local.");try{listing.setText(jobStore.list().toString(2));}catch(Exception e){status.setText(e.getMessage());}}else status.setText("Transition not allowed or JOB not found.");}
+        });
+        button(body,"Resume selected JOB",new View.OnClickListener(){
+            public void onClick(View v){if(jobStore.transition(selected.getText().toString().trim(),"active")){status.setText("JOB resumed.");try{listing.setText(jobStore.list().toString(2));}catch(Exception e){status.setText(e.getMessage());}}else status.setText("Transition not allowed or JOB not found.");}
+        });
+        button(body,"Complete selected JOB",new View.OnClickListener(){
+            public void onClick(View v){if(jobStore.transition(selected.getText().toString().trim(),"completed")){status.setText("JOB marked complete; it can be explicitly reopened.");try{listing.setText(jobStore.list().toString(2));}catch(Exception e){status.setText(e.getMessage());}}else status.setText("Transition not allowed or JOB not found.");}
+        });
+        button(body,"Export local JOB recovery file",new View.OnClickListener(){
+            public void onClick(View v){
+                try {
+                    File file=new File(getFilesDir(),"stride-jobs-export.json");
+                    FileOutputStream out=new FileOutputStream(file);
+                    out.write(jobStore.exportJson().getBytes("UTF-8"));out.close();
+                    status.setText("Exported local recovery file: "+file.getAbsolutePath()+" · copy it to durable storage using your file manager.");
+                } catch(Exception e){status.setText("Export failed: "+e.getMessage());}
+            }
+        });
+        button(body,"Import / recover pasted JOB JSON",new View.OnClickListener(){
+            public void onClick(View v){
+                try {
+                    int count=jobStore.importJson(importText.getText().toString());
+                    status.setText("Recovered "+count+" JOB(s). Existing IDs are never overwritten.");
+                    listing.setText(jobStore.list().toString(2));
+                } catch(Exception e){status.setText("Recovery rejected: "+e.getMessage());}
+            }
+        });
+        label(body,"Recovery boundary: export creates an app-private JSON file; move a copy to storage you control. Import is transactional and rejects duplicate IDs rather than overwriting existing journeys. This Android dashboard is a local prototype; Faculty Engine and Geometry Lab artifacts currently connect through the Python integration and JSON handoff.");
+        try { listing.setText(jobStore.list().toString(2)); } catch(Exception e){status.setText(e.getMessage());}
+    }
+
     private void showOlpirt() {
         LinearLayout body=page("Olpirt / Pons Native Bridge");
         final TextView report=new TextView(this);
@@ -504,6 +577,7 @@ public final class MainActivity extends Activity {
     protected void onDestroy() {
         if(data!=null) data.close();
         if(consentReviews!=null) consentReviews.close();
+        if(jobStore!=null) jobStore.close();
         super.onDestroy();
     }
 }

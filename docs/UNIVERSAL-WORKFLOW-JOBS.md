@@ -147,6 +147,22 @@ store.record_metric(job["id"], JobMetric(
 
 Automated tests are included in `tests/test_job_engine.py` and are run by the existing Python unittest discovery command. Until CI completes successfully for the implementing commit, this is a source-level implementation with tests added—not a claim of verified CI success.
 
+## Connected Stride implementation
+
+The Python integration layer is `python/stride_core/job_integrations.py`:
+
+- **Faculty Engine connection:** `connect_faculty_run(...)` invokes the existing `run_faculty_suite` and attaches its JSON-ready report to the selected JOB with a SHA-256 digest. Recommendations remain subject to human review; the report does not claim consciousness, biological modulation, or physical signal emission.
+- **Geometry Laboratory connection:** `connect_geometry_experiment(...)` accepts the recorder's `codexgen-geometry-experiment-v1` JSON export, validates its workspace and parameters, checks an optional `linkedJobId`, and attaches the parameters, displayed results, equations, and SVG source as a JOB artifact.
+- **Reproducible snapshots:** `export_job_snapshot(...)` packages a JOB, event history, numerical metrics, and attached artifacts into a versioned JSON recovery envelope with a canonical SHA-256 digest. Import verifies the envelope and each artifact digest before writing.
+- **Recovery:** `import_job_snapshot(...)` rejects tampering and duplicate JOB IDs; it never overwrites existing work. `export_android_job_transfer` and `import_android_job_transfer` provide an explicit interoperable JOB/event subset for the native Android dashboard.
+- **Android dashboard:** `app/src/main/java/com/vanellye/codexgen/jobs/JobStore.java` provides app-private SQLite storage; the JOBs screen in `MainActivity.java` creates and branches journeys, lists them, pauses/resumes/completes them, and exports/imports JSON recovery records. Android's JOB store is app-private and separate from the Python database; use the documented JSON transfer to move records between them.
+
+The Geometry Laboratory now places an optional JOB ID on each experiment snapshot. The browser recorder saves a versioned record with parameters, results, equations, SVG source, replay contract, and SHA-256 integrity digest. Import verifies the digest; Restore validates parameters and regenerates the diagram instead of trusting imported SVG as executable page content. Browser-local storage remains device/browser-specific until the user exports a JSON copy.
+
+The Main is a common index and meeting point, not an owner or authority over contributor work. A JOB retains its own identity, history, attribution, and independence. Sharing or linking does not transfer ownership or remove lawful rights.
+
+These are implemented source paths and explicit JSON handoff contracts. The Android dashboard is not yet wired to execute Python code on-device; Faculty Engine execution and rich artifact snapshots currently run through the Python integration layer. Build and CI results must be checked for the implementing commit before claiming runtime verification.
+
 ## Implementation sequence
 
 1. **Contract:** define a versioned JOB schema and transition vocabulary.
