@@ -1,0 +1,64 @@
+name: Independent Branch CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: independent-branch-ci-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  source-integrity:
+    name: Source integrity and whitespace
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify Git object connectivity
+        run: git fsck --no-reflogs --connectivity-only
+      - name: Check committed diff whitespace
+        run: git diff-tree --check --root -r HEAD
+
+  python-validation:
+    name: Python syntax and available unit tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile Python sources
+        run: python -m compileall -q .
+      - name: Run unit tests when a test suite exists
+        shell: bash
+        run: |
+          if [[ -d tests ]]; then
+            python -m unittest discover -s tests -v
+          else
+            echo "No tests/ directory on this branch; syntax validation only."
+          fi
+
+  android-debug-build:
+    name: Android debug APK build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools'
+      - name: Install declared Android compile platform
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Build debug APK
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon --stacktrace :app:assembleDebug
