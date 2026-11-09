@@ -48,7 +48,10 @@ def _safe_source_path(source_root: Path, approved_path: str) -> Path:
         raise AnalysisError(f"Unsafe approved path: {approved_path}")
     if candidate.is_symlink():
         raise AnalysisError(f"Symbolic links are not accepted: {approved_path}")
-    resolved = candidate.resolve(strict=True)
+    try:
+        resolved = candidate.resolve(strict=True)
+    except FileNotFoundError as exc:
+        raise AnalysisError(f"Approved source file does not exist: {approved_path}") from exc
     if not _inside(resolved, source_root.resolve()):
         raise AnalysisError(f"Approved path escapes the source root: {approved_path}")
     if not resolved.is_file() or resolved.suffix != ".py":
