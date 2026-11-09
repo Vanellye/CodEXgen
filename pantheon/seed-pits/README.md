@@ -53,3 +53,10 @@ The Seed Pits preserve failures, defects, near misses, rejected assumptions, rec
 - **Android Java compile evidence:** `MainActivity.java` imported `InputType` from the wrong Android package. The app also called JGit `Repository.findRef`, which is absent from the pinned JGit 3.7.1 API.
 - **Remediation:** assert the direct Geometry artifact response, use short-lived SQLite connection lifecycle in the test, import `android.text.InputType`, and use JGit 3.7's `Repository.getRef` API.
 - **Status:** these corrections are source changes awaiting the next CI run; no APK success is claimed.
+
+## Verification amendment — restore the legacy CMake toolchain correctly
+
+- **Source run:** [CI #231](https://github.com/Vanellye/CodEXgen/actions/runs/42708468400), API 11 build job.
+- **Observed:** CMake 3.22.1 installed, but the pinned Android Gradle Plugin 3.5.4 could not parse the SDK CMake binary's version string `3.22.1-g37088a8` (`Revision.parseRevision` raised `NumberFormatException`). This failed before native compilation.
+- **Correction:** return the project pin to CMake 3.10.2 and install its exact SDK package identifier `cmake;3.10.2.4988404` rather than the incomplete package identifier `cmake;3.10.2`. This retains the legacy project's intended CMake generation while fixing the package lookup.
+- **Status:** correction committed for the next build attempt; APK assembly remains unverified until CI produces and inspects the artifact.
