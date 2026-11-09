@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 import unittest
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "python"))
@@ -13,13 +14,17 @@ from stride_core.job_reconciliation import (
 
 class JobReconciliationTests(unittest.TestCase):
     def setUp(self):
-        self.jobs = JobStore(":memory:")
+        self.tempdir = tempfile.TemporaryDirectory()
+        self.jobs = JobStore(str(Path(self.tempdir.name) / "jobs.sqlite3"))
         self.jobs.create_job(
             "Reconciliation", "Preserve original event", "test", job_id="reconcile-job"
         )
         self.event = self.jobs.events("reconcile-job")[0]
         self.source_ref = f"job:reconcile-job:event:{self.event['sequence']}"
-        self.ledger = CorrectionLedger(":memory:")
+        self.ledger = CorrectionLedger(str(Path(self.tempdir.name) / "corrections.sqlite3"))
+
+    def tearDown(self):
+        self.tempdir.cleanup()
 
     def propose(self, value="Corrected title"):
         return self.ledger.append_correction(
