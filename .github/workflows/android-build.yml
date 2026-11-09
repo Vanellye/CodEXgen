@@ -14,11 +14,11 @@ permissions:
 
 concurrency:
   group: codexgen-platform-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   python-validation:
-    name: Python engines and tests
+    name: Python compatibility engines and tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,10 +29,22 @@ jobs:
           cache-dependency-path: python/requirements.txt
       - name: Install test dependencies
         run: python -m pip install --upgrade pip numpy
-      - name: Compile Python sources
+      - name: Compile Python compatibility sources
         run: python -m compileall -q python tests generated_modules hypotheticals
-      - name: Run platform unit tests
+      - name: Run Python reference tests
         run: python -m unittest discover -s tests -v
+
+  pantheon-native:
+    name: Pantheon native C++11 host tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure Pantheon
+        run: cmake -S pantheon -B build/pantheon -DCMAKE_CXX_STANDARD=11
+      - name: Build Pantheon
+        run: cmake --build build/pantheon --parallel 2
+      - name: Run Pantheon smoke tests
+        run: ctest --test-dir build/pantheon --output-on-failure
 
   android-api11-views:
     name: Android API 11 Views and C++11 JNI
