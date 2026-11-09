@@ -8,6 +8,7 @@ import ast
 import hashlib
 import json
 import os
+import pprint
 import re
 import tempfile
 from datetime import datetime, timezone
@@ -133,7 +134,7 @@ def _render_catalog(record: dict[str, Any], generated_at: str) -> str:
     }
     return (
         '"""Generated Pantheon structural catalog; source code was not copied or executed."""\n'
-        f"CATALOG = {json.dumps(payload, ensure_ascii=False, indent=2)}\n"
+        f"CATALOG = {pprint.pformat(payload, sort_dicts=True, width=100)}\n"
     )
 
 def _atomic_write(path: Path, content: str) -> None:
