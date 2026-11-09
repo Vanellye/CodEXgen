@@ -96,7 +96,7 @@ Missing evidence must remain visible. A proposal may be recorded as a preservati
 - [Pair Integration Plan](PAIR-INTEGRATION-PLAN.md) identifies file-level overlaps and proposed reconciliation. Its plan is not permission to merge or copy source content.
 - [Seed Pits](../pantheon/seed-pits/README.md) preserve failures, corrections, provenance, and verification amendments. Legacy defects and successful repairs must both remain traceable.
 - [Resonance Stewardship](RESONANCE-STEWARDSHIP.md) governs consent, bounded propagation, traceable origin, and the separation of metaphor, digital information, and measured physical phenomena.
-- Commit [d067870e](https://github.com/Vanellye/CodEXgen/commit/d067870eebb1319e82fbaad2c1487dc88fa7db8f) is a historical success reference for the initial Stride bridge recovery and Android APK verification. It is not evidence of repository-wide repair or universal legacy compatibility.
+- The project discussion identifies `d067870e` as the historical success reference for the initial Stride bridge recovery and Android APK verification. Its full commit SHA could not be resolved against the currently accessible GitHub repository snapshot during this update, so this short identifier is retained as an unverified cross-reference rather than a clickable commit citation. It is not evidence of repository-wide repair or universal legacy compatibility.
 
 ## Current implementation boundary
 
