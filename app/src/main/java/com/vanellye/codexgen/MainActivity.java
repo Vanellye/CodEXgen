@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.os.AsyncTask;
 import android.view.View;
 import android.view.Gravity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.inputmethod.InputType;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -392,6 +394,27 @@ public final class MainActivity extends Activity {
         voluntaryChoice.setText("I have had a genuine opportunity to ask questions and freely choose to proceed. I understand I can say no.");
         body.addView(voluntaryChoice, new LinearLayout.LayoutParams(-1, -2));
 
+        // Any change to reviewed material invalidates an earlier assent click.
+        for (int i = 0; i < layers.length; i++) {
+            layers[i].setOnCheckedChangeListener(new android.widget.CompoundButton.OnCheckedChangeListener() {
+                public void onCheckedChanged(android.widget.CompoundButton buttonView, boolean isChecked) {
+                    voluntaryChoice.setChecked(false);
+                }
+            });
+        }
+        reviewerConfirmed.setOnCheckedChangeListener(new android.widget.CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(android.widget.CompoundButton buttonView, boolean isChecked) {
+                voluntaryChoice.setChecked(false);
+            }
+        });
+        TextWatcher invalidateChoice = new TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            public void onTextChanged(CharSequence s, int start, int before, int count) { voluntaryChoice.setChecked(false); }
+            public void afterTextChanged(Editable e) { }
+        };
+        purpose.addTextChangedListener(invalidateChoice);
+        reviewer.addTextChangedListener(invalidateChoice);
+
         final TextView state = new TextView(this);
         state.setText("Status: PAUSED — no assent has been recorded.");
         state.setPadding(0, dp(10), 0, dp(10));
@@ -443,6 +466,7 @@ public final class MainActivity extends Activity {
         button(body, "Show local review history", new View.OnClickListener() {
             public void onClick(View v) { state.setText(consentReviews.recent(50)); }
         });
+        label(body, "Privacy: review records are stored in app-private SQLite and are not encrypted by this prototype. Keep the purpose summary minimal; do not enter medical, child-protection, or other sensitive personal details.");
         label(body, "Safeguards: no readiness score; no inferred consent from silence, clicks, or continued use; no forced assent. Youth cases require age-appropriate explanation and applicable guardian/safeguarding processes, while respecting the young person's questions and dissent. This screen does not replace legal, clinical, or child-protection review.");
     }
 
