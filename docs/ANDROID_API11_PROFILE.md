@@ -18,7 +18,7 @@ The app uses framework Android Views and platform SQLite APIs. Compose, Kotlin, 
 
 - Git Freedom Bridge: local repository initialization, in-app text-file authoring, branch checkout, status/review, selected-file commit, fast-forward-only pull, normal feature-branch push, and draft pull-request creation (remote operations require API 21+).
 - Local repository path remains under app-private files/git-bridge/CodEXgen.
-- Data Resonance uses the same data_resonance.db database name and observations table columns, so existing rows are retained when the app is updated in place.
+- Data Resonance uses the same data_resonance.db database name and observations table columns, so existing rows are retained when the app is updated in place. The chronological Pearson-r utility is also ported as descriptive analysis only.
 - OLPIRT/Pons native dependency audit remains available through JNI.
 - CodeGen has a native Views screen for local scaffold generation.
 
@@ -27,7 +27,7 @@ The app uses framework Android Views and platform SQLite APIs. Compose, Kotlin, 
 - JGit 3.7.1 is used because the JGit 3.7 line retained a Java 5/6-era baseline. Newer JGit releases require newer Java runtimes.
 - JGit 3.7.1 is an old dependency with published security advisories. The app restricts remote URLs to GitHub HTTPS and sets core.symlinks=false before checkout/merge to mitigate the known symlink checkout class of issue. It does not expose JGit's repo-manifest parser or Amazon S3 transport. This is risk reduction, not a claim that the old dependency is fully patched; use only repositories you trust and obtain a security review before production deployment.
 - Remote HTTPS Git operations are runtime-gated below API 21. The stock TLS stack on Android 3.0/API 11 cannot be assumed to negotiate modern GitHub HTTPS. Local repository operations remain available.
-- Android Keystore APIs are not available on API 11. The API-11 profile encrypts the saved token using a user-entered passphrase, PBKDF2-HMAC-SHA1, AES-CBC, and HMAC-SHA256. The passphrase is not stored; the token must be unlocked for each app session. This is not hardware-backed Keystore protection.
+- Android Keystore APIs are not available on API 11. The API-11 profile encrypts the saved token using a user-entered passphrase (minimum 12 characters), PBKDF2-HMAC-SHA1, AES-CBC, and HMAC-SHA256. The passphrase is not stored; the token must be unlocked for each app session. This is not hardware-backed Keystore protection.
 - The previous Keystore token format is not migrated. Re-enter and re-encrypt the token in this profile.
 - Native output is restricted to armeabi-v7a to retain the API 11 native platform baseline. 64-bit-only devices are not supported by this ABI profile.
 - Workspace-folder import uses framework DocumentsContract on API 21+ without AndroidX DocumentFile. API 11-20 uses app-private local repository storage and the in-app text-file editor for individual files.
