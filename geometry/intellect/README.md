@@ -15,6 +15,11 @@ It is deliberately separate from the shape gallery, visual design collection, an
 | [Conjectures and open questions](CONJECTURES-OPEN-QUESTIONS.md) | Clearly labeled unproved claims, questions, counterexamples sought, and proof status |
 | [Construction and design rationale](CONSTRUCTION-RATIONALE.md) | Why a particular geometry, constraint, transformation, or construction is selected |
 | [Mathematical studies](studies/README.md) | Worked studies in Euclidean, non-Euclidean, fractal, and higher-dimensional geometry |
+| [Interactive mathematical laboratory](../lab/README.md) | Local computational explorers for curvature, recursive fractals, n-cube coordinates, and projections |
+
+## Computational exploration
+
+Use the [Interactive Mathematical Laboratory](../lab/README.md) to experiment with parameters and inspect generated diagrams. The lab's numerical output is a computational illustration, not a proof or an empirical observation.
 
 ## Mathematical study collection
 
