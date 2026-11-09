@@ -25,6 +25,7 @@ input[type=range]{width:100%;accent-color:var(--accent);margin:10px 0 2px}select
 .canvas{width:100%;min-height:320px;aspect-ratio:1.55;background:linear-gradient(135deg,#0b1421,#111f31);border:1px solid var(--line);border-radius:12px;display:block}
 .canvas text{font-family:system-ui,sans-serif}.equation{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#0b1421;border:1px solid var(--line);padding:11px;border-radius:9px;overflow-wrap:anywhere;margin-top:12px;color:#c5e8e3}
 .note{border-left:3px solid var(--warn);padding:8px 12px;color:var(--muted);font-size:.84rem;margin-top:14px}
+ .recorder{display:grid;grid-template-columns:minmax(180px,1fr) auto auto;gap:9px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;margin:0 0 18px}.recorder input{min-width:0;width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:10px;font:inherit}.recorder button{white-space:nowrap}.recorder-meta{grid-column:1/-1;color:var(--muted);font-size:.8rem}.recorder select{min-width:160px}.recorder-status{color:var(--accent);min-height:1.2em}@media(max-width:780px){.recorder{grid-template-columns:1fr 1fr}.recorder input{grid-column:1/-1}.recorder-meta{grid-column:1/-1}}
 .hidden{display:none!important}.footer{color:var(--muted);font-size:.8rem;margin-top:22px}
 @media(max-width:780px){.workspace{grid-template-columns:1fr}.canvas{min-height:270px}.panel{order:1}.stage{order:0}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
@@ -39,6 +40,17 @@ input[type=range]{width:100%;accent-color:var(--accent);margin:10px 0 2px}select
 <button class="tab" data-tab="coordinates" aria-selected="false">03 · Coordinates</button>
 <button class="tab" data-tab="projection" aria-selected="false">04 · Projections</button>
 </nav>
+<section class="recorder" aria-label="Experiment recorder">
+<input id="experimentName" type="text" maxlength="100" placeholder="Experiment title (e.g. Hyperbolic radius study)" aria-label="Experiment title">
+<button id="saveExperiment" type="button">Save experiment</button>
+<button id="exportExperiment" type="button">Export JSON</button>
+<select id="savedExperiments" aria-label="Saved experiments"><option value="">Saved experiments…</option></select>
+<button id="restoreExperiment" type="button">Restore</button>
+<button id="exportDiagram" type="button">Export SVG</button>
+<button id="importExperiment" type="button">Import JSON</button>
+<input id="importFile" type="file" accept="application/json,.json" hidden>
+<div class="recorder-meta"><span id="recorderStatus" class="recorder-status" role="status" aria-live="polite">Experiments are stored only in this browser until exported.</span> · Saves the active workspace's settings, displayed results, equation, and SVG snapshot.</div>
+</section>
 <section id="curvature" class="workspace">
 <div class="panel"><h2>Curvature explorer</h2><p class="sub">A constant-curvature 2D model in geodesic polar coordinates.</p>
 <div class="control"><label for="curv">Gaussian curvature <output class="value" id="curvOut">0.00</output></label><input id="curv" type="range" min="-1" max="1" step=".05" value="0"><div class="hint">Negative: hyperbolic · Zero: Euclidean · Positive: spherical</div></div>
@@ -118,6 +130,33 @@ function drawProjection(){const n=+$("projDim").value,ang=+$("angle").value*Math
  const raw=rotated.map(v=>[v.reduce((s,x,i)=>s+x*basisA[i],0),v.reduce((s,x,i)=>s+x*basisB[i],0)]);let max=1;raw.forEach(p=>max=Math.max(max,Math.abs(p[0]),Math.abs(p[1])));const sc=165/max,xy=raw.map(p=>[320+p[0]*sc,205-p[1]*sc]);const svg=$("projectionSvg");clear(svg);
  for(let i=0;i<vs.length;i++)for(let j=i+1;j<vs.length;j++){let diff=0;for(let q=0;q<n;q++)if(vs[i][q]!==vs[j][q])diff++;if(diff===1)node("line",{x1:xy[i][0],y1:xy[i][1],x2:xy[j][0],y2:xy[j][1],stroke:"#8fb8ff","stroke-width":1.25,"stroke-opacity":.7},svg)}
  xy.forEach(p=>node("circle",{cx:p[0],cy:p[1],r:3.3,fill:"#76d5c4",stroke:"#d7fff6","stroke-width":.5},svg));label(svg,320,24,n+"-dimensional hypercube · orthographic view",14,"#edf4ff");label(svg,320,390,"Rotation plane x"+(plane[0]+1)+"–x"+(plane[1]+1)+" · "+Math.round(ang*180/Math.PI)+"°",12)}
+
+// Local experiment recorder: versioned JSON snapshots in browser localStorage.
+const STORE_KEY="codexgen.geometry.lab.experiments.v1";
+const WORKSPACES=["curvature","fractal","coordinates","projection"];
+function activeWorkspace(){return WORKSPACES.find(id=>!$(id).classList.contains("hidden"))||"curvature"}
+function readStore(){try{const raw=localStorage.getItem(STORE_KEY);if(!raw)return[];const parsed=JSON.parse(raw);return Array.isArray(parsed)?parsed.filter(x=>x&&x.schema==="codexgen-geometry-experiment-v1"):[]}catch(e){return[]}}
+function writeStore(items){try{localStorage.setItem(STORE_KEY,JSON.stringify(items.slice(0,5)));return true}catch(e){set("recorderStatus","Could not save locally (storage may be full or unavailable). Export an experiment as JSON instead.");return false}}
+function currentParameters(){return{curvature:+$("curv").value,radius:+$("radius").value,fractalDepth:+$("depth").value,coordinateDimensions:+$("dimension").value,projectionDimensions:+$("projDim").value,rotationDegrees:+$("angle").value,rotationPlane:$("plane").value}}
+function captureExperiment(name){const workspace=activeWorkspace(),section=$(workspace),svg=section.querySelector("svg.canvas");return{schema:"codexgen-geometry-experiment-v1",app:"CodEXgen Geometric Laboratory",appVersion:1,title:name||workspace+" experiment",createdAt:new Date().toISOString(),workspace,parameters:currentParameters(),results:Array.from(section.querySelectorAll(".stat")).map(el=>({value:el.querySelector("b")?.textContent||"",label:el.querySelector("span")?.textContent||""})),equations:Array.from(section.querySelectorAll(".equation")).map(el=>el.textContent),diagram:svg?svg.outerHTML:"",diagramFormat:"inline-svg",notes:"Mathematical model output; diagram is illustrative and not a proof or empirical measurement."}}
+function refreshSavedList(selected){const sel=$("savedExperiments"),items=readStore();sel.replaceChildren(new Option("Saved experiments…",""));items.forEach((item,i)=>sel.add(new Option(item.title+" · "+new Date(item.createdAt).toLocaleString(),String(i))));if(selected!==undefined&&items[selected])sel.value=String(selected)}
+function downloadFile(filename,text,mime){const blob=new Blob([text],{type:mime}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function safeFilename(s){return(s||"geometry-experiment").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,60)||"geometry-experiment"}
+function restoreParameters(item){if(!item||!item.parameters||!WORKSPACES.includes(item.workspace))throw new Error("Unsupported experiment record.");
+const p=item.parameters;
+$("curv").value=Math.max(-1,Math.min(1,Number(p.curvature)||0));$("radius").value=Math.max(.2,Math.min(2.4,Number(p.radius)||1));$("depth").value=Math.max(0,Math.min(7,Math.round(Number(p.fractalDepth)||0)));$("dimension").value=Math.max(1,Math.min(10,Math.round(Number(p.coordinateDimensions)||4)));$("projDim").value=Math.max(2,Math.min(8,Math.round(Number(p.projectionDimensions)||4)));$("angle").value=Math.max(0,Math.min(180,Number(p.rotationDegrees)||0));
+const allowed=["01","02","12","03","13"];const plane=allowed.includes(p.rotationPlane)?p.rotationPlane:"01";$("plane").value=plane;
+document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===item.workspace?"true":"false"));WORKSPACES.forEach(id=>$(id).classList.toggle("hidden",id!==item.workspace));
+drawCurvature();drawFractal();drawCoordinates();drawProjection();}
+function validImported(item){return item&&item.schema==="codexgen-geometry-experiment-v1"&&WORKSPACES.includes(item.workspace)&&item.parameters&&typeof item.parameters==="object"&&typeof item.title==="string"&&item.title.length<=200}
+$("saveExperiment").addEventListener("click",()=>{const item=captureExperiment($("experimentName").value.trim());const items=readStore();items.unshift(item);if(writeStore(items)){refreshSavedList(0);$("experimentName").value="";set("recorderStatus","Saved locally: "+item.title+" (most recent 5 retained).")}});
+$("exportExperiment").addEventListener("click",()=>{const item=captureExperiment($("experimentName").value.trim());downloadFile(safeFilename(item.title)+".json",JSON.stringify(item,null,2),"application/json");set("recorderStatus","Exported reproducible JSON record, including the SVG snapshot.")});
+$("exportDiagram").addEventListener("click",()=>{const svg=$(activeWorkspace()).querySelector("svg.canvas");if(!svg){set("recorderStatus","No diagram is available in this workspace.");return}const xml=new XMLSerializer().serializeToString(svg);downloadFile(activeWorkspace()+"-diagram.svg",xml,'image/svg+xml;charset=utf-8');set("recorderStatus","Exported the active diagram as SVG.")});
+$("restoreExperiment").addEventListener("click",()=>{const i=+$("savedExperiments").value,items=readStore();if(!Number.isInteger(i)||!items[i]){set("recorderStatus","Choose a saved experiment first.");return}try{restoreParameters(items[i]);$("experimentName").value=items[i].title;set("recorderStatus","Restored settings for: "+items[i].title+". Diagram regenerated from parameters.")}catch(e){set("recorderStatus",e.message)}});
+$("importExperiment").addEventListener("click",()=>$("importFile").click());
+$("importFile").addEventListener("change",async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{if(file.size>2000000)throw new Error("Import file exceeds the 2 MB limit.");const item=JSON.parse(await file.text());if(!validImported(item))throw new Error("This file is not a supported Geometry Laboratory experiment.");const items=readStore();items.unshift(item);if(writeStore(items)){refreshSavedList(0);set("recorderStatus","Imported: "+item.title+". Select Restore to load its parameters.")}}catch(err){set("recorderStatus","Import failed: "+err.message)}finally{e.target.value=""}});
+refreshSavedList();
+
 document.querySelectorAll(".tab").forEach(btn=>btn.addEventListener("click",()=>{document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected",b===btn?"true":"false"));document.querySelectorAll("main>section").forEach(s=>s.classList.toggle("hidden",s.id!==btn.dataset.tab))}));
 ["curv","radius"].forEach(id=>$(id).addEventListener("input",drawCurvature));$("depth").addEventListener("input",drawFractal);$("resetFractal").addEventListener("click",()=>{$("depth").value=0;drawFractal()});$("dimension").addEventListener("input",drawCoordinates);["projDim","angle","plane"].forEach(id=>$(id).addEventListener("input",drawProjection));$("resetProjection").addEventListener("click",()=>{$("projDim").value=4;$("angle").value=35;$("plane").value="01";drawProjection()});
 drawCurvature();drawFractal();drawCoordinates();drawProjection();
