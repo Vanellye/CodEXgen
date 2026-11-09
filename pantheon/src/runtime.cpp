@@ -25,6 +25,44 @@ Result Runtime::execute(const std::string& name, const Input& input) const {
         missing.message = "module_not_registered";
         return missing;
     }
+    if (it->second->requiresControlAuthorization()) {
+        Result denied;
+        denied.module = name;
+        denied.message = "control_authorization_required";
+        return denied;
+    }
+    return it->second->execute(input);
+}
+
+Result Runtime::executeControlled(
+        const std::string& name, const Input& input,
+        const std::vector<StandardEvidence>& standards,
+        const OwnerApproval& ownerApproval) const {
+    std::map<std::string, std::shared_ptr<Module> >::const_iterator it =
+        modules_.find(name);
+    if (it == modules_.end()) {
+        Result missing;
+        missing.module = name;
+        missing.message = "module_not_registered";
+        return missing;
+    }
+    if (!it->second->requiresControlAuthorization()) {
+        Result denied;
+        denied.module = name;
+        denied.message = "module_does_not_require_control_authorization";
+        return denied;
+    }
+
+    ControlGate gate;
+    const ControlGateDecision decision = gate.evaluate(standards, ownerApproval);
+    if (!decision.granted) {
+        Result denied;
+        denied.module = name;
+        denied.message = "control_gate_denied:" + decision.reason;
+        denied.metrics["standards_passed"] = decision.passedCount;
+        denied.metrics["standards_required"] = ControlGate::REQUIRED_STANDARDS;
+        return denied;
+    }
     return it->second->execute(input);
 }
 
