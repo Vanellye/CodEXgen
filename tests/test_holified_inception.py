@@ -5,8 +5,9 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "python"))
 
+from stride_core.job_engine import JobStore
 from stride_core.holified_inception import (
-    ContextItem, HolifiedInputError, read_beyond_present,
+    ContextItem, HolifiedInputError, read_beyond_present, read_with_job_history,
 )
 
 
@@ -43,7 +44,7 @@ class HolifiedInceptionTests(unittest.TestCase):
             ContextItem("u", "Unresolved claim", "disputed", "archive"),
         ])
         self.assertEqual(report.discernment[0]["status"], "disputed")
-        self.assertIn("not settled", report.tensions[0])
+        self.assertIn("do not treat it as settled", report.tensions[0])
 
     def test_existing_perception_helper_is_used_as_read_only_input(self):
         report = read_beyond_present(
@@ -74,6 +75,28 @@ class HolifiedInceptionTests(unittest.TestCase):
             read_beyond_present("Now", [
                 ContextItem("bad", "Claim", "certain", "unknown-source"),
             ])
+
+    def test_optional_job_history_is_explicit_and_temporal(self):
+        store = JobStore(":memory:")
+        store.create_job(
+            "History", "Test history bridge", "unit-test", job_id="bridge-job"
+        )
+        store.transition("bridge-job", "active", reason="begin")
+        report = read_with_job_history(
+            "Current view", store, ["bridge-job"], authorized=True
+        )
+        self.assertEqual(len(report.history.events), 2)
+        self.assertEqual(len(report.historical_context), 2)
+        self.assertTrue(all(item.evidence == "recorded" for item in report.historical_context))
+        self.assertEqual(
+            report.to_dict()["history"]["governance"]["source_mutation"], False
+        )
+
+    def test_optional_job_history_rejects_missing_authorization(self):
+        store = JobStore(":memory:")
+        store.create_job("History", "Purpose", "test", job_id="no-auth")
+        with self.assertRaises(PermissionError):
+            read_with_job_history("Now", store, ["no-auth"])
 
     def test_report_is_json_ready_and_does_not_mutate_context(self):
         original = ContextItem("x", "Keep me", "observed", "user")
