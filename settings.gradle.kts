@@ -14,4 +14,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "CodEXgen"
-include(":app")
+include(":app", ":legacy-android")
