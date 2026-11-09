@@ -104,3 +104,7 @@ The shared module should not be added to any source branch until a separate inte
 ## Current decision
 
 **Plan complete; content integration not performed.** All four source branch refs remain unchanged by this plan. Pair compatibility is promising but not yet verified by tests, and the shared-path collision is a blocking design decision until the four identities are represented together.
+
+## Legacy preservation gate
+
+Apply the [Legacy Preservation & Independent Peering Protocol](LEGACY-PEERING-PROTOCOL.md) to every source file and component considered for this plan. Re-fetch and pin exact source SHAs; retain the original files and provenance; document consumers, interfaces, dependencies, and historical behavior; and place any extracted or reconciled implementation in a new, reviewable location. The proposed pair resolution is not approved peering until contract tests, compatibility checks, provenance review, and explicit human approval are recorded. Age, isolation, or unrelated ancestry is never permission to delete or overwrite a source branch.
