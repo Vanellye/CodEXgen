@@ -16,6 +16,36 @@ Stride should keep human purpose, evidence-based reasoning, and ethical responsi
 
 This is the concise acceptance rule for every Stride workflow. If a feature cannot preserve the user's stated purpose, show the evidential basis and uncertainty of its claims, and identify the person or permission authorizing its consequential actions, it must not silently proceed.
 
+## Readiness standard before essential assent
+
+**Base standard:** no person should be asked for essential assent until the purpose, choices, consequences, uncertainties, and right to decline have been explained in language they can understand. Assent must be informed, voluntary, specific, and free from intimidation, manipulation, retaliation, or artificial urgency. A click, silence, continued use, or a high moral-readiness score is not assent.
+
+Use these layers as supportive checks—not as a test of a person's worth or a ranking of moral stature:
+
+1. **Safety and dignity:** Is the person physically and emotionally safe to consider the request? Can they pause or leave without penalty?
+2. **Purpose and meaning:** Can they explain, in their own words, what is being proposed and why?
+3. **Evidence and uncertainty:** Have facts, interpretations, unknowns, and plausible alternatives been distinguished?
+4. **Consequences and boundaries:** Do they understand material benefits, risks, data use, who may be affected, and what cannot be promised?
+5. **Freedom from pressure:** Have fear, shame, threats, peer pressure, authority pressure, and misleading urgency been removed as far as reasonably possible?
+6. **Choice and reversibility:** Can they ask questions, seek trusted advice, say no, withdraw later where feasible, and understand what happens next?
+7. **Human confirmation:** Is the assent recorded in a proportionate, privacy-preserving way, with a clear human point of accountability?
+
+If any essential layer is unclear, pause, explain, offer support, and revisit only when the person freely chooses. Do not infer consent from compliance.
+
+### Youth-specific safeguards
+
+When children or young people are involved:
+
+- Use age-appropriate, plain language and check understanding without turning the conversation into an exam.
+- Treat the young person's questions, hesitation, silence, and dissent seriously. Never shame, threaten, frighten, or pressure them into agreement.
+- Seek parent or guardian permission where required by law or the relevant safeguarding standard, while also respecting the young person's own assent or dissent to the extent appropriate and legally required.
+- Provide access to a trusted, independent adult or safeguarding professional when appropriate; do not make the system the sole authority.
+- Do not profile, rank, diagnose, or score a young person's morality, faith, obedience, courage, or worth. Do not use behavioral data to infer these traits.
+- Build confidence by offering truthful reassurance, choices, practical coping supports, and the freedom to ask for time—not by suppressing healthy caution or promising that nothing bad can happen.
+- Escalate credible safety concerns to an appropriate human safeguarding process; do not automate punitive judgments.
+
+**Fear-respecting principle:** the aim is not to eliminate fear at any cost. Fear can signal uncertainty or danger. The aim is to reduce avoidable fear through honesty, safety, understanding, support, and genuine choice—while preserving a person's right to be cautious and to refuse.
+
 ## The six commitments
 
 1. **Essence — preserve purpose.** Keep the declared purpose, user intent, and essential project invariants visible. Do not silently rewrite a user's goals or discard foundational work.
