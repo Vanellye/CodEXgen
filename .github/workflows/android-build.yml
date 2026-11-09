@@ -81,17 +81,22 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK 8 for the legacy Android Gradle toolchain
+      - name: Set up JDK 17 for current Android SDK tools
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '8'
+          java-version: '17'
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
         with:
           packages: 'platform-tools'
       - name: Install API 29 compile platform
         run: sdkmanager "platforms;android-29" "build-tools;29.0.3"
+      - name: Set up JDK 8 for the legacy Android Gradle toolchain
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
       - name: Enable Gradle wrapper
         run: chmod +x ./gradlew
       - name: Compile Android Views Java sources
