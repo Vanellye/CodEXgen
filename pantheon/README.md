@@ -10,6 +10,7 @@ Pantheon is the native execution core for CodEXgen/Stride. The first milestone e
 - **Migration modules** — each Python capability is ported separately and compared against Python reference fixtures.
 - **Gateway origin** — the Faculty Engine integration commit is carried as immutable provenance; the Gateway Router ranks authorized and safe execution paths by compatibility, readiness, and reliability.
 - **Compatibility period** — Python remains the reference implementation until native parity tests pass.
+- **JGit capability checkpoint** — Android components obtain the shared Git Freedom Bridge through `GitFreedomBridge.shared(context)`. Its JGit dependency is pinned to `3.7.1.201504261725-r`, anchored to origin checkpoint `f63e166e11aee325fe0ea8504672f19134d2768b`. This is app-process capability discovery, not unrestricted operating-system or cross-device control. See [JGit Compatibility Checkpoint](../docs/JGIT-COMPATIBILITY-CHECKPOINT.md).
 
 ## Port order
 

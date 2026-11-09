@@ -43,7 +43,7 @@ public final class MainActivity extends Activity {
 
     public void onCreate(Bundle state) {
         super.onCreate(state);
-        git = new GitFreedomBridge(this);
+        git = GitFreedomBridge.shared(this);
         data = new DataResonanceStore(this);
         config = new GitFreedomBridge.Config();
         buildShell();
@@ -165,7 +165,7 @@ public final class MainActivity extends Activity {
     }
     private void showGit() {
         LinearLayout body=page("Git Freedom Bridge");
-        label(body,"Local-first repository workflow. Commits and normal pushes target the selected feature branch only.");
+        label(body,"Local-first repository workflow. Commits and normal pushes target the selected feature branch only.\\n" + GitFreedomBridge.compatibilityCheckpoint() + "\\nShared within the CodEXgen app process; each remote action still requires an unlocked token and explicit user action.");
         repositoryUrl=field(body,"HTTPS repository URL","https://github.com/Vanellye/CodEXgen.git",InputType.TYPE_CLASS_TEXT);
         baseBranch=field(body,"Base branch","main-11-of-38",InputType.TYPE_CLASS_TEXT);
         featureBranch=field(body,"Feature branch","olpirt/stride-next",InputType.TYPE_CLASS_TEXT);

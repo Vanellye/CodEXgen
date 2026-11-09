@@ -23,6 +23,24 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
  * GitHub's modern TLS requirements.
  */
 public final class GitFreedomBridge {
+    /** Immutable compatibility checkpoint for the JGit integration. */
+    public static final String JGIT_VERSION = "3.7.1.201504261725-r";
+    public static final String ORIGIN_CHECKPOINT_SHA = "f63e166e11aee325fe0ea8504672f19134d2768b";
+    private static GitFreedomBridge sharedInstance;
+
+    /**
+     * Returns the process-wide bridge for any CodEXgen/Pantheon Android component.
+     * The shared instance retains the user's session authorization; it does not
+     * grant permissions to other apps or bypass per-operation checks.
+     */
+    public static synchronized GitFreedomBridge shared(Context context) {
+        if (sharedInstance == null) sharedInstance = new GitFreedomBridge(context);
+        return sharedInstance;
+    }
+
+    public static String compatibilityCheckpoint() {
+        return "JGit " + JGIT_VERSION + " | origin " + ORIGIN_CHECKPOINT_SHA;
+    }
     public static final class Config {
         public String repositoryUrl = "https://github.com/Vanellye/CodEXgen.git";
         public String baseBranch = "main-11-of-38";
