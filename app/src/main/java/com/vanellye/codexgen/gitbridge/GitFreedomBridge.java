@@ -86,6 +86,7 @@ public final class GitFreedomBridge {
         }
         Git git = open();
         try {
+            requireClean(git);
             Repository r = git.getRepository();
             Ref local = r.findRef(c.featureBranch);
             if (local == null) {
