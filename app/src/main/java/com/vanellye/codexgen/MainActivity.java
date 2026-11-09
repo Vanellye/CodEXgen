@@ -213,10 +213,10 @@ public final class MainActivity extends Activity {
                 runWork(gitStatus,new Work(){public String run() throws Exception{return git.initializeLocal(config);}});
             }
         });
-        button(body,"Import workspace folder (Android API 19+)",new View.OnClickListener(){
+        button(body,"Import workspace folder (Android API 21+)",new View.OnClickListener(){
             public void onClick(View v){
-                if (android.os.Build.VERSION.SDK_INT < 19) {
-                    gitStatus.setText("Folder import requires API 19+. Use the in-app text-file editor on API 11-18.");
+                if (android.os.Build.VERSION.SDK_INT < 21) {
+                    gitStatus.setText("Folder import requires API 21+. Use the in-app text-file editor on API 11-20.");
                     return;
                 }
                 Intent picker = new Intent("android.intent.action.OPEN_DOCUMENT_TREE");
