@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(pantheon_runtime LANGUAGES CXX)
 
-add_library(pantheon_runtime STATIC src/runtime.cpp src/control_gate.cpp src/faculty_engine.cpp src/gateway.cpp)
+add_library(pantheon_runtime STATIC src/runtime.cpp src/control_gate.cpp src/faculty_engine.cpp src/gateway.cpp src/rise_fall.cpp)
 target_include_directories(pantheon_runtime PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set_target_properties(pantheon_runtime PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
 target_compile_options(pantheon_runtime PRIVATE -Wall -Wextra -pedantic)
@@ -22,8 +22,13 @@ add_executable(pantheon_gateway_test tests/gateway_test.cpp)
 target_link_libraries(pantheon_gateway_test pantheon_runtime)
 set_target_properties(pantheon_gateway_test PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
 
+add_executable(pantheon_rise_fall_test tests/rise_fall_test.cpp)
+target_link_libraries(pantheon_rise_fall_test pantheon_runtime)
+set_target_properties(pantheon_rise_fall_test PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
+
 enable_testing()
 add_test(NAME pantheon_runtime_smoke COMMAND pantheon_runtime_smoke)
 add_test(NAME pantheon_control_gate_test COMMAND pantheon_control_gate_test)
 add_test(NAME pantheon_faculty_test COMMAND pantheon_faculty_test)
 add_test(NAME pantheon_gateway_test COMMAND pantheon_gateway_test)
+add_test(NAME pantheon_rise_fall_test COMMAND pantheon_rise_fall_test)
