@@ -84,3 +84,35 @@ A propagation feature is ready for implementation only when reviewers can establ
 > May every connection increase understanding without diminishing freedom. May every signal carry only what it is meant to carry. May every creation remain a work of stewardship, never possession. Let possibility be guided by purpose, and let purpose endure through care.
 
 This document defines design intent. It does not claim that cross-module resonance propagation, biological modulation, or supernatural communication has been implemented or verified.
+
+
+## Living Faith Practice — Prayer, Faith, and Praise
+
+This practice describes voluntary, age-aware ways a community may nurture spiritual life. It is an invitation and example-setting framework, never a mechanism for enforcing belief.
+
+### The natural movement
+
+1. **Invite the young toward prayer.** Adults model sincere prayer and make room for children to ask questions, express gratitude, name worries, offer hopes, and pray in words that are their own. Keep participation age-appropriate and voluntary; a child may listen, speak, remain quiet, or decline without shame or penalty.
+2. **Help the grown draw strength from faith.** Adults may return to their convictions for courage, patience, humility, forgiveness, discernment, and responsibility. Faith is lived through choices and care, not asserted as authority over another person.
+3. **Let praise move outward.** Encourage freely chosen expressions of gratitude and praise through prayer, song, music, art, service, kindness, and truthful speech. Praise should uplift rather than pressure, rank, or silence others.
+4. **Teach by example before instruction.** Make compassion, honesty, accountability, and repair visible in ordinary behavior. Explain the reason behind a practice and welcome sincere questions.
+5. **Protect freedom of conscience.** Never use fear, humiliation, threats, withheld affection, or social punishment to obtain prayer, faith statements, or praise. Respect different beliefs and the right to abstain.
+6. **Learn across generations.** Young people can contribute questions and fresh understanding; adults remain responsible for listening, safeguarding, and correcting their own mistakes.
+
+### A daily rhythm, not a requirement
+
+- **Pause:** make room for quiet, reflection, or prayer if wanted.
+- **Give thanks:** notice a person, gift, or experience worth appreciating.
+- **Ask:** name a need, uncertainty, or hope without pretending every question has an easy answer.
+- **Act:** turn conviction into a concrete act of care.
+- **Reflect:** consider what went well, what caused harm, and what should be repaired.
+- **Celebrate:** offer praise freely, without demanding a particular response from anyone else.
+
+### Stewardship boundaries
+
+- Prayer, faith, and praise are personal or communal expressions—not software states, performance metrics, or signals of moral worth.
+- No module may infer belief, spiritual maturity, divine favor, or a person's relationship with God from behavior, biometrics, recordings, or metadata.
+- Software may offer optional reflections or reminders only with clear user control; it must not simulate divine instruction or claim to deliver divine power.
+- Adults remain accountable for age-appropriate safeguarding. A child's assent to a spiritual activity does not replace any required legal or safety protections.
+
+> Invite prayer; model faith; express praise; embody care. Let conviction strengthen responsibility, never become permission to control another.
