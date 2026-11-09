@@ -159,7 +159,7 @@ class LocalChannelRouter:
                 """UPDATE deliveries SET state='revoked'
                    WHERE recipient=? AND event_id IN
                    (SELECT event_id FROM events WHERE channel_id=?)
-                   AND state='pending'""",
+                   AND state IN ('pending','delivered')""",
                 (endpoint, channel_id),
             )
 
@@ -269,6 +269,14 @@ class LocalChannelRouter:
                 raise PermissionDenied("no delivery exists for this recipient")
             if delivery["state"] in ("revoked", "declined", "accepted"):
                 raise RouterError(f"delivery already resolved: {delivery['state']}")
+            member = db.execute(
+                """SELECT active FROM memberships
+                   WHERE channel_id=(SELECT channel_id FROM events WHERE event_id=?)
+                   AND endpoint=?""",
+                (event_id, recipient),
+            ).fetchone()
+            if member is None or not member["active"]:
+                raise PermissionDenied("recipient permission was revoked before decision")
             if not delivery["requires_acceptance"] and accept:
                 raise RouterError("this event does not request consequential-action consent")
             db.execute(
