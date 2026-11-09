@@ -171,7 +171,7 @@ public final class MainActivity extends Activity {
         tokenField=field(body,"Fine-grained GitHub token","",InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         vaultPass=field(body,"Vault passphrase (8+ characters)","",InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         gitStatus=new TextView(this);
-        gitStatus.setText("Local repository: "+git.localPath()+"\nRemote HTTPS transport is disabled on API 11-15.");
+        gitStatus.setText("Local repository: "+git.localPath()+"\nRemote HTTPS transport requires Android API 21 or newer.");
         body.addView(gitStatus);
         button(body,"Save encrypted token",new View.OnClickListener(){
             public void onClick(View v){
@@ -196,7 +196,7 @@ public final class MainActivity extends Activity {
                 runWork(gitStatus,new Work(){public String run() throws Exception{return git.initializeLocal(config);}});
             }
         });
-        button(body,"Clone / prepare feature branch (API 16+ HTTPS)",new View.OnClickListener(){
+        button(body,"Clone / prepare feature branch (API 21+ HTTPS)",new View.OnClickListener(){
             public void onClick(View v){
                 readConfig();
                 runWork(gitStatus,new Work(){public String run() throws Exception{return git.cloneOrPrepare(config);}});
