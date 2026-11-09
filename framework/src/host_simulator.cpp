@@ -43,14 +43,12 @@ ExecutionResult HostSimulator::run(const std::string& id,
         state_=checkpoint_;
         trace_.append(EventKind::StateRestored,id,result.status,recovery,
                       "last explicit checkpoint restored");
-    } else if (recovery==RecoveryAction::EnterSafeHold) {
+    } else {
         safe_hold_=true;
         trace_.append(EventKind::SafeHoldEntered,id,result.status,recovery,
-                      "execution blocked until host clears safe hold");
-    } else if (recovery==RecoveryAction::RestoreCheckpoint && !checkpoint_valid_) {
-        safe_hold_=true;
-        trace_.append(EventKind::SafeHoldEntered,id,result.status,recovery,
-                      "checkpoint unavailable; fail closed");
+                      recovery==RecoveryAction::RestoreCheckpoint
+                      ? "checkpoint unavailable; fail closed"
+                      : "no approved recovery path; fail closed");
     }
     return result;
 }
