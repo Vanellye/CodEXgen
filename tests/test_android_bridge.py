@@ -45,6 +45,12 @@ class AndroidBridgeEndToEndTests(unittest.TestCase):
         except urllib.error.HTTPError as error:
             return error.code, json.loads(error.read().decode("utf-8"))
 
+    def test_bridge_rejects_weak_tokens_and_remote_cleartext(self):
+        with self.assertRaises(ValueError):
+            make_server(self.store, "short", host="127.0.0.1", port=0)
+        with self.assertRaises(ValueError):
+            make_server(self.store, self.token, host="0.0.0.0", port=0)
+
     def test_authenticated_bridge_artifact_persistence_and_snapshot_recovery(self):
         transfer = {
             "schema": "codexgen.android.jobs.v1",

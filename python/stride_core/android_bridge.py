@@ -1,6 +1,6 @@
 """Authenticated HTTP bridge between the Android JOB dashboard and Stride integrations.
 
-Run with: STRIDE_BRIDGE_TOKEN='...' python -m stride_core.android_bridge --db stride_jobs.sqlite3
+Run with: STRIDE_BRIDGE_TOKEN='...' PYTHONPATH=python python -m stride_core.android_bridge --db stride_jobs.sqlite3
 The default listener is loopback-only. Non-loopback binds require TLS certificate/key.
 """
 from __future__ import annotations

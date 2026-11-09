@@ -37,3 +37,10 @@ The Seed Pits preserve failures, defects, near misses, rejected assumptions, rec
 - Repeated defects may justify stronger technical controls, not humiliation or permanent exclusion.
 - A lesson is portable; ownership of the lesson is not transferred by sharing it.
 - The Main indexes these records but does not own them.
+
+## Verification amendment — source remediation committed
+
+- **Commit:** [`791dddf`](https://github.com/Vanellye/CodEXgen/commit/791dddf6ee88a0d6d74f5b3ff5fc6356db151b79) corrected the Android Faculty JSON literal and the API 21 importer constructor, aligned Gradle and CI on SDK CMake 3.22.1, and added a real HTTP bridge persistence/recovery test.
+- **Follow-up:** [`8443fbb`](https://github.com/Vanellye/CodEXgen/commit/8443fbba754ef14c2bce2d1697fc3ef31f1fe821) corrected test resource handling after confirming the Python JOB store opens short-lived SQLite connections rather than exposing a close method.
+- **Current state:** source remediation is committed; no successful post-remediation CI result or APK artifact has yet been recorded. The CMake 3.22.1 / NDK r16b combination remains an explicit compatibility question until the APK build runs.
+- **Next evidence to append:** CI run URL and conclusion; Python end-to-end test result; Android Java compile result; APK path, package/application ID, version, and SHA-256 digest; whether the APK installs and launches on the declared API range.
