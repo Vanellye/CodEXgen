@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 import unittest
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "python"))
@@ -11,10 +12,14 @@ from stride_core.job_history import JobHistoryAccessError, recall_job_history
 
 class JobHistoryTests(unittest.TestCase):
     def setUp(self):
-        self.store = JobStore(":memory:")
+        self.tempdir = tempfile.TemporaryDirectory()
+        self.store = JobStore(str(Path(self.tempdir.name) / "jobs.sqlite3"))
         self.job = self.store.create_job(
             "Historical reader", "Test opt-in history", "unit-test", job_id="job-history"
         )
+
+    def tearDown(self):
+        self.tempdir.cleanup()
 
     def test_access_requires_explicit_authorization_before_store_reads(self):
         class NoReadStore:
