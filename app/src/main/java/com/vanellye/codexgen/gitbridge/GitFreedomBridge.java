@@ -191,6 +191,34 @@ public final class GitFreedomBridge {
             return "Local commit created: " + cmd.call().getName();
         } finally { git.close(); }
     }
+    public String writeLocalFile(String relativePath, String contents) throws Exception {
+        if (relativePath == null || relativePath.trim().length() == 0)
+            throw new IllegalArgumentException("Repository-relative file path is required.");
+        String path = relativePath.trim();
+        if (path.startsWith("/") || path.indexOf('\\\\') >= 0)
+            throw new IllegalArgumentException("Absolute paths and backslashes are not allowed.");
+        String[] parts = path.split("/");
+        for (int i = 0; i < parts.length; i++) {
+            if (parts[i].length() == 0 || ".".equals(parts[i]) || "..".equals(parts[i]) || ".git".equals(parts[i]))
+                throw new IllegalArgumentException("Unsafe repository path rejected.");
+        }
+        if (!new File(repoDir, ".git").isDirectory())
+            throw new IllegalStateException("Initialize or clone the local repository first.");
+        File root = repoDir.getCanonicalFile();
+        File target = new File(root, path).getCanonicalFile();
+        String rootPath = root.getPath() + File.separator;
+        if (!target.getPath().startsWith(rootPath))
+            throw new IllegalArgumentException("File path escapes the repository.");
+        File parent = target.getParentFile();
+        if (parent != null) parent.mkdirs();
+        java.io.FileOutputStream output = new java.io.FileOutputStream(target);
+        try {
+            output.write((contents == null ? "" : contents).getBytes("UTF-8"));
+            output.flush();
+        } finally { output.close(); }
+        return "Saved " + path + " inside the local repository.";
+    }
+
     public String pushNormal(Config c) throws Exception {
         validate(c); requireRemoteTls();
         Git git = open();
