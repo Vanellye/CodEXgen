@@ -8,6 +8,7 @@ This is the reading map for the project's technical notes, principles, and explo
 |---|---|
 | [Universal Workflow — JOBs](UNIVERSAL-WORKFLOW-JOBS.md) | Shared lifecycle for self-directed Journeys of Becoming, resilient branching, recovery, evidence, and consent |
 | [Essence Alignment](ESSENCE-ALIGNMENT.md) | Repository-wide dignity and consequence invariant; purpose, wisdom, evidence, balance, responsible propagation, and human stewardship |
+| [Resonance Stewardship](RESONANCE-STEWARDSHIP.md) | Faith-inspired purpose, responsible information propagation, Data Resonance boundaries, and evidence distinctions |
 | [Rise & Fall Directives](RISE-FALL-DIRECTIVES.md) | Principle- and evidence-based ơ / ọ / WARDEN policy prototype, decision boundaries, and zero-preservation rules |
 | [Pantheon Workflow Boundary](../pantheon/WORKFLOW-BOUNDARY.md) | Separate upstream governance and evidence preparation from downstream authorized execution |
 | [Stride Consent & Human Review](STRIDE-CONSENT-REVIEW.md) | Seven-layer assent checks, pause/decline paths, human-review declaration, local audit records, and implementation gaps |
