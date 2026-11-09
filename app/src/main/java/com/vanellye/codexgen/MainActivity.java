@@ -22,14 +22,14 @@ import java.util.List;
 import java.util.Map;
 import com.vanellye.codexgen.gitbridge.GitFreedomBridge;
 import com.vanellye.codexgen.dataresonance.DataResonanceStore;
-import com.vanellye.codexgen.nativebridge.OlpirtNativeBridge;
+import com.vanellye.codexgen.nativebridge.OlpirtNativeBridge;\nimport com.vanellye.codexgen.consent.ConsentReviewStore;
 
 /** Native Android Views application. No Compose, Kotlin, AndroidX or Lifecycle dependency. */
 public final class MainActivity extends Activity {
     private LinearLayout root;
     private FrameLayout content;
     private GitFreedomBridge git;
-    private DataResonanceStore data;
+    private DataResonanceStore data;\n    private ConsentReviewStore consentReviews;
     private EditText repositoryUrl, baseBranch, featureBranch, authorName, authorEmail;
     private EditText tokenField, vaultPass, commitMessage, prTitle, prBody, localFilePath, localFileContents;
     private EditText channelField, valueField, unitField, biomarkerField, frequencyField, notesField, correlationA, correlationB;
@@ -44,7 +44,7 @@ public final class MainActivity extends Activity {
     public void onCreate(Bundle state) {
         super.onCreate(state);
         git = GitFreedomBridge.shared(this);
-        data = new DataResonanceStore(this);
+        data = new DataResonanceStore(this);\n        consentReviews = new ConsentReviewStore(this);
         config = new GitFreedomBridge.Config();
         buildShell();
         showCodeGen();
@@ -59,7 +59,7 @@ public final class MainActivity extends Activity {
         root.setPadding(dp(8), dp(8), dp(8), dp(8));
         LinearLayout nav = new LinearLayout(this);
         nav.setOrientation(LinearLayout.HORIZONTAL);
-        String[] labels = new String[]{"CodeGen","Git","Resonance","Olpirt"};
+        String[] labels = new String[]{"CodeGen","Git","Consent","Resonance","Olpirt"};
         for (int i=0;i<labels.length;i++) {
             final int index=i;
             Button b = new Button(this);
@@ -349,6 +349,105 @@ public final class MainActivity extends Activity {
         label(body,"Database is local to this app. Back up deliberately before uninstalling.");
     }
 
+
+    private void showConsent() {
+        LinearLayout body = page("Stride Consent & Human Review");
+        label(body, "A supportive pause—not a test of character, faith, intelligence, or worth. Do not continue if any essential point is unclear. A checked item records that it was explained and understood; it does not prove understanding.");
+        label(body, "Proposed purpose / action");
+        final EditText purpose = new EditText(this);
+        purpose.setHint("Describe what is proposed, why, and who may be affected");
+        purpose.setMinLines(3);
+        purpose.setGravity(Gravity.TOP);
+        purpose.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        body.addView(purpose, new LinearLayout.LayoutParams(-1, dp(96)));
+
+        final String[] layerText = new String[]{
+            "1. Safety and dignity — the person can pause or leave without penalty; immediate safety needs and support options were discussed.",
+            "2. Purpose and meaning — the proposal and its reason were explained in plain language; questions were welcomed.",
+            "3. Evidence and uncertainty — facts, interpretations, unknowns, sources, and alternatives were distinguished.",
+            "4. Consequences and boundaries — material benefits, risks, data use, affected people, and limits were explained.",
+            "5. Freedom from pressure — no threats, shame, retaliation, authority pressure, peer pressure, or artificial urgency is being used.",
+            "6. Choice and reversibility — the person can decline, ask for time or advice, and understands withdrawal and next steps.",
+            "7. Human accountability — a responsible human reviewer is identified and can answer questions and oversee the decision."
+        };
+        final CheckBox[] layers = new CheckBox[7];
+        for (int i = 0; i < layerText.length; i++) {
+            layers[i] = new CheckBox(this);
+            layers[i].setText(layerText[i]);
+            layers[i].setPadding(0, dp(5), 0, dp(5));
+            body.addView(layers[i], new LinearLayout.LayoutParams(-1, -2));
+        }
+
+        label(body, "Human reviewer (required before recording assent)");
+        final EditText reviewer = field(body, "Name or role of accountable human reviewer", "", InputType.TYPE_CLASS_TEXT);
+        final CheckBox reviewerConfirmed = new CheckBox(this);
+        reviewerConfirmed.setText("I am the designated human reviewer; I have reviewed the proposal, checked for pressure or unresolved concerns, and remain accountable for follow-up.");
+        body.addView(reviewerConfirmed, new LinearLayout.LayoutParams(-1, -2));
+
+        final CheckBox voluntaryChoice = new CheckBox(this);
+        voluntaryChoice.setText("I have had a genuine opportunity to ask questions and freely choose to proceed. I understand I can say no.");
+        body.addView(voluntaryChoice, new LinearLayout.LayoutParams(-1, -2));
+
+        final TextView state = new TextView(this);
+        state.setText("Status: PAUSED — no assent has been recorded.");
+        state.setPadding(0, dp(10), 0, dp(10));
+        body.addView(state);
+
+        button(body, "Record voluntary assent (all safeguards required)", new View.OnClickListener() {
+            public void onClick(View v) {
+                boolean[] flags = new boolean[7];
+                boolean complete = true;
+                for (int i = 0; i < 7; i++) {
+                    flags[i] = layers[i].isChecked();
+                    if (!flags[i]) complete = false;
+                }
+                if (!complete) {
+                    state.setText("PAUSED — explain and resolve every layer before asking for assent.");
+                    return;
+                }
+                if (purpose.getText().toString().trim().length() == 0) {
+                    state.setText("PAUSED — describe the purpose and proposed action first.");
+                    return;
+                }
+                if (reviewer.getText().toString().trim().length() == 0 || !reviewerConfirmed.isChecked()) {
+                    state.setText("PAUSED — an accountable human reviewer must review and confirm.");
+                    return;
+                }
+                if (!voluntaryChoice.isChecked()) {
+                    state.setText("NO ASSENT — the person's voluntary choice has not been given. They may pause or decline.");
+                    return;
+                }
+                long id = consentReviews.record("ASSENTED", flags, reviewer.getText().toString(), purpose.getText().toString());
+                state.setText("ASSENT RECORDED locally as review #" + id + ". This record is not a legal determination and does not authorize unrelated actions.");
+                voluntaryChoice.setChecked(false);
+            }
+        });
+        button(body, "Record decline — no penalty", new View.OnClickListener() {
+            public void onClick(View v) {
+                long id = consentReviews.record("DECLINED", layerFlags(layers), "", purpose.getText().toString());
+                voluntaryChoice.setChecked(false);
+                state.setText("DECLINED — review #" + id + " recorded locally. No assent was given.");
+            }
+        });
+        button(body, "Pause / request more explanation", new View.OnClickListener() {
+            public void onClick(View v) {
+                long id = consentReviews.record("PAUSED", layerFlags(layers), reviewer.getText().toString(), purpose.getText().toString());
+                voluntaryChoice.setChecked(false);
+                state.setText("PAUSED — review #" + id + " recorded. No assent was given; revisit only if the person chooses.");
+            }
+        });
+        button(body, "Show local review history", new View.OnClickListener() {
+            public void onClick(View v) { state.setText(consentReviews.recent(50)); }
+        });
+        label(body, "Safeguards: no readiness score; no inferred consent from silence, clicks, or continued use; no forced assent. Youth cases require age-appropriate explanation and applicable guardian/safeguarding processes, while respecting the young person's questions and dissent. This screen does not replace legal, clinical, or child-protection review.");
+    }
+
+    private boolean[] layerFlags(CheckBox[] checks) {
+        boolean[] flags = new boolean[7];
+        for (int i = 0; i < 7; i++) flags[i] = checks[i].isChecked();
+        return flags;
+    }
+
     private void showOlpirt() {
         LinearLayout body=page("Olpirt / Pons Native Bridge");
         final TextView report=new TextView(this);
@@ -373,7 +472,7 @@ public final class MainActivity extends Activity {
     }
 
     protected void onDestroy() {
-        if(data!=null) data.close();
+        if(data!=null) data.close();\n        if(consentReviews!=null) consentReviews.close();
         super.onDestroy();
     }
 }
