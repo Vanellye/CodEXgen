@@ -156,8 +156,11 @@ class GitFreedomBridge(context: Context) {
                 .include(remote.objectId)
                 .setFastForward(MergeCommand.FastForwardMode.FF_ONLY)
                 .call()
-            require(!result.conflicts.isNullOrEmpty().not()) {
-                "Pull did not complete as a fast-forward. Review divergence manually; no reset was performed."
+            require(
+                result.mergeStatus == org.eclipse.jgit.api.MergeResult.MergeStatus.FAST_FORWARD ||
+                    result.mergeStatus == org.eclipse.jgit.api.MergeResult.MergeStatus.ALREADY_UP_TO_DATE
+            ) {
+                "Pull did not complete as a fast-forward (${result.mergeStatus}). Review divergence manually; no reset was performed."
             }
             GitBridgeResult.Success(
                 GitBridgeStatus(
