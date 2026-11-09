@@ -11,6 +11,7 @@
 - **Data Resonance** — app-local SQLite observations with optional labels, units, timestamps, and frequency metadata.
 - **Olpirt + Pons** — a native dependency-contract audit through JNI.
 - **Stride / Python** — exploratory perception, creativity, adaptive-feedback, and signal-simulation modules.
+- **Geometry & Design** — a separate library for mathematical reasoning, shape studies, and constructive designs; it is kept distinct from measured graphs and observation records.
 
 ## Build
 
@@ -33,7 +34,7 @@ A commit is not proof of a successful build. Check the GitHub Actions result for
 
 ## Read the project literature
 
-Start with the [documentation index](docs/README.md). It links to the compatibility contract, system principles, and research/simulation notes. The index is maintained alongside the documents whenever project literature changes.
+Start with the [documentation index](docs/README.md) for technical notes and project literature. The [Geometry & Design library](geometry/README.md) separately organizes geometric intellect, shapes, and constructive designs.
 
 ## Important boundaries
 
@@ -42,6 +43,7 @@ Start with the [documentation index](docs/README.md). It links to the compatibil
 - The current Olpirt report audits declared dependency contracts; it must not be described as verified runtime provider wiring unless integration tests prove that.
 - Frequency values are digital metadata or simulation inputs, not established biological control methods. The project does not claim to modify DNA/RNA, consciousness, or physical matter.
 - Hypothetical and fictional models are not validated scientific mechanisms.
+- Geometric concepts and designs are not empirical observations; keep measured datasets, telemetry, and statistical plots in their relevant research or observation records.
 
 ## Project status
 
