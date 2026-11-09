@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>Geometric Laboratory · CodEXgen</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1220;--panel:#121d2e;--panel2:#18263a;--ink:#edf4ff;--muted:#9eb0c8;--line:#2b405b;--accent:#76d5c4;--accent2:#8fb8ff;--warn:#ffd28a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 20% 0%,#172b42 0,transparent 42%),var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+header{padding:28px max(20px,calc((100vw - 1180px)/2));border-bottom:1px solid var(--line)}
+.kicker{color:var(--accent);font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;font-weight:700}
+h1{font-size:clamp(1.8rem,4vw,2.8rem);line-height:1.08;margin:.4rem 0}.intro{max-width:780px;color:var(--muted);margin:.7rem 0 0}
+main{max-width:1180px;margin:auto;padding:22px 18px 50px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+button,.tab{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:10px 14px;border-radius:10px;font:inherit;cursor:pointer}
+button:hover,.tab:hover{border-color:var(--accent)}.tab[aria-selected=true]{background:#244154;border-color:var(--accent);color:#fff}
+.workspace{display:grid;grid-template-columns:minmax(260px,340px) minmax(0,1fr);gap:16px}
+.panel,.stage{background:linear-gradient(160deg,var(--panel),#0f1928);border:1px solid var(--line);border-radius:16px;padding:18px;min-width:0}
+h2{font-size:1.25rem;margin:0 0 5px}h3{font-size:1rem;margin:18px 0 8px}.sub{color:var(--muted);font-size:.9rem;margin:0 0 15px}
+.control{margin:17px 0}.control label{display:flex;justify-content:space-between;gap:10px;font-weight:600}.value{color:var(--accent);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent);margin:10px 0 2px}select{width:100%;background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit}
+.hint{font-size:.82rem;color:var(--muted)}.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:14px}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px}.stat b{display:block;font-size:1.15rem;color:var(--accent2);font-variant-numeric:tabular-nums}.stat span{font-size:.76rem;color:var(--muted)}
+.stage-head{display:flex;justify-content:space-between;align-items:start;gap:12px;margin-bottom:10px}.stage-head p{color:var(--muted);margin:3px 0 0;font-size:.88rem}
+.canvas{width:100%;min-height:320px;aspect-ratio:1.55;background:linear-gradient(135deg,#0b1421,#111f31);border:1px solid var(--line);border-radius:12px;display:block}
+.canvas text{font-family:system-ui,sans-serif}.equation{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#0b1421;border:1px solid var(--line);padding:11px;border-radius:9px;overflow-wrap:anywhere;margin-top:12px;color:#c5e8e3}
+.note{border-left:3px solid var(--warn);padding:8px 12px;color:var(--muted);font-size:.84rem;margin-top:14px}
+.hidden{display:none!important}.footer{color:var(--muted);font-size:.8rem;margin-top:22px}
+@media(max-width:780px){.workspace{grid-template-columns:1fr}.canvas{min-height:270px}.panel{order:1}.stage{order:0}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="kicker">CodEXgen · Geometry & Design</div><h1>Interactive Mathematical Laboratory</h1><p class="intro">Explore constant curvature, recursive fractals, n-dimensional coordinates, and projections. Adjust a model, inspect the construction, and compare numerical properties. Everything runs locally in this page; no account, network request, or external library is required.</p></header>
+<main>
+<nav class="tabs" aria-label="Laboratory workspaces">
+<button class="tab" data-tab="curvature" aria-selected="true">01 · Curvature</button>
+<button class="tab" data-tab="fractal" aria-selected="false">02 · Fractals</button>
+<button class="tab" data-tab="coordinates" aria-selected="false">03 · Coordinates</button>
+<button class="tab" data-tab="projection" aria-selected="false">04 · Projections</button>
+</nav>
+<section id="curvature" class="workspace">
+<div class="panel"><h2>Curvature explorer</h2><p class="sub">A constant-curvature 2D model in geodesic polar coordinates.</p>
+<div class="control"><label for="curv">Gaussian curvature <output class="value" id="curvOut">0.00</output></label><input id="curv" type="range" min="-1" max="1" step=".05" value="0"><div class="hint">Negative: hyperbolic · Zero: Euclidean · Positive: spherical</div></div>
+<div class="control"><label for="radius">Geodesic radius <output class="value" id="radiusOut">1.00</output></label><input id="radius" type="range" min=".2" max="2.4" step=".05" value="1"></div>
+<div class="stats"><div class="stat"><b id="circumference">6.28</b><span>Geodesic circle circumference</span></div><div class="stat"><b id="area">3.14</b><span>Geodesic disk area</span></div><div class="stat"><b id="ratio">1.000</b><span>Circumference / 2πr</span></div><div class="stat"><b id="curvType">Flat</b><span>Model class</span></div></div>
+<div class="equation" id="curvFormula">Sₖ(r) = r when k = 0; C = 2πSₖ(r)</div>
+<p class="hint">For k ≠ 0, Sₖ(r) = sin(√k r)/√k if k &gt; 0, and sinh(√−k r)/√−k if k &lt; 0. Disk area is 2π∫₀ʳ Sₖ(t)dt.</p>
+</div>
+<div class="stage"><div class="stage-head"><div><h2>Geodesic polar grid</h2><p>Radial distances are measured along geodesics; the display is a local model illustration.</p></div></div><svg id="curvSvg" class="canvas" viewBox="0 0 640 410" role="img" aria-label="Curved geodesic polar grid"></svg><div class="note">Positive-curvature models are restricted to radii below the antipodal distance. The drawing is a coordinate visualization, not a physical surface or an empirical measurement.</div></div>
+</section>
+<section id="fractal" class="workspace hidden">
+<div class="panel"><h2>Fractal explorer</h2><p class="sub">Build the Sierpiński triangle by recursive subdivision.</p>
+<div class="control"><label for="depth">Iteration depth <output class="value" id="depthOut">4</output></label><input id="depth" type="range" min="0" max="7" step="1" value="4"><div class="hint">Each step replaces one triangle with three smaller triangles.</div></div>
+<div class="stats"><div class="stat"><b id="triangles">81</b><span>Remaining triangles</span></div><div class="stat"><b id="scale">1/16</b><span>Side scale per piece</span></div><div class="stat"><b id="fracDim">1.5850</b><span>Similarity dimension</span></div><div class="stat"><b id="areaFrac">11.11%</b><span>Area remaining</span></div></div>
+<div class="equation">N(n) = 3ⁿ · side scale = 2⁻ⁿ · D = log(3) / log(2)</div>
+<p class="hint">The ideal limit has non-integer similarity dimension log(3)/log(2). This finite rendering is an approximation at the selected depth.</p>
+</div>
+<div class="stage"><div class="stage-head"><div><h2>Recursive construction</h2><p>Increase depth to reveal finer self-similar structure.</p></div><button id="resetFractal" type="button">Reset depth</button></div><svg id="fractalSvg" class="canvas" viewBox="0 0 640 410" role="img" aria-label="Sierpiński triangle fractal"></svg><div class="note">The triangle is generated from exact midpoint subdivision. At depth n, 3ⁿ filled triangles remain and their total area is (3/4)ⁿ of the initial area.</div></div>
+</section>
+<section id="coordinates" class="workspace hidden">
+<div class="panel"><h2>Coordinate explorer</h2><p class="sub">Inspect the vertices and basic combinatorics of an n-dimensional hypercube.</p>
+<div class="control"><label for="dimension">Coordinate dimensions n <output class="value" id="dimensionOut">4</output></label><input id="dimension" type="range" min="1" max="10" step="1" value="4"></div>
+<div class="stats"><div class="stat"><b id="vertexCount">16</b><span>Vertices · 2ⁿ</span></div><div class="stat"><b id="edgeCount">32</b><span>Edges · n·2ⁿ⁻¹</span></div><div class="stat"><b id="faceCount">24</b><span>Square faces · C(n,2)·2ⁿ⁻²</span></div><div class="stat"><b id="basisCount">4</b><span>Basis vectors</span></div></div>
+<h3>Coordinate convention</h3><div class="equation" id="coordEquation">x = (x₁, x₂, x₃, x₄), xᵢ ∈ {−1, +1}</div>
+<p class="hint">Vertices are all sign combinations. An edge connects two vertices that differ in exactly one coordinate.</p></div>
+<div class="stage"><div class="stage-head"><div><h2>Coordinate-space projection</h2><p>First two coordinates shown with remaining coordinates encoded by depth and offset.</p></div></div><svg id="coordSvg" class="canvas" viewBox="0 0 640 410" role="img" aria-label="Hypercube coordinate visualization"></svg><div class="note">The 2D view is only a projection of the n-dimensional coordinate object. It cannot preserve all distances and angles once n exceeds two.</div></div>
+</section>
+<section id="projection" class="workspace hidden">
+<div class="panel"><h2>Projection explorer</h2><p class="sub">Rotate a hypercube in higher-dimensional coordinate planes, then project it into two dimensions.</p>
+<div class="control"><label for="projDim">Object dimension <output class="value" id="projDimOut">4</output></label><input id="projDim" type="range" min="2" max="8" step="1" value="4"></div>
+<div class="control"><label for="angle">Rotation angle <output class="value" id="angleOut">35°</output></label><input id="angle" type="range" min="0" max="180" step="1" value="35"></div>
+<div class="control"><label for="plane">Rotation plane</label><select id="plane"><option value="01">x₁–x₂</option><option value="02">x₁–x₃</option><option value="12">x₂–x₃</option><option value="03">x₁–x₄</option><option value="13">x₂–x₄</option></select></div>
+<div class="stats"><div class="stat"><b id="projVertices">16</b><span>Projected vertices</span></div><div class="stat"><b id="projEdges">32</b><span>Projected edges</span></div><div class="stat"><b id="projDimLabel">4D → 2D</b><span>Projection mapping</span></div><div class="stat"><b id="projInfo">Orthographic</b><span>Projection type</span></div></div>
+<div class="equation">v ∈ {−1,+1}ⁿ → R(v) → (u₁·v, u₂·v)</div>
+<p class="hint">The rotation is applied in the selected coordinate plane. A deterministic orthonormal 2D view basis combines all coordinates before orthographic projection.</p></div>
+<div class="stage"><div class="stage-head"><div><h2>Rotated hypercube</h2><p>Edges connect sign vectors differing in one coordinate.</p></div><button id="resetProjection" type="button">Reset view</button></div><svg id="projectionSvg" class="canvas" viewBox="0 0 640 410" role="img" aria-label="Rotated higher-dimensional hypercube projection"></svg><div class="note">Projection can cause distinct vertices or edges to overlap. Apparent crossings are properties of the 2D drawing, not intersections necessarily present in the original object.</div></div>
+</section>
+<p class="footer">Local computation only · No network calls · Values are mathematical model outputs, not biological or physical measurements. See the Geometry & Design documentation for definitions, assumptions, and proofs.</p>
+</main>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const NS="http://www.w3.org/2000/svg";
+function node(tag,attrs,parent){const el=document.createElementNS(NS,tag);Object.keys(attrs||{}).forEach(k=>el.setAttribute(k,attrs[k]));if(parent)parent.appendChild(el);return el}
+function clear(svg){while(svg.firstChild)svg.removeChild(svg.firstChild)}
+function label(svg,x,y,t,size,fill){const e=node("text",{x:x,y:y,"text-anchor":"middle","font-size":size||12,fill:fill||"#9eb0c8"},svg);e.textContent=t;return e}
+function set(id,v){$(id).textContent=v}
+function sK(k,r){if(Math.abs(k)<1e-9)return r;const a=Math.sqrt(Math.abs(k));return k>0?Math.sin(a*r)/a:Math.sinh(a*r)/a}
+function areaK(k,r){if(Math.abs(k)<1e-9)return Math.PI*r*r;const a=Math.sqrt(Math.abs(k));return k>0?2*Math.PI*(1-Math.cos(a*r))/k:2*Math.PI*(Math.cosh(a*r)-1)/(-k)}
+function drawCurvature(){
+ let k=+$("curv").value,r=+$("radius").value;if(k>0)r=Math.min(r,Math.PI/Math.sqrt(k)*.88);
+ set("curvOut",k.toFixed(2));set("radiusOut",r.toFixed(2));$("radius").value=r;
+ const s=sK(k,r),c=2*Math.PI*s,a=areaK(k,r),ratio=s/r;
+ set("circumference",c.toFixed(3));set("area",a.toFixed(3));set("ratio",ratio.toFixed(3));set("curvType",k>.001?"Spherical":k<-.001?"Hyperbolic":"Flat");
+ $("curvFormula").textContent="Sₖ(r) = "+s.toFixed(4)+"; C = 2πSₖ(r) = "+c.toFixed(4);
+ const svg=$("curvSvg");clear(svg);const cx=320,cy=205,scale=75;
+ for(let j=1;j<=5;j++){let rr=r*j/5,rad=Math.abs(sK(k,rr))*scale;node("circle",{cx,cy,r:Math.max(1,rad),fill:"none",stroke:j===5?"#76d5c4":"#30465f","stroke-width":j===5?2:1,"stroke-dasharray":j===5?"":"3 5"},svg)}
+ for(let i=0;i<24;i++){let t=i*Math.PI/12,pts=[];for(let j=0;j<=50;j++){let rr=r*j/50,rad=sK(k,rr)*scale;pts.push((cx+rad*Math.cos(t))+","+(cy+rad*Math.sin(t)))}node("polyline",{points:pts.join(" "),fill:"none",stroke:"#45617e","stroke-width":1},svg)}
+ node("circle",{cx,cy,r:4,fill:"#ffd28a"},svg);label(svg,cx,24,"Geodesic radius r = "+r.toFixed(2),14,"#edf4ff");label(svg,cx,390,"k = "+k.toFixed(2)+" · local geodesic-polar model",12);
+}
+function triangle(svg,a,b,c){node("polygon",{points:a[0]+","+a[1]+" "+b[0]+","+b[1]+" "+c[0]+","+c[1],fill:"#76d5c4","fill-opacity":.82,stroke:"#c5fff1","stroke-width":.65},svg)}
+function sier(svg,a,b,c,d){if(d===0){triangle(svg,a,b,c);return}const ab=[(a[0]+b[0])/2,(a[1]+b[1])/2],bc=[(b[0]+c[0])/2,(b[1]+c[1])/2],ca=[(c[0]+a[0])/2,(c[1]+a[1])/2];sier(svg,a,ab,ca,d-1);sier(svg,ab,b,bc,d-1);sier(svg,ca,bc,c,d-1)}
+function drawFractal(){const d=+$("depth").value;set("depthOut",d);set("triangles",Math.pow(3,d).toLocaleString());set("scale","1/"+Math.pow(2,d));set("fracDim",(Math.log(3)/Math.log(2)).toFixed(4));set("areaFrac",(100*Math.pow(3/4,d)).toFixed(2)+"%");
+ const svg=$("fractalSvg");clear(svg);const a=[320,24],b=[48,374],c=[592,374];sier(svg,a,b,c,d);label(svg,320,398,"Sierpiński construction · depth "+d,12)}
+function choose(n,k){if(k<0||k>n)return 0;let v=1;for(let i=1;i<=k;i++)v=v*(n-i+1)/i;return Math.round(v)}
+function vertices(n){const a=[];for(let m=0;m<(1<<n);m++){const v=[];for(let i=0;i<n;i++)v.push((m>>i&1)?1:-1);a.push(v)}return a}
+function projectBase(v){let x=v[0]||0,y=v[1]||0;for(let i=2;i<v.length;i++){const t=i*2.3999632297;x+=v[i]*.34*Math.cos(t);y+=v[i]*.34*Math.sin(t)}return [x,y]}
+function drawCoordinates(){const n=+$("dimension").value;set("dimensionOut",n);set("vertexCount",Math.pow(2,n).toLocaleString());set("edgeCount",(n*Math.pow(2,n-1)).toLocaleString());set("faceCount",n>=2?(choose(n,2)*Math.pow(2,n-2)).toLocaleString():"0");set("basisCount",n);let names=[];for(let i=1;i<=n;i++)names.push("x"+i);$("coordEquation").textContent="x = ("+names.join(", ")+"), xᵢ ∈ {−1, +1}";
+ const svg=$("coordSvg");clear(svg);const vs=vertices(n),pts=vs.map(projectBase),cx=320,cy=202,sc=Math.min(115,225/Math.max(2,n));const xy=pts.map(p=>[cx+p[0]*sc,cy-p[1]*sc]);
+ for(let i=0;i<vs.length;i++)for(let j=i+1;j<vs.length;j++){let diff=0;for(let q=0;q<n;q++)if(vs[i][q]!==vs[j][q])diff++;if(diff===1)node("line",{x1:xy[i][0],y1:xy[i][1],x2:xy[j][0],y2:xy[j][1],stroke:"#54799a","stroke-width":1.2,"stroke-opacity":.72},svg)}
+ xy.forEach((p,i)=>node("circle",{cx:p[0],cy:p[1],r:3.2,fill:"#76d5c4"},svg));label(svg,320,24,n+"-cube · "+vs.length+" vertices",14,"#edf4ff");label(svg,320,390,"Coordinates use all "+n+" sign choices",12)}
+function drawProjection(){const n=+$("projDim").value,ang=+$("angle").value*Math.PI/180,plane=$("plane").value.split("").map(Number);set("projDimOut",n);set("angleOut",Math.round(ang*180/Math.PI)+"°");set("projVertices",Math.pow(2,n));set("projEdges",n*Math.pow(2,n-1));set("projDimLabel",n+"D → 2D");$("plane").querySelectorAll("option").forEach(o=>o.disabled=+o.value[0]>=n||+o.value[1]>=n);
+ const vs=vertices(n);const rotated=vs.map(v=>{const w=v.slice(),i=plane[0],j=plane[1],x=w[i],y=w[j];w[i]=x*Math.cos(ang)-y*Math.sin(ang);w[j]=x*Math.sin(ang)+y*Math.cos(ang);return w});
+ const basisA=[],basisB=[];for(let i=0;i<n;i++){basisA.push(Math.cos(i*1.61803398875));basisB.push(Math.sin(i*1.61803398875))}
+ const norm=Math.sqrt(basisA.reduce((s,x)=>s+x*x,0));for(let i=0;i<n;i++){basisA[i]/=norm;basisB[i]/=norm}
+ const raw=rotated.map(v=>[v.reduce((s,x,i)=>s+x*basisA[i],0),v.reduce((s,x,i)=>s+x*basisB[i],0)]);let max=1;raw.forEach(p=>max=Math.max(max,Math.abs(p[0]),Math.abs(p[1])));const sc=165/max,xy=raw.map(p=>[320+p[0]*sc,205-p[1]*sc]);const svg=$("projectionSvg");clear(svg);
+ for(let i=0;i<vs.length;i++)for(let j=i+1;j<vs.length;j++){let diff=0;for(let q=0;q<n;q++)if(vs[i][q]!==vs[j][q])diff++;if(diff===1)node("line",{x1:xy[i][0],y1:xy[i][1],x2:xy[j][0],y2:xy[j][1],stroke:"#8fb8ff","stroke-width":1.25,"stroke-opacity":.7},svg)}
+ xy.forEach(p=>node("circle",{cx:p[0],cy:p[1],r:3.3,fill:"#76d5c4",stroke:"#d7fff6","stroke-width":.5},svg));label(svg,320,24,n+"-dimensional hypercube · orthographic view",14,"#edf4ff");label(svg,320,390,"Rotation plane x"+(plane[0]+1)+"–x"+(plane[1]+1)+" · "+Math.round(ang*180/Math.PI)+"°",12)}
+document.querySelectorAll(".tab").forEach(btn=>btn.addEventListener("click",()=>{document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected",b===btn?"true":"false"));document.querySelectorAll("main>section").forEach(s=>s.classList.toggle("hidden",s.id!==btn.dataset.tab))}));
+["curv","radius"].forEach(id=>$(id).addEventListener("input",drawCurvature));$("depth").addEventListener("input",drawFractal);$("resetFractal").addEventListener("click",()=>{$("depth").value=0;drawFractal()});$("dimension").addEventListener("input",drawCoordinates);["projDim","angle","plane"].forEach(id=>$(id).addEventListener("input",drawProjection));$("resetProjection").addEventListener("click",()=>{$("projDim").value=4;$("angle").value=35;$("plane").value="01";drawProjection()});
+drawCurvature();drawFractal();drawCoordinates();drawProjection();
+})();
+</script>
+</body></html>
