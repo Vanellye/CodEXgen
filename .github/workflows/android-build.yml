@@ -47,8 +47,8 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Accept Android SDK licenses
+        run: yes | sdkmanager --licenses >/dev/null
       - name: Install API 29 platform
         run: sdkmanager "platforms;android-29" "build-tools;29.0.3"
       - name: Enable Gradle wrapper
@@ -74,8 +74,8 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Accept Android SDK licenses
+        run: yes | sdkmanager --licenses >/dev/null
       - name: Install Android and native toolchains
         run: |
           sdkmanager "platforms;android-35" "build-tools;35.0.0" "cmake;3.22.1" "ndk;26.3.11579264"
