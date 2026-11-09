@@ -2,6 +2,14 @@
 
 Store constructive and visual work built from geometric ideas: compositions, patterns, tessellations, grids, spatial layouts, diagrams, and reusable design systems.
 
+## Design and concept map
+
+![Geometry knowledge map](../visuals/geometry-knowledge-map.svg)
+
+![Dimension and projection map](../visuals/dimension-projection-map.svg)
+
+These maps show relationships between areas of study. They are navigation aids and conceptual illustrations, not empirical graphs or claims that higher spatial dimensions are directly observable.
+
 ## Suggested organization
 
 - **Patterns:** repetitions, tilings, tessellations, and ornamental systems.
