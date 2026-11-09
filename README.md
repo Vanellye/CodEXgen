@@ -1,65 +1,48 @@
 # CodEXgen
 
-CodEXgen is a multi-layer Android and Python platform with two Android compatibility profiles.
+**CodEXgen** is a local-first Android and Python project for code creation, Git workflows, dependency insight, and experimental data exploration.
 
-## Platform profiles
+> **Project principle:** protect private information, make connections understandable, and keep important actions under the user's control.
 
-| Profile | Module | Compile SDK | Target SDK | Minimum SDK |
-|---|---|---:|---:|---:|
-| Legacy baseline | `:legacy-android` | 29 | 29 | **11 (Android 3.0)** |
-| Modern app | `:app` | 35 | 29 | 24 |
+## What is included
 
-The API 11 profile uses native Android Views and app-private SQLite. It is kept separate
-from the modern Jetpack Compose application because Compose and current AndroidX libraries
-cannot run on Android 3.0. The modern app retains Compose, JGit, encrypted token storage,
-and the C++17 native bridge.
+- **CodeGen** — a native Android Views screen for local code scaffolding.
+- **Git Freedom Bridge** — local repository work, branch operations, selected-file commits, and guarded GitHub workflows.
+- **Data Resonance** — app-local SQLite observations with optional labels, units, timestamps, and frequency metadata.
+- **Olpirt + Pons** — a native dependency-contract audit through JNI.
+- **Stride / Python** — exploratory perception, creativity, adaptive-feedback, and signal-simulation modules.
 
-## Build locally
+## Build
 
-Requires JDK 17, Android SDK platforms 29 and 35, Android Build Tools, and (for the modern
-app) NDK 26.3.11579264 plus CMake 3.22.1.
+The active Android app is the **API 11 compatibility profile**. It uses Android Views, Java-compatible source, C++11 JNI, and the legacy Gradle toolchain.
 
-Build the API 11 baseline APK:
+Install JDK 8, Android SDK platform 29, Build Tools 29.0.3, CMake 3.10.2, and NDK 16.1.4479499. The CI workflow uses JDK 17 temporarily for current Android SDK tools, then JDK 8 for Gradle.
 
-```bash
-./gradlew :legacy-android:assembleDebug
-```
-
-Build the modern app and native bridge:
-
-```bash
+~~~bash
 ./gradlew :app:assembleDebug
-```
+~~~
 
-Run modern app lint:
+Run the Python checks:
 
-```bash
-./gradlew :app:lintDebug
-```
-
-Run Python validation and tests:
-
-```bash
+~~~bash
 python -m compileall -q python tests generated_modules hypotheticals
-python -m unittest discover -s tests -v
-```
+PYTHONPATH=python python -m unittest discover -s tests -v
+~~~
 
-## Continuous integration
+A commit is not proof of a successful build. Check the GitHub Actions result for the branch before treating an APK as verified.
 
-The GitHub Actions workflow `.github/workflows/android-build.yml` runs three independent
-jobs on pushes, pull requests, and manual dispatch:
+## Read the project literature
 
-1. Python source compilation and unit tests.
-2. API 11 baseline APK build and artifact upload.
-3. Modern Android APK build, native C++ compilation, lint, and artifact upload.
+Start with the [documentation index](docs/README.md). It links to the compatibility contract, system principles, and research/simulation notes. The index is maintained alongside the documents whenever project literature changes.
 
-Artifacts are retained for 14 days. A failed modern build does not prevent the independent
-API 11 baseline APK from being uploaded, and vice versa.
+## Important boundaries
 
-## Architecture
+- Git publishing and other remote actions must remain user-authorized.
+- Keep credentials and private configuration out of source control.
+- The current Olpirt report audits declared dependency contracts; it must not be described as verified runtime provider wiring unless integration tests prove that.
+- Frequency values are digital metadata or simulation inputs, not established biological control methods. The project does not claim to modify DNA/RNA, consciousness, or physical matter.
+- Hypothetical and fictional models are not validated scientific mechanisms.
 
-- `legacy-android/` — API 11-compatible native Views application and local SQLite store.
-- `app/` — modern Compose UI, Git Freedom Bridge, Data Resonance, and C++17 Olpirt bridge.
-- `python/` — adaptive governance, code generation, vector memory, and stride engines.
-- `tests/` — Python unit tests.
-- `hypotheticals/` — explicitly exploratory/fictional models, not validated biological mechanisms.
+## Project status
+
+The source tree and CI workflow are evolving. Consult the linked documentation and latest workflow run for the current implementation and verification status.
