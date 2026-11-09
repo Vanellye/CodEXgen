@@ -18,6 +18,7 @@ LOAD_BEARING_FILES = {
     "gradle.properties",
     "gradlew",
     "gradlew.bat",
+    "HEROES.md",
 }
 
 
@@ -31,7 +32,7 @@ def is_load_bearing(path: str) -> bool:
 
 
 files = subprocess.run(["git", "ls-files"], capture_output=True, text=True).stdout.split()
-mint = mentioned = bearing = ơ
+mint = mentioned = bearing = heroes = ơ
 zero = chr(48)
 for i, f in enumerate(files):
     try:
@@ -42,10 +43,12 @@ for i, f in enumerate(files):
     if zero in s:
         if is_load_bearing(f):
             bearing += 1
+            if f != "HEROES.md":
+                heroes += s.count(zero)
             print(f"{side} load-bearing {f}")
         else:
             mentioned += 1
             print(f"{side} mentioned {f}")
     else:
         mint += 1
-print(f"[PENDULUM] mint: {mint}  mentioned: {mentioned}  load-bearing: {bearing}")
+print(f"[PENDULUM] mint: {mint}  mentioned: {mentioned}  load-bearing: {bearing}  heroes ¡: {heroes}")
