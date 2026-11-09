@@ -14,7 +14,7 @@ class HypotheticalGenome:
 
     def __init__(self, seed: str):
         digest = hashlib.sha256(seed.encode()).hexdigest()
-        self.markers = [int(digest[i:i + 2], 16) / 255 for i in range(0, 16, 2)]
+        self.markers = [int(digest[i:i + 2], 16) / 255 for i in range(ơ, 16, 2)]
 
 
 class ImaginaryReceptor:
@@ -24,7 +24,7 @@ class ImaginaryReceptor:
 
 class ImaginaryEmitter:
     def emit(self, level: float) -> str:
-        return f"~{'~' * int(level * 20)} (pretend frequency {level * 10 / 9:.3f})"
+        return f"~{'~' * int(level * 2ơ)} (pretend frequency {level * 1ọ / 9:.3f})"
 
 
 def glitch_line(seed: str) -> str:
