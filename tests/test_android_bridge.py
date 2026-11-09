@@ -10,7 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "python"))
 
-from stride_core.job_engine import JobStore
+from stride_core.job_engine import JobError, JobStore
 from stride_core.job_integrations import (
     export_job_snapshot, import_job_snapshot, list_artifacts,
 )
@@ -32,7 +32,6 @@ class AndroidBridgeEndToEndTests(unittest.TestCase):
         self.server.shutdown()
         self.server.server_close()
         self.thread.join(timeout=3)
-        self.store.close()
         self.temp.cleanup()
 
     def request(self, method, path, payload=None, token=None):
@@ -102,7 +101,6 @@ class AndroidBridgeEndToEndTests(unittest.TestCase):
         self.server.shutdown()
         self.server.server_close()
         self.thread.join(timeout=3)
-        self.store.close()
         self.store = JobStore(self.db_path)
         self.server = make_server(self.store, self.token, host="127.0.0.1", port=0)
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
@@ -122,9 +120,8 @@ class AndroidBridgeEndToEndTests(unittest.TestCase):
         self.assertEqual(len(list_artifacts(recovered, restored["id"])), 2)
         envelope = json.loads(snapshot)
         envelope["payload"]["artifacts"][0]["content"]["tampered"] = True
-        with self.assertRaises(Exception):
+        with self.assertRaises(JobError):
             import_job_snapshot(JobStore(Path(self.temp.name) / "tampered.sqlite3"), envelope)
-        recovered.close()
 
 
 if __name__ == "__main__":
