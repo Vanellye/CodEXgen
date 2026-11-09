@@ -13,22 +13,38 @@
 - **Stride / Python** — exploratory perception, creativity, adaptive-feedback, and signal-simulation modules.
 - **Geometry & Design** — a separate library for mathematical reasoning, shape studies, and constructive designs; it is kept distinct from measured graphs and observation records.
 
+## Shared Pantheon Node.js runtime
+
+All Pantheon Node.js target processes share the exact **Node.js 11.15.0** runtime contract. The version is pinned in `.nvmrc`, `.node-version`, and `pantheon/node-runtime.json`; the root npm test checks the active process before a node is allowed to proceed. CI runs that check under the same pinned runtime.
+
+Node.js 11 is end-of-life and receives no security fixes. This pin is retained as an explicit compatibility requirement, not a security recommendation. Keep network-facing nodes isolated, minimize dependencies, and do not expose untrusted workloads to this runtime. The native Pantheon C++11 runtime and Android API 11 profile are separate version constraints.
+
+Use Node Version Manager to select the shared runtime:
+
+```bash
+nvm install
+nvm use
+npm test
+```
+
+See [Pantheon Node Runtime](pantheon/NODE_RUNTIME.md) for the node contract and upgrade boundary.
+
 ## Build
 
 The active Android app is the **API 11 compatibility profile**. It uses Android Views, Java-compatible source, C++11 JNI, and the legacy Gradle toolchain.
 
 Install JDK 8, Android SDK platform 29, Build Tools 29.0.3, CMake 3.10.2, and NDK 16.1.4479499. The CI workflow uses JDK 17 temporarily for current Android SDK tools, then JDK 8 for Gradle.
 
-~~~bash
+```bash
 ./gradlew :app:assembleDebug
-~~~
+```
 
 Run the Python checks:
 
-~~~bash
+```bash
 python -m compileall -q python tests generated_modules hypotheticals
 PYTHONPATH=python python -m unittest discover -s tests -v
-~~~
+```
 
 A commit is not proof of a successful build. Check the GitHub Actions result for the branch before treating an APK as verified.
 

@@ -17,6 +17,18 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  node11-runtime-contract:
+    name: Pantheon shared Node.js 11 runtime contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up pinned Node.js runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: '11.15.0'
+      - name: Verify every Pantheon Node.js process uses the shared runtime
+        run: npm test
+
   python-validation:
     name: Python compatibility engines and tests
     runs-on: ubuntu-latest
