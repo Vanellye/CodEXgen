@@ -20,14 +20,12 @@ public:
         return ExecutionResult(Status::ModuleFailure);
     }
 };
-int main() {
-    Registry registry; Echo echo; Failure failure;
+static void register_fixtures(Registry& registry, Echo& echo, Failure& failure) {
     assert(registry.add(&echo)==Status::Ok);
     assert(registry.add(&failure)==Status::Ok);
-    HostSimulator sim(registry);
+}
+static void run_fixture(HostSimulator& sim, ExecutionRequest& request) {
     sim.set_state("mode","baseline"); sim.checkpoint();
-    ExecutionRequest request; request.input="fixture-input";
-    request.granted_capabilities.insert(Capability::ReadLocalState);
     ExecutionResult ok=sim.run("fixture.echo",request,RecoveryAction::None);
     assert(ok.status==Status::Ok && ok.output=="fixture-input");
     sim.set_state("mode","mutated");
@@ -36,21 +34,38 @@ int main() {
     std::string mode;
     assert(sim.get_state("mode",&mode) && mode=="baseline");
     assert(!sim.safe_hold());
-    const std::vector<TraceEvent>& events=sim.trace().events();
-    assert(events.size()==5);
-    for (std::size_t i=0;i<events.size();++i)
-        assert(events[i].sequence==i+1);
-    assert(events[0].kind==EventKind::RunStarted);
-    assert(events[1].kind==EventKind::ModuleCompleted);
-    assert(events[2].kind==EventKind::RunStarted);
-    assert(events[3].kind==EventKind::RecoveryRequested);
-    assert(events[4].kind==EventKind::StateRestored);
+}
+int main() {
+    Echo echo; Failure failure; Registry registry;
+    register_fixtures(registry,echo,failure);
+    ExecutionRequest request; request.input="fixture-input";
+    request.granted_capabilities.insert(Capability::ReadLocalState);
+    HostSimulator first(registry), replay(registry);
+    run_fixture(first,request); run_fixture(replay,request);
+    const std::vector<TraceEvent>& a=first.trace().events();
+    const std::vector<TraceEvent>& b=replay.trace().events();
+    assert(a.size()==5 && b.size()==a.size());
+    for (std::size_t i=0;i<a.size();++i) {
+        assert(a[i].sequence==i+1 && b[i].sequence==a[i].sequence);
+        assert(a[i].kind==b[i].kind && a[i].module_id==b[i].module_id);
+        assert(a[i].status==b[i].status && a[i].recovery==b[i].recovery);
+    }
+    assert(a[0].kind==EventKind::RunStarted);
+    assert(a[1].kind==EventKind::ModuleCompleted);
+    assert(a[2].kind==EventKind::RunStarted);
+    assert(a[3].kind==EventKind::RecoveryRequested);
+    assert(a[4].kind==EventKind::StateRestored);
     HostSimulator no_checkpoint(registry);
     no_checkpoint.run("fixture.failure",request,RecoveryAction::RestoreCheckpoint);
     assert(no_checkpoint.safe_hold());
-    ExecutionResult blocked=no_checkpoint.run("fixture.echo",request,RecoveryAction::None);
-    assert(blocked.status==Status::ModuleFailure);
+    assert(no_checkpoint.run("fixture.echo",request,RecoveryAction::None).status==Status::ModuleFailure);
     no_checkpoint.clear_safe_hold();
-    assert(!no_checkpoint.safe_hold());
+    HostSimulator no_policy(registry);
+    no_policy.run("fixture.failure",request,RecoveryAction::None);
+    assert(no_policy.safe_hold());
+    ExecutionRequest denied;
+    HostSimulator permission_test(registry);
+    permission_test.run("fixture.echo",denied,RecoveryAction::None);
+    assert(permission_test.safe_hold());
     return 0;
 }
