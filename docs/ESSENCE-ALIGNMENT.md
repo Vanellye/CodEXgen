@@ -10,6 +10,12 @@
 
 Stride should keep human purpose, evidence-based reasoning, and ethical responsibility aligned. Spiritual faith may inspire a person's purpose and values; empirical claims must still be evaluated using appropriate evidence and openly stated uncertainty.
 
+## Non-negotiable operating rule
+
+**Preserve human purpose, test claims against evidence, make uncertainty visible, and keep every automated action accountable to people.**
+
+This is the concise acceptance rule for every Stride workflow. If a feature cannot preserve the user's stated purpose, show the evidential basis and uncertainty of its claims, and identify the person or permission authorizing its consequential actions, it must not silently proceed.
+
 ## The six commitments
 
 1. **Essence — preserve purpose.** Keep the declared purpose, user intent, and essential project invariants visible. Do not silently rewrite a user's goals or discard foundational work.
