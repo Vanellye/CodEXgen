@@ -85,6 +85,6 @@ Corrections update derived interpretations and indexes; they do not rewrite sour
 
 This specification is governed by the [Legacy Preservation & Independent Peering Protocol](LEGACY-PEERING-PROTOCOL.md). Temporal navigation is a consumer of preserved records, not an authority over their origins. Any connection to another branch or component must document its interface, provenance, permissions, and tests before peering.
 
-## Governing statement
+## Cognitive-layer consumer\n\n[Holified Inception](HOLIFIED-INCEPTION.md) consumes this temporal model to trace origins, inspect recorded context, surface contradictions, and explore clearly labeled possibilities. It must preserve the event ledger, keep simulated and fictional time separate from observed time, and return derived interpretations with provenance. This relationship is a documented design contract, not a claim that the runtime integration is already implemented.\n\n## Governing statement
 
 **Turn the record backward to understand. Turn the view forward to learn. Correct the interpretation without erasing the origin. Keep known space factual and imagined space honestly imagined.**
