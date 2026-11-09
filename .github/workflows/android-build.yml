@@ -93,6 +93,10 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+      - name: Install legacy NDK host compatibility libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libncurses5
       - name: Set up JDK 17 for current Android SDK tools
         uses: actions/setup-java@v4
         with:
@@ -116,7 +120,7 @@ jobs:
 
   android-api11-views:
     name: Android API 11 Views and C++11 JNI
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 17 for current Android SDK tools

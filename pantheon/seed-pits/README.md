@@ -68,3 +68,12 @@ The Seed Pits preserve failures, defects, near misses, rejected assumptions, rec
 - **Observed Android compile defect:** `MainActivity` referenced `StrideEngineClient` from the `.jobs` package without importing it. The Java source job reported four unresolved-symbol errors at the four bridge calls.
 - **Remediation:** add the explicit import. Extend the Android workflow to inspect package ID, minimum SDK, packaged `armeabi-v7a` JNI library, APK signature, and SHA-256 before uploading the APK and checksum.
 - **Status:** pending next CI verification. This is a source correction and verification gate, not yet an APK success claim.
+
+## Verification amendment — legacy NDK host dependency
+
+- **Source run:** [CI #232](https://github.com/Vanellye/CodEXgen/actions/runs/42708912309), commit `eb5071499e85ece0ad51541b65958dc7b7f7e473`.
+- **Observed:** SDK CMake 3.10.2.4988404 and archived NDK r16b installed successfully. Native configuration then failed because the Ubuntu 26.04 runner image did not provide the legacy host library `libncurses.so.5` required by the NDK r16b Clang binary.
+- **Classification:** CI host-image compatibility issue, not a source-level C++ error.
+- **Remediation:** run the legacy Android native build on Ubuntu 22.04 and explicitly install `libncurses5` before invoking the archived NDK.
+- **Additional verification gate:** before upload, inspect the APK package ID and minSdk, confirm the `armeabi-v7a` JNI library is packaged, verify the APK signature, and publish a SHA-256 checksum beside the APK.
+- **Status:** pending next CI run; no APK artifact is yet verified.
