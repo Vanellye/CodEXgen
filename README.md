@@ -2,7 +2,9 @@
 
 **CodEXgen** is a local-first Android and Python project for code creation, Git workflows, dependency insight, and experimental data exploration.
 
-> **Project principle:** protect private information, make connections understandable, and keep important actions under the user's control.
+> **Guiding invariant:** We protect what is unconditional, and we take responsibility for what is consequential.
+>
+> Across every module, preserve human dignity, agency, privacy, and the right to decline; scale evidence, authorization, review, reversibility, and human accountability to the impact of each action. See [Essence Alignment](docs/ESSENCE-ALIGNMENT.md).
 
 ## What is included
 
