@@ -19,7 +19,7 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 /**
  * Local-first Git bridge for the API 11 profile.
  * Local init/status/commit remain available on API 11. HTTPS remote transport is gated
- * below API 16 because the stock legacy TLS provider cannot be assumed to negotiate
+ * below API 21 because older stock TLS providers cannot be assumed to negotiate
  * GitHub's modern TLS requirements.
  */
 public final class GitFreedomBridge {
