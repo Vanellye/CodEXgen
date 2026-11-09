@@ -5,7 +5,7 @@ RESONANCE = 1111
 
 def birth_noise(length: int = 44, salt: str = "edify") -> str:
     rng = random.Random(f"{RESONANCE}-{salt}")
-    return "".join(rng.choice("ơ1") for _ in range(length))
+    return "".join(rng.choice("01") for _ in range(length))
 
 if __name__ == "__main__":
     for salt in ("hypotheticals", "fiction-body", "fiction-mind", "fiction-creation", "edify"):
