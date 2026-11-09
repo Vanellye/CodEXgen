@@ -60,12 +60,20 @@ public final class GitFreedomBridge {
     }
     private Git open() throws Exception {
         if (!new File(repoDir, ".git").isDirectory()) throw new IllegalStateException("No local repository. Initialize or clone one first.");
-        return Git.open(repoDir);
+        Git git = Git.open(repoDir);
+        // Prevent JGit from materializing repository symlinks during checkout.
+        // This is a defense for the legacy JGit line on filesystems with case-folding behavior.
+        org.eclipse.jgit.lib.StoredConfig stored = git.getRepository().getConfig();
+        stored.setBoolean("core", null, "symlinks", false);
+        stored.save();
+        return git;
     }
     private void validate(Config c) {
         if (c == null || c.baseBranch == null || c.featureBranch == null ||
             c.baseBranch.length() == 0 || c.featureBranch.length() == 0 ||
             c.baseBranch.equals(c.featureBranch)) throw new IllegalArgumentException("Distinct base and feature branches are required.");
+        if (c.repositoryUrl == null || !c.repositoryUrl.startsWith("https://github.com/"))
+            throw new IllegalArgumentException("Only HTTPS GitHub repository URLs are supported.");
         if (c.authorName == null || c.authorName.trim().length() == 0 ||
             c.authorEmail == null || c.authorEmail.indexOf('@') < 1) throw new IllegalArgumentException("Commit author and email are required.");
     }
@@ -96,6 +104,7 @@ public final class GitFreedomBridge {
             if (parent != null) parent.mkdirs();
             Git.cloneRepository().setURI(c.repositoryUrl).setDirectory(repoDir)
                 .setBranch("refs/heads/" + c.baseBranch)
+                .setNoCheckout(true)
                 .setCredentialsProvider(credentials()).call().close();
         }
         Git git = open();
