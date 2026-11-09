@@ -76,6 +76,27 @@ jobs:
       - name: Run Pantheon smoke tests
         run: ctest --test-dir build/pantheon --output-on-failure
 
+  android-java-views:
+    name: Android Views Java source compatibility
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 8 for the legacy Android Gradle toolchain
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools'
+      - name: Install API 29 compile platform
+        run: sdkmanager "platforms;android-29" "build-tools;29.0.3"
+      - name: Enable Gradle wrapper
+        run: chmod +x ./gradlew
+      - name: Compile Android Views Java sources
+        run: ./gradlew --no-daemon --stacktrace :app:compileDebugJavaWithJavac
+
   android-api11-views:
     name: Android API 11 Views and C++11 JNI
     runs-on: ubuntu-latest
