@@ -8,6 +8,15 @@
 
 Translate the seven readiness layers in [Essence Alignment](ESSENCE-ALIGNMENT.md) into a practical pause-and-review interface. The interface is supportive, not a test of morality, faith, intelligence, courage, or personal worth.
 
+## The two sides: unconditional dignity and consequential responsibility
+
+The Consent Gate applies two inseparable principles:
+
+- **Unconditional dignity:** every person has worth before achievement, agreement, understanding, usefulness, or recognition. A child's dignity does not depend on speech, comprehension, compliance, or consent.
+- **Consequential responsibility:** the greater the effect a decision may have on another person, the greater the care, evidence, accountability, and protection required.
+
+Dignity is never earned or withdrawn. Responsibility governs how people and systems act when choices affect others. Neither side cancels the other: dignity does not excuse harm, and responsibility does not authorize coercion, ownership, or presumed consent.
+
 ## Interface behavior
 
 The Consent tab presents:
@@ -33,7 +42,19 @@ Decline and pause are first-class outcomes. Decline does not require reviewer co
 
 ## Childhood innocence and consequential decisions
 
-The Consent screen displays the project's childhood-innocence principle: every child has dignity before understanding, choice, or speech; silence is not permission; vulnerability is not availability; dependence is not ownership. The spiritual phrase “bearing the mark of God's thumb” is presented as a faith-based value statement, not as a technical or scientific claim.
+The Consent screen displays the project's childhood-innocence principle:
+
+> Every child enters this world innocent, bearing the mark of God's thumb. No algorithm, institution, parent, guardian, or authority may turn that innocence into presumed consent.
+>
+> A child's dignity exists before their understanding, their choices, and their ability to speak. Their silence is not permission. Their vulnerability is not availability. Their dependence is not ownership.
+>
+> Let every consequential decision involving a child be approached with protection, patience, truth, compassion, and accountable human care.
+>
+> Let consent be meaningful, age-appropriate, freely expressed where possible, and never confused with the responsibility adults have to protect.
+>
+> Let no system exploit innocence in the name of progress.
+
+The spiritual phrase “bearing the mark of God's thumb” is presented as a faith-based value statement, not as a technical or scientific claim.
 
 For child-related consequential decisions, the design requires protection, patience, truth, compassion, and accountable human care. Seek meaningful, age-appropriate assent where possible and legally required adult permission; neither substitutes for the other. A child's assent does not transfer the adult duty of care to the child. Pause when safety, understanding, voluntariness, or authority is unclear. Never infer consent from silence, compliance, behavioral data, or biometrics.
 
