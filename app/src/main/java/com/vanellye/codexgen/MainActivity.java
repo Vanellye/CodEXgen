@@ -22,14 +22,16 @@ import java.util.List;
 import java.util.Map;
 import com.vanellye.codexgen.gitbridge.GitFreedomBridge;
 import com.vanellye.codexgen.dataresonance.DataResonanceStore;
-import com.vanellye.codexgen.nativebridge.OlpirtNativeBridge;\nimport com.vanellye.codexgen.consent.ConsentReviewStore;
+import com.vanellye.codexgen.nativebridge.OlpirtNativeBridge;
+import com.vanellye.codexgen.consent.ConsentReviewStore;
 
 /** Native Android Views application. No Compose, Kotlin, AndroidX or Lifecycle dependency. */
 public final class MainActivity extends Activity {
     private LinearLayout root;
     private FrameLayout content;
     private GitFreedomBridge git;
-    private DataResonanceStore data;\n    private ConsentReviewStore consentReviews;
+    private DataResonanceStore data;
+    private ConsentReviewStore consentReviews;
     private EditText repositoryUrl, baseBranch, featureBranch, authorName, authorEmail;
     private EditText tokenField, vaultPass, commitMessage, prTitle, prBody, localFilePath, localFileContents;
     private EditText channelField, valueField, unitField, biomarkerField, frequencyField, notesField, correlationA, correlationB;
@@ -472,7 +474,8 @@ public final class MainActivity extends Activity {
     }
 
     protected void onDestroy() {
-        if(data!=null) data.close();\n        if(consentReviews!=null) consentReviews.close();
+        if(data!=null) data.close();
+        if(consentReviews!=null) consentReviews.close();
         super.onDestroy();
     }
 }
