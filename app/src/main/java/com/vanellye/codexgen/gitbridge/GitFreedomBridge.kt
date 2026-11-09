@@ -8,6 +8,10 @@ import org.eclipse.jgit.api.MergeCommand
 import org.eclipse.jgit.transport.RefSpec
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import java.io.File
+import java.net.HttpURLConnection
+import java.net.URL
+import org.json.JSONArray
+import org.json.JSONObject
 
 /**
  * Local-first Git workflow. All mutations target the configured feature branch.
@@ -312,7 +316,7 @@ class GitFreedomBridge(context: Context) {
                 if (existing != null) "Existing open pull request #$number found: $htmlUrl"
                 else "Draft pull request #$number created: $htmlUrl",
                 config.featureBranch,
-                changedFiles(Git.open(repoDir)).size,
+                Git.open(repoDir).use { changedFiles(it).size },
                 false
             )
         )
