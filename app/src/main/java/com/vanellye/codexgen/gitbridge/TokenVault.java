@@ -19,7 +19,7 @@ public final class TokenVault {
         prefs = context.getApplicationContext().getSharedPreferences("git_bridge_vault_v1", Context.MODE_PRIVATE);
     }
     private byte[] derive(char[] pass, byte[] salt) throws Exception {
-        PBEKeySpec spec = new PBEKeySpec(pass, salt, 20000, 256);
+        PBEKeySpec spec = new PBEKeySpec(pass, salt, 100000, 256);
         try {
             return SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1").generateSecret(spec).getEncoded();
         } finally { spec.clearPassword(); }
@@ -35,7 +35,7 @@ public final class TokenVault {
     }
     public void save(String token, char[] passphrase) throws Exception {
         if (token == null || token.length() == 0) throw new IllegalArgumentException("Token is required.");
-        if (passphrase == null || passphrase.length < 8) throw new IllegalArgumentException("Vault passphrase must be at least 8 characters.");
+        if (passphrase == null || passphrase.length < 12) throw new IllegalArgumentException("Vault passphrase must be at least 12 characters.");
         byte[] salt = new byte[16], iv = new byte[16];
         SecureRandom random = new SecureRandom();
         random.nextBytes(salt); random.nextBytes(iv);
