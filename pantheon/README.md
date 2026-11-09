@@ -11,6 +11,7 @@ Pantheon is the native execution core for CodEXgen/Stride. The first milestone e
 - **Gateway origin** — the Faculty Engine integration commit is carried as immutable provenance; the Gateway Router ranks authorized and safe execution paths by compatibility, readiness, and reliability.
 - **Compatibility period** — Python remains the reference implementation until native parity tests pass.
 - **38/38 control gate** — control modules are fail-closed until all 38 numbered standards pass with evidence references and an authenticated owner approval is supplied. The gate authorizes only in-process module invocation; it does not grant system-wide or physical-device control. See [Control Authorization Standard](CONTROL_AUTHORIZATION.md).
+- **Principle 43 — The Cleansing of Thought** — protects the distinction between thoughts, intentions, and actions; safeguards mental privacy; keeps reflection voluntary; and separates spiritual guidance from clinical claims. Compliance requires mapped controls, passing acceptance tests, and recorded human review. See [Principle 43](PRINCIPLE-43.md).
 - **JGit capability checkpoint** — Android components obtain the shared Git Freedom Bridge through `GitFreedomBridge.shared(context)`. Its JGit dependency is pinned to `3.7.1.201504261725-r`, anchored to origin checkpoint `f63e166e11aee325fe0ea8504672f19134d2768b`. This is app-process capability discovery, not unrestricted operating-system or cross-device control. See [JGit Compatibility Checkpoint](../docs/JGIT-COMPATIBILITY-CHECKPOINT.md).
 
 ## Port order
