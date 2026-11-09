@@ -172,7 +172,7 @@ public final class MainActivity extends Activity {
         authorName=field(body,"Commit author","CodEXgen Contributor",InputType.TYPE_CLASS_TEXT);
         authorEmail=field(body,"Commit email","",InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
         tokenField=field(body,"Fine-grained GitHub token","",InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        vaultPass=field(body,"Vault passphrase (8+ characters)","",InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        vaultPass=field(body,"Vault passphrase (12+ characters)","",InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         gitStatus=new TextView(this);
         gitStatus.setText("Local repository: "+git.localPath()+"\nRemote HTTPS transport requires Android API 21 or newer.");
         body.addView(gitStatus);
@@ -195,6 +195,7 @@ public final class MainActivity extends Activity {
                 try{
                     git.saveToken(tokenField.getText().toString(),vaultPass.getText().toString().toCharArray());
                     tokenField.setText("");
+                    vaultPass.setText("");
                     gitStatus.setText("Token encrypted with a passphrase-derived key. Passphrase is not stored.");
                 }catch(Exception e){gitStatus.setText(e.getMessage());}
             }
@@ -203,6 +204,7 @@ public final class MainActivity extends Activity {
             public void onClick(View v){
                 try{
                     git.unlockToken(vaultPass.getText().toString().toCharArray());
+                    vaultPass.setText("");
                     gitStatus.setText("Token unlocked in memory for this session.");
                 }catch(Exception e){gitStatus.setText(e.getMessage());}
             }
