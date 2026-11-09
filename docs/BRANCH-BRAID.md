@@ -100,3 +100,85 @@ At audit time, all 13 listed branches reported `protected: false`, and the repos
 ## Scope limitations
 
 This is a point-in-time audit of the 13 branches in this repository. It is not an audit of every repository in a GitHub organization or personal account. The connected GitHub search at audit time exposed `Vanellye/CodEXgen`; additional private or organization repositories may not have been visible to that installation.
+
+
+## Refresh: repository-wide accessible scope and current CI snapshot
+
+This refresh supersedes earlier head-SHA, ahead/behind, and CI-run details above where they differ.
+
+### Accessible repository inventory
+
+The connected GitHub installation search for `Vanellye` returned one accessible repository: `Vanellye/CodEXgen` (public, not archived, default branch `main`). GitHub identifies `Vanellye` as a **User** owner, not an Organization. This is the full scope visible to the current connection at this time, not proof that no other private or organization repositories exist outside its permissions.
+
+The repository exposes 13 branches. No repository or branch was removed or modified by this audit, other than this report update on `olpirt/stride-next`.
+
+### Current branch relationship refresh
+
+Against `main`, `olpirt/stride-next` is now 238 commits ahead and 2 behind, with merge base `3056c8ab167d6e02d711d404f09b4b16f9097cd5`. Its current head before this report refresh was `f501acaa6834728999260bcc1abe6f68383fe30e`.
+
+Eight branches have no common ancestor with `main`: `build-speed`, `edify`, `fiction-body`, `fiction-creation`, `fiction-mind`, `heroes-raw`, `hypotheticals`, and `mold`. Each inspected head commit has a parent, so the evidence supports **unrelated branch histories relative to main**, not a claim that the branch refs are dangling or that the commits are parentless orphan objects.
+
+The other branch comparisons remain:
+- `Vanellye-patch-1`: diverged, 1 ahead / 2 behind.
+- `history`: diverged, 48 ahead / 2 behind.
+- `main-11-of-38`: behind, 0 ahead / 2 behind.
+- `olpirt/stride-next`: diverged, 238 ahead / 2 behind.
+
+### Pair-level braid compatibility
+
+The two approved pairs do have a common ancestor with each other, despite lacking a common ancestor with `main`:
+
+| Pair traversal | Pair comparison | Merge base | Changed paths reported |
+|---|---|---|---|
+| `fiction-mind` → `fiction-body` | diverged, 4 ahead / 4 behind | `3b56b72f2b5e9485f9167e3e6558a1be31af1b84` | `hypotheticals/body_fiction.py`; `hypotheticals/resonance_noise_fiction.py` |
+| `fiction-creation` → `hypotheticals` | diverged, 4 ahead / 5 behind | `3b56b72f2b5e9485f9167e3e6558a1be31af1b84` | `hypotheticals/BRIDGE.md`; `hypotheticals/resonance_noise_fiction.py` |
+
+Both pairs touch `hypotheticals/resonance_noise_fiction.py`, a concrete overlap requiring manual reconciliation before any future integration. This is a review warning, not an instruction to merge. Keep the branch refs separate.
+
+### Current CI/check coverage at audited heads
+
+The latest workflow run on `olpirt/stride-next` is [42706993755](https://github.com/Vanellye/CodEXgen/actions/runs/42706993755), for commit `f501acaa6834728999260bcc1abe6f68383fe30e`. Seven checks were reported: five passed and two failed.
+
+Failed:
+- Android API 11 Views and C++11 JNI: SDK setup warning, `Failed to find package 'cmake;3.10.2'`.
+- Android Views Java source compatibility: `Api21WorkspaceTreeImporter.java:17` invalid method declaration; `MainActivity.java:513` has a missing parenthesis, illegal backslash characters, and cascading syntax errors.
+
+Passed:
+- Pantheon shared Node.js 11 runtime contract.
+- Python compatibility engines and tests.
+- Platform-independent framework C++11 contracts.
+- Pantheon native C++11 host tests.
+- Geometry Laboratory browser automation.
+
+Check-run inventory for the 13 branch heads:
+- `olpirt/stride-next`: 7 checks (5 success, 2 failure).
+- `build-speed`: 1 check (`prebuild`, success).
+- The other 11 branch heads: 0 check runs returned by the GitHub check-runs endpoint.
+
+Zero returned check runs means no check-run evidence was attached to those commit heads at the time of inspection; it does not establish that no local tests were ever run. This is a **missing CI evidence** risk for 11 branches. The `main` head also returned zero check runs and zero legacy commit-status contexts.
+
+### Integration and policy risks surfaced
+
+1. **Unrelated ancestry:** eight branches cannot be compared to `main` with a merge base. A content-level import/reconciliation plan is needed; do not use an automatic unrelated-histories merge as a shortcut.
+2. **Pair overlap:** both approved pairs modify `hypotheticals/resonance_noise_fiction.py`; resolve semantics and tests before any future splice.
+3. **CI gaps:** 11 branch heads have no check runs; only `build-speed` has one passing prebuild check outside the active branch.
+4. **Android blockers:** the active branch's Android toolchain package and Java source failures prevent a verified Android build.
+5. **Branch governance:** all 13 branches report `protected: false`; repository rulesets endpoint returned an empty list. This audit did not alter protection. Lack of protection raises accidental-write risk.
+6. **Incomplete organization scope:** the connector exposes one public user-owned repository, not a confirmed complete organization inventory.
+
+### Current braid remains a logical map only
+
+The approved 11-strand order remains:
+1. `fiction-mind` + `fiction-body`
+2. `fiction-creation` + `hypotheticals`
+3. `heroes-raw`
+4. `history`
+5. `main`
+6. `main-11-of-38`
+7. `mold`
+8. `olpirt/stride-next`
+9. `Vanellye-patch-1`
+10. `build-speed`
+11. `edify`
+
+The two pairs are two-at-a-time logical strands; all 13 source branch refs remain independent and preserved. No branch merge, force-push, deletion, ref movement, or protection-setting change was performed.
