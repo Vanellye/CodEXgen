@@ -16,7 +16,7 @@ The app uses framework Android Views and platform SQLite APIs. Compose, Kotlin, 
 
 ## Preserved functionality
 
-- Git Freedom Bridge: local repository initialization, branch checkout, status/review, selected-file commit, fast-forward-only pull, and normal feature-branch push.
+- Git Freedom Bridge: local repository initialization, branch checkout, status/review, selected-file commit, fast-forward-only pull, normal feature-branch push, and draft pull-request creation (remote operations require API 21+).
 - Local repository path remains under app-private files/git-bridge/CodEXgen.
 - Data Resonance uses the same data_resonance.db database name and observations table columns, so existing rows are retained when the app is updated in place.
 - OLPIRT/Pons native dependency audit remains available through JNI.
@@ -25,11 +25,11 @@ The app uses framework Android Views and platform SQLite APIs. Compose, Kotlin, 
 ## Compatibility boundaries
 
 - JGit 3.7.1 is used because the JGit 3.7 line retained a Java 5/6-era baseline. Newer JGit releases require newer Java runtimes.
-- Remote HTTPS Git operations are runtime-gated below API 16. The stock TLS stack on Android 3.0/API 11 cannot be assumed to negotiate modern GitHub HTTPS. Local repository operations remain available.
+- Remote HTTPS Git operations are runtime-gated below API 21. The stock TLS stack on Android 3.0/API 11 cannot be assumed to negotiate modern GitHub HTTPS. Local repository operations remain available.
 - Android Keystore APIs are not available on API 11. The API-11 profile encrypts the saved token using a user-entered passphrase, PBKDF2-HMAC-SHA1, AES-CBC, and HMAC-SHA256. The passphrase is not stored; the token must be unlocked for each app session. This is not hardware-backed Keystore protection.
 - The previous Keystore token format is not migrated. Re-enter and re-encrypt the token in this profile.
 - Native output is restricted to armeabi-v7a to retain the API 11 native platform baseline. 64-bit-only devices are not supported by this ABI profile.
-- The old legacy-android module remains in the repository as historical scaffolding but is no longer included in the active Gradle settings.
+- Workspace-folder import through Android's Storage Access Framework is not available on API 11; the active profile uses app-private local repository storage.\n- The old legacy-android module remains in the repository as historical scaffolding but is no longer included in the active Gradle settings.
 
 ## Build
 
