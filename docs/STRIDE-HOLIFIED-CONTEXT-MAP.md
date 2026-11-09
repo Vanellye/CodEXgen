@@ -13,7 +13,7 @@ This is an observational map of source files and callable behavior, not a contra
 | Component | Existing interface / behavior | How Holified Inception relates |
 |---|---|---|
 | `python/stride_core/faculty_engine.py` | `assess_perception(observations, weights=None)` ranks supplied numeric features; `generate_ideas(concepts, max_combinations=12)` creates deterministic pair prompts. | Reuses these existing functions as optional local helpers. Their outputs remain feature scores and idea prompts, not comprehensive perception or established knowledge. |
-| `python/stride_core/job_engine.py` | `JobStore` creates and retrieves local SQLite Journeys of Becoming, records lifecycle events, branches, and contextual metrics. | Potential future source of authorized historical context. The first engine does not open the JOB database or mutate JOBs. |
+| `python/stride_core/job_engine.py` | `JobStore` creates and retrieves local SQLite Journeys of Becoming, records lifecycle events, branches, and contextual metrics. | Optional adapter reads only explicitly selected JOB event ledgers after caller authorization; no writes or global enumeration. |
 | `python/semantic_vector_memory.py` | Chroma-backed persistent semantic trace storage and similarity retrieval; imports Chroma dependencies. | Optional future context source only. Not imported by the new engine; retrieval scope, consent, provenance, and privacy must be examined before any connection. |
 | `python/adaptive_governance.py` | Async telemetry and prompt-tuning orchestration; imports NumPy and writes telemetry to SQLite; includes simulated judgement and self-correction behavior. | Not called by the first engine. Its automatic rewrite/lock behavior is intentionally not inherited. |
 | `python/olpirt/rise_wisdom_bridge.py` | Existing Rise/Wisdom bridge. | Candidate for later contextual mapping after its complete source and tests are inspected; not called by this initial implementation. |
@@ -71,7 +71,7 @@ This is a one-way read-only composition for the first phase. It does not establi
 - Numeric feature ranking is not broad semantic understanding. It reports the existing helper's bounded score behavior.
 - Deterministic concept pairing is not proof of novelty, usefulness, or truth.
 - Explicit references are not proof of causation.
-- The first engine does not yet read temporal event history, JOB records, or vector memory.
+- The supplied-context reader remains independently usable. Optional JOB temporal recall is now available through `read_with_job_history()` and `python/stride_core/job_history.py`; vector memory remains unconnected.
 - The map does not establish runtime compatibility across every Stride module.
 - Existing source SHAs should be refreshed before any deeper integration.
 
@@ -81,7 +81,7 @@ New tests: `tests/test_holified_inception.py`
 
 The test file covers origin preservation, explicit-link mapping, unresolved references, disputed evidence, optional reuse of perception and creativity helpers, no-context limitations, invalid labels/duplicate identifiers, and read-only behavior.
 
-Execution status: tests are authored and committed; they have not yet been executed in this update. A CI run or local test execution is still needed before claiming they pass.
+Execution status: the original Holified Inception test run exposed one assertion wording mismatch. That assertion was corrected. New JOB history and reader-bridge tests are committed; the latest CI run is pending, so no pass is claimed yet.
 
 ## Preservation boundary
 
@@ -93,6 +93,6 @@ Existing files remain untouched:
 - `python/olpirt/rise_wisdom_bridge.py`
 - `hypotheticals/*`
 
-No branch merge, history rewrite, deletion, external data transfer, or automatic action is part of this work.
+No branch merge, history rewrite, deletion, external data transfer, or automatic action is part of this work. JOB history access requires `authorized=True` and explicit JOB IDs; comparisons preserve both values and do not adjudicate truth.
 
 **Working principle:** Map the context. Respect each component's identity. Add new capability beside existing capability. Let evidence—not declarations—establish what works.
