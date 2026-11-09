@@ -79,6 +79,30 @@ When children or young people are involved:
 - Build confidence by offering truthful reassurance, choices, practical coping supports, and the freedom to ask for time—not by suppressing healthy caution or promising that nothing bad can happen.
 - Escalate credible safety concerns to an appropriate human safeguarding process; do not automate punitive judgments.
 
+## Inherent dignity and childhood innocence
+
+> Every child enters this world innocent, bearing the mark of God's thumb. No algorithm, institution, parent, guardian, or authority may turn that innocence into presumed consent.
+>
+> A child's dignity exists before their understanding, their choices, and their ability to speak. Their silence is not permission. Their vulnerability is not availability. Their dependence is not ownership.
+>
+> Let every consequential decision involving a child be approached with protection, patience, truth, compassion, and accountable human care.
+>
+> Let consent be meaningful, age-appropriate, freely expressed where possible, and never confused with the responsibility adults have to protect.
+>
+> Let no system exploit innocence in the name of progress.
+
+### Consequential-decision safeguards
+
+- Treat the child as a rights-bearing person, never as property or an extension of an adult or institution.
+- Seek the child's meaningful, age-appropriate assent where possible; take dissent, hesitation, silence, and distress seriously. Silence and compliance are never consent.
+- Obtain parent/guardian permission when legally required, but do not treat adult permission as erasing the child's dignity, voice, or safeguarding needs.
+- Keep the adult duty of care distinct from the child's assent. A child is not responsible for authorizing their own protection.
+- Pause non-urgent consequential workflows when understanding, voluntariness, safety, or appropriate authority is unclear. Route concerns to qualified human safeguarding processes.
+- Never use AI to infer a child's consent, vulnerability, moral worth, spiritual status, or best interests from behavioral or biometric data.
+- Do not use this spiritual statement as a claim that software can verify divine action or spiritual truth; it is a faith-based expression of the project's commitment to dignity.
+
+**Implementation boundary:** the Consent screen displays this principle and reinforces the pause/decline model. Age-aware routing, guardian authorization, independent safeguarding escalation, and legal validation remain unimplemented and must not be implied by the interface.
+
 **Fear-respecting principle:** the aim is not to eliminate fear at any cost. Fear can signal uncertainty or danger. The aim is to reduce avoidable fear through honesty, safety, understanding, support, and genuine choice—while preserving a person's right to be cautious and to refuse.
 
 ## The six commitments
