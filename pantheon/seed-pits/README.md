@@ -77,3 +77,12 @@ The Seed Pits preserve failures, defects, near misses, rejected assumptions, rec
 - **Remediation:** run the legacy Android native build on Ubuntu 22.04 and explicitly install `libncurses5` before invoking the archived NDK.
 - **Additional verification gate:** before upload, inspect the APK package ID and minSdk, confirm the `armeabi-v7a` JNI library is packaged, verify the APK signature, and publish a SHA-256 checksum beside the APK.
 - **Status:** pending next CI run; no APK artifact is yet verified.
+
+## Verification amendment — JNI native link dependency
+
+- **Source run:** [CI #234](https://github.com/Vanellye/CodEXgen/actions/runs/42709345888), commit `80c93b57d156081fcdc56b62e368536b4e2c5403`.
+- **Passing evidence:** Android Views Java compilation passed; all 27 Python tests passed; browser automation, Node.js runtime contract, native host tests, and portable framework tests passed. The legacy NDK host dependency was resolved by moving the API 11 build to Ubuntu 22.04 and installing `libncurses5`.
+- **Observed APK build failure:** native CMake compilation completed all five C++ compilation units, but JNI shared-library linking failed with an undefined reference to `pantheon::ControlGate::evaluate(...)`.
+- **Root cause:** Android's CMake target linked `runtime.cpp` but omitted the implementation file `pantheon/src/control_gate.cpp`, although `Runtime::executeControlled` calls that method. Host Pantheon CMake already includes this implementation; the Android target had drifted from it.
+- **Remediation:** add `control_gate.cpp` to the Android JNI shared-library target.
+- **Status:** source correction committed; the next CI run must rebuild, inspect the APK metadata and ABI, verify the debug signature, and publish its checksum before the APK is considered verified.
