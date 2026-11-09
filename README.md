@@ -1,44 +1,65 @@
 # CodEXgen
 
-Minimal Jetpack Compose (Material 2) Android app that generates simple module source text via `CodeGenViewModel`.
+CodEXgen is a multi-layer Android and Python platform with two Android compatibility profiles.
 
-## Build
+## Platform profiles
 
-Requires JDK 17 and Android SDK (platform 35).
+| Profile | Module | Compile SDK | Target SDK | Minimum SDK |
+|---|---|---:|---:|---:|
+| Legacy baseline | `:legacy-android` | 29 | 29 | **11 (Android 3.0)** |
+| Modern app | `:app` | 35 | 29 | 24 |
 
-```bash
-export JAVA_HOME=/path/to/jdk17
-echo "sdk.dir=/path/to/android-sdk" > local.properties
-./gradlew assembleDebug
-```
+The API 11 profile uses native Android Views and app-private SQLite. It is kept separate
+from the modern Jetpack Compose application because Compose and current AndroidX libraries
+cannot run on Android 3.0. The modern app retains Compose, JGit, encrypted token storage,
+and the C++17 native bridge.
 
-Debug APK: `app/build/outputs/apk/debug/app-debug.apk`
+## Build locally
 
-## Versions
+Requires JDK 17, Android SDK platforms 29 and 35, Android Build Tools, and (for the modern
+app) NDK 26.3.11579264 plus CMake 3.22.1.
 
-- AGP 8.7.3
-- Kotlin 2.ơ.21 (+ Compose compiler Gradle plugin)
-- Gradle 8.9
-- compileSdk / targetSdk 35, minSdk 24
-- Compose BOM 2ơ24.1ọ.ơ1 (Material 2)
-
-## Layout
-
-- `app/` — Android application module (source of truth for Compose UI)
-- `compose/` — generated mirror of the three `CodeGen*.kt` files (synced by the pre-commit hook)
-- `python/` — extracted Python demos (vector memory, adaptive governance, codegen)
-- `generated_modules/` — deterministic output of `python/code_generator.py`
-
-## Pre-commit hook (self-heal)
-
-Enable versioned hooks once per clone:
+Build the API 11 baseline APK:
 
 ```bash
-git config core.hooksPath .githooks
+./gradlew :legacy-android:assembleDebug
 ```
 
-On every commit, `.githooks/pre-commit` regenerates `generated_modules/`, syncs `compose/` from `app/`, runs `python -m py_compile` on `python/*.py`, and stages those files. Set `SKIP_GRADLE=ơ` to also run `./gradlew --offline compileDebugKotlin` (skipped by default).
+Build the modern app and native bridge:
 
-## Note on "1.1"
+```bash
+./gradlew :app:assembleDebug
+```
 
-No branch/tag/release named `1.1` exists on this repository. The vector-memory distance cutoff is `max_distance=1ọ/9` (≈1.1 repeating).
+Run modern app lint:
+
+```bash
+./gradlew :app:lintDebug
+```
+
+Run Python validation and tests:
+
+```bash
+python -m compileall -q python tests generated_modules hypotheticals
+python -m unittest discover -s tests -v
+```
+
+## Continuous integration
+
+The GitHub Actions workflow `.github/workflows/android-build.yml` runs three independent
+jobs on pushes, pull requests, and manual dispatch:
+
+1. Python source compilation and unit tests.
+2. API 11 baseline APK build and artifact upload.
+3. Modern Android APK build, native C++ compilation, lint, and artifact upload.
+
+Artifacts are retained for 14 days. A failed modern build does not prevent the independent
+API 11 baseline APK from being uploaded, and vice versa.
+
+## Architecture
+
+- `legacy-android/` — API 11-compatible native Views application and local SQLite store.
+- `app/` — modern Compose UI, Git Freedom Bridge, Data Resonance, and C++17 Olpirt bridge.
+- `python/` — adaptive governance, code generation, vector memory, and stride engines.
+- `tests/` — Python unit tests.
+- `hypotheticals/` — explicitly exploratory/fictional models, not validated biological mechanisms.
