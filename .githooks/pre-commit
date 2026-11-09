@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# CodEXgen pre-commit: regenerate deterministic artifacts, sync mirrors, quick-check.
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+echo "[pre-commit] regenerating generated_modules via code_generator.py"
+python3 python/code_generator.py --out "$ROOT/generated_modules"
+
+echo "[pre-commit] syncing compose/ mirror from app sources"
+mkdir -p compose
+APP_SRC="app/src/main/java/com/vanellye/codexgen"
+for f in CodeGenScreen.kt CodeGenUiState.kt CodeGenViewModel.kt; do
+  if [[ ! -f "$APP_SRC/$f" ]]; then
+    echo "[pre-commit] missing source: $APP_SRC/$f" >&2
+    exit 1
+  fi
+  cp "$APP_SRC/$f" "compose/$f"
+done
+
+echo "[pre-commit] py_compile python/*.py"
+python3 -m py_compile python/*.py
+
+# Gradle compile is optional and off by default (slow / needs SDK).
+if [[ "${SKIP_GRADLE:-1}" != "1" ]]; then
+  echo "[pre-commit] ./gradlew --offline compileDebugKotlin"
+  export JAVA_HOME="${JAVA_HOME:-/opt/jdk17}"
+  export PATH="$JAVA_HOME/bin:$PATH"
+  ./gradlew --offline compileDebugKotlin
+else
+  echo "[pre-commit] skipping Gradle (SKIP_GRADLE=${SKIP_GRADLE:-1})"
+fi
+
+echo "[pre-commit] staging regenerated files"
+git add \
+  generated_modules \
+  compose/CodeGenScreen.kt \
+  compose/CodeGenUiState.kt \
+  compose/CodeGenViewModel.kt
+
+echo "[pre-commit] ok"

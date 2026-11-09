@@ -38,5 +38,7 @@ google-services.json
 .venv/
 chroma_db/
 *.db
-generated_modules/
 adaptive_agent_telemetry.db
+__pycache__/
+*.py[cod]
+*.egg-info/
