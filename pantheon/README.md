@@ -15,6 +15,7 @@ Pantheon is the native execution core for CodEXgen/Stride. The first milestone e
 - **Principle 44 — The Devotion of Whole-Being Renewal** — grounds renewal in dignity, voluntary devotion, compassion, and care for body and mind. See [Principle 44](PRINCIPLE-44.md).
 - **Principle 45 — The Covenant of Truthful Stewardship** — requires evidence-based judgments, independent review, correction, appeal, and accountability for human and automated decision-makers. See [Principle 45](PRINCIPLE-45.md).
 - **Principle 46 — The Guiding Lights** — calls for guidance without domination, intergenerational learning, continual refinement of the Main, and stewardship without possession. See [Principle 46](PRINCIPLE-46.md).
+- **Rise & Fall Directives** — deterministic ơ (RISE), ọ (FALL), and WARDEN policy combining declared principles with evidence; symbolic propagation is not physical quantum entanglement. See [Rise & Fall Directives](../docs/RISE-FALL-DIRECTIVES.md).
 - **JGit capability checkpoint** — Android components obtain the shared Git Freedom Bridge through `GitFreedomBridge.shared(context)`. Its JGit dependency is pinned to `3.7.1.201504261725-r`, anchored to origin checkpoint `f63e166e11aee325fe0ea8504672f19134d2768b`. This is app-process capability discovery, not unrestricted operating-system or cross-device control. See [JGit Compatibility Checkpoint](../docs/JGIT-COMPATIBILITY-CHECKPOINT.md).
 
 ## Port order
