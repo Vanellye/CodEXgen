@@ -202,6 +202,8 @@ def _android_millis(value: Any) -> int:
     if isinstance(value, (int, float)):
         return int(value)
     if isinstance(value, str):
+        if value.isdigit():
+            return int(value)
         try:
             parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
             if parsed.tzinfo is None:
