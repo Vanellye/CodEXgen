@@ -63,6 +63,16 @@ class PantheonEngineTests(unittest.TestCase):
             generate_pantheon_modules(self.source, self.output, ["sample.py"])
         self.assertEqual((self.output / "keep.txt").read_text(encoding="utf-8"), "historical")
 
+    def test_top_level_side_effects_are_not_executed(self):
+        marker = self.root / "must_not_exist.txt"
+        source = self.source / "side_effect.py"
+        source.write_text(
+            f"from pathlib import Path\\nPath({str(marker)!r}).write_text('executed')\\n",
+            encoding="utf-8",
+        )
+        analyze_approved_files(self.source, ["side_effect.py"])
+        self.assertFalse(marker.exists())
+
     def test_rejects_syntax_errors_without_writing_output(self):
         broken = self.source / "broken.py"
         broken.write_text("def incomplete(:\n", encoding="utf-8")
