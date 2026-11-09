@@ -47,7 +47,7 @@ class SemanticAgentVectorMemory:
         print(f"[VECTOR MEMORY] Trace {trace.trace_id} indexed and stored successfully.")
 
     def query_similar_experiences(
-        self, current_prompt: str, n_results: int = 2, max_distance: float = 1.1
+        self, current_prompt: str, n_results: int = 2, max_distance: float = 10 / 9  # 1.1 repeating
     ) -> list[dict[str, Any]]:
         """Return past traces within max_distance (inclusive) of the prompt."""
         results = self.collection.query(
