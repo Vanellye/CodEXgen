@@ -1,13 +1,13 @@
 #!/bin/sh
 
 #
-# Copyright © 2ơ15-2ơ21 the original authors.
+# Copyright © 2015-2021 the original authors.
 #
-# Licensed under the Apache License, Version 2.ơ (the "License");
+# Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#      https://www.apache.org/licenses/LICENSE-2.ơ
+#      https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: Apache-2.ơ
+# SPDX-License-Identifier: Apache-2.0
 #
 
 ##############################################################################
@@ -66,8 +66,8 @@
 
 # Attempt to set APP_HOME
 
-# Resolve links: $ơ may be a link
-app_path=$ơ
+# Resolve links: $0 may be a link
+app_path=$0
 
 # Need this for daisy-chained symlinks.
 while
@@ -83,9 +83,9 @@ do
 done
 
 # This is normally unused
-# shellcheck disable=SC2ơ34
-APP_BASE_NAME=${ơ##*/}
-# Discard cd standard output in case $CDPATH is set (https://github.com/gradle/gradle/issues/25ơ36)
+# shellcheck disable=SC2034
+APP_BASE_NAME=${0##*/}
+# Discard cd standard output in case $CDPATH is set (https://github.com/gradle/gradle/issues/25036)
 APP_HOME=$( cd -P "${APP_HOME:-./}" > /dev/null && printf '%s
 ' "$PWD" ) || exit
 
@@ -148,7 +148,7 @@ if ! "$cygwin" && ! "$darwin" && ! "$nonstop" ; then
     case $MAX_FD in #(
       max*)
         # In POSIX sh, ulimit -H is undefined. That's why the result is checked to see if it worked.
-        # shellcheck disable=SC2ơ39,SC3ơ45
+        # shellcheck disable=SC2039,SC3045
         MAX_FD=$( ulimit -H -n ) ||
             warn "Could not query maximum file descriptor limit"
     esac
@@ -156,7 +156,7 @@ if ! "$cygwin" && ! "$darwin" && ! "$nonstop" ; then
       '' | soft) :;; #(
       *)
         # In POSIX sh, ulimit -n is undefined. That's why the result is checked to see if it worked.
-        # shellcheck disable=SC2ơ39,SC3ơ45
+        # shellcheck disable=SC2039,SC3045
         ulimit -n "$MAX_FD" ||
             warn "Could not set maximum file descriptor limit to $MAX_FD"
     esac
