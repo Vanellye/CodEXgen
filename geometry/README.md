@@ -4,6 +4,10 @@ This folder is the home for **geometrical knowledge and constructive design**: d
 
 It is intentionally separate from measurement records, telemetry, charts of observed data, and other empirical graphs. Those belong with the relevant observation or experiment documentation. A geometric illustration explains a structure; an observation graph reports recorded evidence. Do not mix the two without labeling them clearly.
 
+## Interactive mathematical exploration
+
+Open the [Interactive Mathematical Laboratory](lab/README.md) to adjust curvature, fractal iteration depth, coordinate dimensions, and higher-dimensional projections in a local browser-based tool.
+
 ## Organization
 
 | Area | Put these materials here |
@@ -12,6 +16,7 @@ It is intentionally separate from measurement records, telemetry, charts of obse
 | [Shapes](shapes/README.md) | Shape definitions, properties, classifications, dimensions, symmetry, and geometric constructions |
 | [Designs](designs/README.md) | Compositions, tessellations, patterns, spatial layouts, visual systems, and reusable design studies |
 | [Visuals](visuals/README.md) | Picture atlas, dimension maps, concept maps, and explanatory SVG diagrams |
+| [Interactive Lab](lab/README.md) | Browser-based curvature, fractal, coordinate, and projection explorers |
 
 ## Visual overview
 
