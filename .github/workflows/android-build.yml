@@ -1,4 +1,4 @@
-name: Android Build\n\n# API 11-compatible standalone profile; modern Compose app is built separately.
+name: CodEXgen Platform CI
 
 on:
   push:
@@ -13,41 +13,88 @@ permissions:
   contents: read
 
 concurrency:
-  group: android-build-${{ github.ref }}
+  group: codexgen-platform-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  assemble-debug:
-    name: Assemble debug APK
+  python-validation:
+    name: Python engines and tests
     runs-on: ubuntu-latest
     steps:
       - name: Check out source
         uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: python/requirements.txt
+      - name: Install test dependencies
+        run: python -m pip install --upgrade pip numpy
+      - name: Compile Python sources
+        run: python -m compileall -q python tests generated_modules hypotheticals
+      - name: Run platform unit tests
+        run: python -m unittest discover -s tests -v
 
+  legacy-api11:
+    name: Android API 11 baseline APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
-
-      - name: Install Android SDK 29 and native build tools
-        run: |
-          sdkmanager "platforms;android-29" "build-tools;29.0.3" "cmake;3.22.1"
-
-      - name: Make Gradle wrapper executable
+      - name: Install API 29 platform
+        run: sdkmanager "platforms;android-29" "build-tools;29.0.3"
+      - name: Enable Gradle wrapper
         run: chmod +x ./gradlew
-
-      - name: Build debug APK
+      - name: Assemble API 11 baseline
         run: ./gradlew --no-daemon --stacktrace :legacy-android:assembleDebug
-
-      - name: Upload debug APK
-        if: success()
+      - name: Upload API 11 APK
         uses: actions/upload-artifact@v4
         with:
           name: codexgen-api11-legacy-debug-apk
           path: legacy-android/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+          retention-days: 14
+
+  modern-android:
+    name: Modern Android app and native bridge
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Install Android and native toolchains
+        run: |
+          sdkmanager "platforms;android-35" "build-tools;35.0.0" "cmake;3.22.1" "ndk;26.3.11579264"
+      - name: Enable Gradle wrapper
+        run: chmod +x ./gradlew
+      - name: Assemble modern APK and run lint
+        run: ./gradlew --no-daemon --stacktrace :app:assembleDebug :app:lintDebug
+      - name: Upload modern APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: codexgen-modern-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload lint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codexgen-android-lint-report
+          path: app/build/reports/lint-results-debug.html
+          if-no-files-found: ignore
           retention-days: 14
