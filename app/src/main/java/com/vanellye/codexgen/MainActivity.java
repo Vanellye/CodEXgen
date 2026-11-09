@@ -32,7 +32,7 @@ public final class MainActivity extends Activity {
     private DataResonanceStore data;
     private EditText repositoryUrl, baseBranch, featureBranch, authorName, authorEmail;
     private EditText tokenField, vaultPass, commitMessage, prTitle, prBody, localFilePath, localFileContents;
-    private EditText channelField, valueField, unitField, biomarkerField, frequencyField, notesField;
+    private EditText channelField, valueField, unitField, biomarkerField, frequencyField, notesField, correlationA, correlationB;
     private TextView gitStatus;
     private LinearLayout changedFiles;
     private final Map<String, CheckBox> fileChecks = new HashMap<String, CheckBox>();
@@ -326,6 +326,19 @@ public final class MainActivity extends Activity {
                     result.setText("Saved observation #"+id+" to app-private SQLite.");
                     valueField.setText(""); notesField.setText("");
                 }catch(Exception e){result.setText("Save failed: "+e.getMessage());}
+            }
+        });
+        correlationA=field(body,"Correlation channel A","signal-a",InputType.TYPE_CLASS_TEXT);
+        correlationB=field(body,"Correlation channel B","signal-b",InputType.TYPE_CLASS_TEXT);
+        button(body,"Calculate exploratory Pearson r",new View.OnClickListener(){
+            public void onClick(View v){
+                try{
+                    DataResonanceStore.Correlation c=data.correlation(
+                        correlationA.getText().toString(),correlationB.getText().toString());
+                    result.setText("Matched samples: "+c.sampleCount+"\\nPearson r: "+
+                        (c.pearsonR == null ? "not available" : String.valueOf(c.pearsonR.doubleValue()))+
+                        "\\nDescriptive association only; not causal or clinical evidence.");
+                }catch(Exception e){result.setText("Correlation failed: "+e.getMessage());}
             }
         });
         button(body,"Show recent observations",new View.OnClickListener(){
