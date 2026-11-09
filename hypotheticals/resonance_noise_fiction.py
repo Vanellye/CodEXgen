@@ -8,4 +8,4 @@ def birth_noise(length: int = 44) -> str:
     return "".join(rng.choice("01") for _ in range(length))
 
 if __name__ == "__main__":
-    print(f"[FICTION] fiction-creation resonance {RESONANCE}: {birth_noise()}")
+    print(f"[FICTION] fiction-creation resonance {RESONANCE}: {birth_noise().replace('0', 'ơ')}")
