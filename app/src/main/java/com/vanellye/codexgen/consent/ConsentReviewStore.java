@@ -18,7 +18,11 @@ public final class ConsentReviewStore extends SQLiteOpenHelper {
     public long record(String outcome, boolean[] layers, String reviewer, String purpose) {
         if (!"ASSENTED".equals(outcome) && !"DECLINED".equals(outcome) && !"PAUSED".equals(outcome))
             throw new IllegalArgumentException("Invalid review outcome.");
-        if (layers == null || layers.length != 7) throw new IllegalArgumentException("Exactly seven layer flags are required.");\n        String safeReviewer = reviewer == null ? "" : reviewer.trim();\n        String safePurpose = purpose == null ? "" : purpose.trim();\n        if (safeReviewer.length() > 120) throw new IllegalArgumentException("Reviewer field is limited to 120 characters.");\n        if (safePurpose.length() > 500) throw new IllegalArgumentException("Purpose summary is limited to 500 characters.");
+        if (layers == null || layers.length != 7) throw new IllegalArgumentException("Exactly seven layer flags are required.");
+        String safeReviewer = reviewer == null ? "" : reviewer.trim();
+        String safePurpose = purpose == null ? "" : purpose.trim();
+        if (safeReviewer.length() > 120) throw new IllegalArgumentException("Reviewer field is limited to 120 characters.");
+        if (safePurpose.length() > 500) throw new IllegalArgumentException("Purpose summary is limited to 500 characters.");
         ContentValues values = new ContentValues();
         values.put("created_at", Long.valueOf(System.currentTimeMillis()));
         values.put("outcome", outcome);
