@@ -74,6 +74,15 @@ class LocalChannelRouterTests(unittest.TestCase):
         self.assertEqual([item.event_id for item in pulled], [event])
         self.assertEqual(recovered.delivery_state(event, "bob"), "delivered")
 
+    def test_revocation_after_delivery_prevents_later_acceptance(self):
+        event = self.router.push("realm-a", "alice", "action-request", {},
+                                 idempotency_key="late-revoke", requires_acceptance=True)
+        self.router.pull("realm-a", "bob")
+        self.router.revoke("realm-a", "owner", "bob")
+        self.assertEqual(self.router.delivery_state(event, "bob"), "revoked")
+        with self.assertRaises(RouterError):
+            self.router.decide(event, "bob", accept=True)
+
     def test_only_owner_can_grant_or_revoke(self):
         with self.assertRaises(PermissionDenied):
             self.router.grant("realm-a", "alice", "mallory", can_read=True)
