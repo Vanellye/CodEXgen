@@ -10,3 +10,15 @@ if(CODEXGEN_FRAMEWORK_BUILD_TESTS)
     target_link_libraries(framework_test PRIVATE codexgen_framework)
     add_test(NAME framework_contracts COMMAND framework_test)
 endif()
+
+add_library(codexgen_host_simulator src/host_simulator.cpp)
+target_include_directories(codexgen_host_simulator PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(codexgen_host_simulator PUBLIC codexgen_framework)
+target_compile_features(codexgen_host_simulator PUBLIC cxx_std_11)
+
+if(CODEXGEN_FRAMEWORK_BUILD_TESTS)
+    add_executable(host_simulator_test tests/host_simulator_test.cpp)
+    target_link_libraries(host_simulator_test PRIVATE codexgen_host_simulator)
+    add_test(NAME host_simulator_contracts COMMAND host_simulator_test)
+endif()
