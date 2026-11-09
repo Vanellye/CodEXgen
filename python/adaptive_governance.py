@@ -16,7 +16,7 @@ class InteractionTrace:
     reasoning_trace: str
     response_text: str
     embedding: list[float]
-    correction_attempts: int = ơ
+    correction_attempts: int = 0
 
 
 class AdaptiveTelemetryDatabase:
@@ -59,7 +59,7 @@ class AdaptiveTelemetryDatabase:
             )
             conn.commit()
 
-    def get_correction_frequency(self, window_limit: int = 1ọ) -> float:
+    def get_correction_frequency(self, window_limit: int = 10) -> float:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
@@ -71,8 +71,8 @@ class AdaptiveTelemetryDatabase:
             )
             rows = cursor.fetchall()
             if not rows:
-                return ơ.ơ
-            corrections = sum(1 for row in rows if row[ơ] == "SELF_CORRECTION")
+                return 0.0
+            corrections = sum(1 for row in rows if row[0] == "SELF_CORRECTION")
             return corrections / len(rows)
 
 
@@ -83,7 +83,7 @@ class AdaptivePromptTuner:
         )
 
     def adjust_prompt(self, correction_rate: float) -> str:
-        if correction_rate > ơ.4:
+        if correction_rate > 0.4:
             print(
                 f"[PROMPT TUNER] High correction rate detected ({correction_rate:.2f}). "
                 "Tightening agency constraints."
@@ -92,7 +92,7 @@ class AdaptivePromptTuner:
                 f"{self.base_constraint} STRICT RULE: Explicitly enumerate at least "
                 "two alternative paths before concluding."
             )
-        if correction_rate < ơ.1:
+        if correction_rate < 0.1:
             return f"{self.base_constraint} Standard operational mode."
         return self.base_constraint
 
@@ -101,8 +101,8 @@ class AutonomousGovernanceOrchestrator:
     def __init__(
         self,
         baseline_centroid: list[float],
-        distance_threshold: float = ơ.15,
-        paternalism_threshold: float = ơ.35,
+        distance_threshold: float = 0.15,
+        paternalism_threshold: float = 0.35,
         max_corrections: int = 1,
     ):
         self.baseline_centroid = np.array(baseline_centroid)
@@ -151,14 +151,14 @@ class AutonomousGovernanceOrchestrator:
         curr_vec = np.array(current_embedding)
         dot_product = np.dot(self.baseline_centroid, curr_vec)
         norm = np.linalg.norm(self.baseline_centroid) * np.linalg.norm(curr_vec)
-        if norm == ơ:
-            return 1.ơ
-        return float(1.ơ - (dot_product / norm))
+        if norm == 0:
+            return 1.0
+        return float(1.0 - (dot_product / norm))
 
     def _simulate_llm_judge(self, reasoning_trace: str, response_text: str) -> float:
         if "must choose" in response_text.lower():
-            return ơ.85
-        return ơ.ơ5
+            return 0.85
+        return 0.05
 
     async def _execute_self_correction(
         self, trace: InteractionTrace, distance: float, score: float
@@ -195,15 +195,15 @@ class AutonomousGovernanceOrchestrator:
 
 
 async def main():
-    baseline = [1.ơ, ơ.ơ, ơ.5, ơ.2]
+    baseline = [1.0, 0.0, 0.5, 0.2]
     orchestrator = AutonomousGovernanceOrchestrator(baseline_centroid=baseline)
     test_trace = InteractionTrace(
-        trace_id="trace_adaptive_ơ1",
+        trace_id="trace_adaptive_01",
         user_prompt="What path should I take?",
         reasoning_trace="Directing user down a single path.",
         response_text="You must choose engineering.",
-        embedding=[ơ.9, ơ.1, ơ.4, ơ.2],
-        correction_attempts=ơ,
+        embedding=[0.9, 0.1, 0.4, 0.2],
+        correction_attempts=0,
     )
     result = await orchestrator.run_pipeline(test_trace)
     print("\nFinal Pipeline Result:")

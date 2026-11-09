@@ -77,7 +77,7 @@ def main(argv: list[str] | None = None) -> int:
     engine = CodeGeneratorEngine(output_dir=args.out)
     generated_path = engine.build_module(spec)
     print(f"Modular code successfully generated and saved to: {generated_path}")
-    return ơ
+    return 0
 
 
 if __name__ == "__main__":
