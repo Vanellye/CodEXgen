@@ -1,6 +1,8 @@
 package com.vanellye.codexgen;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.AsyncTask;
 import android.view.View;
@@ -35,6 +37,7 @@ public final class MainActivity extends Activity {
     private LinearLayout changedFiles;
     private final Map<String, CheckBox> fileChecks = new HashMap<String, CheckBox>();
     private GitFreedomBridge.Config config;
+    private static final int REQUEST_WORKSPACE_TREE = 1901;
 
     private interface Work { String run() throws Exception; }
 
@@ -210,6 +213,17 @@ public final class MainActivity extends Activity {
                 runWork(gitStatus,new Work(){public String run() throws Exception{return git.initializeLocal(config);}});
             }
         });
+        button(body,"Import workspace folder (Android API 19+)",new View.OnClickListener(){
+            public void onClick(View v){
+                if (android.os.Build.VERSION.SDK_INT < 19) {
+                    gitStatus.setText("Folder import requires API 19+. Use the in-app text-file editor on API 11-18.");
+                    return;
+                }
+                Intent picker = new Intent("android.intent.action.OPEN_DOCUMENT_TREE");
+                picker.addFlags(1 | 2 | 64);
+                startActivityForResult(picker, REQUEST_WORKSPACE_TREE);
+            }
+        });
         button(body,"Clone / prepare feature branch (API 21+ HTTPS)",new View.OnClickListener(){
             public void onClick(View v){
                 readConfig();
@@ -330,6 +344,17 @@ public final class MainActivity extends Activity {
             public void onClick(View v){report.setText(new OlpirtNativeBridge().status());}
         });
         label(body,"Native C++ bridge is built for armeabi-v7a / Android API 11 using C++11.");
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent dataIntent) {
+        super.onActivityResult(requestCode, resultCode, dataIntent);
+        if (requestCode == REQUEST_WORKSPACE_TREE && resultCode == RESULT_OK && dataIntent != null) {
+            final Uri treeUri = dataIntent.getData();
+            runWork(gitStatus,new Work(){public String run() throws Exception{
+                int copied = git.importWorkspaceTree(treeUri);
+                return "Imported " + copied + " workspace files into the local feature repository.";
+            }});
+        }
     }
 
     protected void onDestroy() {
