@@ -1,0 +1,32 @@
+name: TACS advanced verification
+
+on:
+  push:
+    branches: [leveled-consciousness]
+    paths:
+      - "python/tacs/**"
+      - "tests/test_tacs*.py"
+      - ".github/workflows/tacs-advanced.yml"
+  pull_request:
+    paths:
+      - "python/tacs/**"
+      - "tests/test_tacs*.py"
+      - ".github/workflows/tacs-advanced.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  tacs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run TACS tests
+        env:
+          PYTHONPATH: python
+        run: python -m unittest discover -s tests -p "test_tacs*.py" -v
+      - name: Compile TACS
+        run: python -m compileall -q python/tacs
