@@ -1,5 +1,6 @@
 """Safety and provenance tests for Pantheon source analysis."""
 from __future__ import annotations
+import hashlib
 import json
 import tempfile
 import unittest
@@ -45,6 +46,14 @@ class PantheonEngineTests(unittest.TestCase):
         self.assertIsNotNone(compiled)
         saved = json.loads((self.output / "manifest.json").read_text(encoding="utf-8"))
         self.assertEqual(saved["approved_sources"][0]["source_path"], "sample.py")
+        self.assertEqual(saved["schema_version"], 1)
+        self.assertEqual(saved["provenance"]["digest_algorithm"], "sha256")
+        recorded_digest = saved.pop("manifest_sha256")
+        canonical = json.dumps(
+            saved, ensure_ascii=False, sort_keys=True,
+            separators=(",", ":"), allow_nan=False,
+        ).encode("utf-8")
+        self.assertEqual(recorded_digest, hashlib.sha256(canonical).hexdigest())
 
     def test_rejects_unapproved_or_traversal_paths(self):
         with self.assertRaises(AnalysisError):
