@@ -137,7 +137,7 @@ def validate_record(record: Mapping[str, Any]) -> dict[str, Any]:
     if not isinstance(record["units"], dict):
         raise EnvelopeError("units must be an object")
     _check_json_value(record["units"], "units")
-    if record["quality"] not in QUALITY_STATES:
+    if not isinstance(record["quality"], str) or record["quality"] not in QUALITY_STATES:
         raise EnvelopeError("quality is not a recognized quality state")
     _validate_provenance(record["provenance"])
     _validate_transformations(record["transformations"])
@@ -145,7 +145,7 @@ def validate_record(record: Mapping[str, Any]) -> dict[str, Any]:
     authorization = record["authorization"]
     if not isinstance(authorization, dict) or set(authorization) != {"status", "scope", "approval_ref"}:
         raise EnvelopeError("authorization must contain status, scope, and approval_ref")
-    if authorization["status"] not in {"not_authorized", "authorized", "declined"}:
+    if not isinstance(authorization["status"], str) or authorization["status"] not in {"not_authorized", "authorized", "declined"}:
         raise EnvelopeError("authorization.status is not recognized")
     if authorization["status"] == "authorized":
         if not isinstance(authorization["scope"], list) or not authorization["scope"]:
