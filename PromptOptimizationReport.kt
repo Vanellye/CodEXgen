@@ -1,4 +1,4 @@
-package com.vanellye.codexgen.gitbridge
+package com.vanellye.eria.gitbridge
 
 data class PromptDimension(
     val name: String,

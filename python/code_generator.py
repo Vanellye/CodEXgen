@@ -65,7 +65,7 @@ def _repo_generated_dir() -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Deterministic CodEXgen module generator")
+    parser = argparse.ArgumentParser(description="Deterministic ERIA module generator")
     parser.add_argument(
         "--out",
         default=_repo_generated_dir(),

@@ -1,4 +1,4 @@
-package com.vanellye.codexgen
+package com.vanellye.eria
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer

@@ -1,4 +1,4 @@
-package com.vanellye.codexgen.contracts
+package com.vanellye.eria.contracts
 
 import java.text.ParsePosition
 import java.text.SimpleDateFormat

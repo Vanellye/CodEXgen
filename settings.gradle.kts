@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "CodEXgen"
+rootProject.name = "ERIA"
 include(":app")

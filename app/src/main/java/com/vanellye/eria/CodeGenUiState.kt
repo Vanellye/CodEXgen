@@ -1,4 +1,4 @@
-package com.vanellye.codexgen
+package com.vanellye.eria
 
 /**
  * UI state for the code-generation screen.

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# CodEXgen pre-commit: regenerate deterministic artifacts, sync mirrors, quick-check.
+# ERIA pre-commit: regenerate deterministic artifacts, sync mirrors, quick-check.
 set -euo pipefail
 
 ROOT="$(git rev-parse --show-toplevel)"
@@ -10,7 +10,7 @@ python3 python/code_generator.py --out "$ROOT/generated_modules"
 
 echo "[pre-commit] syncing compose/ mirror from app sources"
 mkdir -p compose
-APP_SRC="app/src/main/java/com/vanellye/codexgen"
+APP_SRC="app/src/main/java/com/vanellye/eria"
 for f in CodeGenScreen.kt CodeGenUiState.kt CodeGenViewModel.kt; do
   if [[ ! -f "$APP_SRC/$f" ]]; then
     echo "[pre-commit] missing source: $APP_SRC/$f" >&2
