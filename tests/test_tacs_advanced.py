@@ -74,7 +74,7 @@ class TacsEmbeddedSignatureTests(unittest.TestCase):
                 verified=verify_git_tag_signature(repo,"release",[fingerprint])
                 self.assertTrue(verified["valid"])
                 self.assertEqual(verified["signer"],fingerprint)
-                parent=root/"ancestral.json";parent.write_text('{"kind":"tag"}\\n')
+                parent=root/"ancestral.json";parent.write_text('{"kind":"tag"}\n')
                 correction=append_correction(root/"chain",parent,"release",target,
                     "reviewed correction",["test evidence"],{"state":"old"},{"state":"new"},
                     "ci-reviewer",["unit tests"],True)
