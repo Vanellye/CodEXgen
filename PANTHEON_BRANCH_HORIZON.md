@@ -1,6 +1,6 @@
 # Pantheon Branch Horizon
 
-Status: read-only branch observer with cross-branch peering; latest CI validation pending
+Status: read-only branch observer with cross-branch peering; focused CI passed
 Version: 0.3.1
 Design anchor: `ae89abe4a44d90429fcf5316bdb196316a1de6cb`
 
@@ -81,7 +81,7 @@ No PR comments, issues, notifications, or cross-branch writes are enabled. A pro
 
 ## Validation
 
-Focused workflow validation is run on each branch-head update. The workflow runs the dedicated Branch Horizon unit tests before scanning and uploading artifacts. The test suite covers six-lens rotation, Sacred as the non-rotating seventh dimension, exact head binding, no mutation of refs/worktree, symlink exclusion, and detection of differing interface/dependency signals across a peer ref.
+Focused workflow run [42729652057](https://github.com/Vanellye/CodEXgen/actions/runs/42729652057) passed on head `17c53fca966d6e8d378f708d04fd6b9809bcd7a1`. Unit tests, bounded observer execution, and JSON/Markdown artifact upload succeeded. The workflow runs the dedicated tests before every scan. The test suite covers six-lens rotation, Sacred as the non-rotating seventh dimension, exact head binding, no mutation of refs/worktree, symlink exclusion, and detection of differing interface/dependency signals across a peer ref.
 
 ## Limitations and next review gates
 
