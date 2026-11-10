@@ -65,6 +65,15 @@ class AdoptionGateTests(unittest.TestCase):
             report = evaluate_candidate(repo, repo, "divergence/auto/observer", head, "f" * 40, base)
             self.assertIn("branch_head_does_not_match_observed_sha", report["reasons"])
 
+
+    def test_adoption_workflow_proposes_pr_but_never_auto_merges(self):
+        workflow = (Path(__file__).resolve().parents[1] /
+                    ".github" / "workflows" / "pantheon-auto-adopt.yml").read_text(encoding="utf-8")
+        self.assertIn("gh pr create", workflow)
+        self.assertIn("receiver review and approval", workflow)
+        self.assertNotIn("gh pr merge", workflow)
+        self.assertNotIn("--auto --squash", workflow)
+
     def test_deletions_are_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)
