@@ -16,6 +16,14 @@ class JobEngineTests(unittest.TestCase):
     def tearDown(self):
         self.temp.cleanup()
 
+
+    def test_in_memory_store_persists_across_operation_connections(self):
+        store = JobStore(":memory:")
+        job = store.create_job("Ephemeral", "Keep state during store lifetime", "unit-test")
+        loaded = store.get_job(job["id"])
+        self.assertEqual(loaded["title"], "Ephemeral")
+        self.assertEqual(len(store.events(job["id"])), 1)
+
     def test_create_and_persist_job(self):
         job = self.store.create_job("Geometry study", "Compare projections", "geometry-lab")
         loaded = self.store.get_job(job["id"])
