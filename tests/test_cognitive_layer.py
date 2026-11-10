@@ -8,6 +8,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "python"))
 
 from cognitive_layer import LedgerError, MemoryEntry, TemporalCognitiveLayer
+from codexgen_contracts.envelope import validate_record
 
 
 def entry(entry_id, statement, *, start=None, end=None, parents=()):
@@ -35,6 +36,15 @@ class TemporalCognitiveLayerTests(unittest.TestCase):
         self.layer.append(entry("derived", "Add a review stage.", parents=("origin",)))
         self.assertEqual(self.layer.lineage("derived"), ("origin",))
         self.assertEqual(len(self.layer.entries()), 2)
+
+
+    def test_memory_entry_maps_to_true_north_envelope_without_claim_adjudication(self):
+        record = entry("envelope-claim", "A preserved statement.").to_envelope()
+        validate_record(record)
+        self.assertEqual(record["quality"], "UNKNOWN")
+        self.assertEqual(record["authorization"]["status"], "not_authorized")
+        self.assertEqual(record["payload"]["statement"], "A preserved statement.")
+        self.assertEqual(record["retention"]["policy"], "append_only")
 
     def test_duplicate_identifier_is_rejected_without_overwrite(self):
         self.layer.append(entry("same-id", "Original statement."))
