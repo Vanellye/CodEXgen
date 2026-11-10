@@ -140,9 +140,9 @@ The protocol must work offline. Online transports are replaceable adapters, not 
 - Verifies the manifest with OpenSSL against a public key supplied out-of-band.
 - Pins that key by an independently supplied SHA-256 fingerprint.
 - Checks sorted unique relative paths, source repository/ref/commit provenance, exact file inventory, byte sizes, and SHA-256 payload digests.
-- Rejects duplicate manifest keys, non-canonical JSON, traversal paths, symlinks, unlisted files, and mismatched payloads.
+- Rejects duplicate manifest keys, non-canonical JSON, traversal paths, symlinks, unlisted files, mismatched payloads, and bundles that exceed the configured manifest, key, file-count, per-file, or total-payload limits.
 - Does not extract, install, execute, forward, promote, or authorize adoption. A successful report explicitly returns `adoption_authorized: false`.
 
-Focused tests create ephemeral Ed25519 keys and exercise successful verification, key-pin mismatch, payload tampering, unlisted files, non-canonical manifests, and traversal rejection. These are test keys, not a production trust root.
+Focused tests create ephemeral Ed25519 keys and exercise successful verification, key-pin mismatch, payload tampering, unlisted files, non-canonical manifests, traversal rejection, and resource-limit enforcement. These are test keys, not a production trust root.
 
 **Not implemented:** deterministic archive parsing, encryption, dependency resolution, capability review, signer revocation/key rotation, receiver approval UI, sandboxed validation, atomic installation, version activation, rollback, or transport adapters. The current verifier is a partial Phase 1 implementation and must not be described as a complete package exchange or installer. The existing native source analyzer remains a separate non-executing inventory tool.
