@@ -16,6 +16,22 @@ bool Runtime::hasModule(const std::string& name) const {
     return modules_.find(name) != modules_.end();
 }
 
+Result Runtime::evaluateAccess(
+        const std::string& name, const std::shared_ptr<Module>& module,
+        const AccessContext& context,
+        const std::vector<AccessGrant>& grants) const {
+    AccessTablet tablet;
+    const AccessDecision decision = tablet.evaluateAll(
+        module->accessRequirements(), context, grants);
+    Result result;
+    result.module = name;
+    result.ok = decision.granted;
+    result.message = decision.granted
+        ? "access_tablet_granted"
+        : "access_tablet_denied:" + decision.reason;
+    return result;
+}
+
 Result Runtime::execute(const std::string& name, const Input& input) const {
     std::map<std::string, std::shared_ptr<Module> >::const_iterator it =
         modules_.find(name);
@@ -29,6 +45,12 @@ Result Runtime::execute(const std::string& name, const Input& input) const {
         Result denied;
         denied.module = name;
         denied.message = "control_authorization_required";
+        return denied;
+    }
+    if (!it->second->accessRequirements().empty()) {
+        Result denied;
+        denied.module = name;
+        denied.message = "access_tablet_required";
         return denied;
     }
     return it->second->execute(input);
@@ -52,6 +74,70 @@ Result Runtime::executeControlled(
         denied.message = "module_does_not_require_control_authorization";
         return denied;
     }
+    if (!it->second->accessRequirements().empty()) {
+        Result denied;
+        denied.module = name;
+        denied.message = "access_tablet_required";
+        return denied;
+    }
+
+    ControlGate gate;
+    const ControlGateDecision decision = gate.evaluate(standards, ownerApproval);
+    if (!decision.granted) {
+        Result denied;
+        denied.module = name;
+        denied.message = "control_gate_denied:" + decision.reason;
+        denied.metrics["standards_passed"] = decision.passedCount;
+        denied.metrics["standards_required"] = ControlGate::REQUIRED_STANDARDS;
+        return denied;
+    }
+    return it->second->execute(input);
+}
+
+Result Runtime::executeWithAccess(
+        const std::string& name, const Input& input,
+        const AccessContext& context,
+        const std::vector<AccessGrant>& grants) const {
+    std::map<std::string, std::shared_ptr<Module> >::const_iterator it =
+        modules_.find(name);
+    if (it == modules_.end()) {
+        Result missing;
+        missing.module = name;
+        missing.message = "module_not_registered";
+        return missing;
+    }
+    if (it->second->requiresControlAuthorization()) {
+        Result denied;
+        denied.module = name;
+        denied.message = "control_authorization_required";
+        return denied;
+    }
+    const Result access = evaluateAccess(name, it->second, context, grants);
+    if (!access.ok) return access;
+    return it->second->execute(input);
+}
+
+Result Runtime::executeControlledWithAccess(
+        const std::string& name, const Input& input,
+        const AccessContext& context, const std::vector<AccessGrant>& grants,
+        const std::vector<StandardEvidence>& standards,
+        const OwnerApproval& ownerApproval) const {
+    std::map<std::string, std::shared_ptr<Module> >::const_iterator it =
+        modules_.find(name);
+    if (it == modules_.end()) {
+        Result missing;
+        missing.module = name;
+        missing.message = "module_not_registered";
+        return missing;
+    }
+    if (!it->second->requiresControlAuthorization()) {
+        Result denied;
+        denied.module = name;
+        denied.message = "module_does_not_require_control_authorization";
+        return denied;
+    }
+    const Result access = evaluateAccess(name, it->second, context, grants);
+    if (!access.ok) return access;
 
     ControlGate gate;
     const ControlGateDecision decision = gate.evaluate(standards, ownerApproval);
@@ -76,7 +162,7 @@ std::vector<std::string> Runtime::moduleNames() const {
 }
 
 const char* Runtime::version() {
-    return "Pantheon Native Runtime 0.1.0";
+    return "Pantheon Native Runtime 0.2.0";
 }
 
 } // namespace pantheon
