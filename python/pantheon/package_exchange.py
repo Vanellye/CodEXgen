@@ -51,6 +51,8 @@ def _safe_relative_path(value: Any) -> PurePosixPath:
 
 def _load_manifest(bundle: Path) -> tuple[dict[str, Any], bytes]:
     manifest_path = bundle / "manifest.json"
+    if manifest_path.is_symlink() or not manifest_path.is_file():
+        raise PackageVerificationError("manifest.json is missing or unsafe")
     try:
         raw = manifest_path.read_bytes()
         manifest = json.loads(raw.decode("utf-8"), object_pairs_hook=_unique_object)
@@ -136,10 +138,13 @@ def verify_bundle(
     package contents. The trusted public key must be supplied out-of-band.
     """
     bundle = Path(bundle_dir).resolve(strict=True)
-    key_path = Path(trusted_public_key_path).resolve(strict=True)
+    key_input = Path(trusted_public_key_path)
+    if key_input.is_symlink():
+        raise PackageVerificationError("trusted public key must not be a symbolic link")
+    key_path = key_input.resolve(strict=True)
     if not bundle.is_dir():
         raise PackageVerificationError("bundle path must be a directory")
-    if not key_path.is_file() or key_path.is_symlink():
+    if not key_path.is_file():
         raise PackageVerificationError("trusted public key must be a regular file")
     if not isinstance(expected_key_sha256, str) or not SHA256_RE.fullmatch(expected_key_sha256):
         raise PackageVerificationError("expected key digest must be lowercase SHA-256")
