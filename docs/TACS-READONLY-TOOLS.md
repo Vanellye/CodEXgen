@@ -1,6 +1,6 @@
-# TACS Read-only Tooling
+# TACS Read-only Core
 
-The first implementation deliberately stops before USB export. It provides three independently callable operations:
+This document covers the read-only foundation. The expanded operations are documented in [TACS Advanced Operations](TACS-ADVANCED-OPERATIONS.md). The core provides three independently callable operations:
 
 - **Collector:** enumerates \`refs/tags\`, distinguishes lightweight and annotated tags, records direct and peeled object identities, and emits canonical JSON. It invokes only read-only Git commands.
 - **Language/cadence serializer:** validates schema version 1, NFC-normalizes strings, sorts object keys/tokens/phases, rejects floating-point values, and emits stable UTF-8 JSON plus a SHA-256 digest.
@@ -55,8 +55,7 @@ Tempo is optional and represented as an integer rational, never a float. Cadence
 - Signature verification checks only authenticity/integrity relative to the supplied public key. It does not establish that the signed content is correct, safe, current, or authorized.
 - The detached signature covers the exact bytes, including the final newline. Canonicalize before signing and verify the same bytes.
 - The private signing key stays outside the repository and removable media.
-- No USB discovery, mounting, writing, or export code is included.
-- No tag, branch, or repository reference is modified.
+- This core module never mounts media or writes Git refs. Separate advanced commands provide explicitly confirmed export and namespaced successor-tag creation.
 
 ## Current implementation limits
 
