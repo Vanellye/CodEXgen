@@ -26,6 +26,24 @@ class LocalChannelRouterTests(unittest.TestCase):
         self.assertEqual(received[0].payload["text"], "hello")
         self.assertEqual(self.router.delivery_state(event, "bob"), "delivered")
 
+
+    def test_payload_round_trip_preserves_zero_false_null_and_empty(self):
+        payload = {"zero": 0, "false": False, "null": None, "empty": ""}
+        event = self.router.push(
+            "realm-a", "alice", "data-record", payload, idempotency_key="preserve-values"
+        )
+        received = self.router.pull("realm-a", "bob")
+        self.assertEqual(received[0].event_id, event)
+        self.assertEqual(received[0].payload, payload)
+
+    def test_non_finite_payload_is_rejected_before_event_append(self):
+        with self.assertRaises(RouterError):
+            self.router.push(
+                "realm-a", "alice", "data-record", {"reading": float("nan")},
+                idempotency_key="reject-nan",
+            )
+        self.assertEqual(self.router.history("realm-a"), [])
+
     def test_unauthorized_push_and_pull_are_rejected(self):
         with self.assertRaises(PermissionDenied):
             self.router.push("realm-a", "bob", "message", {}, idempotency_key="x")
