@@ -113,10 +113,10 @@ jobs:
               --title "Pantheon auto-adoption: $BRANCH" \
               --body "## Automatic adoption proposal
 
-          - Source branch: `$BRANCH`
-          - Exact source head: `$HEAD_SHA`
+          - Source branch: $BRANCH
+          - Exact source head: $HEAD_SHA
           - Successful Branch Horizon validation: $RUN_URL
-          - Policy: `PANTHEON_DIVERGENCE_ADOPTION.md`
+          - Policy: PANTHEON_DIVERGENCE_ADOPTION.md
 
           This PR was opened by the opt-in Divergence Garden workflow after the trusted adoption gate and baseline tests passed. GitHub auto-merge is enabled; repository rules and required checks remain authoritative. No force-push, branch-protection bypass, or direct write to the target branch is used.
 
