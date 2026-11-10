@@ -22,6 +22,29 @@ public:
     }
 };
 
+
+class ControlledAccessModule : public AccessModule {
+public:
+    std::string name() const { return "controlled-access-module"; }
+    bool requiresControlAuthorization() const { return true; }
+};
+
+class TestOwnerApproval : public pantheon::OwnerApproval {
+public:
+    explicit TestOwnerApproval(bool approved) : approved_(approved) {}
+    bool approvedByAuthorizedOwner() const { return approved_; }
+private:
+    bool approved_;
+};
+
+static std::vector<pantheon::StandardEvidence> allStandards() {
+    std::vector<pantheon::StandardEvidence> standards;
+    for (unsigned int i = 1; i <= 38; ++i) {
+        standards.push_back(pantheon::StandardEvidence(i, true, "evidence-" + std::to_string(i)));
+    }
+    return standards;
+}
+
 static pantheon::AccessContext context() {
     pantheon::AccessContext value;
     value.subject = "user:local-owner";
@@ -91,5 +114,27 @@ int main() {
     pantheon::Result operationDenied = runtime.executeWithAccess(
         "access-module", pantheon::Input(), context(), wrongOperation);
     assert(!operationDenied.ok);
+
+    // A controlled resource module must pass both independent gates.
+    std::shared_ptr<pantheon::Module> controlled(new ControlledAccessModule());
+    assert(runtime.registerModule(controlled));
+    pantheon::Result bypassAttempt = runtime.executeControlled(
+        "controlled-access-module", pantheon::Input(), allStandards(),
+        TestOwnerApproval(true));
+    assert(!bypassAttempt.ok);
+    assert(bypassAttempt.message == "access_tablet_required");
+
+    pantheon::Result accessButNoOwner = runtime.executeControlledWithAccess(
+        "controlled-access-module", pantheon::Input(), context(), grants,
+        allStandards(), TestOwnerApproval(false));
+    assert(!accessButNoOwner.ok);
+    assert(accessButNoOwner.message ==
+           "control_gate_denied:authorized_owner_approval_required");
+
+    pantheon::Result bothGates = runtime.executeControlledWithAccess(
+        "controlled-access-module", pantheon::Input(), context(), grants,
+        allStandards(), TestOwnerApproval(true));
+    assert(bothGates.ok);
+    assert(bothGates.message == "resource_action_executed");
     return 0;
 }
