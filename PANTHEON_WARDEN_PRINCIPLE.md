@@ -29,6 +29,48 @@ Default state for an unverified or unclaimed object is `UNCLAIMED`, not adoptabl
 8. Ambiguous or incomplete checks fail closed; they do not silently repair or promote.
 9. The Warden enforces boundaries but cannot claim ownership or expand its powers.
 
+## Universal warning law
+
+Every operation, observation, proposal, transformation, and output must carry its applicable warnings. A warning must travel with the artifact or report it describes; it must not be hidden in a log that the recipient is unlikely to see.
+
+A warning is a disclosure, not an authorization and not an automatic veto. It must distinguish confirmed facts from inference and unknowns.
+
+### Minimum warning record
+
+Where applicable, each warning records:
+- stable warning code and severity (`INFO`, `CAUTION`, `HIGH`, or `BLOCKING`);
+- affected object, operation, branch, and exact commit/object identity;
+- evidence and detection method;
+- uncertainty, missing evidence, and known limitations;
+- possible impact and affected boundary;
+- reversibility and recovery/rollback path;
+- required consent, approval, or human review;
+- validation status and the condition that clears the warning.
+
+If a field is not applicable, say so; do not silently omit a material unknown.
+
+### Required behavior
+
+1. Attach warnings to Branch Horizon reports, peer comparisons, Divergence Garden proposals, adoption PRs, tag lifecycle records, migration plans, builds, dependency changes, permission changes, exports, and repository mutations.
+2. Show material warnings before a user-authorized action, not only after it.
+3. Preserve warnings in machine-readable artifacts and human-readable summaries.
+4. Do not downgrade, suppress, or clear a warning without recording the evidence, actor, and reason.
+5. Missing provenance, uncertain authorization, stale identity, failed validation, or an unverified destructive effect is `BLOCKING`; fail closed.
+6. A warning never grants permission. A clean warning list never proves safety, compatibility, or consent.
+7. Distinguish an empty warning list from a scan that did not run or was incomplete.
+8. Preserve historical warnings with the artifact/version they describe; later clearance does not rewrite history.
+
+### Machine-readable baseline
+
+```text
+WARNINGS_REQUIRED = ALL_OPERATIONS
+WARNINGS_TRAVEL_WITH = ARTIFACT_AND_REPORT
+WARNING_IS_PERMISSION = false
+SILENT_WARNING_SUPPRESSION = FORBIDDEN
+INCOMPLETE_EVIDENCE = BLOCKING
+EMPTY_WARNINGS != PROOF_OF_SAFETY
+```
+
 ## Scope
 
 - **Branch Horizon:** peering reports relationships and uncertainty; it cannot infer ownership, compatibility, merge permission, or consent from proximity, ancestry, matching declarations, or tags.
