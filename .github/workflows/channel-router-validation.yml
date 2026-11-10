@@ -1,0 +1,31 @@
+name: Channel Router Focused Validation
+
+on:
+  push:
+    paths:
+      - 'python/channel_router.py'
+      - 'tests/test_channel_router.py'
+      - '.github/workflows/channel-router-validation.yml'
+  pull_request:
+    paths:
+      - 'python/channel_router.py'
+      - 'tests/test_channel_router.py'
+      - '.github/workflows/channel-router-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  router-tests:
+    name: Channel router syntax and unit tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile router and focused tests
+        run: python -m py_compile python/channel_router.py tests/test_channel_router.py
+      - name: Run focused router tests
+        run: python -m unittest discover -s tests -p 'test_channel_router.py' -v
