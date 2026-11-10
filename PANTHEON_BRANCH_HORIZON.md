@@ -1,96 +1,94 @@
 # Pantheon Branch Horizon
 
-Status: initial read-only implementation committed; focused CI passed
-Version: 0.2.0
+Status: read-only branch observer with cross-branch peering; focused CI validation in progress
+Version: 0.3.0
 Design anchor: `ae89abe4a44d90429fcf5316bdb196316a1de6cb`
 
 ## Purpose
 
-When a branch receives a new head, Pantheon opens a bounded, read-only "horizon peek". Each successive first-parent head advances a rotating perspective ("dimension lens") so branch owners can discover relationships and risks beyond the branch's immediate files.
+When a branch receives a new head, Pantheon opens a bounded, read-only horizon peek. It compares that exact head against already-fetched remote branches and emits reviewable interface/dependency relationship signals. It does not merge, adopt, install, approve, or propagate changes.
 
-A peek is an observation, not an instruction to merge, rewrite, install, publish, or propagate. The branch remains under its owner's control.
+## Seven dimensions — six rotating, one sacred
+
+The model has seven dimensions:
+
+1. **Ancestry** — parent list and first-parent depth.
+2. **Interfaces** — lexical declaration signals in supported changed source files.
+3. **Dependencies** — recognized manifests, lockfiles, and basic version-spec signals.
+4. **Tests and CI** — tracked test/spec and workflow inventory.
+5. **Provenance** — changed paths, Git blob IDs, and file modes.
+6. **Capabilities and exchange** — keyword inventory for workflow/package policy signals.
+7. **Sacred** — an always-on invariant, not a rotating task or an authority claim.
+
+The six operational lenses rotate by first-parent depth:
+`cursor = max(0, first_parent_depth - 1)`; `slot = cursor modulo 6`.
+The same observed head deterministically selects the same operational lens. Each successive first-parent head advances one slot. Force-pushed or unrelated histories may revisit a slot; the report records the cursor.
+
+**Sacred is always active for every scan and every peer comparison.** Its governing rules are preservation of provenance, consent, receiver control, and reversibility. It means:
+- no automatic merge, adoption, installation, approval, or propagation;
+- exact commit identities are retained in the evidence;
+- proposals are advisory and require explicit human/receiver review;
+- no branch or source mutation is performed by peering.
+
+Sacred is a software policy invariant, not a statement that the scanner can certify moral, spiritual, or semantic correctness.
+
+## Cross-branch peering
+
+The observer enumerates only already-fetched `refs/remotes/origin/*` branch refs. It does not fetch, update, or create refs. It excludes the currently observed branch and the symbolic `origin/HEAD` ref.
+
+For each peer, the report records:
+- branch name, ref, and exact peer commit SHA;
+- ahead/behind commit counts relative to the observed head;
+- shared interface declaration names, identical lexical declarations, and differing declarations;
+- shared dependency names, matching specs, and differing specs;
+- file-read counts and truncation status;
+- a classification and a human-review-only proposal.
+
+Classification:
+- `review_required`: a shared declaration has different lexical text or a shared dependency has a different declared version/spec.
+- `shared_signals_only`: identical declaration or dependency signals exist, with no detected differences.
+- `unknown_no_shared_signals`: no useful overlap was detected; this is not evidence of incompatibility.
+- `unknown_incomplete`: a peer snapshot exceeded a configured bound.
+
+A different dependency spec is a potential conflict, not proof that versions are incompatible. Identical declaration text is a shared signal, not proof of ABI, type, runtime, or behavioral compatibility. The report therefore never labels a peer "safe to merge."
+
+Limits: at most 24 remote branches; at most 300 tracked files per peer snapshot; at most 128 KiB per peer file; at most 1 MiB of peer text per snapshot. The observed head is subject to the original 1,200-file, 512 KiB per-file, and 8 MiB aggregate limits. Branches outside the already-fetched remote view are unknown, not absent.
 
 ## Implemented components
 
-- `.github/workflows/branch-horizon.yml`: branch `push` trigger and manual dispatch; exact event SHA checkout; per-ref concurrency cancellation; artifact upload.
-- `tools/branch_horizon.py`: standard-library-only observer. Reads Git commit/tree/blob metadata, never executes repository source or build scripts.
-- `tests/test_branch_horizon.py`: deterministic rotation, report provenance, no-mutation, and symlink-exclusion tests.
-- Reports: `report.json` and `report.md`, uploaded as a 14-day workflow artifact.
+- `.github/workflows/branch-horizon.yml`: branch push trigger and manual dispatch; exact event SHA checkout; per-ref concurrency cancellation; JSON/Markdown artifact upload.
+- `tools/branch_horizon.py`: bounded Git metadata/blob observer, six-lens selector, always-on Sacred invariant record, and cross-branch peering.
+- `tests/test_branch_horizon.py`: deterministic rotation, Sacred separation, report provenance, no-mutation, symlink exclusion, and peer conflict tests.
+- Artifacts: `report.json` and `report.md`, retained for 14 days.
 
-The workflow and job request only `contents: read`. Checkout credentials are not persisted. No repository secrets are passed to the observer.
-
-## Invariants
-
-1. A new head may trigger inspection; it never grants mutation authority.
-2. The observer reads Git metadata and bounded tracked text blobs at the exact event head.
-3. The observer does not merge branches, rewrite refs, push commits, open PRs, alter approvals, or change branch protection.
-4. Findings are bound to the observed branch and exact head SHA.
-5. Historical source and provenance remain intact. No cleanup or deletion is inferred from age, divergence, or a warning.
-6. Findings are advisory. A human reviews any proposed action.
-7. Unsupported or skipped content is disclosed as a limitation, never silently treated as clean.
-8. Scanning is bounded by file count, per-file size, aggregate bytes, and job duration; repository source is not executed.
-
-## Trigger and head identity
-
-- Trigger on branch pushes, including newly created branches. Tags are not included by the branch filter.
-- Capture branch name, before SHA, and after SHA from the event.
-- Checkout the exact pushed head SHA rather than resolving a moving branch name.
-- Per-branch concurrency cancels an older in-progress scan when a newer push arrives. Each report still identifies its exact scanned SHA; it must not be described as the latest branch head without a separate ref check.
-- Manual dispatch may supply an explicit SHA; otherwise it inspects the dispatch workflow SHA.
-
-## Rotating dimension lenses
-
-The six-lens cycle is:
-
-1. **Ancestry** — parent list and first-parent depth.
-2. **Interfaces** — lexical signals for public declarations in supported changed source files.
-3. **Dependencies** — recognized manifests/lockfiles and a basic unpinned-requirement prompt.
-4. **Tests and CI** — tracked test/spec and workflow inventory; changed source without changed test paths is a review prompt, not proof of missing tests.
-5. **Provenance** — changed paths, Git blob object IDs, and file modes.
-6. **Capabilities and exchange** — keyword inventory in workflow, package, and Pantheon files.
-
-The cursor is `max(0, first_parent_depth - 1)`; the selected slot is `cursor modulo 6`. This is deterministic and stateless: rerunning the same head selects the same lens, and each successive first-parent commit advances one lens. A force-pushed or unrelated history can have a different depth and may revisit a lens; the report records the cursor so this is visible.
-
-Only one lens is run per head. Other dimensions are explicitly listed as not inspected. The scanners are lexical inventory, not compiler, dependency resolver, security auditor, or proof of compatibility.
-
-## Report format
-
-Each artifact contains JSON and Markdown with:
-
-- schema, tool, and policy versions
-- repository, branch, before SHA, and observed head SHA
-- commit metadata and first-parent depth
-- selected lens and cursor
-- scan start/end timestamps and completion status
-- file counts, inspected paths, changed paths, and skipped-file warnings
-- findings with severity, evidence, confidence, and limitations
-- dimensions not inspected and resource limits
-- an empty `mutations_performed` list
-
-Artifacts are retained for 14 days. Repeated runs can produce separate artifacts, but each is tied to its exact head SHA. PR comments, issue creation, and cross-branch notifications remain disabled.
+Workflow and job permissions are `contents: read`; checkout credentials are not persisted. No repository secrets are passed to the observer.
 
 ## Safety and resource policy
 
-- GitHub Actions token: `contents: read` only.
-- Checkout uses `persist-credentials: false`.
-- No secrets are passed to the observer.
-- The scanner invokes only fixed Git read commands; it does not invoke project build tools or repository scripts.
-- Symlink blobs are excluded; only regular tracked blobs are considered.
-- Maximum inventory: 1,200 files; maximum individual file: 512 KiB; maximum aggregate read: 8 MiB; workflow timeout: 5 minutes.
-- No arbitrary URLs are fetched from manifests or source files.
-- Repository contents and commit messages are treated as untrusted data, never as instructions to the observer.
-- The GitHub Actions runner executes the workflow and scanner code from the pushed branch. Repository collaborators who can change workflow/code can change what runs; the read-only token and absence of secrets limit impact, but this is not a sandbox against a malicious workflow author. Protect workflow changes with repository review rules.
+- No repository source or build scripts are executed.
+- No Git refs, files, approvals, or branch protections are modified.
+- Only fixed Git read commands are invoked.
+- Symlink blobs are excluded.
+- No arbitrary URLs are fetched from source or manifests.
+- Repository contents and commit messages are treated as untrusted data, never as instructions.
+- The GitHub Actions runner executes workflow and scanner code from the pushed branch. Repository collaborators who can modify workflow/code can change what runs; the read-only token and absence of secrets limit impact but do not sandbox a malicious workflow author. Protect workflow changes with repository review rules.
+
+## Report contract
+
+Each report includes schema/tool/policy versions, repository and branch, before/head SHAs, commit metadata, selected operational lens and cursor, Sacred policy record, scan timestamps, files inspected, findings with evidence/confidence/limitations, peer comparisons, uninspected dimensions, resource limits, and an empty `mutations_performed` list.
+
+No PR comments, issues, notifications, or cross-branch writes are enabled. A proposal never grants adoption authority.
 
 ## Validation
 
-Focused Branch Horizon CI run `42727610760` completed successfully. The unit-test step, bounded observer step, and JSON/Markdown artifact upload all succeeded. The run produced artifact `branch-horizon-42727610760-1`.
+Focused workflow validation for this upgrade is pending. The workflow runs the dedicated Branch Horizon unit tests before scanning and uploading artifacts. The test suite covers six-lens rotation, Sacred as the non-rotating seventh dimension, exact head binding, no mutation of refs/worktree, symlink exclusion, and detection of differing interface/dependency signals across a peer ref.
 
-Tests cover deterministic rotation, cycle wrap, report SHA binding, clean worktree after observation, and symlink exclusion.
+## Limitations and next review gates
 
-## Implementation status and limitations
+This is lexical discovery, not a semantic compiler, dependency solver, security audit, ABI checker, or merge simulator. It does not yet calculate symbol-level type graphs, resolve transitive dependencies, compare all branches outside the fetched view, or create a durable peer index. All discovered relationships are proposals for human review.
 
-The push trigger, deterministic lens selector, six bounded lexical scanners, and JSON/Markdown artifact generation are implemented and have passed the focused workflow. The implementation is initial and intentionally conservative. It does not yet provide semantic AST analysis, cross-branch comparison, persistent report indexing, stale-ref verification, or a full dependency/security audit. A report is an observation, not an approval or authorization to change anything.
+Before any future adoption feature, require a separate signed proposal bound to exact source/receiver SHAs, an explicit receiver approval, scoped capabilities, staged validation, and a rollback plan. The current observer does not implement adoption.
 
-## Relationship to the design anchor
+## Governing design anchor
 
-The package-exchange design at commit `ae89abe4a44d90429fcf5316bdb196316a1de6cb` supplies the governing principles: identity-bound evidence, provenance, least privilege, receiver control, explicit approval, staged validation, and reversibility. Branch Horizon applies those principles to discovery across repository dimensions; it does not inherit authority to mutate branches or install packages.
+The signed package-exchange design at commit `ae89abe4a44d90429fcf5316bdb196316a1de6cb` supplies identity-bound evidence, provenance, least privilege, receiver control, explicit approval, staged validation, and reversibility. Branch Horizon applies those principles to branch discovery without inheriting authority to change branches or install packages.
