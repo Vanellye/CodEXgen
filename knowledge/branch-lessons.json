@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0",
+  "repository": "Vanellye/CodEXgen",
+  "audit_date": "2026-11-10",
+  "records": [
+    {
+      "id": "KNOW-WARDEN-001",
+      "branch": "pantheon/branch-horizon",
+      "commit": "7b3de5ecf47a64bd3039b97c6a920f5d6b6f41c7",
+      "path": "PANTHEON_WARDEN_PRINCIPLE.md",
+      "blob_sha1": "a7765bff74cafbf62623455094dfd7e13ff3d9c8",
+      "type": "governance_principle",
+      "evidence": "observed",
+      "lesson": "The Warden observes and enforces boundaries; it owns no branch, tag, source, identity, or unclaimed state. Observation, absence, and tags never grant adoption authority.",
+      "limits": "Policy artifact inspected; implementation conformance across all workflows is not established.",
+      "review": "accepted_for_reuse"
+    },
+    {
+      "id": "KNOW-HORIZON-001",
+      "branch": "pantheon/branch-horizon",
+      "commit": "7b3de5ecf47a64bd3039b97c6a920f5d6b6f41c7",
+      "path": "PANTHEON_BRANCH_HORIZON.md",
+      "blob_sha1": "71ebfdb2691263ee925640f29335253a802522d5",
+      "type": "implementation_design",
+      "evidence": "observed",
+      "lesson": "Use exact-SHA-bound, bounded, read-only branch observation. Treat lexical overlap as a signal, not compatibility proof; keep proposals separate from adoption authority.",
+      "supporting_test": {
+        "path": "tests/test_branch_horizon.py",
+        "blob_sha1": "9a6357c8f117f37106bc45edd58f977ee30d1119"
+      },
+      "limits": "The design describes lexical discovery and bounded peer visibility, not a semantic compiler or complete view of all remote branches.",
+      "review": "accepted_for_reuse"
+    },
+    {
+      "id": "KNOW-DIVERGENCE-001",
+      "branch": "pantheon/divergence-adoption",
+      "commit": "bdb4c8dae89140743ec06e6f4ce48774b2617d2c",
+      "path": "PANTHEON_DIVERGENCE_ADOPTION.md",
+      "blob_sha1": "6486459cb199ce04c8483c7a3bf341ac1cca5c81",
+      "type": "proposal",
+      "evidence": "proposed",
+      "lesson": "If adoption is ever enabled, keep it opt-in, exact-SHA-bound, narrow, staged, PR-based, and subject to existing protections. The source explicitly says the workflow is not active until merged into default branch.",
+      "supporting_test": {
+        "path": "tests/test_adoption_gate.py",
+        "blob_sha1": "2129accdc03fd32e50743f67f39762ca77160f03"
+      },
+      "limits": "Do not claim automatic adoption is active or that any branch was adopted.",
+      "review": "hold_for_evidence"
+    },
+    {
+      "id": "KNOW-PACKAGE-001",
+      "branch": "pantheon/signed-package-exchange",
+      "commit": "ae89abe4a44d90429fcf5316bdb196316a1de6cb",
+      "path": "PANTHEON_PACKAGE_EXCHANGE.md",
+      "blob_sha1": "5dd942ba2efc3569a648e2036aa4aa38e36c15f2",
+      "type": "design_specification",
+      "evidence": "proposed",
+      "lesson": "Separate signature verification, policy checks, receiver review, explicit approval, staging, validation, and installation. Signature validity never substitutes for receiver consent.",
+      "limits": "Document is labeled design specification, not implemented capability.",
+      "review": "accepted_as_design_reference"
+    },
+    {
+      "id": "KNOW-COGNITIVE-001",
+      "branch": "cognitive-layer-2",
+      "commit": "68d83bf0c8e4b3d38cdf189123f27f66336e57de",
+      "path": "docs/cognitive-layer-2.md",
+      "blob_sha1": "6dcc474d5fa8652c117cde49164ebc334c2dba4f",
+      "type": "implementation_design",
+      "evidence": "observed",
+      "lesson": "Append evidence with lineage; surface temporal conflicts without choosing a winner; require human review before downstream promotion.",
+      "supporting_test": {
+        "path": "tests/test_cognitive_layer.py",
+        "blob_sha1": "ed6ad6c73b4357630c81b90e5dbc231472b1ebd6"
+      },
+      "limits": "Branch-local test source inspected; this catalog does not report a fresh test run or cross-branch integration.",
+      "review": "accepted_for_reuse"
+    },
+    {
+      "id": "KNOW-CHANNEL-001",
+      "branch": "integration/channel-router-main",
+      "commit": "52da4ddc4a1230b9215afb9044eeb0d40fba8b9e",
+      "path": "docs/channel-router-integration.md",
+      "blob_sha1": "8d77964847402c2cb6931ed0ec1be790884ecd87",
+      "type": "integration_design",
+      "evidence": "observed",
+      "lesson": "Separate publish and read grants; make push and pull distinct; require recipient acceptance for consequential requests; preserve append-only event and decision history.",
+      "limits": "Local-only, no network transport or action execution. SQLite file/schema owner can still tamper with storage.",
+      "review": "accepted_for_reuse"
+    },
+    {
+      "id": "KNOW-GITBRIDGE-001",
+      "branch": "integration/git-freedom-router",
+      "commit": "e3bd5bccc9d6180cc685b1a5340549a526ad99f8",
+      "path": "docs/GIT-FREEDOM-ROUTER-REVIEW.md",
+      "blob_sha1": "2e96ae02e3c2f928d07a30d9c06a8d8262642acf",
+      "type": "security_review",
+      "evidence": "observed",
+      "lesson": "Fast-forward-only pull, feature-branch-scoped push, dirty-tree rejection, and no force-push path are useful boundaries. Vault cryptography, workspace overwrite, branch-guard coverage, token lifecycle, and device TLS need further review.",
+      "limits": "Review findings are not proof of remediation or device-level behavior.",
+      "review": "needs_revision"
+    },
+    {
+      "id": "KNOW-SOURCEDIGEST-001",
+      "branch": "pantheon/source-digest-engine",
+      "commit": "0226d6c75e7745dabbd51c77c499651815431ffb",
+      "path": "PANTHEON.md",
+      "blob_sha1": "b807800f7f4376c1e1f568a86adc896482e52500",
+      "type": "tool_specification",
+      "evidence": "observed",
+      "lesson": "A source cataloger can inspect explicitly approved paths, parse without executing, emit metadata and hashes, and refuse silent output replacement.",
+      "limits": "Specification and test inventory inspected; not a claim of complete security or production validation.",
+      "review": "accepted_as_design_reference"
+    },
+    {
+      "id": "KNOW-ZERO-001",
+      "branch": "zero-dissipation-anchor",
+      "commit": "232238bd6d3f4a91db3a3c0ec6c459cc74e6fee0",
+      "path": "docs/zero-dissipation-protocol.md",
+      "blob_sha1": "32638c7aa2b5ac1b8dcdc22f6ba35ca92c61054a",
+      "type": "governance_protocol",
+      "evidence": "observed",
+      "lesson": "Distinguish zero, false, empty, null, unknown, and deleted. Detect read-only first; resolve only with evidence, tests, rollback, and authorized propagation.",
+      "limits": "Protocol text is not proof every branch currently implements it.",
+      "review": "accepted_for_reuse"
+    },
+    {
+      "id": "KNOW-RESONANCE-001",
+      "branch": "leveled-consciousness",
+      "commit": "d73a606ec2a8b5d060abb06da77e92a9294d201c",
+      "path": "docs/RESONANCE-STEWARDSHIP.md",
+      "blob_sha1": "d5b65f65eda4cfe98ff7b51c96b1acc803d9c62c",
+      "type": "stewardship_principle",
+      "evidence": "observed",
+      "lesson": "Keep spiritual meaning, digital information operations, and measured physical phenomena distinct. Personal data propagation requires explicit authorization; metaphor or simulation is not biological evidence.",
+      "limits": "This is a stewardship document; it does not establish any physical or biological effect.",
+      "review": "accepted_for_reuse"
+    },
+    {
+      "id": "KNOW-HISTORY-001",
+      "branch": "history",
+      "commit": "362c7192692d5c48bec1e7374287fb32d3552c6a",
+      "path": "HISTORY.md",
+      "blob_sha1": "fef69f37b4d6a193c72d487bb4578e21d3882462",
+      "type": "historical_claim",
+      "evidence": "observed",
+      "lesson": "Preserve the branch's own chronology and merge/ancestry claims as historical assertions with their original context.",
+      "limits": "The claim that a merge commit connects histories was not independently verified in this pass.",
+      "review": "hold_for_evidence"
+    },
+    {
+      "id": "KNOW-HEROES-001",
+      "branch": "heroes-raw",
+      "commit": "6dbb03dc9f2b79d8d791a34b5964d7fd031dfa0c",
+      "path": "HEROES.md",
+      "blob_sha1": "6203e4cd298f49dc59223a6574867fc8c76f261a",
+      "type": "inventory_record",
+      "evidence": "observed",
+      "lesson": "A documented inventory of load-bearing zeros illustrates that numeric zero may encode versions, sizes, values, or control flow and must not be transformed by appearance alone.",
+      "limits": "The file's count and explanations are source claims; no independent recount was performed in this pass.",
+      "review": "accepted_for_reuse"
+    }
+  ]
+}

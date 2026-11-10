@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "repository": "Vanellye/CodEXgen",
+  "snapshot_id": "branch-heads-2026-11-10T01:18:00Z",
+  "retrieved_at_utc": "2026-11-10T01:18:00Z",
+  "source": "GitHub branches API, page 1, per_page=100",
+  "branch_count": 27,
+  "meaning": "Exact branch refs and commit heads observed during canonical-account preparation. This is a point-in-time observation, not a claim that branches are immutable or semantically audited.",
+  "refs": [
+    {
+      "name": "Vanellye-patch-1",
+      "head_sha": "cf732a008b5642243ab5e4133a5ce882f6513dca"
+    },
+    {
+      "name": "build-speed",
+      "head_sha": "fbec48cff29207732b6a8d17511a9af84b84434e"
+    },
+    {
+      "name": "cognitive-layer-2",
+      "head_sha": "68d83bf0c8e4b3d38cdf189123f27f66336e57de"
+    },
+    {
+      "name": "edify",
+      "head_sha": "82e92324383bbcd02e2a3a938e8d7e4dbff4d837"
+    },
+    {
+      "name": "fiction-body",
+      "head_sha": "71ab22da2f04c2b58171e1bafe889cc524a0ed61"
+    },
+    {
+      "name": "fiction-creation",
+      "head_sha": "63d398d8ecad5e686b5570023c065f89e2918790"
+    },
+    {
+      "name": "fiction-mind",
+      "head_sha": "ef62753230622ccbe755e560b0c49b268b882127"
+    },
+    {
+      "name": "heroes-raw",
+      "head_sha": "6dbb03dc9f2b79d8d791a34b5964d7fd031dfa0c"
+    },
+    {
+      "name": "history",
+      "head_sha": "362c7192692d5c48bec1e7374287fb32d3552c6a"
+    },
+    {
+      "name": "hypotheticals",
+      "head_sha": "860fc3e26e147da1aa4ee38659676830ad0ec099"
+    },
+    {
+      "name": "integration/channel-router-main",
+      "head_sha": "52da4ddc4a1230b9215afb9044eeb0d40fba8b9e"
+    },
+    {
+      "name": "integration/git-freedom-router",
+      "head_sha": "e3bd5bccc9d6180cc685b1a5340549a526ad99f8"
+    },
+    {
+      "name": "knowledge-recycle-foundation",
+      "head_sha": "ab1cd44ac9260c69742fd88ea4e27f6bf9eb1c59"
+    },
+    {
+      "name": "leveled-consciousness",
+      "head_sha": "d73a606ec2a8b5d060abb06da77e92a9294d201c"
+    },
+    {
+      "name": "main",
+      "head_sha": "67ecdb5c5bd148b6fd7c9945fa648f3c89a93a95"
+    },
+    {
+      "name": "main-11-of-38",
+      "head_sha": "9ed3ca42e3e9b8862f019bc4069e36d6aafc1380"
+    },
+    {
+      "name": "mold",
+      "head_sha": "11736208aa6c8288a59601da4cce2b841989ff9e"
+    },
+    {
+      "name": "olpirt/stride-next",
+      "head_sha": "a8c6a90efc09e27afbead0f07191e17bf4faa431"
+    },
+    {
+      "name": "pantheon/branch-horizon",
+      "head_sha": "93545f384490bf77821722b49f5de361a7597a5d"
+    },
+    {
+      "name": "pantheon/cpp-html-consent-engine",
+      "head_sha": "a02629956deda7db4416cdbb1bc9b3c5badf90a0"
+    },
+    {
+      "name": "pantheon/divergence-adoption",
+      "head_sha": "057b100077129dd54fa29a4a31f71b8f9ad6474f"
+    },
+    {
+      "name": "pantheon/signed-package-exchange",
+      "head_sha": "ae89abe4a44d90429fcf5316bdb196316a1de6cb"
+    },
+    {
+      "name": "pantheon/source-digest-engine",
+      "head_sha": "0226d6c75e7745dabbd51c77c499651815431ffb"
+    },
+    {
+      "name": "repair/quarantine-legacy-python-syntax",
+      "head_sha": "5a1cc0bca432f1294eb6e33a870e508f42068f74"
+    },
+    {
+      "name": "review/legacy-syntax-quarantine",
+      "head_sha": "2e3fd32c786aafc137de0a4cd79178fd14506bc2"
+    },
+    {
+      "name": "review/two-snapshot-synthesis",
+      "head_sha": "82635ceb38990a7e1078fbeef78e59e809125b4e"
+    },
+    {
+      "name": "zero-dissipation-anchor",
+      "head_sha": "232238bd6d3f4a91db3a3c0ec6c459cc74e6fee0"
+    }
+  ]
+}
