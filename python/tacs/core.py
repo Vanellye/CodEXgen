@@ -13,7 +13,6 @@ import os
 import re
 import subprocess
 import sys
-import tempfile
 import unicodedata
 from pathlib import Path
 from typing import Any
@@ -79,7 +78,7 @@ def _safe_remote_identity(remote: str) -> str:
     match = re.match(r"^(?:[^@/]+@)?([^:/]+):(.+)$", remote)
     if match and "://" not in remote:
         host, path = match.groups()
-        return "https://" + host.lower() + "/" + path.removesuffix(".git")
+        return "https://" + host.lower() + "/" + (path[:-4] if path.endswith(".git") else path)
     parsed = urlsplit(remote)
     if parsed.scheme and parsed.hostname:
         path = parsed.path.rstrip("/")
@@ -131,8 +130,10 @@ def _parse_annotated_tag(repo: Path, tag_object_id: str) -> dict[str, Any]:
 def collect_tags(repository: str | os.PathLike[str]) -> dict[str, Any]:
     """Collect all refs/tags without changing refs, index, worktree, or repository config."""
     repo = Path(repository).expanduser().resolve()
-    if not (repo / ".git").exists() and _git(repo, "rev-parse", "--git-dir").strip() == "":
-        raise TacsError("not a Git repository")
+    try:
+        _git(repo, "rev-parse", "--git-dir")
+    except TacsError as exc:
+        raise TacsError("not a Git repository: " + str(repo)) from exc
     identity = _repository_identity(repo)
     listing = _git(
         repo, "for-each-ref",
@@ -156,8 +157,9 @@ def collect_tags(repository: str | os.PathLike[str]) -> dict[str, Any]:
         target_type = _git(repo, "cat-file", "-t", target_id).strip()
         if object_type == "tag":
             annotation = _parse_annotated_tag(repo, tag_object_id)
-            if annotation["tag_object_target"] != target_id:
-                raise TacsError("annotated tag target mismatch: " + refname)
+            direct_target_type = _git(repo, "cat-file", "-t", annotation["tag_object_target"]).strip()
+            if direct_target_type != annotation["declared_target_type"]:
+                raise TacsError("annotated tag target type mismatch: " + refname)
             kind = "annotated"
         else:
             annotation = None
@@ -168,6 +170,9 @@ def collect_tags(repository: str | os.PathLike[str]) -> dict[str, Any]:
             "ref": refname,
             "kind": kind,
             "tag_object_id": tag_object_id,
+            "direct_target_object_id": (
+                annotation["tag_object_target"] if annotation else tag_object_id
+            ),
             "target_object_id": target_id,
             "target_object_type": target_type,
             "annotation": annotation,
@@ -285,7 +290,7 @@ def verify_ed25519_signature(
         return True
     # A bad signature is a normal negative result; operational failures are errors.
     diagnostic = (proc.stderr + "\n" + proc.stdout).lower()
-    if "verification failure" in diagnostic or "signature" in diagnostic or proc.returncode == 1:
+    if "verification failure" in diagnostic:
         return False
     raise TacsError("OpenSSL verification could not run: " + diagnostic.strip())
 
