@@ -19,6 +19,7 @@ class AnalysisError(ValueError):
     """Raised when an approval, source, or output boundary is invalid."""
 
 MAX_SOURCE_BYTES = 2 * 1024 * 1024
+MANIFEST_SCHEMA_VERSION = 1
 
 def _inside(child: Path, parent: Path) -> bool:
     try:
@@ -180,12 +181,26 @@ def generate_pantheon_modules(
             "source_path": record["source_path"],
         })
     manifest = {
+        "schema_version": MANIFEST_SCHEMA_VERSION,
         "format": "pantheon-source-catalog-v1",
         "generated_at_utc": generated_at,
         "execution_performed": False,
         "source_root_label": source.name,
+        "provenance": {
+            "digest_algorithm": "sha256",
+            "source_record_count": len(records),
+            "artifact_record_count": len(artifacts),
+        },
         "approved_sources": records,
         "generated_artifacts": artifacts,
     }
-    _atomic_write(output / "manifest.json", json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
+    canonical = json.dumps(
+        manifest, ensure_ascii=False, sort_keys=True,
+        separators=(",", ":"), allow_nan=False,
+    ).encode("utf-8")
+    manifest["manifest_sha256"] = hashlib.sha256(canonical).hexdigest()
+    rendered = json.dumps(
+        manifest, ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False
+    ) + "\n"
+    _atomic_write(output / "manifest.json", rendered)
     return manifest
