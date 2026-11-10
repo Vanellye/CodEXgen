@@ -115,3 +115,64 @@ These are separable capabilities, not mandatory directories or a central service
 
 Each branch can implement, replace, or omit a capability independently. Peering requires a documented interface and relevant tests; it does not require shared internal implementation or surrender of branch identity.
 
+## Three evidence gates for peering
+
+These gates make the truth statement actionable. They are review practices, not a central authority or a requirement that every branch use the same internal design.
+
+### 1. Provenance checks — where did this come from?
+
+For each proposed component or change, record:
+
+- Source repository, branch, and exact commit SHA.
+- Original file path and, when relevant, the source blob or content hash.
+- Author/contributor attribution where available; do not infer missing authorship.
+- Whether the material is original, copied, adapted, generated, or externally supplied.
+- Any license, attribution, or usage constraints that are known; mark unknowns for review.
+- The transformations made during extraction or adaptation, with links to the untouched source.
+- Evidence status: observed, tested, proposed, hypothetical, fictional, or unknown.
+
+**Pass condition:** another reviewer can trace the candidate back to its origin and distinguish original material from later interpretation. Missing provenance is recorded as a gap, not filled by guesswork.
+
+### 2. Interface review — how will the parts meet?
+
+Before connecting components, document:
+
+- The public inputs, outputs, events, and expected side effects.
+- Data formats, version assumptions, error behavior, and resource/lifecycle ownership.
+- Runtime, platform, build-tool, and dependency requirements.
+- Permission boundaries, secrets handling, network access, and any destructive or externally visible operation.
+- Compatibility adapters or version negotiation needed between the two sides.
+- What remains independent and what is intentionally shared.
+- A rollback or disable path that does not destroy either source.
+
+Review both directions: what the candidate expects from its host, and what it exposes to other components. Prefer a narrow adapter over copying an entire branch or making one branch adopt another's internal architecture.
+
+**Pass condition:** the boundary is understandable, bounded, and reviewable; incompatible assumptions and unresolved risks are explicitly listed. A documented interface is not proof of runtime compatibility.
+
+### 3. Reproducible tests — can another person verify it?
+
+For each candidate, preserve:
+
+- Exact source commit and test commit SHA.
+- Toolchain, runtime, SDK, dependency versions, and relevant configuration.
+- Exact commands or workflow used, including required environment variables with secret values omitted.
+- Test fixtures and expected outcomes; use deterministic fixtures where possible.
+- Results for unit, integration, compatibility, security-sensitive, and build checks as applicable.
+- Logs or artifact references, timestamps, and artifact hashes where available.
+- Known skipped tests, flaky tests, platform gaps, and manual-only checks.
+
+A test result applies only to the exact commit and environment recorded. A passing compile does not prove correct behavior, security, or device compatibility. A skipped or unavailable test is **not verified**, not a pass.
+
+**Pass condition:** an independent reviewer can rerun the stated checks and compare outcomes against the recorded evidence. Any non-reproducible result remains qualified.
+
+### Review outcome
+
+Use one of four explicit outcomes for each proposed peering:
+
+- **Ready for limited trial:** all relevant gates have evidence; remaining limitations are bounded and accepted.
+- **Needs revision:** a specific provenance, interface, or test gap can be corrected.
+- **Hold for evidence:** source, behavior, compatibility, or risk is not yet understood.
+- **Do not peer:** the change conflicts with consent, safety, licensing, integrity, or an independent branch's stated boundaries.
+
+A pass never authorizes a merge by itself. The affected contributors retain their own decision rights, and consequential shared changes still require explicit authorization.
+
