@@ -69,12 +69,28 @@ class JobStore:
 
     def __init__(self, database: str | Path = "stride_jobs.sqlite3") -> None:
         self.database = str(database)
-        if self.database != ":memory:":
+        self._memory_uri: Optional[str] = None
+        self._memory_anchor: Optional[sqlite3.Connection] = None
+        if self.database == ":memory:":
+            # Each sqlite3.connect(":memory:") creates a separate database.
+            # A shared-cache URI plus an anchor connection preserves one
+            # isolated in-memory database across this store's short-lived
+            # operation connections.
+            self._memory_uri = f"file:stride_jobs_{uuid.uuid4().hex}?mode=memory&cache=shared"
+            self._memory_anchor = sqlite3.connect(
+                self._memory_uri, uri=True, timeout=10.0
+            )
+            self._memory_anchor.row_factory = sqlite3.Row
+            self._memory_anchor.execute("PRAGMA foreign_keys = ON")
+        else:
             Path(self.database).expanduser().resolve().parent.mkdir(parents=True, exist_ok=True)
         self._initialize()
 
     def _connect(self) -> sqlite3.Connection:
-        connection = sqlite3.connect(self.database, timeout=10.0)
+        if self._memory_uri is not None:
+            connection = sqlite3.connect(self._memory_uri, uri=True, timeout=10.0)
+        else:
+            connection = sqlite3.connect(self.database, timeout=10.0)
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA foreign_keys = ON")
         return connection
