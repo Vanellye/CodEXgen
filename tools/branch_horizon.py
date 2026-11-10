@@ -268,7 +268,7 @@ def _peer_refs(repo: Path, current_branch: str) -> tuple[list[dict[str, str]], b
         if ref == "origin/HEAD":
             continue
         branch = ref.removeprefix("origin/")
-        if branch == current_branch or branch.endswith("/" + current_branch):
+        if branch == current_branch:
             continue
         if len(peers) >= MAX_PEER_BRANCHES:
             truncated = True
