@@ -19,7 +19,7 @@ from typing import Any
 
 VERSION = "0.2.0"
 POLICY_VERSION = "branch-horizon-readonly-v1"
-LENSES = (
+ROTATING_LENSES = (
     "ancestry",
     "interfaces",
     "dependencies",
@@ -27,7 +27,15 @@ LENSES = (
     "provenance",
     "capabilities_exchange",
 )
+# The seventh dimension is always active as a governing invariant, never a
+# rotating task: preserve provenance, consent, receiver control, and reversibility.
+SACRED_DIMENSION = "sacred"
+LENSES = ROTATING_LENSES + (SACRED_DIMENSION,)
 MAX_FILES = 1200
+MAX_PEER_BRANCHES = 24
+MAX_PEER_FILES = 300
+MAX_PEER_FILE_BYTES = 128 * 1024
+MAX_PEER_TOTAL_BYTES = 1024 * 1024
 MAX_FILE_BYTES = 512 * 1024
 MAX_TOTAL_BYTES = 8 * 1024 * 1024
 TEXT_SUFFIXES = {
@@ -48,8 +56,8 @@ TEST_PARTS = ("test", "tests", "spec", "specs")
 def stable_lens(first_parent_depth: int) -> tuple[int, str]:
     """Successive first-parent heads rotate one slot; reruns remain identical."""
     cursor = max(0, first_parent_depth - 1)
-    slot = cursor % len(LENSES)
-    return cursor, LENSES[slot]
+    slot = cursor % len(ROTATING_LENSES)
+    return cursor, ROTATING_LENSES[slot]
 
 
 def _git(repo: Path, *args: str, binary: bool = False) -> bytes:
@@ -246,6 +254,228 @@ def _scan_lens(lens: str, repo: Path, head: str, depth: int,
     return findings, sorted(set(inspected))
 
 
+
+def _peer_refs(repo: Path, current_branch: str) -> tuple[list[dict[str, str]], bool]:
+    """Discover already-fetched remote branch refs; never fetch or update refs."""
+    raw = _git(repo, "for-each-ref", "--format=%(refname:short) %(objectname)", "refs/remotes/origin")
+    peers: list[dict[str, str]] = []
+    truncated = False
+    for line in _text(raw).splitlines():
+        parts = line.strip().split()
+        if len(parts) != 2:
+            continue
+        ref, sha = parts
+        if ref == "origin/HEAD":
+            continue
+        branch = ref.removeprefix("origin/")
+        if branch == current_branch or branch.endswith("/" + current_branch):
+            continue
+        if len(peers) >= MAX_PEER_BRANCHES:
+            truncated = True
+            break
+        peers.append({"branch": branch, "ref": ref, "sha": sha})
+    return sorted(peers, key=lambda item: item["branch"]), truncated
+
+
+def _peer_snapshot(repo: Path, ref: str) -> tuple[dict[str, dict[str, str]], dict[str, str], bool]:
+    raw = _git(repo, "ls-tree", "-r", "-z", ref)
+    entries: dict[str, dict[str, str]] = {}
+    truncated = False
+    for item in raw.split(b"\0"):
+        if not item:
+            continue
+        try:
+            meta, raw_path = item.split(b"\t", 1)
+            mode, kind, oid = meta.decode("ascii").split(" ")
+            path = raw_path.decode("utf-8", "surrogateescape")
+        except (ValueError, UnicodeDecodeError):
+            continue
+        if mode == "120000" or kind != "blob":
+            continue
+        if len(entries) >= MAX_PEER_FILES:
+            truncated = True
+            break
+        entries[path] = {"mode": mode, "oid": oid}
+
+    contents: dict[str, str] = {}
+    total = 0
+    for path in sorted(entries):
+        if Path(path).suffix.lower() not in TEXT_SUFFIXES and Path(path).name not in MANIFEST_NAMES:
+            continue
+        oid = entries[path]["oid"]
+        size = int(_git(repo, "cat-file", "-s", oid).strip() or b"0")
+        if size > MAX_PEER_FILE_BYTES or total + size > MAX_PEER_TOTAL_BYTES:
+            truncated = True
+            continue
+        blob = _git(repo, "cat-file", "blob", oid, binary=True)
+        total += len(blob)
+        contents[path] = _text(blob)
+    return entries, contents, truncated
+
+
+def _interface_signals(contents: dict[str, str]) -> dict[str, str]:
+    patterns = (
+        r"^\s*(?:export\s+)?(?:interface|class|type|function)\s+([A-Za-z_$][\w$]*)",
+        r"^\s*(?:pub\s+)?(?:class|struct|enum|trait|fn)\s+([A-Za-z_]\w*)",
+        r"^\s*(?:class|interface|enum|object|fun)\s+([A-Za-z_]\w*)",
+        r"^\s*(?:class|def)\s+([A-Za-z_]\w*)",
+        r"^\s*(?:class|struct|enum|union|typedef)\s+([A-Za-z_]\w*)",
+    )
+    signals: dict[str, str] = {}
+    for path, body in contents.items():
+        if Path(path).suffix.lower() not in {
+            ".py", ".pyi", ".h", ".hh", ".hpp", ".hxx", ".c", ".cc", ".cpp",
+            ".kt", ".kts", ".java", ".js", ".jsx", ".ts", ".tsx", ".rs", ".go",
+        }:
+            continue
+        for line in body.splitlines():
+            for pattern in patterns:
+                match = re.search(pattern, line)
+                if match:
+                    name = match.group(1)
+                    signals.setdefault(name, " ".join(line.strip().split()))
+                    break
+    return signals
+
+
+def _dependency_signals(contents: dict[str, str]) -> dict[str, str]:
+    deps: dict[str, str] = {}
+    for path, body in contents.items():
+        name = Path(path).name
+        if name == "requirements.txt":
+            for line in body.splitlines():
+                value = line.strip()
+                if not value or value.startswith(("#", "-")):
+                    continue
+                match = re.match(r"([A-Za-z0-9_.-]+)(?:\[[^\]]+\])?\s*(.*)", value)
+                if match:
+                    deps.setdefault(match.group(1).lower().replace("_", "-"), match.group(2).strip() or "unspecified")
+        elif name == "package.json":
+            try:
+                data = json.loads(body)
+                for section in ("dependencies", "devDependencies", "peerDependencies", "optionalDependencies"):
+                    values = data.get(section, {})
+                    if isinstance(values, dict):
+                        for package, version in values.items():
+                            deps.setdefault(package.lower(), str(version))
+            except (ValueError, AttributeError):
+                continue
+        elif name == "go.mod":
+            for line in body.splitlines():
+                match = re.match(r"^\s*([A-Za-z0-9._/-]+)\s+(v[^\s]+)", line)
+                if match:
+                    deps.setdefault(match.group(1).lower(), match.group(2))
+        elif name == "Cargo.toml":
+            in_dependencies = False
+            for line in body.splitlines():
+                stripped = line.strip()
+                if stripped.startswith("["):
+                    in_dependencies = stripped in {
+                        "[dependencies]", "[dev-dependencies]", "[build-dependencies]"
+                    }
+                elif in_dependencies:
+                    match = re.match(r'([A-Za-z0-9_-]+)\s*=\s*["{]([^"}]+)', stripped)
+                    if match:
+                        deps.setdefault(match.group(1).lower().replace("_", "-"), match.group(2))
+    return deps
+
+
+def _compare_peer(repo: Path, head: str, peer: dict[str, str]) -> dict[str, Any]:
+    entries, contents, truncated = _peer_snapshot(repo, peer["ref"])
+    current_entries, current_contents, current_truncated = _peer_snapshot(repo, head)
+    current_interfaces = _interface_signals(current_contents)
+    peer_interfaces = _interface_signals(contents)
+    shared_symbols = sorted(set(current_interfaces) & set(peer_interfaces))
+    identical_symbols = [
+        name for name in shared_symbols
+        if current_interfaces[name] == peer_interfaces[name]
+    ]
+    differing_symbols = [
+        name for name in shared_symbols
+        if current_interfaces[name] != peer_interfaces[name]
+    ]
+    current_deps = _dependency_signals(current_contents)
+    peer_deps = _dependency_signals(contents)
+    shared_deps = sorted(set(current_deps) & set(peer_deps))
+    same_deps = [name for name in shared_deps if current_deps[name] == peer_deps[name]]
+    differing_deps = [name for name in shared_deps if current_deps[name] != peer_deps[name]]
+
+    ancestry = _text(_git(repo, "rev-list", "--left-right", "--count", f"{head}...{peer['sha']}")).strip().split()
+    ahead = int(ancestry[0]) if len(ancestry) > 0 else None
+    behind = int(ancestry[1]) if len(ancestry) > 1 else None
+    if truncated or current_truncated:
+        classification = "unknown_incomplete"
+    elif differing_symbols or differing_deps:
+        classification = "review_required"
+    elif identical_symbols or same_deps:
+        classification = "shared_signals_only"
+    else:
+        classification = "unknown_no_shared_signals"
+
+    return {
+        "branch": peer["branch"],
+        "ref": peer["ref"],
+        "peer_sha": peer["sha"],
+        "classification": classification,
+        "ancestry": {"head_only_commits": ahead, "peer_only_commits": behind},
+        "interface_signals": {
+            "shared_names": shared_symbols,
+            "identical_declarations": identical_symbols,
+            "different_declarations": differing_symbols,
+        },
+        "dependency_signals": {
+            "shared_names": shared_deps,
+            "same_specs": same_deps,
+            "different_specs": differing_deps,
+            "head_specs_for_differences": {name: current_deps[name] for name in differing_deps},
+            "peer_specs_for_differences": {name: peer_deps[name] for name in differing_deps},
+        },
+        "evidence": {
+            "head_text_files_read": len(current_contents),
+            "peer_text_files_read": len(contents),
+            "head_truncated": current_truncated,
+            "peer_truncated": truncated,
+        },
+        "proposal": {
+            "action": "human_review_only",
+            "suggested_review": (
+                "Inspect declaration and dependency differences before proposing an interface adapter or dependency alignment."
+                if classification == "review_required"
+                else "Review shared signals as discovery leads; do not infer semantic compatibility."
+            ),
+            "adoption_authorized": False,
+        },
+        "sacred_guard": {
+            "status": "preserved",
+            "rules": [
+                "compare exact immutable commit identities",
+                "read-only observation; no branch or file mutation",
+                "no automatic merge, adoption, installation, approval, or propagation",
+                "retain provenance and require receiver review",
+            ],
+        },
+    }
+
+
+def _cross_branch_peering(repo: Path, branch: str, head: str) -> dict[str, Any]:
+    peers, branch_limit_hit = _peer_refs(repo, branch)
+    comparisons = [_compare_peer(repo, head, peer) for peer in peers]
+    return {
+        "enabled": True,
+        "mode": "read_only",
+        "peer_count": len(comparisons),
+        "branch_limit_hit": branch_limit_hit,
+        "limits": {
+            "max_peer_branches": MAX_PEER_BRANCHES,
+            "max_peer_files": MAX_PEER_FILES,
+            "max_peer_file_bytes": MAX_PEER_FILE_BYTES,
+            "max_peer_total_bytes": MAX_PEER_TOTAL_BYTES,
+        },
+        "comparisons": comparisons,
+        "adoption_authorized": False,
+    }
+
+
 def build_report(repo: Path, branch: str, before: str, head: str) -> dict[str, Any]:
     started = datetime.now(timezone.utc).isoformat()
     commit_raw = _git(repo, "show", "-s", "--format=%H%n%P%n%an%n%aI%n%s", head)
@@ -263,6 +493,7 @@ def build_report(repo: Path, branch: str, before: str, head: str) -> dict[str, A
     contents, skipped = _read_blobs(repo, entries)
     changed = _changed_paths(repo, head)
     findings, inspected = _scan_lens(lens, repo, head, depth, entries, contents, changed, commit)
+    peer_report = _cross_branch_peering(repo, branch, head)
     incomplete = tree_truncated or bool(skipped)
     if tree_truncated:
         findings.append(_finding("warning", "File inventory limit reached", [],
@@ -291,12 +522,21 @@ def build_report(repo: Path, branch: str, before: str, head: str) -> dict[str, A
         "files_inspected": inspected,
         "changed_paths": changed,
         "findings": findings,
-        "dimensions_not_inspected": [name for name in LENSES if name != lens],
+        "dimensions_not_inspected": [name for name in ROTATING_LENSES if name != lens],
+        "sacred_dimension": {
+            "name": SACRED_DIMENSION,
+            "mode": "always_on_invariant",
+            "principles": ["provenance", "consent", "receiver_control", "reversibility"],
+            "adoption_authorized": False,
+        },
+        "cross_branch_peering": peer_report,
         "limits": {"max_files": MAX_FILES, "max_file_bytes": MAX_FILE_BYTES, "max_total_bytes": MAX_TOTAL_BYTES},
         "mutations_performed": [],
         "limitations": [
             "Read-only lexical inventory; no source code or build scripts were executed.",
-            "Only one rotating lens was scanned for this head.",
+            "Only one of six operational lenses was selected for this head; the seventh Sacred dimension is an always-on invariant.",
+            "Cross-branch interface and dependency matching is lexical and does not prove semantic compatibility.",
+            "Only already-fetched remote branches are compared; branch refs outside the fetched view are unknown.",
             "Static heuristics may miss language-specific constructs and semantic relationships.",
         ],
     }
@@ -323,7 +563,16 @@ def render_markdown(report: dict[str, Any]) -> str:
         if item.get("limitation"):
             lines.append(f"- Limitation: {item['limitation']}")
         lines.append("")
-    lines += ["## Dimensions not inspected", ""]
+    lines += ["## Sacred dimension", "",
+              "- Always-on invariant: provenance, consent, receiver control, and reversibility.",
+              "- No proposal authorizes adoption; explicit receiver review is required.",
+              "", "## Cross-branch peering", "",
+              f"- Peers compared: {report['cross_branch_peering']['peer_count']}",
+              f"- Mode: {report['cross_branch_peering']['mode']}",
+              "- Interface and dependency matches are discovery signals, not proof of compatibility.",
+              "- Differing declarations or dependency specs are flagged for human review.",
+              "- No merge, adoption, installation, approval, or propagation is authorized.",
+              "", "## Dimensions not inspected", ""]
     lines += [f"- {name}" for name in report["dimensions_not_inspected"]]
     lines += ["", "## Safety", "",
               "- No repository code was executed.",
