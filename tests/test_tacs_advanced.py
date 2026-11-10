@@ -8,7 +8,7 @@ def git(repo,*args):
     return subprocess.run(["git","-C",str(repo),*args],check=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True).stdout.strip()
 def make_repo(root):
     git(root,"init","-q");git(root,"config","user.name","TACS Test");git(root,"config","user.email","tacs@example.invalid")
-    (root/"seed.txt").write_text("ancestry\n",encoding="utf-8");git(root,"add","seed.txt");git(root,"commit","-qm","seed");git(root,"tag","lightweight")
+    (root/"seed.txt").write_text("ancestry\n",encoding="utf-8");git(root,"add","seed.txt");git(root,"commit","-qm","seed");git(root,"tag","lightweight");return git(root,"rev-parse","HEAD")
 def metadata():
     return {"schema_version":1,"language":{"schema_version":1,"tokens":[{"token_id":"rise","glyph":"ơ","pronunciation":"oh","gloss":"emergence","role":"state"}]},"cadence":{"schema_version":1,"phases":[{"index":0,"token_ids":["rise"],"beats":1}],"tempo":None}}
 
