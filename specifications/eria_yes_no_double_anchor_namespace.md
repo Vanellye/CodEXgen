@@ -337,6 +337,60 @@ Every convergence should identify both its **expanse** (new relationships, capab
 
 This is a proposed semantic and governance rule. It does not modify runtime behavior, grant ownership, or authorize merging branches or rewriting repository history.
 
+
+## 13. Canonical wording, aliases, and visible variation
+
+### 13.1 Canonical expression without historical erasure
+
+ERIA shall standardize inconsistent spellings, aliases, labels, and representations when evidence establishes that they refer to the same concept. The purpose is to reduce ambiguity and prevent misleading or divergent wording in active interfaces, documentation, generated output, and code-facing vocabulary.
+
+**Standardization changes the preferred expression; it does not erase the provenance of prior expressions.**
+
+For each normalized concept, maintain a terminology record containing:
+
+- a stable concept ID;
+- the canonical spelling, label, and semantic definition;
+- recognized variants, aliases, historical spellings, abbreviations, and code representations;
+- the source location, branch, commit, language, version, and date for each observed variant;
+- the reason the variants are considered equivalent, with supporting evidence and confidence;
+- any known distinctions, conflicting meanings, or contexts where a variant must not be substituted;
+- the mapping decision, reviewer or authority, and effective version;
+- compatibility, deprecation, and rollback instructions where code or public interfaces are affected.
+
+### 13.2 Normalize presentation; preserve the record
+
+When equivalence is established, active presentation may use the canonical form consistently. Search, parsing, migration, and compatibility layers should continue to recognize documented historical variants where safe and appropriate.
+
+Historical source files, commits, tags, signed artifacts, logs, and provenance records are not rewritten merely to make spelling uniform. A new commit may update active documentation or code to the canonical form, while the original spelling and its origin remain recoverable through version control and the terminology record.
+
+Do not describe this process as deletion, erasure, or destruction of the variants. They become **registered aliases or superseded forms** with traceable origins.
+
+### 13.3 Semantic equivalence gate
+
+Do not normalize two expressions merely because they look or sound similar. Before treating them as one concept:
+
+1. compare definitions, behavior, context, types, and usage;
+2. identify whether the difference is spelling-only, a synonym, a legacy label, a language-specific representation, or a genuinely different concept;
+3. record evidence and uncertainty;
+4. ask the bounded YES/NO question where the mapping is consequential;
+5. keep ambiguous or conflicting cases UNRESOLVED;
+6. test parsers, serializers, APIs, generated code, documentation links, and downstream consumers;
+7. publish a reversible mapping and compatibility plan.
+
+A NO rejects the proposed equivalence, not either expression's historical existence. CANT blocks a mapping that violates law, rights, security, or a declared invariant. NOT changes predicate meaning only; it is not a spelling-normalization tool.
+
+### 13.4 Safe migration of code-facing names
+
+For code identifiers, schemas, commands, and public APIs, distinguish the canonical display label from the executable identifier. Prefer compatibility aliases, deprecation warnings, adapters, and staged migrations before changing a public or persisted identifier.
+
+A code-facing rename requires a reviewable change set, reference updates, compatibility tests, migration notes, and rollback. Never silently change serialized values, database keys, command-line interfaces, wire protocols, or signed content.
+
+### 13.5 Governing rule
+
+> Standardize the word that people and systems use now; retain the record of every form that brought it here. Correct misleading variation without falsifying origin. Unify expression only where evidence establishes shared meaning; preserve distinction wherever meaning differs.
+
+This section authorizes a terminology-governance method for future reviewed changes. It does not claim that a repository-wide scan, code rewrite, runtime migration, or deployment has already occurred.
+
 ## Governing principle
 
 **YES connects by explicit agreement. NO distinguishes by explicit refusal. CANT protects declared boundaries. NOT carries meaning through negation. Continuity may cross boundaries without erasing distinction; names may evolve in essence without falsifying origin; harmful logic may be excluded without erasing the entities or evidence it affected.**
