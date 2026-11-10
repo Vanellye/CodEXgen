@@ -1,4 +1,4 @@
-name: Pantheon Automatic Adoption
+name: Pantheon Adoption Proposal
 
 # This privileged workflow is defined on the default branch and reacts only to
 # successful Branch Horizon runs from explicitly opted-in divergence branches.
@@ -87,13 +87,13 @@ jobs:
           raise SystemExit(0 if result.wasSuccessful() else 1)
           PY
 
-  adopt:
+  propose:
     needs: validate
     if: ${{ needs.validate.result == 'success' && needs.validate.outputs.eligible == 'true' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
-      contents: write
+      contents: read
       pull-requests: write
     steps:
       - name: Checkout default branch only
@@ -102,7 +102,7 @@ jobs:
           ref: ${{ github.event.repository.default_branch }}
           persist-credentials: false
 
-      - name: Open adoption PR and enable GitHub auto-merge
+      - name: Open review-only adoption proposal
         env:
           GH_TOKEN: ${{ github.token }}
           BRANCH: ${{ github.event.workflow_run.head_branch }}
@@ -128,11 +128,11 @@ jobs:
           - Successful Branch Horizon validation: $RUN_URL
           - Policy: PANTHEON_DIVERGENCE_ADOPTION.md
 
-          This PR was opened by the opt-in Divergence Garden workflow after the trusted adoption gate and baseline tests passed. GitHub auto-merge is enabled; repository rules and required checks remain authoritative. No force-push, branch-protection bypass, or direct write to the target branch is used.
+          This PR was opened by the opt-in Divergence Garden workflow after the trusted eligibility gate and candidate tests passed. It remains open for explicit receiver review and approval. No automatic merge, force-push, branch-protection bypass, or direct write to the target branch is performed.
 
-          If the source head changes, a new successful validation is required before adoption."
+          If the source head changes, a new successful validation is required before review can continue."
           )
             PR_NUMBER="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$BRANCH" --base "$TARGET" --state open --json number --jq '.[0].number')"
           fi
 
-          gh pr merge "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --auto --squash
+          echo "Proposal opened as PR #$PR_NUMBER; receiver review is required."
