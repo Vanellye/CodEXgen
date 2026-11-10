@@ -49,6 +49,46 @@ Where applicable, each warning records:
 
 If a field is not applicable, say so; do not silently omit a material unknown.
 
+### Review, recovery, and warning clearance
+
+Every warning must expose three independently reviewable sections. These are required fields in the warning record, not optional prose.
+
+#### Reversibility and recovery instructions
+
+Record:
+- reversibility: `REVERSIBLE`, `PARTIALLY_REVERSIBLE`, `IRREVERSIBLE`, or `UNKNOWN`;
+- the exact pre-operation state and immutable backup/reference needed for recovery;
+- ordered, executable recovery steps, including the responsible authorized actor;
+- expected post-recovery state and how it will be verified;
+- data, history, identity, or capability that cannot be restored;
+- recovery test evidence, or an explicit statement that recovery has not been tested.
+
+If recovery is unknown, untested for a high-impact operation, or depends on unavailable material, disclose that limitation. Do not describe an operation as reversible merely because a new commit can be made.
+
+#### For review
+
+Every warning must carry a review section with:
+- review state: `PENDING`, `APPROVED`, `REJECTED`, or `NEEDS_REVISION`;
+- reviewer identity/role and review timestamp, when review has occurred;
+- evidence examined and policy/version used;
+- objections, unresolved questions, and required changes;
+- whether independent or receiver-side review is required.
+
+A review state of `APPROVED` acknowledges only the specific warning and scope reviewed. It does not grant adoption, merge, execution, or mutation authority.
+
+#### Conditions for clearing the warning
+
+Each warning must declare explicit, testable clearance conditions when it is created. A warning may be marked `CLEARED` only when:
+1. every declared clearance condition has been met;
+2. supporting evidence is attached and bound to exact object/commit identities;
+3. the required reviewer or authorized verifier records the decision;
+4. relevant tests/checks pass against the exact candidate state;
+5. residual risk and limitations are recorded.
+
+The clearance record must preserve the original warning and include the changed condition, resolution evidence, verifier identity/role, timestamp, validation results, and exact artifact/commit identity. If conditions are not met, retain the warning as open or mark it `NEEDS_REVISION`; do not silently remove it.
+
+Warnings do not clear merely because a branch advances, a tag is promoted, time passes, a workflow is rerun, or an unrelated check succeeds. A new commit requires re-evaluation against that exact commit. A cleared warning remains in the historical record; clearance never rewrites history.
+
 ### Required behavior
 
 1. Attach warnings to Branch Horizon reports, peer comparisons, Divergence Garden proposals, adoption PRs, tag lifecycle records, migration plans, builds, dependency changes, permission changes, exports, and repository mutations.
