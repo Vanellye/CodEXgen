@@ -463,6 +463,7 @@ def _cross_branch_peering(repo: Path, branch: str, head: str) -> dict[str, Any]:
     return {
         "enabled": True,
         "mode": "read_only",
+        "visibility": "remote_refs_found" if comparisons else "no_remote_branch_refs_visible",
         "peer_count": len(comparisons),
         "branch_limit_hit": branch_limit_hit,
         "limits": {
@@ -494,7 +495,18 @@ def build_report(repo: Path, branch: str, before: str, head: str) -> dict[str, A
     changed = _changed_paths(repo, head)
     findings, inspected = _scan_lens(lens, repo, head, depth, entries, contents, changed, commit)
     peer_report = _cross_branch_peering(repo, branch, head)
-    incomplete = tree_truncated or bool(skipped)
+    peer_incomplete = peer_report["branch_limit_hit"] or any(
+        item["classification"] == "unknown_incomplete"
+        for item in peer_report["comparisons"]
+    )
+    incomplete = tree_truncated or bool(skipped) or peer_incomplete
+    if peer_report["branch_limit_hit"]:
+        findings.append(_finding("warning", "Peer branch limit reached", [],
+                                  f"Only the first {MAX_PEER_BRANCHES} eligible remote branches were compared.", "high"))
+    if not peer_report["peer_count"]:
+        findings.append(_finding("notice", "No remote peer refs visible", [],
+                                  "No already-fetched origin branch refs were available for comparison; this does not mean the repository has no other branches.",
+                                  "high"))
     if tree_truncated:
         findings.append(_finding("warning", "File inventory limit reached", [],
                                   f"Only the first {MAX_FILES} tracked blobs were inventoried.", "high"))
@@ -537,6 +549,7 @@ def build_report(repo: Path, branch: str, before: str, head: str) -> dict[str, A
             "Only one of six operational lenses was selected for this head; the seventh Sacred dimension is an always-on invariant.",
             "Cross-branch interface and dependency matching is lexical and does not prove semantic compatibility.",
             "Only already-fetched remote branches are compared; branch refs outside the fetched view are unknown.",
+            "A zero-peer result means no remote refs were visible to this checkout, not that no other branches exist.",
             "Static heuristics may miss language-specific constructs and semantic relationships.",
         ],
     }
@@ -568,6 +581,7 @@ def render_markdown(report: dict[str, Any]) -> str:
               "- No proposal authorizes adoption; explicit receiver review is required.",
               "", "## Cross-branch peering", "",
               f"- Peers compared: {report['cross_branch_peering']['peer_count']}",
+              f"- Visibility: {report['cross_branch_peering']['visibility']}",
               f"- Mode: {report['cross_branch_peering']['mode']}",
               "- Interface and dependency matches are discovery signals, not proof of compatibility.",
               "- Differing declarations or dependency specs are flagged for human review.",
