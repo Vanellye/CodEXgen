@@ -17,8 +17,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-VERSION = "0.2.0"
-POLICY_VERSION = "branch-horizon-readonly-v1"
+VERSION = "0.3.0"
+POLICY_VERSION = "branch-horizon-readonly-peering-v2"
 ROTATING_LENSES = (
     "ancestry",
     "interfaces",
