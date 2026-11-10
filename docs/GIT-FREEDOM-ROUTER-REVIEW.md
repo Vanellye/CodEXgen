@@ -21,7 +21,7 @@ The branch is intended to trigger the Android Java compile job. A successful com
 1. `TokenVault` uses AES-CBC with a separate HMAC and PBKDF2-HMAC-SHA1. Review cryptographic policy and platform-provider compatibility before release.
 2. The vault enforces a 12-character passphrase on save but only 8 characters on read; align or document this inconsistency.
 3. `writeLocalFile` checks canonical path containment but is not gated by the configured feature-branch guard; review whether file editing should require the same branch authorization.
-4. Workspace import writes into the repository and can replace existing working-tree files. It should preview conflicts or require an explicit overwrite decision before being exposed in the UI.
+4. **Addressed in the current branch:** workspace import now scans the complete selected tree before copying and refuses the import if any file would overwrite an existing path. It requests read permission only and uses exclusive file creation as a second conflict check. A provider/read failure can still leave newly created files from earlier in the copy; whole-tree rollback is not yet implemented.
 5. The shared bridge singleton retains the unlocked token in process memory. Review lifecycle and explicit lock behavior.
 6. Remote transport is intentionally disabled below API 21. This is a compatibility restriction, not proof of successful TLS on every API 21+ device.
 
@@ -41,3 +41,16 @@ The branch is intended to trigger the Android Java compile job. A successful com
 - No automatic UI integration.
 - No force update, history rewrite, or automatic branch deletion.
 - No claim of runtime/device validation until CI and device tests complete.
+
+
+## TRUE NORTH importer hardening
+
+The API 19+ workspace importer now:
+- takes a read-only persistable URI grant;
+- performs a full conflict scan before the first write;
+- rejects the entire import if an existing file would be replaced;
+- verifies canonical destination containment;
+- uses exclusive file creation to catch conflicts introduced after preflight;
+- deletes a newly created partial file if that file's stream copy fails.
+
+**Remaining limitation:** the import is not a whole-tree transaction. If the document provider fails after several new files have been copied, those newly created files may remain. The importer does not overwrite pre-existing files, but an operator may need to review and clean up a partial import.
