@@ -2,6 +2,10 @@
 
 Status: opt-in, fail-closed adoption proposal; no automatic adoption is active until this workflow is merged into the default branch.
 
+## Warden Principle
+
+This workflow is governed by [PANTHEON_WARDEN_PRINCIPLE.md](PANTHEON_WARDEN_PRINCIPLE.md). The Warden observes and enforces boundaries; it owns no branch, tag, source, or unclaimed state. Absence is not consent, zero is not deletion, and observation is not permission. Tags never independently authorize adoption. Every adoption remains explicitly authorized, provenance-bound, validated, receiver-controlled, and subject to repository protections.
+
 ## Intent
 
 Divergence is a capability, not a defect. A branch may explore an independent implementation without surrendering its identity. When its owner explicitly opts into automatic adoption, a narrow set of eligible improvements can be proposed to the default branch.
