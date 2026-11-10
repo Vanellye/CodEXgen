@@ -78,6 +78,10 @@ jobs:
           packages: 'platform-tools'
       - name: Install declared Android compile platform
         run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Run Android unit tests
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon --stacktrace :app:testDebugUnitTest
       - name: Build debug APK
         run: |
           chmod +x ./gradlew
