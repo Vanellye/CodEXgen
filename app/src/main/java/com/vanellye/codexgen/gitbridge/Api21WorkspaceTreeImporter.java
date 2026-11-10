@@ -65,15 +65,13 @@ public final class Api21WorkspaceTreeImporter {
                 if (!safeName(name) || skip(name)) continue;
 
                 File target = new File(destination, name).getCanonicalFile();
-                if (!target.getPath().startsWith(rootPath))
+                if (!WorkspaceImportPolicy.isWithinRoot(target, root))
                     throw new SecurityException("Workspace path escaped repository.");
 
                 boolean directory = DocumentsContract.Document.MIME_TYPE_DIR.equals(mime);
-                if (target.exists()) {
-                    if (!directory || !target.isDirectory()) {
-                        conflicts.add(relativePath(root, target));
-                        continue;
-                    }
+                if (WorkspaceImportPolicy.isConflict(target, directory)) {
+                    conflicts.add(relativePath(root, target));
+                    continue;
                 }
                 if (directory) {
                     scanChildren(treeUri, id, target, root, rootPath, conflicts);
@@ -173,12 +171,10 @@ public final class Api21WorkspaceTreeImporter {
     }
 
     private boolean safeName(String name) {
-        return name != null && name.length() > 0 && !".".equals(name) &&
-            !"..".equals(name) && name.indexOf('/') < 0 && name.indexOf('\\') < 0;
+        return WorkspaceImportPolicy.isSafeName(name);
     }
 
     private boolean skip(String name) {
-        return ".git".equals(name) || ".gradle".equals(name) || "build".equals(name) ||
-            ".idea".equals(name) || ".kotlin".equals(name) || "local.properties".equals(name);
+        return WorkspaceImportPolicy.isSkippedName(name);
     }
 }
