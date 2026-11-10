@@ -1,7 +1,7 @@
 # Pantheon Signed Package Exchange
 
-Status: design specification (not yet implemented)
-Version: 0.1-draft
+Status: design specification with a partial read-only verifier implementation
+Version: 0.2-draft
 
 ## Purpose
 
@@ -134,4 +134,15 @@ The protocol must work offline. Online transports are replaceable adapters, not 
 
 ## Current implementation status
 
-This document is a design proposal only. It does not claim that package signing, encryption, sandboxing, approval UI, installation, or rollback have been implemented. The existing native source analyzer remains a separate non-executing inventory tool until these features are implemented and tested.
+**Implemented and tested on this branch:** `python/pantheon/package_exchange.py` provides a read-only directory-bundle verifier.
+
+- Requires a canonical, versioned JSON manifest and detached Ed25519 signature.
+- Verifies the manifest with OpenSSL against a public key supplied out-of-band.
+- Pins that key by an independently supplied SHA-256 fingerprint.
+- Checks sorted unique relative paths, source repository/ref/commit provenance, exact file inventory, byte sizes, and SHA-256 payload digests.
+- Rejects duplicate manifest keys, non-canonical JSON, traversal paths, symlinks, unlisted files, and mismatched payloads.
+- Does not extract, install, execute, forward, promote, or authorize adoption. A successful report explicitly returns `adoption_authorized: false`.
+
+Focused tests create ephemeral Ed25519 keys and exercise successful verification, key-pin mismatch, payload tampering, unlisted files, non-canonical manifests, and traversal rejection. These are test keys, not a production trust root.
+
+**Not implemented:** deterministic archive parsing, encryption, dependency resolution, capability review, signer revocation/key rotation, receiver approval UI, sandboxed validation, atomic installation, version activation, rollback, or transport adapters. The current verifier is a partial Phase 1 implementation and must not be described as a complete package exchange or installer. The existing native source analyzer remains a separate non-executing inventory tool.
