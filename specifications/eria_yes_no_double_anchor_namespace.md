@@ -208,9 +208,62 @@ Required safeguards before calling it protected:
 
 For affected entities, retain a traceable lineage from the entity and its names through language, historical geography, and continental attribution where reliable evidence exists. Record source, date, uncertainty, alternate accounts, and correction history. Never infer a continental source from a name, language, appearance, or symbolic association alone. Unknown origin remains unknown until evidence supports a more specific claim.
 
-A correction may change an active interpretation or exclude a harmful rule, but it must not falsify the historical identity or provenance record. Preserve the previous interpretation as a superseded record with its evidence and reason for correction.
+A correction may change an active interpretation or exclude a harmful rule, but it must not falsify the historical identity or provenance record. Persevere with the previous interpretation as a traceable, superseded record, retaining its evidence and reason for correction.
 
+
+
+## 11. Perseverance, root-folding, and OLPIRT origin
+
+### 11.1 Persevere as the active continuity verb
+
+Use **PERSEVERE** where the intended meaning is active, ongoing continuity through change, resistance, repair, and renewed effort. This is not merely keeping an unchanged object in storage: it is carrying forward what remains truthful and meaningful while allowing justified transformation.
+
+- **Persevere** with identity: maintain a traceable identity through change.
+- **Persevere** with evidence: retain the evidence and its history while interpretations are corrected.
+- **Persevere** with meaning: carry forward supported meaning without freezing it against new evidence.
+- **Persevere** with conservancy: sustain the conditions that allow continuity and responsible expansion.
+
+The ordinary technical term **preservation** remains available when referring precisely to immutable records, backups, or data-integrity operations. The conceptual principle is PERSEVERE; the storage mechanism must still be specified accurately.
+
+### 11.2 Root-folding
+
+Fold root terms into a **root-lineage map** rather than flattening them into one replacement word. Each root entry should connect:
+
+- the original term and spelling;
+- its language and documented linguistic source, when known;
+- the intended ERIA essence or sense;
+- the context in which that sense applies;
+- evidence, alternate interpretations, and confidence;
+- its relationship to the OLPIRT origin anchor;
+- the date and authority for any approved change.
+
+A root may have several senses. The map must retain those distinctions instead of manufacturing a single universal definition. Where linguistic origin is uncertain, mark it unresolved rather than treating a symbolic association as etymological fact.
+
+### 11.3 OLPIRT origin anchor
+
+**OLPIRT** is designated here as the proposed named origin anchor for this namespace lineage. It serves as the declared point from which this particular ERIA vocabulary and its root-folding history are organized.
+
+OLPIRT is not a license to rewrite external historical, linguistic, geographic, or continental origins. Those claims require their own evidence and provenance. The OLPIRT anchor records the project's declared conceptual lineage while leaving independently evidenced origins intact.
+
+Every mapped root should be able to answer:
+
+1. What is the source term?
+2. What meaning is being carried forward?
+3. What evidence supports that meaning?
+4. How does this root relate to OLPIRT?
+5. What remains uncertain or disputed?
+6. Has the mapping received an explicit YES, an explicit NO, or is it still UNRESOLVED?
+
+### 11.4 Truth-to-meaning rule
+
+A proposed meaning must remain attached to the evidence that supports it. A metaphor may guide design, but it must be labeled as metaphor; a hypothesis remains a hypothesis; a verified linguistic or historical claim must cite its source.
+
+**Proposed axiom:**
+
+> Persevere with what is true. Fold roots into a lineage without flattening their differences. Adhere meaning to evidence, and trace this namespace's declared origin to OLPIRT without claiming origins that the evidence cannot establish.
+
+This section is a proposal only. It does not authorize global renaming, alter language keywords, or modify existing runtime behavior.
 
 ## Governing principle
 
-**YES connects by explicit agreement. NO distinguishes by explicit refusal. CANT protects declared boundaries. NOT preserves meaning through negation. Continuity may cross boundaries without erasing distinction; names may evolve in essence without falsifying origin; harmful logic may be excluded without erasing the entities or evidence it affected.**
+**YES connects by explicit agreement. NO distinguishes by explicit refusal. CANT protects declared boundaries. NOT carries meaning through negation. Continuity may cross boundaries without erasing distinction; names may evolve in essence without falsifying origin; harmful logic may be excluded without erasing the entities or evidence it affected.**
