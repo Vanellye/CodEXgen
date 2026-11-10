@@ -47,13 +47,13 @@ def evaluate_candidate(
         reasons.append("branch_head_does_not_match_observed_sha")
 
     try:
-        git(trusted_repo, "rev-parse", "--verify", f"{base_ref}^{{commit}}")
-        git(trusted_repo, "merge-base", "--is-ancestor", base_ref, head_sha)
+        git(candidate_repo, "rev-parse", "--verify", f"{base_ref}^{{commit}}")
+        git(candidate_repo, "merge-base", "--is-ancestor", base_ref, head_sha)
     except (subprocess.CalledProcessError, FileNotFoundError):
         reasons.append("candidate_is_not_based_on_current_target")
 
     try:
-        raw = git(trusted_repo, "diff", "--name-status", f"{base_ref}...{head_sha}")
+        raw = git(candidate_repo, "diff", "--name-status", f"{base_ref}...{head_sha}")
         entries = [line.split("\t", 1) for line in raw.splitlines() if line]
         if not entries:
             reasons.append("no_changes_to_adopt")
@@ -68,7 +68,7 @@ def evaluate_candidate(
                 reasons.append(f"non_additive_change:{path}")
             if path not in ALLOWED_PATHS:
                 reasons.append(f"path_not_allowlisted:{path}")
-        numstat = git(trusted_repo, "diff", "--numstat", f"{base_ref}...{head_sha}")
+        numstat = git(candidate_repo, "diff", "--numstat", f"{base_ref}...{head_sha}")
         total = 0
         for line in numstat.splitlines():
             fields = line.split("\t")
