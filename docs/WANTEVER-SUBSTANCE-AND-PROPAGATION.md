@@ -105,3 +105,17 @@ No tag, signature, score, agent, CI job, or propagation process may independentl
 This document establishes a shared design contract. It does not claim that Wantever is implemented, tested, or deployed in every branch or runtime. Each branch must be inspected and updated through a separate reviewable change with focused tests. Until those changes are merged and verified, propagation means a shared reference and an adoption plan—not automatic code convergence.
 
 Wantever is a software and governance concept. It does not establish biological, electromagnetic, spiritual, or other physical effects.
+
+
+## 9. Inventory of invited invention
+
+Wantever can compose the ERIA inventory concepts defined in [ERIA — Inventory of Invited Invention](ERIA-INVENTORY-OF-INVITED-INVENTION.md):
+
+- **WITHOUT** records a known absence, deliberate omission, or unresolved gap.
+- **WONT** records a stated willingness, disposition, or intended direction.
+- Their composition may invite improvisation and generate proposals; it does not create consent or execution authority.
+- **CAP** records a scoped, evidenced, revisable boundary. It does not imply that a mandatory safety, legal, or policy limit may be bypassed.
+
+Preserve each source entry and its provenance. Keep proposals distinct from confirmed facts and adopted changes. Destructive force pushes remain prohibited by default; any exceptional non-fast-forward update requires exact scoped authorization, a recoverable prior reference, and an expected-old-SHA lease check. If those conditions are not met, retain the existing history.
+
+This vocabulary is an ERIA design contract. It does not claim that every runtime or branch already enforces these controls.
