@@ -21,14 +21,23 @@ public class WorkspaceImportPolicyTest {
         assertFalse(WorkspaceImportPolicy.isSkippedName("src"));
     }
 
-    @Test public void existingFilesConflictButExistingDirectoriesCanBeMerged() {
-        File root = new File("build/test-root");
+    @Test public void existingFilesConflictButExistingDirectoriesCanBeMerged() throws Exception {
+        File root = new File(System.getProperty("java.io.tmpdir"), "workspace-import-policy-test");
+        root.mkdirs();
         File file = new File(root, "README.md");
         File directory = new File(root, "src");
-        assertFalse(WorkspaceImportPolicy.isConflict(new File(root, "new.py"), false));
-        assertTrue(WorkspaceImportPolicy.isConflict(file, false));
-        assertTrue(WorkspaceImportPolicy.isConflict(file, true));
-        assertFalse(WorkspaceImportPolicy.isConflict(directory, true));
+        file.createNewFile();
+        directory.mkdir();
+        try {
+            assertFalse(WorkspaceImportPolicy.isConflict(new File(root, "new.py"), false));
+            assertTrue(WorkspaceImportPolicy.isConflict(file, false));
+            assertTrue(WorkspaceImportPolicy.isConflict(file, true));
+            assertFalse(WorkspaceImportPolicy.isConflict(directory, true));
+        } finally {
+            file.delete();
+            directory.delete();
+            root.delete();
+        }
     }
 
     @Test public void rejectsPathsOutsideRoot() throws Exception {
