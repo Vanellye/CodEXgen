@@ -1,98 +1,94 @@
 # Pantheon Branch Horizon
 
-Status: initial design proposal (read-only observer; implementation pending)
-Version: 0.1-draft
+Status: initial read-only implementation committed; CI execution pending
+Version: 0.2.0
 Design anchor: `ae89abe4a44d90429fcf5316bdb196316a1de6cb`
 
 ## Purpose
 
-When a branch receives a new head, Pantheon opens a bounded, read-only "horizon peek". Each new head is assigned a rotating perspective ("dimension lens") so branch owners can discover relationships and risks that are not visible from the branch's immediate files alone.
+When a branch receives a new head, Pantheon opens a bounded, read-only "horizon peek". Each successive first-parent head advances a rotating perspective ("dimension lens") so branch owners can discover relationships and risks beyond the branch's immediate files.
 
 A peek is an observation, not an instruction to merge, rewrite, install, publish, or propagate. The branch remains under its owner's control.
+
+## Implemented components
+
+- `.github/workflows/branch-horizon.yml`: branch `push` trigger and manual dispatch; exact event SHA checkout; per-ref concurrency cancellation; artifact upload.
+- `tools/branch_horizon.py`: standard-library-only observer. Reads Git commit/tree/blob metadata, never executes repository source or build scripts.
+- `tests/test_branch_horizon.py`: deterministic rotation, report provenance, no-mutation, and symlink-exclusion tests.
+- Reports: `report.json` and `report.md`, uploaded as a 14-day workflow artifact.
+
+The workflow and job request only `contents: read`. Checkout credentials are not persisted. No repository secrets are passed to the observer.
 
 ## Invariants
 
 1. A new head may trigger inspection; it never grants mutation authority.
-2. The observer reads only repository metadata and source explicitly available to the workflow.
+2. The observer reads Git metadata and bounded tracked text blobs at the exact event head.
 3. The observer does not merge branches, rewrite refs, push commits, open PRs, alter approvals, or change branch protection.
-4. Every finding includes the observed branch, exact head SHA, lens name, evidence paths/refs, and timestamp.
+4. Findings are bound to the observed branch and exact head SHA.
 5. Historical source and provenance remain intact. No cleanup or deletion is inferred from age, divergence, or a warning.
 6. Findings are advisory. A human reviews any proposed action.
-7. Missing permissions or incomplete visibility produce an explicit "unknown" result, never a guessed conclusion.
-8. The scan is bounded by file, time, and output-size limits; it does not execute repository code.
+7. Unsupported or skipped content is disclosed as a limitation, never silently treated as clean.
+8. Scanning is bounded by file count, per-file size, aggregate bytes, and job duration; repository source is not executed.
 
 ## Trigger and head identity
 
-- Trigger on a branch-head update (push), including newly created branches.
-- Capture the exact branch name, before SHA, and after SHA from the event.
-- Ignore tag events and empty/no-op updates.
-- Deduplicate by the pair `(branch, after_sha)`.
-- If the branch advances while a scan is running, finish or cancel the old scan safely and schedule the newer head; never publish an old report as the current head's report.
+- Trigger on branch pushes, including newly created branches. Tags are not included by the branch filter.
+- Capture branch name, before SHA, and after SHA from the event.
+- Checkout the exact pushed head SHA rather than resolving a moving branch name.
+- Per-branch concurrency cancels an older in-progress scan when a newer push arrives. Each report still identifies its exact scanned SHA; it must not be described as the latest branch head without a separate ref check.
+- Manual dispatch may supply an explicit SHA; otherwise it inspects the dispatch workflow SHA.
 
 ## Rotating dimension lenses
 
-Each distinct head receives one lens from this ordered cycle:
+The six-lens cycle is:
 
-1. **Ancestry** — parent chain, merge base, ahead/behind relationships, and nearby branch divergence.
-2. **Interfaces** — exported symbols, public headers, API declarations, and interface compatibility signals.
-3. **Dependencies** — manifests, lockfiles, dependency edges, version pinning, and missing declarations.
-4. **Tests and CI** — test locations, workflow coverage, validation status, and untested changed areas.
-5. **Provenance** — changed paths, commit authorship metadata, source hashes, preserved legacy artifacts, and traceability.
-6. **Capabilities and exchange** — requested permissions, package boundaries, trust/signature metadata, and receiver-approval requirements.
+1. **Ancestry** — parent list and first-parent depth.
+2. **Interfaces** — lexical signals for public declarations in supported changed source files.
+3. **Dependencies** — recognized manifests/lockfiles and a basic unpinned-requirement prompt.
+4. **Tests and CI** — tracked test/spec and workflow inventory; changed source without changed test paths is a review prompt, not proof of missing tests.
+5. **Provenance** — changed paths, Git blob object IDs, and file modes.
+6. **Capabilities and exchange** — keyword inventory in workflow, package, and Pantheon files.
 
-The lens cursor is deterministic and stateless: derive the slot from a stable hash of the branch name and head SHA modulo the lens count. This makes retries reproducible and avoids mutable shared state or race-prone counters. Record the selected lens and cursor value in every report. A later implementation may support an explicitly configured cycle seed, but it must remain reproducible and reviewable.
+The cursor is `max(0, first_parent_depth - 1)`; the selected slot is `cursor modulo 6`. This is deterministic and stateless: rerunning the same head selects the same lens, and each successive first-parent commit advances one lens. A force-pushed or unrelated history can have a different depth and may revisit a lens; the report records the cursor so this is visible.
 
-A lens is a focused peek, not a claim that all other dimensions were checked. Reports must state which dimensions were not inspected.
+Only one lens is run per head. Other dimensions are explicitly listed as not inspected. The scanners are lexical inventory, not compiler, dependency resolver, security auditor, or proof of compatibility.
 
 ## Report format
 
-Produce a Markdown summary and machine-readable JSON record containing:
+Each artifact contains JSON and Markdown with:
 
-- schema version
-- repository and branch
-- before SHA and observed head SHA
-- selected lens and deterministic cursor
-- scan start/end timestamps
-- files and metadata inspected
+- schema, tool, and policy versions
+- repository, branch, before SHA, and observed head SHA
+- commit metadata and first-parent depth
+- selected lens and cursor
+- scan start/end timestamps and completion status
+- file counts, inspected paths, changed paths, and skipped-file warnings
 - findings with severity, evidence, confidence, and limitations
-- dimensions not inspected
-- scan tool version and policy version
+- dimensions not inspected and resource limits
+- an empty `mutations_performed` list
 
-Reports should be retained as workflow artifacts. Publishing a report must not modify the source branch. PR comments, issue creation, and cross-branch notifications are separate opt-in capabilities and are disabled by default.
+Artifacts are retained for 14 days. Repeated runs can produce separate artifacts, but each is tied to its exact head SHA. PR comments, issue creation, and cross-branch notifications remain disabled.
 
 ## Safety and resource policy
 
-- Read-only repository token: contents/metadata read only; no write permissions.
-- No secrets are passed to analyzed code; no code is executed.
-- Reject symlink escapes and path traversal.
-- Respect configurable maximum file count, file size, total bytes, and scan duration.
-- Do not fetch arbitrary external URLs found in manifests or source files.
-- Treat repository contents and commit messages as untrusted data, never as instructions to the observer.
-- If a lens cannot inspect a language or file type reliably, report the limitation rather than infer absence.
+- GitHub Actions token: `contents: read` only.
+- Checkout uses `persist-credentials: false`.
+- No secrets are passed to the observer.
+- The scanner invokes only fixed Git read commands; it does not invoke project build tools or repository scripts.
+- Symlink blobs are excluded; only regular tracked blobs are considered.
+- Maximum inventory: 1,200 files; maximum individual file: 512 KiB; maximum aggregate read: 8 MiB; workflow timeout: 5 minutes.
+- No arbitrary URLs are fetched from manifests or source files.
+- Repository contents and commit messages are treated as untrusted data, never as instructions to the observer.
+- The GitHub Actions runner executes the workflow and scanner code from the pushed branch. Repository collaborators who can change workflow/code can change what runs; the read-only token and absence of secrets limit impact, but this is not a sandbox against a malicious workflow author. Protect workflow changes with repository review rules.
 
-## Acceptance criteria
+## Validation
 
-- A branch push creates one report bound to the exact resulting head SHA.
-- Re-running the same branch/head pair selects the same lens and produces a deduplicated report identity.
-- Different head identities rotate across the configured lens cycle.
-- The workflow has no write-capable token permissions.
-- The observer cannot push, merge, rewrite, delete, approve, or install anything.
-- An incomplete scan is clearly marked incomplete.
-- No source file or branch ref changes as a side effect of inspection.
-- Tests cover deterministic rotation, deduplication, stale-head handling, path safety, size limits, and report provenance.
+Tests cover deterministic rotation, cycle wrap, report SHA binding, clean worktree after observation, and symlink exclusion. CI execution is pending at the time of this specification update.
 
-## Implementation phases
+## Implementation status and limitations
 
-1. **Observer core:** deterministic lens selection, head identity, bounded read-only metadata collection, JSON/Markdown report.
-2. **GitHub event adapter:** push trigger and read-only token permissions; artifact-only output.
-3. **Lens modules:** implement each dimension independently, with per-lens tests and explicit coverage limits.
-4. **Review surface:** optional human-readable report index; any PR comments or notifications require separate opt-in.
-5. **Package integration:** optionally package the observer using the signed receiver-approved exchange protocol. A valid signature does not authorize installation or execution.
+The push trigger, deterministic lens selector, six bounded lexical scanners, and JSON/Markdown artifact generation are implemented. The implementation is initial and intentionally conservative. It does not yet provide semantic AST analysis, cross-branch comparison, persistent report indexing, stale-ref verification, or a full dependency/security audit. A report is an observation, not an approval or authorization to change anything.
 
 ## Relationship to the design anchor
 
 The package-exchange design at commit `ae89abe4a44d90429fcf5316bdb196316a1de6cb` supplies the governing principles: identity-bound evidence, provenance, least privilege, receiver control, explicit approval, staged validation, and reversibility. Branch Horizon applies those principles to discovery across repository dimensions; it does not inherit authority to mutate branches or install packages.
-
-## Current implementation status
-
-This file is a design proposal. It does not claim that the push trigger, rotating lens selector, scanners, reports, or tests have been implemented.
