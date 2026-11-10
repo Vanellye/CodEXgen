@@ -126,19 +126,20 @@ Cadence must be deterministic when serialized. No implicit wall-clock timing, ne
 - A successful digest check proves byte consistency, not correctness, identity, or authorization.
 - A valid signature proves possession of the corresponding signing key, not that the signed content is true or safe.
 
-## Implementation gates
-
-Before implementation:
-
-1. Approve the TACS record schema and invented-language lexicon format.
-2. Add fixtures for lightweight tags, annotated tags, missing objects, duplicate names across repositories, and correction chains.
-3. Implement a read-only collector and verifier first.
-4. Add deterministic serialization and digest tests.
-5. Add detached-signature verification using a maintained cryptographic library.
-6. Add USB export only after explicit path selection, safe-write/atomic-replace behavior, and recovery tests.
-7. Keep all Git ref mutation outside the collector/exporter; any later promotion requires a separate review and explicit approval.
-
 ## Implementation status
+
+The core collector, deterministic language/cadence serializer, and detached Ed25519 verifier are implemented and CI-verified.
+
+The advanced module now provides:
+- Embedded OpenPGP and SSH annotated-tag signature verification through Git, with explicit signer allowlisting
+- Read-only discovery of already-mounted removable devices on Linux, macOS, and Windows
+- Portable bundle export to a detected removable-media mount root, requiring exact destination confirmation and refusing overwrite
+- Append-only correction records with explicit approval and exclusive file creation
+- Dry-run successor-tag planning and signed namespaced tag creation with an explicit apply flag
+
+The advanced workflow and tests are in `.github/workflows/tacs-advanced.yml` and `tests/test_tacs_advanced.py`. The implementation and compile tests passed in GitHub Actions run [42732215339](https://github.com/Vanellye/CodEXgen/actions/runs/42732215339).
+
+**Operational boundaries:** no device was mounted or accessed during development. Media discovery does not mount devices. USB export requires the user to select and confirm a currently mounted removable-media root. Successor promotion requires an allowlisted signature on the original annotated tag and a configured local Git signing key; it is dry-run unless `--apply` is supplied. The correction reviewer field is provenance metadata, not a cryptographic identity credential. Original tags are never moved or deleted.
 
 Read-only tooling is implemented in `python/tacs/`:
 
