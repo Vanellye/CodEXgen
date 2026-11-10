@@ -1,6 +1,6 @@
 # TACS: Tag Ancestry, Correction, and Portable Signatures
 
-**Status:** design specification; implementation pending review  
+**Status:** read-only tooling implemented; USB export remains gated  
 **Canonical design branch:** `leveled-consciousness`  
 **Design basis:** `olpirt/stride-next` snapshot `07da1600a5e4afe2c0e4e13e68be0214c173bb6e`
 
@@ -138,6 +138,16 @@ Before implementation:
 6. Add USB export only after explicit path selection, safe-write/atomic-replace behavior, and recovery tests.
 7. Keep all Git ref mutation outside the collector/exporter; any later promotion requires a separate review and explicit approval.
 
-## Current state
+## Implementation status
 
-This document defines the design only. No existing tag was read, rewritten, converted, moved, or deleted by this change. No thumb drive was accessed, and no signature or TACS manifest has been generated.
+Read-only tooling is implemented in `python/tacs/`:
+
+- `collect_tags()` enumerates tag refs and records lightweight/annotated kind, tag object IDs, direct and peeled targets, object types, and annotated-tag metadata. It uses read-only Git commands.
+- `serialize_language_cadence()` validates schema version 1, normalizes strings to NFC, sorts tokens/phases and JSON keys, rejects floating-point values, and returns canonical UTF-8 JSON plus SHA-256.
+- `verify_ed25519_signature()` verifies a detached Ed25519 signature over exact manifest bytes with OpenSSL and a public key only.
+- CLI: `PYTHONPATH=python python -m tacs collect|serialize|verify`.
+- Tests: `tests/test_tacs.py`; CI: `.github/workflows/tacs-readonly.yml`.
+
+The dedicated GitHub Actions run for commit `00471c1ee554c027c1a7b32bedd22570b4c7b6ab` completed successfully, including the TACS unit-test and compile steps.
+
+**Still gated:** USB discovery/mounting/export, manifest import, correction-chain mutation, private-key handling, tag/branch ref promotion, and automatic trust decisions. No existing tag was rewritten, converted, moved, or deleted. No thumb drive was accessed.
