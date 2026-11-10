@@ -171,7 +171,13 @@ class LocalChannelRouter:
             raise RouterError("event_type and idempotency_key are required")
         if not isinstance(payload, dict):
             raise RouterError("payload must be a JSON object")
-        encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+        try:
+            encoded = json.dumps(
+                payload, ensure_ascii=False, sort_keys=True,
+                separators=(",", ":"), allow_nan=False,
+            )
+        except (TypeError, ValueError) as exc:
+            raise RouterError("payload must contain only finite JSON values") from exc
         with self._connect() as db:
             membership = db.execute(
                 """SELECT can_publish,active FROM memberships
