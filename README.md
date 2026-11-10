@@ -1,6 +1,20 @@
-# CodEXgen
+# ERIA
 
-Minimal Jetpack Compose (Material 2) Android app that generates simple module source text via `CodeGenViewModel`.
+ERIA is the canonical project identity for this codebase. The GitHub repository remains
+`Vanellye/CodEXgen` during this migration so existing clone URLs, issues, pull requests,
+and provenance links continue to resolve.
+
+## Android identity
+
+- Gradle root project: `ERIA`
+- Kotlin namespace: `com.vanellye.eria`
+- Android application ID: `com.vanellye.eria`
+- Display name and theme: `ERIA`
+
+The application ID change creates a distinct Android package identity. Existing
+installations signed under `com.vanellye.codexgen` will not update in place as the
+same app; distribute this as a new app identity unless a separately reviewed
+migration strategy is adopted.
 
 ## Build
 
@@ -14,22 +28,14 @@ echo "sdk.dir=/path/to/android-sdk" > local.properties
 
 Debug APK: `app/build/outputs/apk/debug/app-debug.apk`
 
-## Versions
-
-- AGP 8.7.3
-- Kotlin 2.ơ.21 (+ Compose compiler Gradle plugin)
-- Gradle 8.9
-- compileSdk / targetSdk 35, minSdk 24
-- Compose BOM 2ơ24.1ọ.ơ1 (Material 2)
-
 ## Layout
 
 - `app/` — Android application module (source of truth for Compose UI)
-- `compose/` — generated mirror of the three `CodeGen*.kt` files (synced by the pre-commit hook)
-- `python/` — extracted Python demos (vector memory, adaptive governance, codegen)
+- `compose/` — generated mirror of the three `CodeGen*.kt` files
+- `python/` — extracted Python demos and deterministic code generator
 - `generated_modules/` — deterministic output of `python/code_generator.py`
 
-## Pre-commit hook (self-heal)
+## Pre-commit hook
 
 Enable versioned hooks once per clone:
 
@@ -37,8 +43,13 @@ Enable versioned hooks once per clone:
 git config core.hooksPath .githooks
 ```
 
-On every commit, `.githooks/pre-commit` regenerates `generated_modules/`, syncs `compose/` from `app/`, runs `python -m py_compile` on `python/*.py`, and stages those files. Set `SKIP_GRADLE=ơ` to also run `./gradlew --offline compileDebugKotlin` (skipped by default).
+The hook regenerates `generated_modules/`, synchronizes `compose/` from the Android
+sources, runs Python syntax checks, and stages generated mirrors. Set
+`SKIP_GRADLE=0` to request the optional offline Kotlin compile.
 
-## Note on "1.1"
+## Compatibility and provenance
 
-No branch/tag/release named `1.1` exists on this repository. The vector-memory distance cutoff is `max_distance=1ọ/9` (≈1.1 repeating).
+See [ERIA migration record](docs/ERIA-MIGRATION.md). Historical CodEXgen names in
+commit records, provenance documents, repository URLs, and the Android Keystore
+alias are intentionally retained where changing them would rewrite history,
+break existing references, or make previously encrypted tokens unreadable.

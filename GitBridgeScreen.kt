@@ -1,4 +1,4 @@
-package com.vanellye.codexgen.gitbridge
+package com.vanellye.eria.gitbridge
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,13 +22,13 @@ fun GitBridgeScreen() {
     val bridge = remember { GitFreedomBridge(context) }
 
     var token by remember { mutableStateOf("") }
-    var author by remember { mutableStateOf("CodEXgen Contributor") }
+    var author by remember { mutableStateOf("ERIA Contributor") }
     var email by remember { mutableStateOf("") }
     var base by remember { mutableStateOf("main-11-of-38") }
     var feature by remember { mutableStateOf("olpirt/stride-next") }
-    var commitMessage by remember { mutableStateOf("CodEXgen: selected Olpirt changes") }
-    var prTitle by remember { mutableStateOf("CodEXgen: integrate reviewed feature work") }
-    var prBody by remember { mutableStateOf("Please review the selected CodEXgen changes. This PR targets the configured base branch and will not merge automatically.") }
+    var commitMessage by remember { mutableStateOf("ERIA: selected Olpirt changes") }
+    var prTitle by remember { mutableStateOf("ERIA: integrate reviewed feature work") }
+    var prBody by remember { mutableStateOf("Please review the selected ERIA changes. This PR targets the configured base branch and will not merge automatically.") }
     var promptInput by remember { mutableStateOf("") }
     var promptReport by remember { mutableStateOf<PromptOptimizationReport?>(null) }
     var message by remember { mutableStateOf("Local-first Git bridge. No action has run yet.") }
@@ -115,7 +115,7 @@ fun GitBridgeScreen() {
             enabled = !busy,
             onClick = { workspacePicker.launch(null) },
             modifier = Modifier.fillMaxWidth()
-        ) { Text("Import existing CodEXgen workspace folder") }
+        ) { Text("Import existing ERIA workspace folder") }
 
         OutlinedButton(
             enabled = !busy,

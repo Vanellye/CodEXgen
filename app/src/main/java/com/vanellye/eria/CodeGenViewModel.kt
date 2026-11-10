@@ -1,4 +1,4 @@
-package com.vanellye.codexgen
+package com.vanellye.eria
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.vanellye.codexgen"
+    namespace = "com.vanellye.eria"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.vanellye.codexgen"
+        applicationId = "com.vanellye.eria"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
