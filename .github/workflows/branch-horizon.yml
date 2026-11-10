@@ -38,6 +38,9 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Run Branch Horizon unit tests
+        run: python -m unittest discover -s tests -p 'test_branch_horizon.py' -v
+
       - name: Run bounded Branch Horizon observer
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
