@@ -71,11 +71,21 @@ jobs:
             --github-output "$GITHUB_OUTPUT"
 
       - name: Run trusted Branch Horizon tests against candidate implementation
-        env:
-          PYTHONPATH: candidate
         run: |
-          python -m unittest discover -s tests -p 'test_branch_horizon.py' -v
-          python -m unittest discover -s tests -p 'test_adoption_gate.py' -v
+          python - <<'PY'
+          import sys
+          import unittest
+
+          # Put the exact candidate checkout ahead of the trusted test directory
+          # so tests import candidate implementation modules, not the baseline copy.
+          sys.path.insert(0, "candidate")
+          loader = unittest.defaultTestLoader
+          suite = unittest.TestSuite()
+          suite.addTests(loader.discover("tests", pattern="test_branch_horizon.py"))
+          suite.addTests(loader.discover("tests", pattern="test_adoption_gate.py"))
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          raise SystemExit(0 if result.wasSuccessful() else 1)
+          PY
 
   adopt:
     needs: validate
