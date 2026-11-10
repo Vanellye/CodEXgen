@@ -1,2 +1,2 @@
-numpy>=1.26
-chromadb>=0.5.0
+numpy>=1.26,<3
+chromadb>=0.5.0,<2
