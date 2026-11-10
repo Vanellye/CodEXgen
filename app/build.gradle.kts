@@ -47,6 +47,8 @@ android {
 }
 
 dependencies {
+    // Isolated Git transport/router dependency; kept behind the bridge API.
+    implementation("org.eclipse.jgit:org.eclipse.jgit:3.7.1.201504261725-r")
     val composeBom = platform("androidx.compose:compose-bom:2024.10.01")
     implementation(composeBom)
     androidTestImplementation(composeBom)
