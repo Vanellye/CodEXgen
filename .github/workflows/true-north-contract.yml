@@ -1,0 +1,32 @@
+name: TRUE NORTH data contract
+
+on:
+  push:
+    branches: [leveled-consciousness]
+    paths:
+      - "python/codexgen_contracts/**"
+      - "tests/test_data_envelope.py"
+      - ".github/workflows/true-north-contract.yml"
+  pull_request:
+    paths:
+      - "python/codexgen_contracts/**"
+      - "tests/test_data_envelope.py"
+      - ".github/workflows/true-north-contract.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  envelope:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Validate TRUE NORTH data envelope
+        env:
+          PYTHONPATH: python
+        run: python -m unittest discover -s tests -p "test_data_envelope.py" -v
+      - name: Compile contract package
+        run: python -m compileall -q python/codexgen_contracts
