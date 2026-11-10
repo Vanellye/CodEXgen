@@ -105,3 +105,10 @@ The current simulator is single-process and synchronous. Its checkpoint covers o
 `validate_data_envelope` returns validation errors and never grants execution permission. The C++11 contract preserves payload JSON text as supplied; parsing and canonical JSON serialization remain responsibilities of a host adapter. The validator checks envelope metadata, not semantic correctness of the payload.
 
 Build and run the contract test with the normal framework commands above. The `data_envelope_contracts` CTest target is part of the framework test suite.
+
+
+## ERIA Transendiant Pulse Filter (C++11)
+
+`codexgen/transendiant_filter.hpp` provides deterministic cross-realm pulse classification and ordering. It preserves the original expression, treats a standalone ` / ` as an isolated splice marker, and distinguishes BLOCKED, QUARANTINED, REJECTED, PRESERVED, and RESTORED outcomes. Restoration requires explicit YES, verified endpoints, verified authorization, provenance, evidence, and a supplied canonical expression. Unresolved information remains preserved; it is never guessed into certainty.
+
+The filter is a pure classification stage, not a network tunnel, cryptographic verifier, authentication provider, or natural-language inference engine. Transport adapters and evidence verification remain separate responsibilities. See [the ERIA filter specification](../specifications/eria_transendiant_pulse_filter.md). The `transendiant_filter_contracts` test is included in the standard CMake/CTest commands above.
