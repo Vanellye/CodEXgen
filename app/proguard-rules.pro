@@ -1,1 +1,1 @@
-# CodEXgen proguard rules
+# ERIA proguard rules

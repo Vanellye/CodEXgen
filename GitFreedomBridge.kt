@@ -1,4 +1,4 @@
-package com.vanellye.codexgen.gitbridge
+package com.vanellye.eria.gitbridge
 
 import android.content.Context
 import android.net.Uri
@@ -24,7 +24,7 @@ data class GitFileChange(
 class GitFreedomBridge(context: Context) {
     private val appContext = context.applicationContext
     private val vault = TokenVault(appContext)
-    private val repoDir = File(appContext.filesDir, "git-bridge/CodEXgen")
+    private val repoDir = File(appContext.filesDir, "git-bridge/ERIA")
 
     fun saveUserToken(token: String) = vault.save(token)
     fun clearUserToken() = vault.clear()

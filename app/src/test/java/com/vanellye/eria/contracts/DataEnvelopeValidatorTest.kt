@@ -1,4 +1,4 @@
-package com.vanellye.codexgen.contracts
+package com.vanellye.eria.contracts
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
