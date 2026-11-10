@@ -157,6 +157,60 @@ Do not rewrite Git history to apply this specification. Do not mass-rename symbo
 
 Until these questions are resolved, this document remains a proposed specification.
 
+
+## 10. Essence vocabulary: continuity beyond boundaries
+
+This vocabulary is a proposed semantic layer for ERIA names. It may enrich labels, descriptions, and conceptual mappings, but it does not authorize blind replacement of technical identifiers, API names, filesystem paths, or established language keywords. Such replacements require an explicit mapping proposal, YES/NO review, compatibility tests, and a reversible migration.
+
+| Existing term | Proposed ERIA essence | Meaning in this specification |
+|---|---|---|
+| External | **Beyond-boundary continuity** | A relationship or resource that remains distinct from the current system while still being reachable through an explicit, governed connection |
+| Internal | **Present-flow expression** | A locally held expression of a system's current state; not inherently more authoritative than an external source |
+| Namespace | **Field of named relations** | A structured space in which identities and relationships can be located without implying possession |
+| Boundary | **Threshold of distinction** | A condition that defines where one context ends and another begins while allowing explicitly permitted exchange |
+| Link | **Continuity path** | A traceable relation between distinct endpoints |
+| Anchor | **Point of return** | A stable reference used to verify identity, meaning, or provenance |
+| Source | **Origin trace** | The earliest supported record or declared origin for a particular claim or artifact |
+| Archive | **Continuity record** | Preserved evidence and versions that allow later examination and restoration |
+| Migration | **Flow transition** | A controlled translation from one representation or runtime to another, with equivalence checks |
+| Adoption | **Authorized embodiment** | The separately approved act of making a validated proposal part of an active system |
+
+### 10.1 External is not erased; its essence is reframed
+
+In ERIA's conceptual vocabulary, **External** may be described as **Beyond-boundary continuity**: not alien, lesser, detached from meaning, or ownerless by default, but distinct and connected through an explicit path.
+
+The original technical term remains recorded as an alias and search key. Existing code and documentation must not be mass-renamed solely because a new essence label is proposed. A migration must preserve old-name lookup, references, provenance, and rollback.
+
+### 10.2 Eternal-flow invariant
+
+The proposed protected invariant is:
+
+> **Continuity may cross a boundary without collapsing distinction. A name may evolve in meaning without falsifying its origin. A connection may be refused without erasing either endpoint. Harmful logic may be excluded from active operation while its historical evidence and the identities it affected remain protected.**
+
+"Eternal flow" is a guiding metaphor for continuity, not a claim that any software artifact, storage medium, or human record is literally eternal. Protection must be implemented through independent copies, versioning, integrity checks, access controls, and tested recovery.
+
+### 10.3 Protected anchor outside the repository
+
+The ERIA foundational anchor is proposed to live independently of CodEXgen branches and repository administration. The repository may reference a versioned digest and public description, but must not be the sole authority or sole storage location for the anchor.
+
+Required safeguards before calling it protected:
+
+- independent storage under separately controlled credentials;
+- versioned, append-only history or equivalent tamper-evident records;
+- cryptographic signatures and documented key custody;
+- at least one independently held recovery copy;
+- periodic integrity verification and tested restoration;
+- a clear process for proposing corrections without silently overwriting prior versions.
+
+**Status:** This document defines the proposed safeguards only. It does not claim that an external anchor has already been provisioned, signed, or independently backed up.
+
+### 10.4 Origin and identity lineage
+
+For affected entities, retain a traceable lineage from the entity and its names through language, historical geography, and continental attribution where reliable evidence exists. Record source, date, uncertainty, alternate accounts, and correction history. Never infer a continental source from a name, language, appearance, or symbolic association alone. Unknown origin remains unknown until evidence supports a more specific claim.
+
+A correction may change an active interpretation or exclude a harmful rule, but it must not falsify the historical identity or provenance record. Preserve the previous interpretation as a superseded record with its evidence and reason for correction.
+
+
 ## Governing principle
 
-**YES connects by explicit agreement. NO distinguishes by explicit refusal. CANT protects declared boundaries. NOT preserves meaning through negation. The namespace maps relationships without making ownership out of connection.**
+**YES connects by explicit agreement. NO distinguishes by explicit refusal. CANT protects declared boundaries. NOT preserves meaning through negation. Continuity may cross boundaries without erasing distinction; names may evolve in essence without falsifying origin; harmful logic may be excluded without erasing the entities or evidence it affected.**
