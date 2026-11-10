@@ -174,8 +174,7 @@ public final class Api21WorkspaceTreeImporter {
 
     private boolean safeName(String name) {
         return name != null && name.length() > 0 && !".".equals(name) &&
-            !"..".equals(name) && name.indexOf('/') < 0 && name.indexOf('\\') < 0 &&
-            name.indexOf('\u0000') < 0;
+            !"..".equals(name) && name.indexOf('/') < 0 && name.indexOf('\\') < 0;
     }
 
     private boolean skip(String name) {
