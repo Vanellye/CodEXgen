@@ -1,0 +1,64 @@
+name: Pantheon Branch Horizon
+
+on:
+  push:
+    branches:
+      - "**"
+  workflow_dispatch:
+    inputs:
+      head_sha:
+        description: "Commit SHA to inspect (defaults to workflow SHA)"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pantheon-branch-horizon-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  observe:
+    name: Read-only rotating branch scan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout exact pushed head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.head_sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run Branch Horizon unit tests
+        run: python -m unittest discover -s tests -p 'test_branch_horizon.py' -v
+
+      - name: Run bounded Branch Horizon observer
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          GITHUB_EVENT_BEFORE: ${{ github.event.before || '' }}
+          GITHUB_SHA: ${{ inputs.head_sha || github.sha }}
+        run: |
+          python tools/branch_horizon.py \
+            --repo . \
+            --branch "$GITHUB_REF_NAME" \
+            --before "$GITHUB_EVENT_BEFORE" \
+            --head "$GITHUB_SHA" \
+            --output-dir branch-horizon-report
+
+      - name: Upload JSON and Markdown reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: branch-horizon-${{ github.run_id }}-${{ github.run_attempt }}
+          path: branch-horizon-report/
+          if-no-files-found: error
+          retention-days: 14
