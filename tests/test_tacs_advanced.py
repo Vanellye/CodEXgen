@@ -1,4 +1,4 @@
-import hashlib,json,subprocess,tempfile,unittest
+import hashlib,json,subprocess,tempfile,unittest,shutil
 from pathlib import Path
 from unittest.mock import patch
 from tacs import TacsError
@@ -50,5 +50,43 @@ class TacsDiscoveryTests(unittest.TestCase):
         result=discover_removable_media()
         self.assertIsInstance(result,list)
         self.assertTrue(all("mountpoint" in item and item["removable"]=="true" for item in result))
+
+
+class TacsEmbeddedSignatureTests(unittest.TestCase):
+    @unittest.skipUnless(shutil.which("gpg"), "GPG is required for embedded tag-signature integration test")
+    def test_pinned_signed_tag_and_successor_promotion(self):
+        import os
+        from tacs.advanced import verify_git_tag_signature, promote_successor_tag
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);repo=root/"repo";repo.mkdir();home=root/"gnupg";home.mkdir(mode=0o700)
+            old_home=os.environ.get("GNUPGHOME");os.environ["GNUPGHOME"]=str(home)
+            try:
+                subprocess.run(["gpg","--batch","--passphrase","","--quick-generate-key",
+                    "TACS CI <tacs-ci@example.invalid>","ed25519","sign","0"],
+                    check=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                listing=subprocess.run(["gpg","--with-colons","--list-keys"],check=True,
+                    stdout=subprocess.PIPE,text=True).stdout
+                fingerprint=next(line.split(":")[9] for line in listing.splitlines() if line.startswith("fpr:"))
+                target=make_repo(repo)
+                git(repo,"config","user.signingkey",fingerprint)
+                git(repo,"config","gpg.program","gpg")
+                git(repo,"tag","-s","-m","signed release","release")
+                verified=verify_git_tag_signature(repo,"release",[fingerprint])
+                self.assertTrue(verified["valid"])
+                self.assertEqual(verified["signer"],fingerprint)
+                parent=root/"ancestral.json";parent.write_text('{"kind":"tag"}\\n')
+                correction=append_correction(root/"chain",parent,"release",target,
+                    "reviewed correction",["test evidence"],{"state":"old"},{"state":"new"},
+                    "ci-reviewer",["unit tests"],True)
+                plan=promote_successor_tag(repo,correction["path"],[fingerprint],apply=False)
+                self.assertFalse(plan["applied"])
+                original=git(repo,"rev-parse","refs/tags/release")
+                applied=promote_successor_tag(repo,correction["path"],[fingerprint],apply=True)
+                self.assertTrue(applied["applied"])
+                self.assertEqual(git(repo,"cat-file","-t",applied["successor_tag_ref"]),"tag")
+                self.assertEqual(git(repo,"rev-parse","refs/tags/release"),original)
+            finally:
+                if old_home is None:os.environ.pop("GNUPGHOME",None)
+                else:os.environ["GNUPGHOME"]=old_home
 
 if __name__=="__main__":unittest.main()
