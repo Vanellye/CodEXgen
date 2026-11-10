@@ -1,6 +1,6 @@
 # Pantheon Branch Horizon
 
-Status: initial read-only implementation committed; CI execution pending
+Status: initial read-only implementation committed; focused CI passed
 Version: 0.2.0
 Design anchor: `ae89abe4a44d90429fcf5316bdb196316a1de6cb`
 
@@ -83,11 +83,13 @@ Artifacts are retained for 14 days. Repeated runs can produce separate artifacts
 
 ## Validation
 
-Tests cover deterministic rotation, cycle wrap, report SHA binding, clean worktree after observation, and symlink exclusion. CI execution is pending at the time of this specification update.
+Focused Branch Horizon CI run `42727610760` completed successfully. The unit-test step, bounded observer step, and JSON/Markdown artifact upload all succeeded. The run produced artifact `branch-horizon-42727610760-1`.
+
+Tests cover deterministic rotation, cycle wrap, report SHA binding, clean worktree after observation, and symlink exclusion.
 
 ## Implementation status and limitations
 
-The push trigger, deterministic lens selector, six bounded lexical scanners, and JSON/Markdown artifact generation are implemented. The implementation is initial and intentionally conservative. It does not yet provide semantic AST analysis, cross-branch comparison, persistent report indexing, stale-ref verification, or a full dependency/security audit. A report is an observation, not an approval or authorization to change anything.
+The push trigger, deterministic lens selector, six bounded lexical scanners, and JSON/Markdown artifact generation are implemented and have passed the focused workflow. The implementation is initial and intentionally conservative. It does not yet provide semantic AST analysis, cross-branch comparison, persistent report indexing, stale-ref verification, or a full dependency/security audit. A report is an observation, not an approval or authorization to change anything.
 
 ## Relationship to the design anchor
 
