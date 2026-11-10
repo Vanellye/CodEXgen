@@ -42,7 +42,7 @@ class LocalChannelRouterTests(unittest.TestCase):
                 "realm-a", "alice", "data-record", {"reading": float("nan")},
                 idempotency_key="reject-nan",
             )
-        self.assertEqual(self.router.history("realm-a"), [])
+        self.assertEqual(self.router.history("realm-a"), ())
 
     def test_unauthorized_push_and_pull_are_rejected(self):
         with self.assertRaises(PermissionDenied):
