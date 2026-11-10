@@ -1,0 +1,168 @@
+{
+  "catalog_version": "1.0",
+  "purpose": "Starter index of reusable lessons; not a complete repository ingestion.",
+  "generated_from": {
+    "repository": "Vanellye/CodEXgen",
+    "main_commit": "67ecdb5c5bd148b6fd7c9945fa648f3c89a93a95",
+    "knowledge_branch": "knowledge-recycle-foundation"
+  },
+  "preservation_policy": {
+    "originals_are_immutable": true,
+    "corrections_are_separate_records": true,
+    "proposals_require_human_review": true,
+    "similarity_is_not_truth": true,
+    "catalog_does_not_authorize_writes": true
+  },
+  "records": [
+    {
+      "id": "KNOW-LEGACY-001",
+      "title": "Quarantine preserves malformed legacy source without guessing",
+      "record_type": "decision",
+      "evidence_status": "verified",
+      "origin": {
+        "repository": "Vanellye/CodEXgen",
+        "branch": "main",
+        "commit": "67ecdb5c5bd148b6fd7c9945fa648f3c89a93a95",
+        "path": "hypotheticals/bio_resonance_fiction.py",
+        "blob_sha1": "2d689a275e0a2bf39a1c1fa14afe3d84fb5589c2"
+      },
+      "supporting_artifact": {
+        "path": "docs/LEGACY-SYNTAX-QUARANTINE.md",
+        "blob_sha1": "e50873dcc2132d112756523f6e542363cbe6c48a"
+      },
+      "lesson": "Pin the original bytes, quarantine only the exact known failure, and record malformed expressions verbatim. Do not invent replacement semantics.",
+      "limits": "Verification establishes source identity and CI exclusion, not that the quarantined module compiles or that intended values are known.",
+      "relationships": [],
+      "review_state": "accepted_for_reuse"
+    },
+    {
+      "id": "KNOW-PROVENANCE-001",
+      "title": "Compare snapshots without collapsing disconnected histories",
+      "record_type": "lesson",
+      "evidence_status": "observed",
+      "origin": {
+        "repository": "Vanellye/CodEXgen",
+        "branch": "main",
+        "commit": "67ecdb5c5bd148b6fd7c9945fa648f3c89a93a95",
+        "path": "docs/PR1-PR10-PROVENANCE.md",
+        "blob_sha1": "4228add6ec653f1fa3305076c4a075a5ad0de94d"
+      },
+      "related_artifact": {
+        "path": "docs/TWO-SNAPSHOT-SYNTHESIS.md",
+        "blob_sha1": "c2f361a5022e0d326be5caf9fb39d7d2b7a4fbfa"
+      },
+      "lesson": "Use exact commit and blob evidence to preserve file-level identity; do not infer a shared history or its cause when the compare evidence does not establish one.",
+      "limits": "This record describes the documented comparison snapshot, not a fresh complete audit of every branch.",
+      "relationships": [],
+      "review_state": "accepted_for_reuse"
+    },
+    {
+      "id": "KNOW-STRIDE-JOB-001",
+      "title": "Append-only correction proposals preserve original JOB events",
+      "record_type": "implementation_lesson",
+      "evidence_status": "observed",
+      "origin": {
+        "repository": "Vanellye/CodEXgen",
+        "branch": "olpirt/stride-next",
+        "commit": "7169c2666ab1b88fbc81479b1c57c9dbcd68e03b",
+        "path": "python/stride_core/job_reconciliation.py"
+      },
+      "supporting_artifacts": [
+        {
+          "commit": "c97d3d4e5ab0bd9e75fa2e88bac0efd2b790e40c",
+          "path": "tests/test_job_reconciliation.py"
+        },
+        {
+          "commit": "6b3d694bd9dedc31170a01060f07642120640019",
+          "path": "docs/TEMPORAL-RECONCILIATION.md"
+        }
+      ],
+      "lesson": "Store correction proposals and review decisions separately from original events; derive a corrected view only from explicitly accepted decisions.",
+      "limits": "The implementation was recorded in the supplied Stride snapshot history; this catalog entry does not claim current runtime or cross-branch compatibility.",
+      "relationships": [],
+      "review_state": "accepted_for_reuse"
+    },
+    {
+      "id": "KNOW-STRIDE-CONTEXT-001",
+      "title": "Read-only context can connect observations without adjudicating them",
+      "record_type": "implementation_lesson",
+      "evidence_status": "observed",
+      "origin": {
+        "repository": "Vanellye/CodEXgen",
+        "branch": "olpirt/stride-next",
+        "commit": "602bd51f456463e28855c952a21916a78d69c097",
+        "path": "python/stride_core/holified_inception.py"
+      },
+      "supporting_artifacts": [
+        {
+          "commit": "6df063b7d41721d94738804aac1521e4474b0dba",
+          "path": "tests/test_holified_inception.py"
+        },
+        {
+          "commit": "51048783c4c462af4084aabc8cf4f06b9ed5ac46",
+          "path": "docs/STRIDE-HOLIFIED-CONTEXT-MAP.md"
+        }
+      ],
+      "lesson": "Contextual links and creative combinations should remain labeled as links or hypotheses; unresolved relationships are not facts.",
+      "limits": "Observed design and test artifacts do not establish sentience, external discovery, or factual correctness of generated associations.",
+      "relationships": [],
+      "review_state": "accepted_for_reuse"
+    },
+    {
+      "id": "KNOW-MEMORY-001",
+      "title": "Vector similarity is retrieval metadata, not truth or consent",
+      "record_type": "risk_lesson",
+      "evidence_status": "observed",
+      "origin": {
+        "repository": "Vanellye/CodEXgen",
+        "branch": "main",
+        "commit": "67ecdb5c5bd148b6fd7c9945fa648f3c89a93a95",
+        "path": "python/semantic_vector_memory.py",
+        "blob_sha1": "911a48137cab6bc66ec23c8cf2fc823d805de3cf"
+      },
+      "lesson": "Treat semantic distance as a candidate retrieval signal only. Before personal interaction data is ingested, define consent, minimization, retention, deletion, provenance, and review.",
+      "limits": "The file's existence and implementation were inspected; no privacy, retention, or retrieval-quality audit is claimed.",
+      "relationships": [],
+      "review_state": "proposed_for_review"
+    },
+    {
+      "id": "KNOW-GOVERNANCE-001",
+      "title": "Generated self-corrections must not overwrite original traces",
+      "record_type": "risk_lesson",
+      "evidence_status": "observed",
+      "origin": {
+        "repository": "Vanellye/CodEXgen",
+        "branch": "main",
+        "commit": "67ecdb5c5bd148b6fd7c9945fa648f3c89a93a95",
+        "path": "python/adaptive_governance.py",
+        "blob_sha1": "b0a4635e3498fc8838c93ba28c0e151613349a5c"
+      },
+      "lesson": "Preserve an input trace and store any generated alternative as a linked proposal. A simulated judge is not a validated authority.",
+      "limits": "This is a code-reading lesson, not a runtime security or correctness assessment.",
+      "relationships": [],
+      "review_state": "proposed_for_review"
+    },
+    {
+      "id": "KNOW-EDIFY-POLICY-001",
+      "title": "Branch-local text transformations require explicit scope review",
+      "record_type": "open_question",
+      "evidence_status": "observed",
+      "origin": {
+        "repository": "Vanellye/CodEXgen",
+        "branch": "edify",
+        "commit": "82e92324383bbcd02e2a3a938e8d7e4dbff4d837",
+        "path": "EDIFY.md",
+        "blob_sha1": "831eaa6d2177568115448c31285a31c9685528fd"
+      },
+      "lesson": "A branch-local transformation policy must not be applied globally without an explicit compatibility decision. Preserve its exact source and record unresolved scope.",
+      "limits": "The catalog does not infer who introduced altered numeric glyphs in other files or whether those changes were intentional.",
+      "relationships": [
+        {
+          "type": "raises_compatibility_question_for",
+          "target": "KNOW-MEMORY-001"
+        }
+      ],
+      "review_state": "hold_for_evidence"
+    }
+  ]
+}
