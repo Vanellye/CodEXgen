@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.22.1)
+project(codexgen_legacy LANGUAGES CXX)
+add_library(codexgen_legacy SHARED legacy_jni.cpp)
+target_compile_features(codexgen_legacy PRIVATE cxx_std_11)
+find_library(log_lib log)
+target_link_libraries(codexgen_legacy PRIVATE ${log_lib})
