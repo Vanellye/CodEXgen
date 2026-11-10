@@ -1,7 +1,7 @@
 # Pantheon Branch Horizon
 
-Status: read-only branch observer with cross-branch peering; focused CI validation in progress
-Version: 0.3.0
+Status: read-only branch observer with cross-branch peering; latest CI validation pending
+Version: 0.3.1
 Design anchor: `ae89abe4a44d90429fcf5316bdb196316a1de6cb`
 
 ## Purpose
@@ -34,7 +34,7 @@ Sacred is a software policy invariant, not a statement that the scanner can cert
 
 ## Cross-branch peering
 
-The observer enumerates only already-fetched `refs/remotes/origin/*` branch refs. It does not fetch, update, or create refs. It excludes the currently observed branch and the symbolic `origin/HEAD` ref.
+The observer enumerates only already-fetched `refs/remotes/origin/*` branch refs. It does not fetch, update, or create refs. It excludes the currently observed branch and the symbolic `origin/HEAD` ref. A zero-peer result is explicitly reported as `no_remote_branch_refs_visible`; it does not claim that the repository has no other branches. Reaching the peer cap or truncating a peer snapshot marks the report incomplete.
 
 For each peer, the report records:
 - branch name, ref, and exact peer commit SHA;
@@ -81,7 +81,7 @@ No PR comments, issues, notifications, or cross-branch writes are enabled. A pro
 
 ## Validation
 
-Focused workflow validation for this upgrade is pending. The workflow runs the dedicated Branch Horizon unit tests before scanning and uploading artifacts. The test suite covers six-lens rotation, Sacred as the non-rotating seventh dimension, exact head binding, no mutation of refs/worktree, symlink exclusion, and detection of differing interface/dependency signals across a peer ref.
+Focused workflow validation is run on each branch-head update. The workflow runs the dedicated Branch Horizon unit tests before scanning and uploading artifacts. The test suite covers six-lens rotation, Sacred as the non-rotating seventh dimension, exact head binding, no mutation of refs/worktree, symlink exclusion, and detection of differing interface/dependency signals across a peer ref.
 
 ## Limitations and next review gates
 
