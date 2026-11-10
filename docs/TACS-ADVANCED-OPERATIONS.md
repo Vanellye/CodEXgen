@@ -53,6 +53,8 @@ PYTHONPATH=python python -m tacs.advanced promote --repo . \\
 # After reviewing the plan, repeat with --apply.
 \`\`\`
 
+The dedicated workflow passed all 12 tests, including a generated OpenPGP-signed tag, signer-fingerprint pinning, signed successor-tag promotion, correction append-only behavior, and bundle integrity. See [GitHub Actions run 42732534070](https://github.com/Vanellye/CodEXgen/actions/runs/42732534070).
+
 ## Verification details and limitations
 
 - OpenPGP signatures use Git's configured GPG verifier. A full VALIDSIG fingerprint must match a supplied trusted signer.
