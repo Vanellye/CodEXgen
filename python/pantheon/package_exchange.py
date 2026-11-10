@@ -10,6 +10,11 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 
 SCHEMA_VERSION = 1
+MAX_MANIFEST_BYTES = 2 * 1024 * 1024
+MAX_PUBLIC_KEY_BYTES = 64 * 1024
+MAX_FILES = 1024
+MAX_FILE_BYTES = 32 * 1024 * 1024
+MAX_TOTAL_BYTES = 256 * 1024 * 1024
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 IDENTIFIER_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$")
 
@@ -54,6 +59,8 @@ def _load_manifest(bundle: Path) -> tuple[dict[str, Any], bytes]:
     if manifest_path.is_symlink() or not manifest_path.is_file():
         raise PackageVerificationError("manifest.json is missing or unsafe")
     try:
+        if manifest_path.stat().st_size > MAX_MANIFEST_BYTES:
+            raise PackageVerificationError("manifest.json exceeds the configured size limit")
         raw = manifest_path.read_bytes()
         manifest = json.loads(raw.decode("utf-8"), object_pairs_hook=_unique_object)
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
@@ -87,6 +94,8 @@ def _validate_manifest(manifest: dict[str, Any]) -> list[dict[str, Any]]:
     files = manifest["files"]
     if not isinstance(files, list) or not files:
         raise PackageVerificationError("files must be a non-empty list")
+    if len(files) > MAX_FILES:
+        raise PackageVerificationError("file count exceeds the configured limit")
     seen: set[str] = set()
     paths: list[str] = []
     for index, item in enumerate(files):
@@ -99,6 +108,8 @@ def _validate_manifest(manifest: dict[str, Any]) -> list[dict[str, Any]]:
         paths.append(path)
         if type(item["size_bytes"]) is not int or item["size_bytes"] < 0:
             raise PackageVerificationError(f"files[{index}].size_bytes must be non-negative")
+        if item["size_bytes"] > MAX_FILE_BYTES:
+            raise PackageVerificationError(f"files[{index}] exceeds the per-file size limit")
         if not isinstance(item["sha256"], str) or not SHA256_RE.fullmatch(item["sha256"]):
             raise PackageVerificationError(f"files[{index}].sha256 must be lowercase SHA-256")
     if paths != sorted(paths):
@@ -149,6 +160,8 @@ def verify_bundle(
     if not isinstance(expected_key_sha256, str) or not SHA256_RE.fullmatch(expected_key_sha256):
         raise PackageVerificationError("expected key digest must be lowercase SHA-256")
 
+    if key_path.stat().st_size > MAX_PUBLIC_KEY_BYTES:
+        raise PackageVerificationError("trusted public key exceeds the configured size limit")
     key_digest = hashlib.sha256(key_path.read_bytes()).hexdigest()
     if key_digest != expected_key_sha256:
         raise PackageVerificationError("trusted public key digest does not match pinned digest")
@@ -158,6 +171,7 @@ def verify_bundle(
     _verify_signature(bundle, key_path)
 
     expected_paths = {"manifest.json", "manifest.sig"}
+    total_bytes = 0
     for item in files:
         relative = _safe_relative_path(item["path"])
         current = bundle
@@ -172,6 +186,14 @@ def verify_bundle(
             raise PackageVerificationError(f"package path escapes bundle: {relative.as_posix()}") from exc
         if not target.is_file():
             raise PackageVerificationError(f"package payload is not a regular file: {relative.as_posix()}")
+        actual_size = target.stat().st_size
+        if actual_size > MAX_FILE_BYTES:
+            raise PackageVerificationError(f"payload exceeds the per-file size limit: {relative.as_posix()}")
+        total_bytes += actual_size
+        if total_bytes > MAX_TOTAL_BYTES:
+            raise PackageVerificationError("package exceeds the total payload size limit")
+        if actual_size != item["size_bytes"]:
+            raise PackageVerificationError(f"size mismatch: {relative.as_posix()}")
         data = target.read_bytes()
         if len(data) != item["size_bytes"]:
             raise PackageVerificationError(f"size mismatch: {relative.as_posix()}")
