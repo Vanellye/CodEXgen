@@ -1,12 +1,12 @@
 # TRUE NORTH — Data and Architecture Alignment
 
-**Status:** Architecture and governance specification. This document describes shared contracts and review rules; it does not assert that every capability is implemented on every branch.
+**Status:** ERIA architecture and governance specification. The GitHub repository remains `Vanellye/CodEXgen` as a historical remote identity. This document describes shared contracts and review rules; it does not assert that every capability is implemented on every branch.
 
 > Orient by truth. Move by purpose. Never mistake momentum for direction.
 
 ## 1. Purpose
 
-TRUE NORTH is the common reference for connecting CodEXgen branches without erasing their identities. It aligns data meaning, interfaces, provenance, review, safety, and recovery while preserving independent histories and human authority.
+TRUE NORTH is the common reference for connecting ERIA branches without erasing their identities. It aligns data meaning, interfaces, provenance, review, safety, and recovery while preserving independent histories and human authority.
 
 The governing invariant is:
 
