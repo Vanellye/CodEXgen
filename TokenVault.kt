@@ -16,7 +16,8 @@ import javax.crypto.spec.GCMParameterSpec
  */
 class TokenVault(context: Context) {
     private val prefs = context.getSharedPreferences("git_bridge_vault", Context.MODE_PRIVATE)
-    // Preserve the existing Keystore alias so encrypted tokens remain readable.\n    private val alias = "codexgen_git_bridge_aes"
+    // Preserve the existing Keystore alias so encrypted tokens remain readable.
+    private val alias = "codexgen_git_bridge_aes"
 
     fun save(token: String) {
         require(token.isNotBlank()) { "Token cannot be blank." }
