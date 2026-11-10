@@ -28,6 +28,46 @@ class MemoryEntry:
     effective_until: str | None = None
     derived_from: tuple[str, ...] = ()
 
+    def to_envelope(self) -> dict[str, object]:
+        """Expose this immutable claim as a TRUE NORTH data record.
+
+        UNKNOWN quality means the ledger preserves the claim without
+        adjudicating its truth. The envelope grants no operational authority.
+        """
+        return {
+            "record_id": self.entry_id,
+            "schema_version": 1,
+            "source": "cognitive_layer",
+            "observed_at": self.recorded_at,
+            "payload": {
+                "subject": self.subject,
+                "statement": self.statement,
+                "effective_from": self.effective_from,
+                "effective_until": self.effective_until,
+                "derived_from": list(self.derived_from),
+            },
+            "units": {},
+            "quality": "UNKNOWN",
+            "provenance": {
+                "source_ref": self.source_ref,
+                "signature_status": "not_present",
+            },
+            "transformations": [],
+            "authorization": {
+                "status": "not_authorized",
+                "scope": [],
+                "approval_ref": None,
+            },
+            "validation": {
+                "status": "unreviewed",
+                "reconciliation": "pending",
+            },
+            "retention": {
+                "policy": "append_only",
+                "historical_record_mutation": "prohibited",
+            },
+        }
+
 
 @dataclass(frozen=True)
 class ReconciliationReport:
