@@ -1,0 +1,128 @@
+name: Pantheon Automatic Adoption
+
+# This privileged workflow is defined on the default branch and reacts only to
+# successful Branch Horizon runs from explicitly opted-in divergence branches.
+on:
+  workflow_run:
+    workflows: ["Pantheon Branch Horizon"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pantheon-auto-adopt-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    if: >-
+      ${{ github.event.workflow_run.conclusion == 'success' &&
+          startsWith(github.event.workflow_run.head_branch, 'divergence/auto/') &&
+          github.event.workflow_run.head_repository.full_name == github.repository }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      eligible: ${{ steps.gate.outputs.eligible }}
+      reason: ${{ steps.gate.outputs.reason }}
+    steps:
+      - name: Checkout trusted default-branch policy and tests
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Checkout exact candidate commit without credentials
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          path: candidate
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify candidate branch still points to the observed SHA
+        id: branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          ENCODED_BRANCH="$(python -c 'import os, urllib.parse; print(urllib.parse.quote(os.environ["BRANCH"], safe=""))')"
+          ACTUAL_SHA="$(gh api "repos/${GITHUB_REPOSITORY}/branches/${ENCODED_BRANCH}" --jq '.commit.sha')"
+          test "$ACTUAL_SHA" = "$EXPECTED_SHA"
+          echo "sha=$ACTUAL_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Run trusted adoption policy against exact candidate
+        id: gate
+        env:
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          EXPECTED_BRANCH_SHA: ${{ steps.branch.outputs.sha }}
+        run: |
+          python tools/adoption_gate.py \
+            --base "origin/${{ github.event.repository.default_branch }}" \
+            --candidate candidate \
+            --branch "$BRANCH" \
+            --head "$HEAD_SHA" \
+            --branch-head "$EXPECTED_BRANCH_SHA" \
+            --github-output "$GITHUB_OUTPUT"
+
+      - name: Run trusted Branch Horizon tests against candidate implementation
+        env:
+          PYTHONPATH: candidate
+        run: |
+          python -m unittest discover -s tests -p 'test_branch_horizon.py' -v
+          python -m unittest discover -s tests -p 'test_adoption_gate.py' -v
+
+  adopt:
+    needs: validate
+    if: ${{ needs.validate.result == 'success' && needs.validate.outputs.eligible == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout default branch only
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Open adoption PR and enable GitHub auto-merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          TARGET: ${{ github.event.repository.default_branch }}
+        run: |
+          ENCODED_BRANCH="$(python -c 'import os, urllib.parse; print(urllib.parse.quote(os.environ["BRANCH"], safe=""))')"
+          ACTUAL_SHA="$(gh api "repos/${GITHUB_REPOSITORY}/branches/${ENCODED_BRANCH}" --jq '.commit.sha')"
+          test "$ACTUAL_SHA" = "$HEAD_SHA"
+
+          PR_NUMBER="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$BRANCH" --base "$TARGET" --state open --json number --jq '.[0].number // empty')"
+          if [ -z "$PR_NUMBER" ]; then
+            gh pr create \
+              --repo "$GITHUB_REPOSITORY" \
+              --head "$BRANCH" \
+              --base "$TARGET" \
+              --title "Pantheon auto-adoption: $BRANCH" \
+              --body "## Automatic adoption proposal
+
+          - Source branch: `$BRANCH`
+          - Exact source head: `$HEAD_SHA`
+          - Successful Branch Horizon validation: $RUN_URL
+          - Policy: `PANTHEON_DIVERGENCE_ADOPTION.md`
+
+          This PR was opened by the opt-in Divergence Garden workflow after the trusted adoption gate and baseline tests passed. GitHub auto-merge is enabled; repository rules and required checks remain authoritative. No force-push, branch-protection bypass, or direct write to the target branch is used.
+
+          If the source head changes, a new successful validation is required before adoption."
+          )
+            PR_NUMBER="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$BRANCH" --base "$TARGET" --state open --json number --jq '.[0].number')"
+          fi
+
+          gh pr merge "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --auto --squash
