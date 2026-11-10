@@ -89,6 +89,10 @@ This is lexical discovery, not a semantic compiler, dependency solver, security 
 
 Before any future adoption feature, require a separate signed proposal bound to exact source/receiver SHAs, an explicit receiver approval, scoped capabilities, staged validation, and a rollback plan. The current observer does not implement adoption.
 
+## Warden Principle
+
+The normative cross-project boundary policy is [PANTHEON_WARDEN_PRINCIPLE.md](PANTHEON_WARDEN_PRINCIPLE.md). Branch peering is observation only: no inference of ownership, consent, compatibility, or adoption authority. Absence and zero remain distinct states. Tags identify exact objects but never authorize adoption. See the policy for required evidence and migration safeguards.
+
 ## Governing design anchor
 
 The signed package-exchange design at commit `ae89abe4a44d90429fcf5316bdb196316a1de6cb` supplies identity-bound evidence, provenance, least privilege, receiver control, explicit approval, staged validation, and reversibility. Branch Horizon applies those principles to branch discovery without inheriting authority to change branches or install packages.
