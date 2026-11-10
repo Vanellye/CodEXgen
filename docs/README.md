@@ -6,6 +6,8 @@ This is the reading map for the project's technical notes, principles, and explo
 
 | Document | What it covers |
 |---|---|
+| [TACS Advanced Operations](TACS-ADVANCED-OPERATIONS.md) | Embedded Git tag signature verification, removable-media discovery, explicit USB bundle export, append-only correction records, and signed successor-tag promotion |
+| [TACS Read-only Core](TACS-READONLY-TOOLS.md) | Read-only tag collection, deterministic language/cadence serialization, detached Ed25519 verification, and core tests |
 | [Universal Workflow — JOBs](UNIVERSAL-WORKFLOW-JOBS.md) | Shared lifecycle for self-directed Journeys of Becoming, resilient branching, recovery, evidence, and consent |
 | [Essence Alignment](ESSENCE-ALIGNMENT.md) | Repository-wide dignity and consequence invariant; purpose, wisdom, evidence, balance, responsible propagation, and human stewardship |
 | [Resonance Stewardship](RESONANCE-STEWARDSHIP.md) | Faith-inspired purpose, responsible information propagation, Data Resonance boundaries, and evidence distinctions |
