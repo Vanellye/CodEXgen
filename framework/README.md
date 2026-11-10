@@ -96,3 +96,12 @@ ARM and ESP32 adapters must implement the same framework contracts without chang
 ### Simulator limits
 
 The current simulator is single-process and synchronous. Its checkpoint covers only simulator-owned key/value state. Event traces are in-memory and are not tamper-proof or durable audit storage. Safe-hold clearing is a host API operation, not an authenticated operator workflow. These limitations must be addressed before treating the simulator as a production safety boundary.
+
+
+## TRUE NORTH data envelope (C++11)
+
+`codexgen/data_envelope.hpp` provides a typed, platform-independent envelope for record identity, source, offset-aware timestamps, monotonic clock metadata, preserved payload JSON, units, quality, provenance, transformations, and explicit authorization scope.
+
+`validate_data_envelope` returns validation errors and never grants execution permission. The C++11 contract preserves payload JSON text as supplied; parsing and canonical JSON serialization remain responsibilities of a host adapter. The validator checks envelope metadata, not semantic correctness of the payload.
+
+Build and run the contract test with the normal framework commands above. The `data_envelope_contracts` CTest target is part of the framework test suite.
