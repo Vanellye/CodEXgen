@@ -1,4 +1,4 @@
-#ifndef CODEXGEN_TRANSEDI��ANT_FILTER_HPP
+#ifndef CODEXGEN_TRANSEDIANT_FILTER_HPP
 #define CODEXGEN_TRANSEDIANT_FILTER_HPP
 
 #include <algorithm>
@@ -108,7 +108,7 @@ private:
         pulse.destination_realm = record.destination_realm;
         pulse.original_expression = record.expression;
         pulse.emitted_expression = record.expression;
-        pulse.splice_isolated = record.expression.find('/') != std::string::npos;
+        pulse.splice_isolated = record.expression.find(" / ") != std::string::npos;
 
         if (!valid_identifier(record.record_id) ||
             !valid_identifier(record.origin_realm) ||
