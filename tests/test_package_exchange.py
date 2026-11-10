@@ -82,6 +82,15 @@ class PackageExchangeTests(unittest.TestCase):
         with self.assertRaises(PackageVerificationError):
             verify_bundle(self.bundle, self.public, self.key_digest)
 
+
+    def test_rejects_declared_payload_over_configured_limit(self):
+        self.manifest["files"][0]["size_bytes"] = MAX_FILE_BYTES + 1
+        manifest_path = self.bundle / "manifest.json"
+        manifest_path.write_bytes(canonical_manifest_bytes(self.manifest))
+        self._sign()
+        with self.assertRaises(PackageVerificationError):
+            verify_bundle(self.bundle, self.public, self.key_digest)
+
     def test_rejects_path_traversal_before_payload_access(self):
         self.manifest["files"][0]["path"] = "../escape.bin"
         manifest_path = self.bundle / "manifest.json"
