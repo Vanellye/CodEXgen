@@ -137,7 +137,7 @@ The advanced module now provides:
 - Append-only correction records with explicit approval and exclusive file creation
 - Dry-run successor-tag planning and signed namespaced tag creation with an explicit apply flag
 
-The advanced workflow and tests are in `.github/workflows/tacs-advanced.yml` and `tests/test_tacs_advanced.py`. The implementation and compile tests passed in GitHub Actions run [42732215339](https://github.com/Vanellye/CodEXgen/actions/runs/42732215339).
+The advanced workflow and tests are in `.github/workflows/tacs-advanced.yml` and `tests/test_tacs_advanced.py`. All 12 tests, including embedded OpenPGP verification and signed successor promotion, plus compilation passed in GitHub Actions run [42732534070](https://github.com/Vanellye/CodEXgen/actions/runs/42732534070).
 
 **Operational boundaries:** no device was mounted or accessed during development. Media discovery does not mount devices. USB export requires the user to select and confirm a currently mounted removable-media root. Successor promotion requires an allowlisted signature on the original annotated tag and a configured local Git signing key; it is dry-run unless `--apply` is supplied. The correction reviewer field is provenance metadata, not a cryptographic identity credential. Original tags are never moved or deleted.
 
