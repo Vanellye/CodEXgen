@@ -130,6 +130,27 @@ A namespace is a field in which identities and relations can be located. It is n
 - Report unknown names, ambiguous aliases, and unresolved overloads rather than guessing.
 - Record type, calling convention, error behavior, nullability, ownership/lifetime rules, and serialization details where cross-language compatibility requires them.
 
+
+### Canonical wording and variation control
+
+ERIA standardizes inconsistent spellings, aliases, labels, and representations when evidence establishes that they refer to the same concept. The canonical form becomes the preferred expression in active documentation, interfaces, and generated output. Earlier forms are not destroyed: they remain registered as aliases or superseded forms with their original provenance.
+
+Each terminology record should contain:
+
+- stable concept ID and canonical spelling/label;
+- semantic definition and contexts of use;
+- every known variant, alias, legacy label, and code representation;
+- source branch, commit, path, language, version, and date for each variant;
+- evidence for equivalence, confidence, and any unresolved distinctions;
+- approval record, effective version, compatibility notes, and rollback path.
+
+**Normalize active expression; preserve historical evidence.** Do not rewrite commits, tags, signed artifacts, or historical records to create cosmetic uniformity. A new reviewed commit may update current documentation or code while the prior form remains recoverable and searchable.
+
+Do not collapse terms based on visual or phonetic resemblance alone. Compare meaning, behavior, context, types, and downstream use. Ambiguous cases remain UNRESOLVED. Where code identifiers or public interfaces are affected, use compatibility aliases and staged deprecation, then test parsers, serializers, APIs, generated code, and consumers before adoption.
+
+> Standardize the word that people and systems use now; retain the record of every form that brought it here. Correct misleading variation without falsifying origin. Unify expression only where evidence establishes shared meaning; preserve distinction wherever meaning differs.
+
+
 ### Essence vocabulary
 
 | Technical term | ERIA essence | Use |
@@ -288,7 +309,7 @@ Include positive, negative, boundary, malformed-input, timeout, and compatibilit
 The Codex is organized as an additive proposal on a dedicated proposal branch. The governing change discipline is:
 
 - do not rewrite Git history to apply this Codex;
-- do not mass-rename symbols or rewrite call sites under a semantic proposal alone;
+- do not blindly mass-rename symbols or rewrite call sites; apply the canonical-terminology review, compatibility, provenance, and rollback rules in Chapter 5;
 - preserve each branch's identity and history;
 - record source branch, commit, file path, and provenance for every contribution;
 - use branch-specific tests and reversible change records;
