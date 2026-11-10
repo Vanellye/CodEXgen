@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 
 from python.pantheon.package_exchange import (
-    PackageVerificationError, canonical_manifest_bytes, verify_bundle,
+    MAX_FILE_BYTES, PackageVerificationError, canonical_manifest_bytes, verify_bundle,
 )
 
 
