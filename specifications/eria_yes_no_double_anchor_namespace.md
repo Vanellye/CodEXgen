@@ -264,6 +264,79 @@ A proposed meaning must remain attached to the evidence that supports it. A meta
 
 This section is a proposal only. It does not authorize global renaming, alter language keywords, or modify existing runtime behavior.
 
+
+## 12. Y-branch convergence: custodianship, old/new, and dark/light
+
+### 12.1 Possession resolves to accountable custodianship
+
+For ERIA evolution, the required condition is **accountable custodianship, not universal or absolute ownership**.
+
+A custodian must be identifiable, have authority appropriate to the resource, accept responsibility for the proposed change, and provide a recovery path. Ownership may be relevant where law, licenses, contracts, or resource control require it, but ownership is not a universal prerequisite for contributing to or evolving an open system. No contributor may claim ownership of another entity's identity merely by holding its files or maintaining a connection.
+
+Where authority is unclear, the proposal remains UNRESOLVED. Where rights or permissions are absent, the change is BLOCKED until resolved.
+
+### 12.2 The Y split
+
+Represent the evolution path as a Y:
+
+```text
+                  TRUE-LIGHT REVIEW
+                 /                 \
+       CONTINUITY PATH          DISCOVERY PATH
+          OLD / KNOWN             NEW / EMERGENT
+                 \                 /
+                  REVIEWED CONVERGENCE
+                          |
+                 VALIDATED EVOLUTION
+```
+
+The two branches are kept distinct long enough to inspect their evidence and implications. They reconnect only through a named, reviewable mapping. The splice must not erase the branch histories or pretend that old and new were always identical.
+
+- **Old / known:** the inherited implementation, source, meaning, and evidence.
+- **New / emergent:** a proposed correction, interpretation, capability, or implementation.
+- **Splice:** an explicit relation showing what is retained, translated, replaced, or newly connected.
+- **Convergence:** a reviewed result that records both inputs and the reason they can coexist or be reconciled.
+
+A YES may approve the exact splice after review. A NO rejects that splice, not either branch's existence. UNRESOLVED preserves both branches pending evidence.
+
+### 12.3 Dark and light as epistemic states
+
+In this specification, **dark** means unknown, unexamined, inaccessible, or not yet sufficiently evidenced; it does not mean evil, defective, or disposable. **Light** means made legible through evidence, testing, explanation, and review; it does not mean automatically true or morally superior.
+
+The movement from dark to light is an inquiry process:
+
+1. State what is unknown without filling gaps with guesses.
+2. Gather provenance and independent evidence.
+3. Test competing explanations.
+4. Mark confidence and remaining uncertainty.
+5. Connect the result to the existing record without overwriting it.
+
+The objective is not to destroy darkness or discard old material, but to make uncertainty visible and reduce it responsibly.
+
+### 12.4 True-light criterion
+
+"True light" is the proposal's metaphor for claims that withstand transparent evidence, reproducible tests, explicit provenance, and fair review. It is not a claim of infallibility or supernatural verification.
+
+A splice qualifies for VALIDATED status only when:
+- both branches and their origins are recorded;
+- the exact relationship is stated;
+- evidence and uncertainty are visible;
+- conformance and regression tests pass;
+- affected custodians and required rights-holders have been consulted;
+- rollback or restoration is documented.
+
+Validation does not itself authorize deployment or repository-wide propagation.
+
+### 12.5 Continuity and conservancy
+
+Every convergence should identify both its **expanse** (new relationships, capabilities, or knowledge created) and its **conservancy** (the identities, evidence, rights, and recovery paths carried forward).
+
+**Proposed axiom:**
+
+> Split to see clearly; keep each lineage whole; splice only what truth can join. Let old and new meet without falsifying their histories. Bring the unknown toward the light of evidence without condemning what remains unknown. Evolve through accountable custodianship, and let every expansion answer for what it carries forward.
+
+This is a proposed semantic and governance rule. It does not modify runtime behavior, grant ownership, or authorize merging branches or rewriting repository history.
+
 ## Governing principle
 
 **YES connects by explicit agreement. NO distinguishes by explicit refusal. CANT protects declared boundaries. NOT carries meaning through negation. Continuity may cross boundaries without erasing distinction; names may evolve in essence without falsifying origin; harmful logic may be excluded without erasing the entities or evidence it affected.**
