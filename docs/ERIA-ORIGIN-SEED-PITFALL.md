@@ -52,7 +52,7 @@ No detected mistake travels upward as an approved conclusion. Hold the affected 
 
 ## Canonical axiom
 
-> Thumb-imprint the trace of the origin so the seed can learn where it stands. Name the pitfall without making it the seed's identity. Extract the lesson, correct what can be corrected, imprint what must be remembered, and let verified understanding teach the seed to rise.
+> Thumb-imprint the origin. Let the seed learn from the pitfall. Let the lesson rise without repeating the harm.
 
 ## Scope
 
