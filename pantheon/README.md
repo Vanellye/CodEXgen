@@ -19,6 +19,7 @@ The [Firmware layer](../firmware/README.md) defines portable device-side observa
 ## Architecture
 
 - **Core runtime** — deterministic module registration and execution with explicit input/output records.
+- **ALEPH (א) origin failsafe** — automatically enters safe hold on execution failure or authorization denial; performs registered compensating actions in reverse dependency order only after owner approval. See [ALEPH Origin Failsafe](ALEPH-ORIGIN-FAILSAFE.md).
 - **Framework adapter** — translates existing Stride feature maps into Pantheon inputs without changing the legacy Python API.
 - **Android bridge** — the Android JNI target links the same runtime library; no Python interpreter is required by the native core.
 - **Migration modules** — each Python capability is ported separately and compared against Python reference fixtures.
