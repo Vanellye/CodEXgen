@@ -1,6 +1,7 @@
 #ifndef PANTHEON_RUNTIME_HPP
 #define PANTHEON_RUNTIME_HPP
 
+#include "pantheon/aleph.hpp"
 #include "pantheon/control_gate.hpp"
 #include <map>
 #include <memory>
@@ -46,10 +47,14 @@ public:
                              const OwnerApproval& ownerApproval) const;
     std::vector<std::string> moduleNames() const;
 
+    // Register compensating actions before execution. Failed execution
+    // automatically engages ALEPH; reversal itself still requires owner approval.
+    Aleph& aleph();
     static const char* version();
 
 private:
     std::map<std::string, std::shared_ptr<Module> > modules_;
+    mutable Aleph aleph_;
 };
 
 } // namespace pantheon
