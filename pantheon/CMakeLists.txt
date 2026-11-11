@@ -14,6 +14,10 @@ add_executable(pantheon_aleph_test tests/aleph_test.cpp)
 target_link_libraries(pantheon_aleph_test pantheon_runtime)
 set_target_properties(pantheon_aleph_test PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
 
+add_executable(pantheon_temple_geometry_test tests/temple_geometry_test.cpp)
+target_link_libraries(pantheon_temple_geometry_test pantheon_runtime)
+set_target_properties(pantheon_temple_geometry_test PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
+
 add_executable(pantheon_control_gate_test tests/control_gate_test.cpp)
 target_link_libraries(pantheon_control_gate_test pantheon_runtime)
 set_target_properties(pantheon_control_gate_test PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
@@ -33,6 +37,7 @@ set_target_properties(pantheon_rise_fall_test PROPERTIES CXX_STANDARD 11 CXX_STA
 enable_testing()
 add_test(NAME pantheon_runtime_smoke COMMAND pantheon_runtime_smoke)
 add_test(NAME pantheon_aleph_test COMMAND pantheon_aleph_test)
+add_test(NAME pantheon_temple_geometry_test COMMAND pantheon_temple_geometry_test)
 add_test(NAME pantheon_control_gate_test COMMAND pantheon_control_gate_test)
 add_test(NAME pantheon_faculty_test COMMAND pantheon_faculty_test)
 add_test(NAME pantheon_gateway_test COMMAND pantheon_gateway_test)
