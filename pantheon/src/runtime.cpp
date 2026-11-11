@@ -2,7 +2,7 @@
 
 namespace pantheon {
 
-Runtime::Runtime() : modules_() {}
+Runtime::Runtime() : modules_(), aleph_() {}
 
 bool Runtime::registerModule(const std::shared_ptr<Module>& module) {
     if (!module) return false;
@@ -23,15 +23,20 @@ Result Runtime::execute(const std::string& name, const Input& input) const {
         Result missing;
         missing.module = name;
         missing.message = "module_not_registered";
+        aleph_.engage(missing.message);
         return missing;
     }
     if (it->second->requiresControlAuthorization()) {
         Result denied;
         denied.module = name;
         denied.message = "control_authorization_required";
+        aleph_.engage(denied.message);
         return denied;
     }
-    return it->second->execute(input);
+
+    Result result = it->second->execute(input);
+    if (!result.ok) aleph_.engage(result.message);
+    return result;
 }
 
 Result Runtime::executeControlled(
@@ -44,12 +49,14 @@ Result Runtime::executeControlled(
         Result missing;
         missing.module = name;
         missing.message = "module_not_registered";
+        aleph_.engage(missing.message);
         return missing;
     }
     if (!it->second->requiresControlAuthorization()) {
         Result denied;
         denied.module = name;
         denied.message = "module_does_not_require_control_authorization";
+        aleph_.engage(denied.message);
         return denied;
     }
 
@@ -61,9 +68,13 @@ Result Runtime::executeControlled(
         denied.message = "control_gate_denied:" + decision.reason;
         denied.metrics["standards_passed"] = decision.passedCount;
         denied.metrics["standards_required"] = ControlGate::REQUIRED_STANDARDS;
+        aleph_.engage(denied.message);
         return denied;
     }
-    return it->second->execute(input);
+
+    Result result = it->second->execute(input);
+    if (!result.ok) aleph_.engage(result.message);
+    return result;
 }
 
 std::vector<std::string> Runtime::moduleNames() const {
@@ -73,6 +84,10 @@ std::vector<std::string> Runtime::moduleNames() const {
         names.push_back(it->first);
     }
     return names;
+}
+
+Aleph& Runtime::aleph() {
+    return aleph_;
 }
 
 const char* Runtime::version() {
