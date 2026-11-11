@@ -18,14 +18,14 @@ Every proposed operation must declare one primary intent and its target:
 
 | Intent | Meaning | Default capability |
 |---|---|---|
-| OBSERVE | Read, inspect, compare, or explain | Read-only |
+| OBSERVE | Read, inspect, compare, or explain across all sources the requester is already authorized to access | Read-All (read breadth only; no write, export, or access-control bypass) |
 | PROPOSE | Prepare a plan, patch, or preview without applying it | No persistent write |
 | LOCAL_EDIT | Change a disposable or explicitly selected working copy | Scoped sandbox write |
 | PERSIST | Save a change to a named file, branch, or record | Exact-target write after confirmation |
 | EXTERNAL_ACTION | Publish, transmit, deploy, merge, or affect an external service | Separate explicit approval and platform authorization |
 | DESTRUCTIVE | Delete, overwrite, revoke, rewrite history, or make recovery harder | Deny by default; exceptional approval and verified recovery plan |
 
-The intent label is descriptive, not an authority level. A harmless-looking label cannot reduce the risk of the underlying operation.
+The intent label is descriptive, not an authority level. A harmless-looking label cannot reduce the risk of the underlying operation. **Read-All** means broad reading only within resources and data the requester is already permitted to see; it never bypasses privacy boundaries, ownership, consent, classification, or platform access controls, and it never includes mutation.
 
 ## 2. Decency and dignity constraints
 
@@ -84,7 +84,7 @@ The learning record must not automatically update:
 - Trust level used as a substitute for evidence.
 - The ability to bypass review, approval, or a safety gate.
 
-Successful history can support a recommendation for a future request. It cannot silently convert a read right into a write right or a local write into an external or destructive right.
+Successful history can support a recommendation for a future request. It cannot silently convert Read-All into write authority, or a local write into an external or destructive right.
 
 ## 6. Audit and provenance
 
