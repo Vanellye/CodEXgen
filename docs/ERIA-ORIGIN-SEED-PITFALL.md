@@ -2,17 +2,19 @@
 
 **Status:** Additive origin-trace record on `main`  
 **Source trace:** Proposal-branch documentation commit `463199580ae19a6dfbfe733e6ce1102f88234e11`  
-**Purpose:** Preserve the lesson carried by a seed-pitfall so it can teach growth without repeating the harm.
+**Purpose:** Thumb-imprint the lesson carried by a seed-pitfall so it can teach growth without repeating the harm.
 
-## Origin is retained, not reenacted
+## Origin is imprinted, not reenacted
 
-A pitfall is a recorded condition, decision, assumption, or omission from which a lesson can be learned. Recording a pitfall does not endorse it, repeat it, or make it a permanent identity of the people or work affected.
+A pitfall is a recorded condition, decision, assumption, or omission from which a lesson can be learned. A thumb-imprint marks that lesson for recognition; it does not endorse the pitfall, repeat it, or make it a permanent identity of the people or work affected.
+
+**The Thumb** is a symbolic act of oversight: it marks the trace, points back to its origin, and makes the lesson easier to recognize. It does not claim ownership, confer authority, or alter the historical source.
 
 The seed remains capable of rising because its history is understood—not because the pitfall is hidden.
 
 ## Seed-pitfall learning record
 
-Each record should preserve:
+Each record should carry a thumb-imprint containing:
 
 1. **Origin trace** — source, date or sequence, branch, commit, file, and context where known.
 2. **Initial assumption** — what was believed or expected at the time.
@@ -23,19 +25,20 @@ Each record should preserve:
 7. **Recovery path** — how to reverse, repair, or safely contain the consequence.
 8. **Uncertainty** — what remains unknown or disputed.
 
-Never invent missing origin details. Unknown fields remain explicitly unknown. Do not rewrite the historical source to make the lesson appear inevitable.
+Never invent missing origin details. Unknown fields remain explicitly unknown. Do not rewrite the historical source to make the lesson appear inevitable. The imprint is an added trace, not a replacement for the source.
 
 ## The rise path
 
-**Seed → Root trace → Pitfall identified → Evidence examined → Lesson extracted → Correction authorized → Recovery tested → New growth**
+**Seed → Root trace → Pitfall identified → Evidence examined → Lesson extracted → Thumb-imprint applied → Correction authorized → Recovery tested → New growth**
 
 - **Seed:** the original idea, contribution, or capability.
 - **Root trace:** the evidence that connects the seed to its actual origin.
 - **Pitfall:** a specific failure mode or mistaken assumption—not a person's worth or identity.
 - **Examination:** compare the record with observed outcomes and competing explanations.
 - **Lesson:** state what should be done differently, without overstating certainty.
+- **Thumb-imprint:** visibly mark the lesson and its source so later work can recognize and learn from it.
 - **Correction:** make only the authorized, bounded change.
-- **Recovery:** preserve a tested way back or a safe containment state.
+- **Recovery:** retain a tested way back or a safe containment state.
 - **New growth:** carry the verified lesson into future work with provenance intact.
 
 ## Complete-sum safeguard
@@ -44,11 +47,11 @@ Before a lesson is promoted, account for affected people, contributions, costs, 
 
 ## Non-propagation rule
 
-No detected mistake travels upward as an approved conclusion. Hold the affected claim, preserve its evidence, correct it at the appropriate source, and carry the correction trail forward. A correction does not erase the fact that the pitfall occurred; a historical pitfall does not authorize repeating it.
+No detected mistake travels upward as an approved conclusion. Hold the affected claim, imprint its evidence and correction trail, and correct it at the appropriate source. A correction does not erase the fact that the pitfall occurred; a historical pitfall does not authorize repeating it.
 
 ## Canonical axiom
 
-> Hold the trace of the origin so the seed can learn where it stands. Name the pitfall without making it the seed's identity. Extract the lesson, correct what can be corrected, preserve what must be remembered, and let verified understanding teach the seed to rise.
+> Thumb-imprint the trace of the origin so the seed can learn where it stands. Name the pitfall without making it the seed's identity. Extract the lesson, correct what can be corrected, imprint what must be remembered, and let verified understanding teach the seed to rise.
 
 ## Scope
 
