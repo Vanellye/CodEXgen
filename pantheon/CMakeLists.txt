@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(pantheon_runtime LANGUAGES CXX)
 
-add_library(pantheon_runtime STATIC src/runtime.cpp src/aleph.cpp src/control_gate.cpp src/faculty_engine.cpp src/gateway.cpp src/rise_fall.cpp)
+add_library(pantheon_runtime STATIC src/runtime.cpp src/aleph.cpp src/control_gate.cpp src/faculty_engine.cpp src/gateway.cpp src/rise_fall.cpp src/temple_geometry.cpp)
 target_include_directories(pantheon_runtime PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set_target_properties(pantheon_runtime PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
 target_compile_options(pantheon_runtime PRIVATE -Wall -Wextra -pedantic)
