@@ -18,6 +18,8 @@ The [Firmware layer](../firmware/README.md) defines portable device-side observa
 
 ## Architecture
 
+- **ECTICT Thinking Ethic** — preserves distinct viewpoints and provenance while turning opposition into testable learning proposals; disagreement is not forced into consensus and every proposal requires human review. See [ECTICT Thinking Ethic](ECTICT-THINKING-ETHIC.md).
+
 - **Core runtime** — deterministic module registration and execution with explicit input/output records.
 - **ERO Source Identity / EYES UP** — identifies declared source provenance and records a spectral-series inspection of history, dependencies, write permissions, and uncertainty. VERIFIED, INFERRED, and UNKNOWN remain distinct; inspection never grants write rights. See [ERO EYES UP](ERO-EYES-UP.md).
 - **Temple Geometry / Sphere Directives** — declarative bass-string connections, bounded sway metadata, geometric shapes, bridges, and purpose-bearing sphere directives; human dignity and consent are non-waivable. This is a model, not a body/actuator controller. See [Temple Geometry](TEMPLE-GEOMETRY.md).
