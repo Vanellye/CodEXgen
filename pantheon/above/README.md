@@ -22,11 +22,18 @@ An upstream proposal should carry:
 - authorization scope and expiry where applicable;
 - safety review and reversibility plan.
 
+## Branch protection ethic
+
+Branch identity, source history, contributor agency, and recovery are protected before any change is proposed. Above-Pantheon may inspect and prepare a branch-operation proposal, but it cannot directly mutate shared refs, merge, delete, force-push, or weaken repository rules. Platform-enforced protections and Pantheon authorization must independently validate consequential changes.
+
+See [Branch Protection — Above-Pantheon Code Ethic](BRANCH-PROTECTION-CODE-ETHIC.md) for required pull-request review, independent approval, passing checks, force-push/deletion blocks, narrowly controlled bypasses, provenance, and recovery requirements. The policy is not evidence that GitHub rules are configured; active protection must be inspected and verified on the repository.
+
 ## Prohibited shortcuts
 
 - No upstream component may claim that it knows divine will or can objectively read the intent of nature.
 - No inferred consent, biometric moral scoring, or silent expansion of scope.
 - No direct execution of downstream modules.
 - Missing or conflicting evidence remains visible; it is not converted into certainty.
+- No branch mutation or protection-rule change based solely on symbolic instruction, inferred intent, prior success, or silence.
 
 **Handoff:** Above-Pantheon components submit proposals. Pantheon independently validates the contract and makes a bounded policy decision.
