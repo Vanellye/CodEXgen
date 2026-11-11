@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(pantheon_runtime LANGUAGES CXX)
 
-add_library(pantheon_runtime STATIC src/runtime.cpp src/aleph.cpp src/control_gate.cpp src/faculty_engine.cpp src/gateway.cpp src/rise_fall.cpp src/temple_geometry.cpp src/ero_source.cpp)
+add_library(pantheon_runtime STATIC src/runtime.cpp src/aleph.cpp src/control_gate.cpp src/faculty_engine.cpp src/gateway.cpp src/rise_fall.cpp src/temple_geometry.cpp src/ero_source.cpp src/ectict.cpp)
 target_include_directories(pantheon_runtime PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set_target_properties(pantheon_runtime PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
 target_compile_options(pantheon_runtime PRIVATE -Wall -Wextra -pedantic)
@@ -30,6 +30,9 @@ set_target_properties(pantheon_rise_fall_test PROPERTIES CXX_STANDARD 11 CXX_STA
 add_executable(pantheon_ero_source_test tests/ero_source_test.cpp)
 target_link_libraries(pantheon_ero_source_test pantheon_runtime)
 set_target_properties(pantheon_ero_source_test PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
+add_executable(pantheon_ectict_test tests/ectict_test.cpp)
+target_link_libraries(pantheon_ectict_test pantheon_runtime)
+set_target_properties(pantheon_ectict_test PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
 
 enable_testing()
 add_test(NAME pantheon_runtime_smoke COMMAND pantheon_runtime_smoke)
@@ -40,3 +43,4 @@ add_test(NAME pantheon_faculty_test COMMAND pantheon_faculty_test)
 add_test(NAME pantheon_gateway_test COMMAND pantheon_gateway_test)
 add_test(NAME pantheon_rise_fall_test COMMAND pantheon_rise_fall_test)
 add_test(NAME pantheon_ero_source_test COMMAND pantheon_ero_source_test)
+add_test(NAME pantheon_ectict_test COMMAND pantheon_ectict_test)
