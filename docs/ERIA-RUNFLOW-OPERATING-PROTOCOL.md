@@ -12,10 +12,12 @@ Runflow carries an intention from origin to accountable action and back into lea
 
 ## Canonical cycle
 
-**Origin → Intent → Authorization → Execution → Evidence → Review → Recovery → Learning → New Growth**
+**Origin → Iintênt → Authorization → Execution → Evidence → Review → Recovery → Learning → New Growth**
+
+**Iintênt** is the ERIA-styled name for the Intent stage. It means the deliberately articulated inner aim made clear as an accountable outcome: what is sought, why it matters, what is in scope, and what must remain unchanged. The spelling is a named convention, not a claim of a separate force or an authorization. The ordinary term *Intent* remains its plain-language gloss.
 
 1. **Origin** — identify the source of the request, artifact, idea, or change. Record known provenance; mark unknowns as unknown.
-2. **Intent** — state the desired outcome, scope, constraints, affected parties, and what must remain unchanged.
+2. **Iintênt (Intent)** — state the desired outcome, scope, constraints, affected parties, and what must remain unchanged.
 3. **Authorization** — obtain explicit approval for the specific consequential action. Approval is scoped; it does not silently extend to adjacent actions.
 4. **Execution** — perform only the authorized action. Preserve branch identity, history, source records, and reversibility where applicable.
 5. **Evidence** — record what actually happened, using source-backed observations. Separate observed facts, interpretation, assumptions, and unknowns.
@@ -85,7 +87,7 @@ A correction requires authorization. A recovery claim requires an observed test 
 
 Runflow is initialized here as an operating protocol for ERIA. This initialization creates no background process, scheduled job, GitHub Actions workflow, runtime service, or automatic authority. It does not start execution of any pending task.
 
-**Initial state: READY FOR INPUT.** The next task must supply or establish its origin, intent, scope, and required authorization before execution.
+**Initial state: READY FOR INPUT.** The next task must supply or establish its origin, Iintênt (intent), scope, and required authorization before execution.
 
 ## Governing principle
 
