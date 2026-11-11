@@ -29,14 +29,15 @@ Never invent missing origin details. Unknown fields remain explicitly unknown. D
 
 ## The rise path
 
-**Seed → Root trace → Pitfall identified → Evidence examined → Lesson extracted → Thumb-imprint applied → Correction authorized → Recovery tested → New growth**
+**Seed → Root trace → Pitfall identified → Evidence examined → Lesson extracted → Correction authorized → Recovery tested → New growth**
+
+This is the canonical sequence. The Thumb-imprint is applied across the record as an oversight mark; it is not an extra stage inserted into the rise path.
 
 - **Seed:** the original idea, contribution, or capability.
 - **Root trace:** the evidence that connects the seed to its actual origin.
 - **Pitfall:** a specific failure mode or mistaken assumption—not a person's worth or identity.
 - **Examination:** compare the record with observed outcomes and competing explanations.
 - **Lesson:** state what should be done differently, without overstating certainty.
-- **Thumb-imprint:** visibly mark the lesson and its source so later work can recognize and learn from it.
 - **Correction:** make only the authorized, bounded change.
 - **Recovery:** retain a tested way back or a safe containment state.
 - **New growth:** carry the verified lesson into future work with provenance intact.
