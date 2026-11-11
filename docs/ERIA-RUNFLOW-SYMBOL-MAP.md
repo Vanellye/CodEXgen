@@ -13,7 +13,7 @@
 | Symbol | Runflow stage | Meaning |
 |---|---|---|
 | ◎ | Origin | Identify and trace the source |
-| ◇ | Intent | Define desired outcome, scope, and constraints |
+| ◇ | Iintênt (Intent) | Define the deliberate aim, outcome, scope, and constraints |
 | ✓? | Authorization | Obtain explicit approval for the exact action |
 | ▶ | Execution | Perform only the authorized action |
 | ◉ | Evidence | Record observed results and their provenance |
@@ -24,7 +24,7 @@
 
 The question mark in `✓?` is intentional: authorization is a question until explicit approval is received. It must never be inferred from silence, readiness, or successful validation.
 
-## 2. The Thumb-imprint
+## 2. Iintênt — the deliberate aim\n\n**◇ Iintênt** names the Intent stage: articulate the aim before action, make its scope legible, and state what must not be changed. It fills the open input `()` with a declared purpose, not an assumption. Iintênt does not authorize execution; the separate `✓?` gate remains required.\n\n## 3. The Thumb-imprint
 
 ```text
        👍
@@ -50,7 +50,7 @@ It does not mean:
 - proof that a claim is true;
 - permission to erase or rewrite the source.
 
-## 3. Task-state symbols
+## 4. Task-state symbols
 
 | State | Symbol | Operational meaning |
 |---|---|---|
@@ -68,7 +68,7 @@ It does not mean:
 
 These symbols label states; they do not themselves cause transitions. State changes must be recorded explicitly.
 
-## 4. Boundary and evidence operators
+## 5. Boundary and evidence operators
 
 | Notation | Meaning |
 |---|---|
@@ -83,7 +83,7 @@ These symbols label states; they do not themselves cause transitions. State chan
 | `Δ` | A proposed change; not yet authorization or adoption |
 | `↩` | Return to an earlier state for clarification, renewed authorization, or recovery |
 
-## 5. Stop conditions
+## 6. Stop conditions
 
 ```text
 ⛔  missing authorization
@@ -98,7 +98,7 @@ These symbols label states; they do not themselves cause transitions. State chan
 
 Containment is not silent correction. If a safe recovery test is unavailable, remain in RECOVERY-REQUIRED or UNRESOLVED and state why.
 
-## 6. Evidence-status marks
+## 7. Evidence-status marks
 
 | Mark | Meaning |
 |---|---|
@@ -110,14 +110,14 @@ Containment is not silent correction. If a safe recovery test is unavailable, re
 
 Never use PASS as a synonym for intended, plausible, reviewed, or merely attempted.
 
-## 7. Compact Runflow record
+## 8. Compact Runflow record
 
 Use this symbolic record for a consequential task:
 
 ```text
 RUNFLOW {
   origin:       ◎ [source]
-  intent:       ◇ [outcome + scope]
+  iintênt:      ◇ [deliberate aim + outcome + scope]
   authorization: ✓? [actor + exact action + boundary]
   execution:    ▶ [action + result]
   evidence:     ◉ [observations + references]
@@ -131,8 +131,8 @@ RUNFLOW {
 
 Unknown values remain explicitly unknown. Do not fabricate a source, approver, test, or result to complete the form.
 
-## 8. Governing axiom
+## 9. Governing axiom
 
-**◎ Trace the origin. ◇ Clarify the intent. ✓? Ask before acting. ▶ Act within scope. ◉ Show the evidence. ⌕ Review the consequence. ↶ Test recovery. ✧ 👍 Imprint the lesson. 🌱 Grow without repeating harm.**
+**◎ Trace the origin. ◇ Clarify Iintênt. ✓? Ask before acting. ▶ Act within scope. ◉ Show the evidence. ⌕ Review the consequence. ↶ Test recovery. ✧ 👍 Imprint the lesson. 🌱 Grow without repeating harm.**
 
 The symbol map is a reading aid. In any conflict, the ERIA Runflow Operating Protocol and the specific authorization record govern.
