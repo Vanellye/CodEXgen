@@ -19,6 +19,7 @@ The [Firmware layer](../firmware/README.md) defines portable device-side observa
 ## Architecture
 
 - **Core runtime** — deterministic module registration and execution with explicit input/output records.
+- **ERO Source Identity / EYES UP** — identifies declared source provenance and records a spectral-series inspection of history, dependencies, write permissions, and uncertainty. VERIFIED, INFERRED, and UNKNOWN remain distinct; inspection never grants write rights. See [ERO EYES UP](ERO-EYES-UP.md).
 - **Temple Geometry / Sphere Directives** — declarative bass-string connections, bounded sway metadata, geometric shapes, bridges, and purpose-bearing sphere directives; human dignity and consent are non-waivable. This is a model, not a body/actuator controller. See [Temple Geometry](TEMPLE-GEOMETRY.md).
 - **ALEPH (א) origin failsafe** — automatically enters safe hold on execution failure or authorization denial; performs registered compensating actions in reverse dependency order only after owner approval. See [ALEPH Origin Failsafe](ALEPH-ORIGIN-FAILSAFE.md).
 - **Framework adapter** — translates existing Stride feature maps into Pantheon inputs without changing the legacy Python API.
@@ -32,7 +33,7 @@ The [Firmware layer](../firmware/README.md) defines portable device-side observa
 - **Principle 45 — The Covenant of Truthful Stewardship** — requires evidence-based judgments, independent review, correction, appeal, and accountability for human and automated decision-makers. See [Principle 45](PRINCIPLE-45.md).
 - **Principle 46 — The Guiding Lights** — calls for guidance without domination, intergenerational learning, continual refinement of the Main, and stewardship without possession. See [Principle 46](PRINCIPLE-46.md).
 - **Rise & Fall Directives** — deterministic ơ (RISE), ọ (FALL), and WARDEN policy combining declared principles with evidence; symbolic propagation is not physical quantum entanglement. See [Rise & Fall Directives](../docs/RISE-FALL-DIRECTIVES.md).
-- **JGit capability checkpoint** — Android components obtain the shared Git Freedom Bridge through `GitFreedomBridge.shared(context)`. Its JGit dependency is pinned to `3.7.1.201504261725-r`, anchored to origin checkpoint `f63e166e11aee325fe0ea8504672f19134d2768b`. This is app-process capability discovery, not unrestricted operating-system or cross-device control. See [JGit Compatibility Checkpoint](../docs/JGIT-COMPATIBILITY-CHECKPOINT.md).
+- **JGit capability checkpoint** — Android components obtain the shared Git Freedom Bridge through GitFreedomBridge.shared(context). Its JGit dependency is pinned to 3.7.1.201504261725-r, anchored to origin checkpoint f63e166e11aee325fe0ea8504672f19134d2768b. This is app-process capability discovery, not unrestricted operating-system or cross-device control. See [JGit Compatibility Checkpoint](../docs/JGIT-COMPATIBILITY-CHECKPOINT.md).
 
 ## Port order
 
@@ -54,4 +55,4 @@ The [Firmware layer](../firmware/README.md) defines portable device-side observa
 
 ## Verification
 
-Host tests should compile with a standard C++11 compiler. Android CI must continue to build `:app:assembleDebug`. A successful commit alone is not proof of a successful build or APK artifact.
+Host tests should compile with a standard C++11 compiler. Android CI must continue to build :app:assembleDebug. A successful commit alone is not proof of a successful build or APK artifact.
