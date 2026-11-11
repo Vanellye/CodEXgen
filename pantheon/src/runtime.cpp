@@ -17,6 +17,13 @@ bool Runtime::hasModule(const std::string& name) const {
 }
 
 Result Runtime::execute(const std::string& name, const Input& input) const {
+    if (aleph_.state() != AlephState::READY) {
+        Result held;
+        held.module = name;
+        held.message = "aleph_safe_hold";
+        return held;
+    }
+
     std::map<std::string, std::shared_ptr<Module> >::const_iterator it =
         modules_.find(name);
     if (it == modules_.end()) {
@@ -43,6 +50,13 @@ Result Runtime::executeControlled(
         const std::string& name, const Input& input,
         const std::vector<StandardEvidence>& standards,
         const OwnerApproval& ownerApproval) const {
+    if (aleph_.state() != AlephState::READY) {
+        Result held;
+        held.module = name;
+        held.message = "aleph_safe_hold";
+        return held;
+    }
+
     std::map<std::string, std::shared_ptr<Module> >::const_iterator it =
         modules_.find(name);
     if (it == modules_.end()) {
