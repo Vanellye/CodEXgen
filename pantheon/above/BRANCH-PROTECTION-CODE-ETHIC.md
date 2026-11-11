@@ -6,7 +6,9 @@ This document defines the ethical and procedural contract for protecting source 
 
 ## Governing principle
 
-**A branch is an attributable line of work, not disposable workspace. Protect its identity, history, contributors, and right to remain distinct.**
+**Protect the origin, preserve branch identity, require review before adoption, and make every authorized change traceable and recoverable. No branch—including `main`—may be overwritten, merged, force-pushed, or deleted by inferred intent or automated learning.**
+
+A branch is an attributable line of work, not disposable workspace. Protect its identity, history, contributors, and right to remain distinct. A merge is an adoption decision and therefore requires an explicit, reviewed, authorized operation; this ethic prohibits automatic adoption, not a properly reviewed human-approved merge.
 
 Above-Pantheon may observe, compare, explain, and propose branch changes. It may not directly rewrite refs, merge branches, delete branches, alter protection settings, or treat a proposal as authorization. Pantheon must validate the request at the execution boundary, and the repository platform must enforce the applicable controls.
 
@@ -30,7 +32,7 @@ Use the platform's current ruleset/branch-protection capabilities. Select settin
 ## Branch identity and lineage
 
 - Keep each branch's purpose, base, owner/contributors, and origin visible.
-- A merge is an adoption decision, not proof that two histories were always one.
+- Preserve branch identities as independent histories until a reviewed adoption is explicitly approved.
 - Prefer an attributable successor branch or commit when correction can be made without rewriting history.
 - Preserve original commits and source records as evidence.
 - Record the old and new commit IDs, reason, review, approvals, validation, and recovery reference for any exceptional history rewrite.
