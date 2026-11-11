@@ -18,6 +18,7 @@ The [Firmware layer](../firmware/README.md) defines portable device-side observa
 
 ## Architecture
 
+- **Force Rewrite Protocol** — permits reversible successor rewrites by default and defines strict backup, provenance, human-approval, and `--force-with-lease` gates for exceptional Git history rewrites. The document is policy only; it does not execute or authorize a history rewrite. See [Force Rewrite Protocol](FORCE-REWRITE-PROTOCOL.md).
 - **ECTICT Thinking Ethic** — preserves distinct viewpoints and provenance while turning opposition into testable learning proposals; disagreement is not forced into consensus and every proposal requires human review. See [ECTICT Thinking Ethic](ECTICT-THINKING-ETHIC.md).
 
 - **Core runtime** — deterministic module registration and execution with explicit input/output records.
