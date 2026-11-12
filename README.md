@@ -4,6 +4,19 @@ ERIA is the canonical project identity for this codebase. The GitHub repository 
 `Vanellye/CodEXgen` during this migration so existing clone URLs, issues, pull requests,
 and provenance links continue to resolve.
 
+## HOME and StridePath
+
+- **HOME** — Android entry point for the ERIA workspace.
+- **Hômmmë Bõđďiê§** — named workspace identities with explicit scope and lineage.
+- **PL·Lêâ§ëə MULTIPLY (✖)** — create separately identified derivatives from an exact source revision.
+- **PL·Lêâ§ëə SPREAD (ð)** — propagate approved principles and references while preserving source provenance.
+- **Ĥõmmmïîịëê§ ÖvêrŘidĕ** — scoped, approved overrides; none are activated by the HOME screen.
+- **StridePath** — recall, transformation history, validation, and recovery contract.
+
+See [StridePath governance](ERIA/stridepath/README.md). These are governed workflows:
+the HOME screen does not silently write files, create branches, publish content, or
+grant permissions. Main remains protected from implicit promotion.
+
 ## Android identity
 
 - Gradle root project: `ERIA`
