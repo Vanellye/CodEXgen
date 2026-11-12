@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This standard governs code creation, review, repair, execution, and transmission in ERIA. It protects people, source integrity, system reliability, and accountable human control.
+This standard governs code creation, review, repair, execution, and transmission in ERIA. It protects people, source integrity, system reliability, and accountable human control. The ĎÏÎ§Ŝ authorization-and-patch gate is the operational contract for these rules and applies to every module, tool, workflow, and generated artifact in the repository.
 
 ## Core rules
 
@@ -29,7 +29,9 @@ Every consequential repair must identify the source repository, branch, exact ba
 - Treating heuristic output as a verified security finding.
 - Concealing failed tests, uncertainty, or incomplete recovery.
 
-## Relationship to ÆĀÄÂ
+## Relationship to ĎÏÎ§Ŝ and ÆĀÄÂ
+
+[ĎÏÎ§Ŝ Authorization and Patch Gate](./DISCS-AUTHORIZATION-AND-PATCH-GATE.md) defines the permission model and gated operation sequence. [The repository-wide application matrix](./DISCS-REPOSITORY-WIDE-APPLICATION.md) maps those requirements to each codebase area and records implementation gaps.
 
 ÆĀÄÂ is the code-rehabilitation process implementing these principles. Its default operation is read-only detection and diagnosis. It may prepare a patch for review, but repair execution remains separately authorized. See [ÆĀÄÂ Code Rehabilitation](./AEAA-CODE-REHABILITATION.md).
 
