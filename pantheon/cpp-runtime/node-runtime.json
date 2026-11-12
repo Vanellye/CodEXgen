@@ -1,0 +1,9 @@
+{
+  "runtime": "node",
+  "version": "11.15.0",
+  "policy": "exact",
+  "scope": "all Pantheon Node.js target processes",
+  "entryGate": "scripts/verify-node-runtime.js",
+  "securityStatus": "end-of-life; isolated compatibility use only",
+  "upgradeRule": "Change all version pins, CI, and node deployment images together in one reviewed change."
+}
