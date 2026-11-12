@@ -25,6 +25,14 @@ jobs:
       - name: Check committed diff whitespace
         run: git diff-tree --check --root -r HEAD
 
+  pantheon-contracts:
+    name: Pantheon C99 contract integration tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile and run every Pantheon contract suite
+        run: bash pantheon/run-contract-tests.sh
+
   python-validation:
     name: Python syntax and available unit tests
     runs-on: ubuntu-24.04
