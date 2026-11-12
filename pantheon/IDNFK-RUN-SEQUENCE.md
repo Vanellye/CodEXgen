@@ -16,13 +16,13 @@ IDnfk builds a deterministic, side-effect-free run plan for a subject under cons
 4. **INSPECT** — require further evidence when the subject is OTHER or evidence is not VERIFIED.
 5. **REVIEW** — verified, recognized subjects advance to review.
 6. **AUTHORIZE** — record a traceable approval reference.
-7. **READY** — mark the plan eligible for a separately authenticated execution boundary.
+7. **READY FOR EXTERNAL AUTHORIZATION CHECK** — mark the plan ready for a separate external authorization check.
 
 ## Invariants
 
 - `OTHER` is a valid holding classification, not a trash bin, success state, or permission grant.
 - Unknown and inferred evidence never advance to execution eligibility.
-- A supplied approval reference is traceability metadata, not proof of identity or authentication.
+- A supplied approval reference is traceability metadata, not proof of identity or authentication. It cannot independently authorize execution.
 - This module plans; it does not execute requested actions, mutate files, change Git refs, or bypass Pantheon control gates.
 - Every plan retains the subject's source identity and requested action.
 - Invalid or incomplete subjects fail closed with an explicit finding.
