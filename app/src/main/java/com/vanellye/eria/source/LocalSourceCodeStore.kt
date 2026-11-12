@@ -152,12 +152,12 @@ class LocalSourceCodeStore(private val root: File) {
         if (length !in 1..MAX_SOURCE_BYTES) throw SourceIntegrityRejected("stored source length is invalid")
         val bytes = ByteArray(length)
         input.readFully(bytes)
-        if (input.read() != -1) throw SourceIntegrityRejected("stored record contains unexpected trailing data")
         val digest = input.readUTF()
         val approvalRef = input.readUTF()
         val count = input.readInt()
         if (count !in 1..16) throw SourceIntegrityRejected("stored authorization scope is invalid")
         val scopes = (0 until count).map { input.readUTF() }
+        if (input.read() != -1) throw SourceIntegrityRejected("stored record contains unexpected trailing data")
         val content = String(bytes, StandardCharsets.UTF_8)
         val authorization = DataAuthorization(AuthorizationStatus.AUTHORIZED, scopes, approvalRef)
         val envelope = DataEnvelope(
