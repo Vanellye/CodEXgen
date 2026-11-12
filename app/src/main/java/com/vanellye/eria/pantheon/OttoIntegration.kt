@@ -77,6 +77,7 @@ data class ExternalActionRequest(
     val requestId: String, val threadId: String, val sourceEventId: String,
     val channel: ExternalActionChannel, val actionKey: String, val targetId: String,
     val payload: Map<String, String>, val payloadDigest: String,
+    val qualityEvidence: TriggerQualityEvidence, val sleepCheckpointDigest: String,
     val approvalScope: String, val idempotencyKey: String
 )
 data class HeldTriggerRule(val ruleId: String, val quality: TriggerQualityReport, val holdReasons: List<String>)
@@ -125,7 +126,7 @@ object OttoTriggerEngine {
             if (protected.disposition != ProtectedTriggerDisposition.READY_FOR_OTTO_REVIEW) {
                 held += HeldTriggerRule(rule.ruleId, quality, protected.holdReasons)
             } else {
-                val digest = requestDigest(thread.threadId, event.eventId, rule.channel, rule.actionKey, rule.targetId, rule.payload)
+                val digest = requestDigest(thread.threadId, event.eventId, rule.channel, rule.actionKey, rule.targetId, rule.payload, rule.quality, sleepCheckpoint.checkpointDigest)
                 requests += ExternalActionRequest(
                     requestId = "otto-" + digest.take(20),
                     threadId = thread.threadId,
@@ -135,6 +136,8 @@ object OttoTriggerEngine {
                     targetId = rule.targetId,
                     payload = rule.payload.toSortedMap(),
                     payloadDigest = digest,
+                    qualityEvidence = rule.quality,
+                    sleepCheckpointDigest = sleepCheckpoint.checkpointDigest,
                     approvalScope = approvalScope(rule.channel, rule.actionKey, rule.targetId),
                     idempotencyKey = digest
                 )
@@ -148,7 +151,8 @@ object OttoTriggerEngine {
 
     fun requestDigest(
         threadId: String, eventId: String, channel: ExternalActionChannel,
-        actionKey: String, targetId: String, payload: Map<String, String>
+        actionKey: String, targetId: String, payload: Map<String, String>,
+        quality: TriggerQualityEvidence, sleepCheckpointDigest: String
     ): String {
         val canonical = buildString {
             append(threadId).append('\n')
@@ -177,8 +181,12 @@ class ExternalActionDispatchGate(
         if (request.actionKey.isBlank() || request.approvalScope != expectedScope) {
             return DispatchResult(DispatchStatus.DENIED, reason = "request approval scope is invalid")
         }
+        if (!request.qualityEvidence.report().qualified || !Regex(\"^[0-9a-f]{64}$\").matches(request.sleepCheckpointDigest)) {
+            return DispatchResult(DispatchStatus.DENIED, reason = \"quality evidence or sleep checkpoint qualification is invalid\")
+        }
         val recomputedDigest = OttoTriggerEngine.requestDigest(
-            request.threadId, request.sourceEventId, request.channel, request.actionKey, request.targetId, request.payload
+            request.threadId, request.sourceEventId, request.channel, request.actionKey, request.targetId,
+            request.payload, request.qualityEvidence, request.sleepCheckpointDigest
         )
         if (recomputedDigest != request.payloadDigest || request.idempotencyKey != recomputedDigest ||
             request.requestId != "otto-" + recomputedDigest.take(20)) {
