@@ -53,7 +53,7 @@ RunPlan IDnfkSequence::build(const Subject& subject) const {
     plan.sequence.push_back("REVIEW");
     plan.stage = RunStage::REVIEW_REQUIRED;
     if (!nonEmpty(subject.approvalReference)) {
-        plan.findings.push_back("A traceable human approval reference is required before execution eligibility.");
+        plan.findings.push_back("A traceable human approval reference is required before external authorization verification.");
         return plan;
     }
 
