@@ -51,6 +51,17 @@ valid_repo_path() {
   return 0
 }
 
+safe_parent_chain() {
+  local parent
+  parent="$(dirname -- "$1")"
+  while [[ "$parent" != "." ]]; do
+    [[ ! -L "$parent" ]] || return 1
+    if [[ -e "$parent" && ! -d "$parent" ]]; then return 1; fi
+    parent="$(dirname -- "$parent")"
+  done
+  return 0
+}
+
 planned=0
 created=0
 skipped=0
@@ -65,8 +76,12 @@ while IFS=$'\t' read -r target template || [[ -n "${target:-}" ]]; do
     printf 'FILLER: BLOCKED invalid path mapping: %s -> %s\n' "${target:-}" "${template:-}"
     ((blocked+=1)); continue
   fi
-  if [[ ! -f "$template" || -L "$template" ]]; then
-    printf 'FILLER: BLOCKED template missing or not a regular file: %s\n' "$template"
+  if [[ ! -f "$template" || -L "$template" ]] || ! safe_parent_chain "$template"; then
+    printf 'FILLER: BLOCKED template missing, symlinked, or not a regular file: %s\n' "$template"
+    ((blocked+=1)); continue
+  fi
+  if ! safe_parent_chain "$target"; then
+    printf 'FILLER: BLOCKED target parent is symlinked or not a directory: %s\n' "$target"
     ((blocked+=1)); continue
   fi
   if [[ -e "$target" || -L "$target" ]]; then
