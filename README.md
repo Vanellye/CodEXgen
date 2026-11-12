@@ -35,6 +35,20 @@ Debug APK: `app/build/outputs/apk/debug/app-debug.apk`
 - `python/` — extracted Python demos and deterministic code generator
 - `generated_modules/` — deterministic output of `python/code_generator.py`
 
+## Repository-wide authorization
+
+The **ĎÏÎ§Ŝ authorization-and-patch gate applies to every repository area**, not only
+Pantheon or source intake. It separates local read/write, repository mutation,
+execution, publication, and external transmission into distinct permissions.
+
+- [ĎÏÎ§Ŝ Authorization and Patch Gate](docs/DISCS-AUTHORIZATION-AND-PATCH-GATE.md)
+- [Repository-wide application matrix and implementation gaps](docs/DISCS-REPOSITORY-WIDE-APPLICATION.md)
+
+The matrix explicitly identifies existing Git bridge operations that still need
+runtime approval enforcement. Policy documentation does not itself enforce those
+operations or grant permission to use them. External transmission and publication
+remain separately authorized and default-deny.
+
 ## Pre-commit hook
 
 Enable versioned hooks once per clone:
