@@ -47,6 +47,12 @@ The hook regenerates `generated_modules/`, synchronizes `compose/` from the Andr
 sources, runs Python syntax checks, and stages generated mirrors. Set
 `SKIP_GRADLE=0` to request the optional offline Kotlin compile.
 
+## Code ethics and rehabilitation
+
+- [ERIA Code Ethics](docs/CODE-ETHICS.md) defines authorization, provenance, privacy, reversibility, and accountability requirements.
+- [ÆĀÄÂ Code Rehabilitation](docs/AEAA-CODE-REHABILITATION.md) defines the detect-to-verify repair lifecycle.
+- `bash tools/aeaa-scan.sh .` runs the read-only advisory scanner; findings are review prompts, never automatic repairs.
+
 ## Compatibility and provenance
 
 See [ERIA migration record](docs/ERIA-MIGRATION.md). Historical CodEXgen names in
