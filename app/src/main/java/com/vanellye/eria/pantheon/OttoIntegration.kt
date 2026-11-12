@@ -102,6 +102,10 @@ class ExternalActionDispatchGate(
 ) {
     fun dispatchApproved(request: ExternalActionRequest, approval: ExternalActionApproval): DispatchResult {
         if (request.targetId !in allowedTargets) return DispatchResult(DispatchStatus.DENIED, reason = "target is not allowlisted")
+        val expectedScope = "external-action:" + request.actionKey + ":" + request.targetId
+        if (request.actionKey.isBlank() || request.approvalScope != expectedScope) {
+            return DispatchResult(DispatchStatus.DENIED, reason = "request approval scope is invalid")
+        }
         val recomputedDigest = OttoTriggerEngine.requestDigest(
             request.threadId, request.sourceEventId, request.actionKey, request.targetId, request.payload
         )
