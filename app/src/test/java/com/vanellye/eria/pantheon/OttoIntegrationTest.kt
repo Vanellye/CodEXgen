@@ -146,4 +146,33 @@ class OttoIntegrationTest {
         assertEquals(DispatchStatus.DENIED, result.status)
         assertFalse(dispatched)
     }
+    @Test fun dispatchRejectsTamperedQualityEvidenceAndSleepCheckpointBinding() {
+        val (thread, event) = threadAndEvent()
+        val request = OttoTriggerEngine.evaluate(thread, event, listOf(rule()), awakeCheckpoint(thread)).requests.single()
+        var dispatched = false
+        val gate = ExternalActionDispatchGate(
+            setOf(ExternalActionTarget(ExternalActionChannel.WEBHOOK, "hook-1")),
+            object : ExternalActionApprovalVerifier { override fun verify(approval: ExternalActionApproval) = true },
+            object : ExternalActionDispatcher {
+                override fun dispatch(request: ExternalActionRequest, idempotencyKey: String): String {
+                    dispatched = true
+                    return "unexpected"
+                }
+            }
+        )
+        val weakEvidence = request.copy(qualityEvidence = quality.copy(policyChecksPassed = false))
+        val weakResult = gate.dispatchApproved(
+            weakEvidence, ExternalActionApproval("approval", request.approvalScope, request.payloadDigest)
+        )
+        assertEquals(DispatchStatus.DENIED, weakResult.status)
+        assertFalse(dispatched)
+
+        val changedCheckpoint = request.copy(sleepCheckpointDigest = "f".repeat(64))
+        val checkpointResult = gate.dispatchApproved(
+            changedCheckpoint, ExternalActionApproval("approval", request.approvalScope, request.payloadDigest)
+        )
+        assertEquals(DispatchStatus.DENIED, checkpointResult.status)
+        assertFalse(dispatched)
+    }
+
 }
