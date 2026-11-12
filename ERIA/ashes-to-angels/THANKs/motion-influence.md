@@ -6,20 +6,19 @@
 
 Preserve the exact name **THANKs** for a bounded motion-influence mechanism. The current runtime target is a virtual motion endpoint only; no physical target is assumed.
 
-## Executable simulation
+## Trigger override
 
-- Runtime: `runtime/thanks-actuator.sh`
-- Acceptance tests: `tests/test-thanks-actuator.sh`
-- Run instructions and trust boundary: `runtime/README.md`
+`TRIGGER_OVERRIDE=ON` is the fixed policy. The OFF switch is removed. If automatic trigger detection is unavailable or fails, the runtime accepts a manual trigger only with a separate manual-trigger authorization ID and a non-empty reason. This override substitutes only for trigger detection; it cannot bypass either independent gate.
 
-The simulator requires explicit simulation mode, a detected trigger, an exact Pheônix authorization scope, independently qualifying Sure-rarity evidence, and a requested speed within the configured ceiling. It emits a virtual command record only.
+A detected trigger alone is never permission to execute. A manual trigger is not permission by itself either.
 
 ## Independent gates
 
 1. **Pheônix authorization:** requires an approval ID, actor ID, and exact scope `THANKs:simulated-motion:execute`.
 2. **Sure-rarity evidence:** requires `SUPPORTED`, an evidence ID, independent support, and reproducibility.
+3. **Manual-trigger authorization (override path only):** requires a distinct manual approval ID and reason.
 
-Neither gate can satisfy or override the other. Missing or invalid data blocks execution. Trigger detection alone never executes an action.
+Neither independent gate can satisfy or override the other. Missing or invalid data blocks execution.
 
 ## Motion bounds and stop
 
@@ -27,8 +26,8 @@ The simulator validates non-negative decimal speed values and enforces the suppl
 
 ## Trust boundary
 
-CLI authorization/evidence values are test fixtures, not secure credentials or independently verified attestations. There is no network dispatch, webhook, hardware driver, hidden execution, or physical movement. Production integration requires a trusted authorization verifier, evidence verifier, target-specific engineering limits, and independent physical safety interlocks.
+CLI authorization/evidence values are test fixtures, not secure credentials or independently verified attestations. There is no network dispatch, webhook, hardware driver, hidden execution, or physical movement. Production integration requires trusted authorization and evidence verifiers, target-specific engineering limits, and independent physical safety interlocks.
 
 ## Acceptance tests
 
-Run `bash ERIA/ashes-to-angels/THANKs/tests/test-thanks-actuator.sh`. Tests cover success in simulation, each independent gate, trigger-only denial, speed-limit rejection, and emergency-stop rejection.
+Run `bash ERIA/ashes-to-angels/THANKs/tests/test-thanks-actuator.sh`. Tests cover automatic detection, manual override, missing manual authorization, both independent gates, speed-limit rejection, emergency-stop rejection, and resistance to an environment-supplied OFF value.
