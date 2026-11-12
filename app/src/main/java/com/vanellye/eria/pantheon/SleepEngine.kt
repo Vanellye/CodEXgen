@@ -17,6 +17,7 @@ data class SleepCheckpoint(
     val threadId: String,
     val transmissionId: String,
     val sourceRef: String,
+    val transmissionReceivedAt: String,
     val payloadDigest: String,
     val capturedAt: String,
     val permissionSnapshotDigest: String,
@@ -99,17 +100,16 @@ object SleepEngine {
         )
         return SleepCheckpoint(
             checkpointId, thread.threadId, thread.origin.transmissionId, thread.origin.sourceRef,
-            thread.origin.payloadDigest, capturedAt, permissionSnapshotDigest, recoveryRef,
+            thread.origin.receivedAt, thread.origin.payloadDigest, capturedAt, permissionSnapshotDigest, recoveryRef,
             previousCheckpointId, digest, SleepState.ASLEEP
         )
     }
 
     fun verifyCheckpoint(checkpoint: SleepCheckpoint): Boolean {
         val origin = TransmissionOrigin(
-            checkpoint.transmissionId, checkpoint.sourceRef, checkpoint.capturedAt, checkpoint.payloadDigest
+            checkpoint.transmissionId, checkpoint.sourceRef, checkpoint.transmissionReceivedAt, checkpoint.payloadDigest
         )
         if (origin.validate().isNotEmpty() || checkpoint.checkpointId.isBlank() ||
-            checkpoint.permissionSnapshotDigest !in listOf(checkpoint.permissionSnapshotDigest) ||
             !Regex("^[0-9a-f]{64}$").matches(checkpoint.permissionSnapshotDigest)) return false
         val expected = checkpointDigest(
             checkpoint.checkpointId, checkpoint.threadId, origin, checkpoint.capturedAt,
