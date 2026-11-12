@@ -17,7 +17,7 @@ enum class RunStage {
     CLASSIFIED,
     INSPECTION_REQUIRED,
     REVIEW_REQUIRED,
-    READY_FOR_AUTHORIZED_EXECUTION,
+    READY_FOR_EXTERNAL_AUTHORIZATION_CHECK,
     INVALID
 };
 
@@ -38,7 +38,7 @@ struct RunPlan {
     std::string identifier;
     SubjectClass subjectClass;
     RunStage stage;
-    bool executionEligible;
+    bool readyForAuthorizationCheck;
     std::vector<std::string> sequence;
     std::vector<std::string> findings;
 
@@ -46,7 +46,7 @@ struct RunPlan {
         : identifier(IDENTIFIER),
           subjectClass(SubjectClass::OTHER),
           stage(RunStage::DISCOVERED),
-          executionEligible(false) {}
+          readyForAuthorizationCheck(false) {}
 };
 
 // Builds a deterministic, side-effect-free plan. It never executes the
