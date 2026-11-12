@@ -160,6 +160,13 @@ object OttoTriggerEngine {
             append(channel.name).append('\n')
             append(actionKey).append('\n')
             append(targetId).append('\n')
+            append(sleepCheckpointDigest).append('\n')
+            append(quality.sourceIntegrityVerified).append('|')
+            append(quality.eventOrderVerified).append('|')
+            append(quality.payloadSchemaVerified).append('|')
+            append(quality.destinationIdentityVerified).append('|')
+            append(quality.replayCheckPassed).append('|')
+            append(quality.policyChecksPassed).append('\n')
             payload.toSortedMap().forEach { (key, value) -> append(key).append('=').append(value).append('\n') }
         }
         return MessageDigest.getInstance("SHA-256").digest(canonical.toByteArray(Charsets.UTF_8))
