@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
-# THANKs simulated actuator. This program never controls physical hardware or dispatches externally.
+# THANKs simulated actuator. Never controls physical hardware or dispatches externally.
 set -euo pipefail
+readonly TRIGGER_OVERRIDE=ON
 
 trigger=""
 simulation=""
 approval=""
 actor=""
 scope=""
+manual_trigger_approval=""
+manual_trigger_reason=""
 evidence_status=""
 evidence_id=""
 independent=""
@@ -18,13 +21,15 @@ emergency_stop="no"
 usage() {
   cat <<'USAGE'
 Usage:
-  bash thanks-actuator.sh --simulate --trigger detected \
+  bash thanks-actuator.sh --simulate --trigger detected|manual \
     --approval-id ID --actor ID --scope THANKs:simulated-motion:execute \
+    [--manual-trigger-approval-id ID --manual-trigger-reason TEXT] \
     --evidence-status SUPPORTED --evidence-id ID \
     --independent yes --reproducible yes \
     --requested-speed NUMBER --max-speed NUMBER [--emergency-stop yes]
 
-This is a local simulation only. No physical actuator or external dispatch exists.
+TRIGGER_OVERRIDE is fixed ON. Manual trigger requires its own authorization ID
+and reason. Both independent gates remain mandatory. Local simulation only.
 USAGE
 }
 
@@ -40,6 +45,8 @@ while (($#)); do
     --approval-id) approval="${2-}"; shift 2 ;;
     --actor) actor="${2-}"; shift 2 ;;
     --scope) scope="${2-}"; shift 2 ;;
+    --manual-trigger-approval-id) manual_trigger_approval="${2-}"; shift 2 ;;
+    --manual-trigger-reason) manual_trigger_reason="${2-}"; shift 2 ;;
     --evidence-status) evidence_status="${2-}"; shift 2 ;;
     --evidence-id) evidence_id="${2-}"; shift 2 ;;
     --independent) independent="${2-}"; shift 2 ;;
@@ -53,10 +60,25 @@ while (($#)); do
 done
 
 [[ "$simulation" == "yes" ]] || deny MODE "explicit --simulate is required"
-[[ "$trigger" == "detected" ]] || deny TRIGGER "no recognized trigger; detection alone never authorizes motion"
 [[ "$emergency_stop" != "yes" ]] || deny STOP "emergency stop is active"
 
-# Pheônix authorization gate: all fields are required and scope is exact.
+case "$trigger" in
+  detected)
+    printf 'TRIGGER_PATH=AUTOMATIC_DETECTION\n'
+    ;;
+  manual)
+    [[ "$TRIGGER_OVERRIDE" == "ON" ]] || deny TRIGGER_OVERRIDE "manual trigger override is disabled"
+    [[ -n "$manual_trigger_approval" && -n "$manual_trigger_reason" ]] ||
+      deny MANUAL_TRIGGER_AUTHORIZATION "manual trigger requires a separate authorization ID and reason"
+    printf 'TRIGGER_PATH=MANUAL_OVERRIDE\nTRIGGER_OVERRIDE=%s\n' "$TRIGGER_OVERRIDE"
+    printf 'MANUAL_TRIGGER_APPROVAL_ID=%s\nMANUAL_TRIGGER_REASON=%s\n' "$manual_trigger_approval" "$manual_trigger_reason"
+    ;;
+  *)
+    deny TRIGGER "trigger must be detected or manually authorized; detection or absence alone is not permission"
+    ;;
+esac
+
+# Pheônix authorization gate: separate from manual-trigger authorization.
 [[ -n "$approval" && -n "$actor" && "$scope" == "THANKs:simulated-motion:execute" ]] ||
   deny PHEONIX_AUTHORIZATION "missing approval identity, actor, or exact simulation scope"
 
@@ -65,14 +87,12 @@ done
    "$independent" == "yes" && "$reproducible" == "yes" ]] ||
   deny SURE_RARITY_EVIDENCE "evidence must be SUPPORTED, identified, independent, and reproducible"
 
-# Numeric validation and configured speed ceiling.
 number_re='^[0-9]+([.][0-9]+)?$'
 [[ "$requested_speed" =~ $number_re && "$max_speed" =~ $number_re ]] ||
   deny MOTION_BOUNDS "speed values must be non-negative decimal numbers"
 within_limit=$(awk -v requested="$requested_speed" -v maximum="$max_speed" 'BEGIN { print (requested <= maximum) ? "yes" : "no" }')
 [[ "$within_limit" == "yes" ]] || deny MOTION_BOUNDS "requested speed exceeds configured simulation ceiling"
 
-# Simulation-only actuator: emits a command record; it does not move hardware.
 printf 'DECISION=SIMULATED_ACTUATION\nTARGET=THANKs:virtual-motion\n'
 printf 'APPROVAL_ID=%s\nACTOR=%s\nEVIDENCE_ID=%s\n' "$approval" "$actor" "$evidence_id"
 printf 'REQUESTED_SPEED=%s\nMAX_SPEED=%s\nMEASURED_SPEED=%s\n' "$requested_speed" "$max_speed" "$requested_speed"
