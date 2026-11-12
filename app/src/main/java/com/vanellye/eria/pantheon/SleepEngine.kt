@@ -109,7 +109,8 @@ object SleepEngine {
         val origin = TransmissionOrigin(
             checkpoint.transmissionId, checkpoint.sourceRef, checkpoint.transmissionReceivedAt, checkpoint.payloadDigest
         )
-        if (origin.validate().isNotEmpty() || checkpoint.checkpointId.isBlank() ||
+        if (origin.validate().isNotEmpty() || checkpoint.checkpointId.isBlank() || checkpoint.threadId.isBlank() ||
+            checkpoint.capturedAt.isBlank() || checkpoint.recoveryRef.isBlank() || checkpoint.previousCheckpointId == checkpoint.checkpointId ||
             !Regex("^[0-9a-f]{64}$").matches(checkpoint.permissionSnapshotDigest)) return false
         val expected = checkpointDigest(
             checkpoint.checkpointId, checkpoint.threadId, origin, checkpoint.capturedAt,
@@ -128,6 +129,7 @@ object SleepEngine {
         val reasons = mutableListOf<String>()
         if (checkpoint.state != SleepState.ASLEEP) reasons += "checkpoint is not asleep"
         if (!verifyCheckpoint(checkpoint)) reasons += "checkpoint integrity verification failed"
+        if (thread.status == SuspensionStatus.CLOSED) reasons += "transmission thread is closed"
         if (checkpoint.threadId != thread.threadId || !matchesOrigin(checkpoint, thread.origin)) {
             reasons += "checkpoint does not match the current transmission thread"
         }
@@ -153,7 +155,8 @@ object SleepEngine {
         if (!verifyCheckpoint(checkpoint)) {
             return held(ProtectedTriggerDisposition.HELD_CHECKPOINT_INTEGRITY, listOf("checkpoint integrity verification failed"))
         }
-        if (checkpoint.threadId != thread.threadId || !matchesOrigin(checkpoint, thread.origin) ||
+        if (trigger.triggerId.isBlank() || trigger.sourceEventId.isBlank() ||
+            checkpoint.threadId != thread.threadId || !matchesOrigin(checkpoint, thread.origin) ||
             trigger.threadId != thread.threadId || trigger.transmissionId != thread.origin.transmissionId ||
             trigger.sourceRef != thread.origin.sourceRef || trigger.payloadDigest != thread.origin.payloadDigest ||
             thread.events.none { it.eventId == trigger.sourceEventId }) {
