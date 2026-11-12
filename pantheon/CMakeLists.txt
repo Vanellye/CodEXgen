@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(pantheon_runtime LANGUAGES CXX)
 
-add_library(pantheon_runtime STATIC src/runtime.cpp src/aleph.cpp src/control_gate.cpp src/faculty_engine.cpp src/gateway.cpp src/rise_fall.cpp src/temple_geometry.cpp src/ero_source.cpp src/ectict.cpp src/idnfk.cpp)
+add_library(pantheon_runtime STATIC src/runtime.cpp src/aleph.cpp src/control_gate.cpp src/faculty_engine.cpp src/gateway.cpp src/rise_fall.cpp src/temple_geometry.cpp src/ero_source.cpp src/ectict.cpp src/idnfk.cpp src/light_cut.cpp)
 target_include_directories(pantheon_runtime PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set_target_properties(pantheon_runtime PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
 target_compile_options(pantheon_runtime PRIVATE -Wall -Wextra -pedantic)
@@ -36,6 +36,9 @@ set_target_properties(pantheon_ectict_test PROPERTIES CXX_STANDARD 11 CXX_STANDA
 add_executable(pantheon_idnfk_test tests/idnfk_test.cpp)
 target_link_libraries(pantheon_idnfk_test pantheon_runtime)
 set_target_properties(pantheon_idnfk_test PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
+add_executable(pantheon_light_cut_test tests/light_cut_test.cpp)
+target_link_libraries(pantheon_light_cut_test pantheon_runtime)
+set_target_properties(pantheon_light_cut_test PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED YES)
 
 enable_testing()
 add_test(NAME pantheon_runtime_smoke COMMAND pantheon_runtime_smoke)
@@ -48,3 +51,4 @@ add_test(NAME pantheon_rise_fall_test COMMAND pantheon_rise_fall_test)
 add_test(NAME pantheon_ero_source_test COMMAND pantheon_ero_source_test)
 add_test(NAME pantheon_ectict_test COMMAND pantheon_ectict_test)
 add_test(NAME pantheon_idnfk_test COMMAND pantheon_idnfk_test)
+add_test(NAME pantheon_light_cut_test COMMAND pantheon_light_cut_test)
