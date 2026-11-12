@@ -54,20 +54,20 @@ Z2AStatus z2a_audit(const Z2AEnvelope *e,
 
     written = snprintf(
         output, capacity,
-        "Z_TO_A REVERSE AUDIT\\n"
-        "Claim/output: %s\\n"
-        "Produced from record: %s\\n"
-        "Source: %s\\n"
-        "Original forum: %s\\n"
-        "Provenance reference: %s\\n"
-        "Evidence reference: %s\\n"
-        "Evidence class: %s\\n"
-        "Purpose: %s\\n"
-        "Known uncertainty: %s\\n"
-        "Audit direction: output -> evidence -> provenance -> original forum\\n"
+        "Z_TO_A REVERSE AUDIT\n"
+        "Claim/output: %s\n"
+        "Produced from record: %s\n"
+        "Source: %s\n"
+        "Original forum: %s\n"
+        "Provenance reference: %s\n"
+        "Evidence reference: %s\n"
+        "Evidence class: %s\n"
+        "Purpose: %s\n"
+        "Known uncertainty: %s\n"
+        "Audit direction: output -> evidence -> provenance -> original forum\n"
         "LIMIT: references and authorization are caller-supplied; this formatter "
         "does not verify their truth or authenticity. Preserve source records; "
-        "do not upgrade uncertainty into fact.\\n",
+        "do not upgrade uncertainty into fact.\n",
         e->claim_or_output,
         e->record_id,
         e->source_id,
