@@ -13,7 +13,7 @@ class SuspensionThreadTest {
         assertEquals(SuspensionEventType.THREAD_CREATED, thread.events.single().type)
     }
     @Test fun suspendsAndResumesOnlyWithMatchingHumanApprovalScope() {
-        val held = thread().suspend(event(SuspensionEventType.SUSPENDED, "event-1"))
+        val held = thread().placeOnHold(event(SuspensionEventType.SUSPENDED, "event-1"))
         assertEquals(SuspensionStatus.SUSPENDED, held.status)
         assertThrows(IllegalArgumentException::class.java) {
             held.resume(event(SuspensionEventType.RESUMED, "event-2", "approval-1"), ResumeApproval("approval-1", "suspension.resume:other-thread", true))
@@ -23,7 +23,7 @@ class SuspensionThreadTest {
         assertEquals(3, resumed.events.size)
     }
     @Test fun rejectsResumeWithoutHumanConfirmation() {
-        val held = thread().suspend(event(SuspensionEventType.SUSPENDED, "event-1"))
+        val held = thread().placeOnHold(event(SuspensionEventType.SUSPENDED, "event-1"))
         assertThrows(IllegalArgumentException::class.java) {
             held.resume(event(SuspensionEventType.RESUMED, "event-2", "approval-1"), ResumeApproval("approval-1", "suspension.resume:thread-001", false))
         }
