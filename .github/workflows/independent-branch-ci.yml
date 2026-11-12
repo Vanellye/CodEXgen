@@ -24,6 +24,10 @@ jobs:
         run: git fsck --no-reflogs --connectivity-only
       - name: Check committed diff whitespace
         run: git diff-tree --check --root -r HEAD
+      - name: Run ÆĀÄÂ read-only advisory scan
+        run: |
+          bash -n tools/aeaa-scan.sh
+          bash tools/aeaa-scan.sh .
 
   pantheon-contracts:
     name: Pantheon C99 contract integration tests
