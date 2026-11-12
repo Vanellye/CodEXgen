@@ -1,5 +1,9 @@
 # Pantheon contract validation and runtime boundary
 
+## Governing authorization contract
+
+Pantheon is governed by the repository-wide [ĎÏÎ§Ŝ authorization-and-patch gate](../docs/DISCS-AUTHORIZATION-AND-PATCH-GATE.md) and [application matrix](../docs/DISCS-REPOSITORY-WIDE-APPLICATION.md). The same non-inheritance rules apply to every Pantheon C contract, Android adapter, and future native binding: a valid envelope or detected trigger is not permission to execute, mutate, publish, or transmit.
+
 ## Contract test suite
 
 Run from the repository root:
@@ -33,7 +37,13 @@ and separately reviewed adapter are required before any consequential action.
 
 The C modules are not yet built as an Android native library and are not
 invoked through JNI. No wallet, network, file, Git, hardware, publishing,
-or process-execution adapter is enabled. Native binding requires a separately
+or process-execution adapter is enabled by the Pantheon runtime gate. Native binding requires a separately
 reviewed NDK/CMake integration and ABI tests. This change intentionally
 establishes a safe Android review boundary without pretending that C contract
 formatters are cryptographic authorization services.
+
+The repository also contains a separate Git bridge with remote and local
+side-effecting methods. Those methods are **not yet enforced by a ĎÏÎ§Ŝ
+operation-specific approval object**; see the application matrix. The presence
+of this Pantheon gate must not be interpreted as a gate around unrelated
+adapters.
