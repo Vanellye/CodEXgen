@@ -21,7 +21,7 @@ IDnfk builds a deterministic, side-effect-free run plan for a subject under cons
 ## Invariants
 
 - `OTHER` is a valid holding classification, not a trash bin, success state, or permission grant.
-- Unknown and inferred evidence never advance to execution eligibility.
+- Unknown and inferred evidence never advance to external authorization verification.
 - A supplied approval reference is traceability metadata, not proof of identity or authentication. It cannot independently authorize execution.
 - This module plans; it does not execute requested actions, mutate files, change Git refs, or bypass Pantheon control gates.
 - Every plan retains the subject's source identity and requested action.
