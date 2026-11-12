@@ -79,7 +79,7 @@ data class ExternalActionRequest(
     val payload: Map<String, String>, val payloadDigest: String,
     val approvalScope: String, val idempotencyKey: String
 )
-data class HeldTriggerRule(val ruleId: String, val quality: TriggerQualityReport)
+data class HeldTriggerRule(val ruleId: String, val quality: TriggerQualityReport, val holdReasons: List<String>)
 data class TriggerEvaluationResult(
     val requests: List<ExternalActionRequest>,
     val heldRules: List<HeldTriggerRule>
@@ -99,7 +99,7 @@ interface ExternalActionDispatcher {
 
 /** Event detection creates qualified requests only; it never calls a provider. */
 object OttoTriggerEngine {
-    fun evaluate(thread: SuspensionThread, event: SuspensionEvent, rules: List<OttoTriggerRule>): TriggerEvaluationResult {
+    fun evaluate(thread: SuspensionThread, event: SuspensionEvent, rules: List<OttoTriggerRule>, sleepCheckpoint: SleepCheckpoint): TriggerEvaluationResult {
         require(thread.status != SuspensionStatus.CLOSED) { "closed thread cannot trigger actions" }
         require(thread.events.any { it == event }) { "event is not part of this thread" }
         val requests = mutableListOf<ExternalActionRequest>()
@@ -108,9 +108,22 @@ object OttoTriggerEngine {
             require(rule.ruleId.isNotBlank() && rule.actionKey.isNotBlank() && rule.targetId.isNotBlank()) {
                 "trigger rule identity, action, and target are required"
             }
-            val quality = rule.quality.report()
-            if (!quality.qualified) {
-                held += HeldTriggerRule(rule.ruleId, quality)
+            val protected = SleepEngine.evaluateProtectedTrigger(
+                sleepCheckpoint,
+                thread,
+                ProtectedTransmissionTrigger(
+                    triggerId = rule.ruleId,
+                    threadId = thread.threadId,
+                    transmissionId = thread.origin.transmissionId,
+                    sourceRef = thread.origin.sourceRef,
+                    payloadDigest = thread.origin.payloadDigest,
+                    sourceEventId = event.eventId,
+                    quality = rule.quality
+                )
+            )
+            val quality = protected.quality
+            if (protected.disposition != ProtectedTriggerDisposition.READY_FOR_OTTO_REVIEW) {
+                held += HeldTriggerRule(rule.ruleId, quality, protected.holdReasons)
             } else {
                 val digest = requestDigest(thread.threadId, event.eventId, rule.channel, rule.actionKey, rule.targetId, rule.payload)
                 requests += ExternalActionRequest(
