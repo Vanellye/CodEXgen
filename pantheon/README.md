@@ -18,7 +18,18 @@ The [Firmware layer](../firmware/README.md) defines portable device-side observa
 
 ## Architecture
 
+- **Above-Pantheon Branch Protection Ethic** — establishes branch identity, review, independent approval, required checks, protected refs, controlled bypass, provenance, and recovery as upstream code-ethic requirements. Policy only; repository rules must be separately configured and verified. See [Branch Protection — Above-Pantheon Code Ethic](above/BRANCH-PROTECTION-CODE-ETHIC.md).
+- **WYIELLL Approval Force** — treats “Do What You Wyielll” as declared purpose, preserves open candidate paths, and requires authenticated, exact-scope human approval before consequential changes. The phrase itself grants no authority. See [WYIELLL Approval Force](WYIELLL-APPROVAL-FORCE.md).
+- **Intent-Based Write Authorization** — derives requested capabilities from declared intent, then gates writes by exact scope, evidence, risk, current consent, and human approval. A progressive understand/prepare/practice/review/apply/verify/reflect loop improves proposals without privilege creep. Policy only; no runtime write grant. See [Intent-Based Write Authorization](INTENT-WRITE-AUTHORIZATION.md).
+- **Force Rewrite Protocol** — permits reversible successor rewrites by default and defines strict backup, provenance, human-approval, and `--force-with-lease` gates for exceptional Git history rewrites. The document is policy only; it does not execute or authorize a history rewrite. See [Force Rewrite Protocol](FORCE-REWRITE-PROTOCOL.md).
+- **ECTICT Thinking Ethic** — preserves distinct viewpoints and provenance while turning opposition into testable learning proposals; disagreement is not forced into consensus and every proposal requires human review. See [ECTICT Thinking Ethic](ECTICT-THINKING-ETHIC.md).
+- **IDnfk subject handling** — builds a deterministic C++11 run plan, preserves source identity, routes unrecognized subjects through `OTHER` and inspection, and requires verified evidence plus a traceable approval reference before an external authorization check. It plans but does not execute actions. See [IDnfk Run Sequence](IDNFK-RUN-SEQUENCE.md).
+- **Light Cut flow routing** — partitions numeric data flow across explicit forward/upward destinations with source provenance and conservation checks; invalid weights, duplicate destinations, and non-finite values fail closed. It produces plans only, not live I/O or physical output. See [Light Cut Flow](LIGHT-CUT-FLOW.md).
+
 - **Core runtime** — deterministic module registration and execution with explicit input/output records.
+- **ERO Source Identity / EYES UP** — identifies declared source provenance and records a spectral-series inspection of history, dependencies, write permissions, and uncertainty. VERIFIED, INFERRED, and UNKNOWN remain distinct; inspection never grants write rights. See [ERO EYES UP](ERO-EYES-UP.md).
+- **Temple Geometry / Sphere Directives** — declarative bass-string connections, bounded sway metadata, geometric shapes, bridges, and purpose-bearing sphere directives; human dignity and consent are non-waivable. This is a model, not a body/actuator controller. See [Temple Geometry](TEMPLE-GEOMETRY.md).
+- **ALEPH (א) origin failsafe** — automatically enters safe hold on execution failure or authorization denial; performs registered compensating actions in reverse dependency order only after owner approval. See [ALEPH Origin Failsafe](ALEPH-ORIGIN-FAILSAFE.md).
 - **Framework adapter** — translates existing Stride feature maps into Pantheon inputs without changing the legacy Python API.
 - **Android bridge** — the Android JNI target links the same runtime library; no Python interpreter is required by the native core.
 - **Migration modules** — each Python capability is ported separately and compared against Python reference fixtures.
@@ -30,7 +41,7 @@ The [Firmware layer](../firmware/README.md) defines portable device-side observa
 - **Principle 45 — The Covenant of Truthful Stewardship** — requires evidence-based judgments, independent review, correction, appeal, and accountability for human and automated decision-makers. See [Principle 45](PRINCIPLE-45.md).
 - **Principle 46 — The Guiding Lights** — calls for guidance without domination, intergenerational learning, continual refinement of the Main, and stewardship without possession. See [Principle 46](PRINCIPLE-46.md).
 - **Rise & Fall Directives** — deterministic ơ (RISE), ọ (FALL), and WARDEN policy combining declared principles with evidence; symbolic propagation is not physical quantum entanglement. See [Rise & Fall Directives](../docs/RISE-FALL-DIRECTIVES.md).
-- **JGit capability checkpoint** — Android components obtain the shared Git Freedom Bridge through `GitFreedomBridge.shared(context)`. Its JGit dependency is pinned to `3.7.1.201504261725-r`, anchored to origin checkpoint `f63e166e11aee325fe0ea8504672f19134d2768b`. This is app-process capability discovery, not unrestricted operating-system or cross-device control. See [JGit Compatibility Checkpoint](../docs/JGIT-COMPATIBILITY-CHECKPOINT.md).
+- **JGit capability checkpoint** — Android components obtain the shared Git Freedom Bridge through GitFreedomBridge.shared(context). Its JGit dependency is pinned to 3.7.1.201504261725-r, anchored to origin checkpoint f63e166e11aee325fe0ea8504672f19134d2768b. This is app-process capability discovery, not unrestricted operating-system or cross-device control. See [JGit Compatibility Checkpoint](../docs/JGIT-COMPATIBILITY-CHECKPOINT.md).
 
 ## Port order
 
@@ -52,4 +63,4 @@ The [Firmware layer](../firmware/README.md) defines portable device-side observa
 
 ## Verification
 
-Host tests should compile with a standard C++11 compiler. Android CI must continue to build `:app:assembleDebug`. A successful commit alone is not proof of a successful build or APK artifact.
+Host tests should compile with a standard C++11 compiler. Android CI must continue to build :app:assembleDebug. A successful commit alone is not proof of a successful build or APK artifact.
