@@ -16,7 +16,7 @@ typedef enum {
 typedef enum {
     NEW_EVIDENCE_UNSPECIFIED = 0,
     NEW_EVIDENCE_SOURCE_REPORTED = 1,
-    NEW_EVIDENCE_INDEPENDENTLY_VERIFIED = 2,
+    NEW_EVIDENCE_INDEPENDENTLY_CORROBORATED = 2,
     NEW_EVIDENCE_HYPOTHESIS = 3
 } NewEvidenceStatus;
 
@@ -27,7 +27,7 @@ typedef enum {
     NEW_STATUS_UNSUPPORTED_DATA = 3,
     NEW_STATUS_PROVENANCE_MISSING = 4,
     NEW_STATUS_OUTPUT_TOO_SMALL = 5,
-    NEW_STATUS_VERIFICATION_DETAILS_MISSING = 6
+    NEW_STATUS_PROOF_REFERENCE_MISSING = 6
 } NewStatus;
 
 /* Caller supplies already-minimized data from an authorized source.
@@ -41,16 +41,16 @@ typedef struct {
     const char *captured_at;
     const char *provenance_digest;
     const char *content_summary;
+    const char *proof_reference;
+    const char *proof_method;
+    const char *proof_checked_at;
     NewDataClass data_class;
     NewEvidenceStatus evidence_status;
-    const char *verifier_id;
-    const char *verification_method;
-    const char *verified_at;
     int authorization_confirmed;
 } NewRecord;
 
-/* Creates a clearly classified, unverified narrative proposal for human review.
- * Independent verification is labeled only when verifier, method, and time exist. */
+/* Builds a classified evidence summary for human review, never a verdict.
+ * Provenance (origin/history) and proof references (claim support) stay distinct. */
 NewStatus new_build_narrative(const NewRecord *record,
                               char *output,
                               size_t output_capacity);
