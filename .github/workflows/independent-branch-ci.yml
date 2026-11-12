@@ -17,7 +17,7 @@ jobs:
     name: Source integrity and whitespace
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Verify Git object connectivity
@@ -33,7 +33,7 @@ jobs:
     name: Pantheon C99 contract integration tests
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Compile and run every Pantheon contract suite
         run: bash pantheon/run-contract-tests.sh
 
@@ -41,7 +41,7 @@ jobs:
     name: Python syntax and available unit tests
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -80,7 +80,7 @@ jobs:
     name: Android debug APK build
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
