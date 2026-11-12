@@ -188,8 +188,8 @@ class ExternalActionDispatchGate(
         if (request.actionKey.isBlank() || request.approvalScope != expectedScope) {
             return DispatchResult(DispatchStatus.DENIED, reason = "request approval scope is invalid")
         }
-        if (!request.qualityEvidence.report().qualified || !Regex(\"^[0-9a-f]{64}$\").matches(request.sleepCheckpointDigest)) {
-            return DispatchResult(DispatchStatus.DENIED, reason = \"quality evidence or sleep checkpoint qualification is invalid\")
+        if (!request.qualityEvidence.report().qualified || !Regex("^[0-9a-f]{64}$").matches(request.sleepCheckpointDigest)) {
+            return DispatchResult(DispatchStatus.DENIED, reason = "quality evidence or sleep checkpoint qualification is invalid")
         }
         val recomputedDigest = OttoTriggerEngine.requestDigest(
             request.threadId, request.sourceEventId, request.channel, request.actionKey, request.targetId,
