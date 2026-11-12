@@ -76,4 +76,26 @@ class OttoIntegrationTest {
         assertEquals(DispatchStatus.DENIED, result.status)
         assertFalse(dispatched)
     }
+
+    @Test fun rejectsModifiedPayloadBeforeExternalDispatch() {
+        val (thread, event) = threadAndEvent()
+        val request = OttoTriggerEngine.evaluate(
+            thread, event, listOf(OttoTriggerRule("rule-3", SuspensionEventType.THREAD_CREATED, "notify", "local-notifier", mapOf("body" to "original")))
+        ).single()
+        var dispatched = false
+        val gate = ExternalActionDispatchGate(
+            setOf("local-notifier"),
+            object : ExternalActionApprovalVerifier { override fun verify(approval: ExternalActionApproval) = true },
+            object : ExternalActionDispatcher {
+                override fun dispatch(request: ExternalActionRequest, idempotencyKey: String): String {
+                    dispatched = true
+                    return "unexpected"
+                }
+            }
+        )
+        val tampered = request.copy(payload = mapOf("body" to "changed"))
+        val result = gate.dispatchApproved(tampered, ExternalActionApproval("approval", request.approvalScope, request.payloadDigest))
+        assertEquals(DispatchStatus.DENIED, result.status)
+        assertFalse(dispatched)
+    }
 }
