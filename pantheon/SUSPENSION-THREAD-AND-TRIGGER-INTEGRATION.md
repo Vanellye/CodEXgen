@@ -50,3 +50,16 @@ The provider adapter must implement durable idempotency and return a receipt. Th
 ## Verification and production gaps
 
 Tests cover bounded OTTO repetition, source-lineage preservation, quality holds, all supported channel contracts, channel/target allowlisting, approval scope, payload tampering, and request-only trigger behavior. Targeted Gradle tests and provider-specific integration tests remain required. A caller-supplied approval reference or quality Boolean is not proof; host verifiers are the trust boundary.
+
+
+## Sleep Engine: transmission-bound checkpoints and protected triggers
+
+Sleep is represented as an explicit checkpoint state, not as a hidden or autonomous process. A checkpoint records the exact transmission ID, source reference, original receive timestamp, payload digest, capture time, permission-snapshot digest, recovery reference, and optional prior checkpoint ID. Its canonical SHA-256 digest detects changes to the checkpoint record.
+
+A protected trigger must match the checkpoint's thread and transmission origin and refer to an event in that thread's history. It remains held while the checkpoint is asleep, while the thread is suspended or closed, when the checkpoint or transmission does not verify, or when any OTTO quality check fails.
+
+Resumption requires all recovery evidence (source transmission, checkpoint integrity, restored permissions, and recovery test), plus a separately verified human approval scoped to the exact checkpoint ID. Failed resumption leaves the checkpoint asleep and reports the hold reasons.
+
+After verified resumption, a matching and quality-qualified trigger becomes **READY_FOR_OTTO_REVIEW** only. OTTO then creates its ordinary reviewable external-action request; the separate channel/target allowlist, authenticated approval verifier, and provider dispatcher remain mandatory. Wake never dispatches, and there is no timer-based or automatic wake.
+
+The checkpoint model is immutable in memory, but durable storage, cryptographic permission attestation, authenticated approver integration, and crash-recovery orchestration remain host responsibilities. No background service or live provider is connected.
