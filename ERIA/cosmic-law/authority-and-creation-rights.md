@@ -30,19 +30,30 @@ Every rewrite must record:
 
 A rewrite must not silently alter unrelated values, erase the original, or imply that a symbolic/metaphorical distance is a measured physical quantity.
 
-## 2. Code-making and rewrite capability
+## 2. DuMain — multiplication of Main
 
-A delegated Faculty may create files, modules, tests, interfaces, and implementation changes inside its approved repository paths and capability scope.
+**DuMain** names the controlled multiplication of the Main line into distinct, traceable working lines. A delegated Faculty may create parallel branches, replicas, or successor workspaces from an identified Main commit so multiple lines of development can proceed without collapsing their identities.
 
-Each grant must specify:
+Multiplication means:
+- identify and record the exact source Main ref and commit SHA;
+- create each derivative as a separately named branch or workspace;
+- preserve the source Main branch, its history, and its current pointer;
+- record parentage, purpose, owner/Faculty, and divergence point for every derivative;
+- allow changes within the delegated paths and operation scope;
+- compare and validate derivatives before any proposed integration.
+
+Multiplication does **not** mean overwriting Main, force-moving its ref, silently merging divergent histories, rewriting provenance, or treating every derivative as approved for promotion. Integration into Main requires a separate explicit human authorization and the repository's review and validation process.
+
+Each DuMain grant must specify:
 - Faculty identity (stable configured identifier, not inferred from title);
-- permitted operations: create, edit, refactor, or delete;
-- allowed paths and protected paths;
-- branch and review requirements;
+- source Main ref and permitted source commit or range;
+- permitted derivative operations and naming/path scope;
+- whether branches may be created, updated, or retired;
+- branch protection and review requirements;
 - start time, expiry/review point, and revocation mechanism;
 - required tests, evidence, and rollback/recovery plan.
 
-Deletion, security-boundary changes, credential changes, production deployment, external dispatch, and modification of protected history require separate explicit authorization. A general code-writing grant does not imply these permissions.
+Deletion of derivatives, security-boundary changes, credential changes, production deployment, external dispatch, and modification of protected history require separate explicit authorization. A DuMain grant does not itself authorize integration into Main.
 
 ## 3. Future-creation rights
 
