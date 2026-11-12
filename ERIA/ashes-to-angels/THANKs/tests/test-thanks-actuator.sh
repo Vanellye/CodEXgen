@@ -22,15 +22,30 @@ expect_blocked() {
 bash "$ACTUATOR" "${base[@]}" >"$tmp/out"
 grep -q 'DECISION=SIMULATED_ACTUATION' "$tmp/out"
 grep -q 'PHYSICAL_ACTUATION=none' "$tmp/out"
-echo "PASS: both independent gates permit simulation only"
+echo "PASS: detected trigger plus both independent gates permits simulation only"
 
-expect_blocked "authorization missing" --approval-id ""
-expect_blocked "authorization scope mismatch" --scope THANKs:physical:execute
-expect_blocked "evidence not supported" --evidence-status PARTIAL
-expect_blocked "evidence not independent" --independent no
-expect_blocked "evidence not reproducible" --reproducible no
-expect_blocked "trigger without recognized detection" --trigger ""
+manual=(--trigger manual --manual-trigger-approval-id manual-approval-001
+  --manual-trigger-reason "automatic detector unavailable")
+bash "$ACTUATOR" "${base[@]}" "${manual[@]}" >"$tmp/out"
+grep -q 'TRIGGER_OVERRIDE=ON' "$tmp/out"
+grep -q 'TRIGGER_PATH=MANUAL_OVERRIDE' "$tmp/out"
+grep -q 'DECISION=SIMULATED_ACTUATION' "$tmp/out"
+echo "PASS: manual override requires its own authorization and both gates"
+
+expect_blocked "manual override missing authorization ID" --trigger manual --manual-trigger-reason "detector unavailable"
+expect_blocked "manual override missing reason" --trigger manual --manual-trigger-approval-id manual-approval-001
+expect_blocked "Pheônix authorization missing" --approval-id ""
+expect_blocked "Pheônix authorization scope mismatch" --scope THANKs:physical:execute
+expect_blocked "Sure-rarity evidence not supported" --evidence-status PARTIAL
+expect_blocked "Sure-rarity evidence not independent" --independent no
+expect_blocked "Sure-rarity evidence not reproducible" --reproducible no
+expect_blocked "missing trigger path" --trigger ""
 expect_blocked "speed above ceiling" --requested-speed 2.1
 expect_blocked "emergency stop" --emergency-stop yes
+
+# The override is a fixed-on policy constant; an environment value cannot disable it.
+TRIGGER_OVERRIDE=OFF bash "$ACTUATOR" "${base[@]}" "${manual[@]}" >"$tmp/out"
+grep -q 'TRIGGER_OVERRIDE=ON' "$tmp/out"
+echo "PASS: environment cannot restore an OFF switch"
 
 echo "ALL_TESTS_PASSED"
