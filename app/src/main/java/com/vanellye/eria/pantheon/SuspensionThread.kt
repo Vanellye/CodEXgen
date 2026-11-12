@@ -33,7 +33,7 @@ data class SuspensionThread(
     val threadId: String, val origin: TransmissionOrigin, val status: SuspensionStatus,
     val events: List<SuspensionEvent>, val crossReferences: List<ThreadCrossReference>
 ) {
-    fun suspend(event: SuspensionEvent): SuspensionThread {
+    fun placeOnHold(event: SuspensionEvent): SuspensionThread {
         require(status == SuspensionStatus.ACTIVE) { "only active threads can be suspended" }
         require(event.type == SuspensionEventType.SUSPENDED) { "expected SUSPENDED event" }
         require(event.actorRef.isNotBlank() && event.detail.isNotBlank()) { "actor and reason are required" }
