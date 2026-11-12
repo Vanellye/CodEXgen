@@ -61,8 +61,9 @@ int main(void) {
     assert(new_build_narrative(&record, output, sizeof(output)) ==
            NEW_STATUS_PROVENANCE_MISSING);
 
+    record.provenance_digest = "sha256:example-digest";
     assert(new_build_narrative(&record, output, 8U) ==
-           NEW_STATUS_PROVENANCE_MISSING);
+           NEW_STATUS_OUTPUT_TOO_SMALL);
 
     return 0;
 }
