@@ -58,8 +58,8 @@ RunPlan IDnfkSequence::build(const Subject& subject) const {
     }
 
     plan.sequence.push_back("AUTHORIZE");
-    plan.stage = RunStage::READY_FOR_AUTHORIZED_EXECUTION;
-    plan.executionEligible = true;
+    plan.stage = RunStage::READY_FOR_EXTERNAL_AUTHORIZATION_CHECK;
+    plan.readyForAuthorizationCheck = true;
     plan.findings.push_back("Approval reference recorded; an external authorization boundary must authenticate it.");
     plan.findings.push_back("This plan does not execute the requested action.");
     return plan;
