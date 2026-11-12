@@ -17,7 +17,11 @@ See [StridePath governance](ERIA/stridepath/README.md). These are governed workf
 the HOME screen does not silently write files, create branches, publish content, or
 grant permissions. Main remains protected from implicit promotion.
 
-## Cradle build entry\n\nERIA Cradle provides a guarded entry point over the Gradle Wrapper. Run `bash ./cradle.sh verify` to execute Android unit tests and assemble the debug APK. See [Cradle documentation](ERIA/cradle/README.md). Gradle remains the underlying build engine.\n\n## Android identity
+## Cradle build entry
+
+ERIA Cradle provides a guarded entry point over the Gradle Wrapper. Run `bash ./cradle.sh verify` to execute Android unit tests and assemble the debug APK. See [Cradle documentation](ERIA/cradle/README.md). Gradle remains the underlying build engine.
+
+## Android identity
 
 - Gradle root project: `ERIA`
 - Kotlin namespace: `com.vanellye.eria`
