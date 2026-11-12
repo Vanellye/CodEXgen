@@ -36,14 +36,53 @@ object OttoCoordinator {
     }
 }
 
+/** Provider-neutral integration families. These are contracts, not live connections. */
+enum class ExternalActionChannel { WEBHOOK, HTTP_CALLBACK, NOTIFICATION, MESSAGE_QUEUE, GENERIC_API }
+
+data class TriggerQualityEvidence(
+    val sourceIntegrityVerified: Boolean,
+    val eventOrderVerified: Boolean,
+    val payloadSchemaVerified: Boolean,
+    val destinationIdentityVerified: Boolean,
+    val replayCheckPassed: Boolean,
+    val policyChecksPassed: Boolean
+) {
+    fun report(): TriggerQualityReport {
+        val checks = listOf(
+            "source integrity not verified" to sourceIntegrityVerified,
+            "event order not verified" to eventOrderVerified,
+            "payload schema not verified" to payloadSchemaVerified,
+            "destination identity not verified" to destinationIdentityVerified,
+            "replay check failed or missing" to replayCheckPassed,
+            "policy checks failed or missing" to policyChecksPassed
+        )
+        val passed = checks.count { it.second }
+        return TriggerQualityReport(passed * 100 / checks.size, passed == checks.size,
+            checks.filterNot { it.second }.map { it.first })
+    }
+}
+data class TriggerQualityReport(val scorePercent: Int, val qualified: Boolean, val holdReasons: List<String>)
+
 data class OttoTriggerRule(
-    val ruleId: String, val eventType: SuspensionEventType, val actionKey: String,
-    val targetId: String, val payload: Map<String, String>
+    val ruleId: String,
+    val eventType: SuspensionEventType,
+    val channel: ExternalActionChannel,
+    val actionKey: String,
+    val targetId: String,
+    val payload: Map<String, String>,
+    val quality: TriggerQualityEvidence
 )
+data class ExternalActionTarget(val channel: ExternalActionChannel, val targetId: String)
 data class ExternalActionRequest(
     val requestId: String, val threadId: String, val sourceEventId: String,
-    val actionKey: String, val targetId: String, val payload: Map<String, String>,
-    val payloadDigest: String, val approvalScope: String, val idempotencyKey: String
+    val channel: ExternalActionChannel, val actionKey: String, val targetId: String,
+    val payload: Map<String, String>, val payloadDigest: String,
+    val approvalScope: String, val idempotencyKey: String
+)
+data class HeldTriggerRule(val ruleId: String, val quality: TriggerQualityReport)
+data class TriggerEvaluationResult(
+    val requests: List<ExternalActionRequest>,
+    val heldRules: List<HeldTriggerRule>
 )
 data class ExternalActionApproval(val approvalRef: String, val scope: String, val requestDigest: String)
 enum class DispatchStatus { DISPATCHED, DENIED }
@@ -54,38 +93,54 @@ interface ExternalActionApprovalVerifier {
     fun verify(approval: ExternalActionApproval): Boolean
 }
 interface ExternalActionDispatcher {
-    /** Provider adapter must enforce durable idempotency for the supplied key. */
+    /** One host-configured provider adapter; it must enforce durable idempotency. */
     fun dispatch(request: ExternalActionRequest, idempotencyKey: String): String
 }
 
-/** Event detection produces requests only; dispatch is a separate, approval-gated operation. */
+/** Event detection creates qualified requests only; it never calls a provider. */
 object OttoTriggerEngine {
-    fun evaluate(thread: SuspensionThread, event: SuspensionEvent, rules: List<OttoTriggerRule>): List<ExternalActionRequest> {
+    fun evaluate(thread: SuspensionThread, event: SuspensionEvent, rules: List<OttoTriggerRule>): TriggerEvaluationResult {
         require(thread.status != SuspensionStatus.CLOSED) { "closed thread cannot trigger actions" }
         require(thread.events.any { it == event }) { "event is not part of this thread" }
-        return rules.filter { it.eventType == event.type }.map { rule ->
+        val requests = mutableListOf<ExternalActionRequest>()
+        val held = mutableListOf<HeldTriggerRule>()
+        rules.filter { it.eventType == event.type }.forEach { rule ->
             require(rule.ruleId.isNotBlank() && rule.actionKey.isNotBlank() && rule.targetId.isNotBlank()) {
                 "trigger rule identity, action, and target are required"
             }
-            val digest = requestDigest(thread.threadId, event.eventId, rule.actionKey, rule.targetId, rule.payload)
-            ExternalActionRequest(
-                requestId = "otto-" + digest.take(20),
-                threadId = thread.threadId,
-                sourceEventId = event.eventId,
-                actionKey = rule.actionKey,
-                targetId = rule.targetId,
-                payload = rule.payload.toSortedMap(),
-                payloadDigest = digest,
-                approvalScope = "external-action:" + rule.actionKey + ":" + rule.targetId,
-                idempotencyKey = digest
-            )
+            val quality = rule.quality.report()
+            if (!quality.qualified) {
+                held += HeldTriggerRule(rule.ruleId, quality)
+            } else {
+                val digest = requestDigest(thread.threadId, event.eventId, rule.channel, rule.actionKey, rule.targetId, rule.payload)
+                requests += ExternalActionRequest(
+                    requestId = "otto-" + digest.take(20),
+                    threadId = thread.threadId,
+                    sourceEventId = event.eventId,
+                    channel = rule.channel,
+                    actionKey = rule.actionKey,
+                    targetId = rule.targetId,
+                    payload = rule.payload.toSortedMap(),
+                    payloadDigest = digest,
+                    approvalScope = approvalScope(rule.channel, rule.actionKey, rule.targetId),
+                    idempotencyKey = digest
+                )
+            }
         }
+        return TriggerEvaluationResult(requests, held)
     }
 
-    fun requestDigest(threadId: String, eventId: String, actionKey: String, targetId: String, payload: Map<String, String>): String {
+    fun approvalScope(channel: ExternalActionChannel, actionKey: String, targetId: String) =
+        "external-action:" + channel.name.lowercase() + ":" + actionKey + ":" + targetId
+
+    fun requestDigest(
+        threadId: String, eventId: String, channel: ExternalActionChannel,
+        actionKey: String, targetId: String, payload: Map<String, String>
+    ): String {
         val canonical = buildString {
             append(threadId).append('\n')
             append(eventId).append('\n')
+            append(channel.name).append('\n')
             append(actionKey).append('\n')
             append(targetId).append('\n')
             payload.toSortedMap().forEach { (key, value) -> append(key).append('=').append(value).append('\n') }
@@ -95,19 +150,22 @@ object OttoTriggerEngine {
     }
 }
 
+/** Dispatch requires a channel+target allowlist and separately authenticated, digest-bound approval. */
 class ExternalActionDispatchGate(
-    private val allowedTargets: Set<String>,
+    private val allowedTargets: Set<ExternalActionTarget>,
     private val approvalVerifier: ExternalActionApprovalVerifier,
     private val dispatcher: ExternalActionDispatcher
 ) {
     fun dispatchApproved(request: ExternalActionRequest, approval: ExternalActionApproval): DispatchResult {
-        if (request.targetId !in allowedTargets) return DispatchResult(DispatchStatus.DENIED, reason = "target is not allowlisted")
-        val expectedScope = "external-action:" + request.actionKey + ":" + request.targetId
+        if (ExternalActionTarget(request.channel, request.targetId) !in allowedTargets) {
+            return DispatchResult(DispatchStatus.DENIED, reason = "channel/target pair is not allowlisted")
+        }
+        val expectedScope = OttoTriggerEngine.approvalScope(request.channel, request.actionKey, request.targetId)
         if (request.actionKey.isBlank() || request.approvalScope != expectedScope) {
             return DispatchResult(DispatchStatus.DENIED, reason = "request approval scope is invalid")
         }
         val recomputedDigest = OttoTriggerEngine.requestDigest(
-            request.threadId, request.sourceEventId, request.actionKey, request.targetId, request.payload
+            request.threadId, request.sourceEventId, request.channel, request.actionKey, request.targetId, request.payload
         )
         if (recomputedDigest != request.payloadDigest || request.idempotencyKey != recomputedDigest ||
             request.requestId != "otto-" + recomputedDigest.take(20)) {
