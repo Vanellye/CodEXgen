@@ -62,7 +62,7 @@ interface ExternalActionDispatcher {
 object OttoTriggerEngine {
     fun evaluate(thread: SuspensionThread, event: SuspensionEvent, rules: List<OttoTriggerRule>): List<ExternalActionRequest> {
         require(thread.status != SuspensionStatus.CLOSED) { "closed thread cannot trigger actions" }
-        require(thread.events.any { it.eventId == event.eventId }) { "event is not part of this thread" }
+        require(thread.events.any { it == event }) { "event is not part of this thread" }
         return rules.filter { it.eventType == event.type }.map { rule ->
             require(rule.ruleId.isNotBlank() && rule.actionKey.isNotBlank() && rule.targetId.isNotBlank()) {
                 "trigger rule identity, action, and target are required"
@@ -102,6 +102,13 @@ class ExternalActionDispatchGate(
 ) {
     fun dispatchApproved(request: ExternalActionRequest, approval: ExternalActionApproval): DispatchResult {
         if (request.targetId !in allowedTargets) return DispatchResult(DispatchStatus.DENIED, reason = "target is not allowlisted")
+        val recomputedDigest = OttoTriggerEngine.requestDigest(
+            request.threadId, request.sourceEventId, request.actionKey, request.targetId, request.payload
+        )
+        if (recomputedDigest != request.payloadDigest || request.idempotencyKey != recomputedDigest ||
+            request.requestId != "otto-" + recomputedDigest.take(20)) {
+            return DispatchResult(DispatchStatus.DENIED, reason = "request integrity check failed")
+        }
         if (approval.scope != request.approvalScope || approval.requestDigest != request.payloadDigest) {
             return DispatchResult(DispatchStatus.DENIED, reason = "approval scope or request digest mismatch")
         }
