@@ -1,42 +1,52 @@
-# ERIA Suspension Thread and Installed-Player Adapter
+# ERIA Suspension Thread and Provider-Neutral Trigger Integration
 
-**Status:** Initial domain contracts; not a deployed player modification or durable service.
-
-## Purpose
-
-Create a traceable suspension thread from a transmission, preserve the transmission's source identity, and cross-reference related records without collapsing verified evidence, inference, and unknowns.
+**Status:** Reviewable domain contracts. No provider connection or background trigger is active.
 
 ## Suspension thread
 
 - TransmissionOrigin retains transmission ID, source reference, receive time, and payload digest.
 - SuspensionThread is an immutable state model with ACTIVE, SUSPENDED, and CLOSED states.
 - Events are appended to the returned thread state; callers must persist them in an append-only journal before treating them as durable.
-- Resume requires a human-confirmation assertion, a non-empty approval reference, and the exact scope suspension.resume:<threadId>.
+- Resume requires a human-confirmation assertion, a non-empty approval reference, and the exact scope `suspension.resume:<threadId>`.
 - Cross-references retain their evidence state. A VERIFIED link requires an evidence reference; INFERRED and UNKNOWN remain explicitly distinct.
 - Corrections add new events and references. They do not rewrite the originating transmission.
 
-## Installed-player deep-mod boundary
+## Provider-neutral trigger families
 
-InstalledPlayerAdapter is deliberately observation-only. It represents a compatibility point for a player that exposes a supported media session. PlayerControlProposalFactory can create a reviewable pause/resume proposal, but every proposal has executionEnabled=false.
+The former installed-player-specific adapter and proposal path are removed from this integration branch. No player is treated as the default or exclusive target.
 
-No code in this change:
-- modifies or replaces the installed player;
-- injects code, hooks private processes, uses root, or automates accessibility controls;
-- sends media commands, changes audio routing, or bypasses player permissions;
-- reads private player storage or extracts credentials.
+One trigger/request contract now covers:
+- webhooks;
+- HTTP callbacks;
+- notifications;
+- message queues;
+- generic provider APIs.
 
-A real Android adapter would need a documented, user-enabled platform interface (for example, a player-published media session), least-privilege permissions, clear user disclosure, and a separate reviewed implementation. Unsupported players remain unsupported; no compatibility is assumed.
+Each request carries its channel, target identity, action key, source thread/event, canonical payload digest, narrow approval scope, and idempotency key. A provider-specific adapter is supplied by the host for the selected channel; no endpoint, credentials, provider SDK, or network call is embedded here.
+
+## Trigger quality gate
+
+A rule must pass all six evidence checks before it can produce an external-action request:
+1. source integrity verified;
+2. event order verified;
+3. payload schema verified;
+4. destination identity verified;
+5. replay check passed;
+6. policy checks passed.
+
+The quality report exposes a percentage and explicit hold reasons. The dispatch threshold is 100%; a lower score produces a held rule and no request. These evidence values are assertions supplied by the host and are not themselves cryptographic proof. Production integration must bind them to authenticated verifiers and durable audit records.
+
+## Approval and dispatch boundary
+
+Detection creates a request only. Dispatch requires:
+1. an allowlisted channel-and-target pair;
+2. an authenticated human approval verifier;
+3. exact approval scope and request digest match;
+4. recomputed payload digest, request ID, and idempotency-key integrity;
+5. a host-supplied provider adapter.
+
+The provider adapter must implement durable idempotency and return a receipt. This interface alone cannot guarantee exactly-once delivery across crashes or provider retries. No webhook, callback, notification, queue, generic API, credentials, player control, Git mutation, publishing, payment, device actuation, or background trigger is connected by this change.
 
 ## Verification and production gaps
 
-The unit tests cover origin preservation, hold/resume scope checks, cross-reference evidence states, and proposal-only player integration. They do not authenticate a human approver or prove the truth of a source reference.
-
-Before production use, add:
-1. a durable append-only event store with integrity protection and recovery tests;
-2. authenticated approval verification, not a caller-supplied Boolean;
-3. timestamp parsing and replay/ordering protections;
-4. a concrete, documented Android media-session observer for supported players;
-5. separate user-consented command execution only if later required and reviewed;
-6. targeted Gradle unit tests and Android permission/session tests.
-
-No automatic resume, external player mutation, background service, JNI bridge, or runtime activation is enabled by these contracts.
+Tests cover bounded OTTO repetition, source-lineage preservation, quality holds, all supported channel contracts, channel/target allowlisting, approval scope, payload tampering, and request-only trigger behavior. Targeted Gradle tests and provider-specific integration tests remain required. A caller-supplied approval reference or quality Boolean is not proof; host verifiers are the trust boundary.
