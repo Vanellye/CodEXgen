@@ -22,7 +22,7 @@ One trigger/request contract now covers:
 - message queues;
 - generic provider APIs.
 
-Each request carries its channel, target identity, action key, source thread/event, canonical payload digest, narrow approval scope, and idempotency key. A provider-specific adapter is supplied by the host for the selected channel; no endpoint, credentials, provider SDK, or network call is embedded here.
+Each request carries its channel, target identity, action key, source thread/event, canonical payload digest, all six quality-evidence flags, the verified awake checkpoint digest, narrow approval scope, and idempotency key. The checkpoint digest and quality evidence are included in the canonical request digest and therefore in the approval binding. A provider-specific adapter is supplied by the host for the selected channel; no endpoint, credentials, provider SDK, or network call is embedded here.
 
 ## Trigger quality gate
 
@@ -45,7 +45,7 @@ Detection creates a request only. Dispatch requires:
 4. recomputed payload digest, request ID, and idempotency-key integrity;
 5. a host-supplied provider adapter.
 
-The provider adapter must implement durable idempotency and return a receipt. This interface alone cannot guarantee exactly-once delivery across crashes or provider retries. No webhook, callback, notification, queue, generic API, credentials, player control, Git mutation, publishing, payment, device actuation, or background trigger is connected by this change.
+The provider adapter must implement durable idempotency and return a receipt. The dispatch gate rechecks all six quality flags and recomputes the request digest including quality evidence and the sleep checkpoint binding before accepting approval. This interface alone cannot guarantee exactly-once delivery across crashes or provider retries. No webhook, callback, notification, queue, generic API, credentials, player control, Git mutation, publishing, payment, device actuation, or background trigger is connected by this change.
 
 ## Verification and production gaps
 
