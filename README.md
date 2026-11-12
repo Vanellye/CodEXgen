@@ -17,6 +17,13 @@ See [StridePath governance](ERIA/stridepath/README.md). These are governed workf
 the HOME screen does not silently write files, create branches, publish content, or
 grant permissions. Main remains protected from implicit promotion.
 
+## FILLER — repository structure completion
+
+FILLER plans missing repository structures from reviewed, explicit template mappings.
+Planning is read-only by default; creation requires branch-bound approval and never
+overwrites existing source. See [FILLER](ERIA/filler/README.md) and the
+[Rightous Companioxn Protocol](ERIA/filler/RIGHTOUS-COMPANION-PROTOCOL.md).
+
 ## Cradle build entry
 
 ERIA Cradle provides a guarded entry point over the Gradle Wrapper. Run `bash ./cradle.sh verify` to execute Android unit tests and assemble the debug APK. See [Cradle documentation](ERIA/cradle/README.md). Gradle remains the underlying build engine.
