@@ -6,7 +6,9 @@ defmodule Eria.Diagnostic.Support do
 
   alias Eria.Evidence.Graph
 
-  def build(%{accepted: records, rejected: rejected} = ingestion, findings \\ [])
+  def build(ingestion, findings \\ [])
+
+  def build(%{accepted: records, rejected: rejected} = ingestion, findings)
       when is_list(records) and is_list(rejected) do
     with {:ok, graph} <- Graph.build(records, findings) do
       domain_counts = Enum.frequencies_by(records, & &1.domain)
