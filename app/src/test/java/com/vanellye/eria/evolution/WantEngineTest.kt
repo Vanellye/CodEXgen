@@ -48,6 +48,14 @@ class WantEngineTest {
         }
     }
 
+    private class FakeApprovalGate : HumanApprovalGate {
+        private val consumed = mutableSetOf<String>()
+        override fun validateAndConsume(approval: HumanApproval): List<String> {
+            if (!consumed.add(approval.approvalId)) return listOf("Approval has already been used.")
+            return emptyList()
+        }
+    }
+
     private class FakeVerifier : EvolutionVerifier {
         override fun verify(
             prompt: MiniPrompt,
@@ -110,8 +118,7 @@ class WantEngineTest {
         assertTrue(result is EvolutionResult.Executed)
         assertEquals(1, ledger.snapshot().size)
         val repeated = engine.execute(prepared, approval(prepared))
-        assertTrue(repeated is EvolutionResult.Executed)
-        assertNull((repeated as EvolutionResult.Executed).reward)
+        assertTrue(repeated is EvolutionResult.Blocked)
         assertEquals(1, ledger.snapshot().size)
     }
 
@@ -131,6 +138,6 @@ class WantEngineTest {
         now: () -> Long = { 10_000L }
     ) = WantEngine(
         MiniPromptDriver(), FakeGenesis(), forge, pantheon, stride,
-        FakeVerifier(), rewards, now
+        FakeVerifier(), rewards, FakeApprovalGate(), now
     )
 }
