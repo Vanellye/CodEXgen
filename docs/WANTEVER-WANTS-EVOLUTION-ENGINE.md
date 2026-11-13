@@ -232,3 +232,23 @@ These are role definitions. They do not assert that the runtime integrations are
 ## 11. Implementation boundary
 
 This document is a proposed integration contract. It does not implement a live reward economy, autonomous coding loop, model training, repository write permission, external dispatch, merge, or deployment. Those require separate code changes, tests, and scoped approval. The current branch change is documentation-only.
+
+## 12. Kotlin reference pipeline added
+
+The integration branch now contains a provider-neutral Kotlin orchestration layer at
+`app/src/main/java/com/vanellye/eria/evolution/WantEvolutionPipeline.kt`.
+
+- `MiniPromptDriver` decomposes each acceptance criterion into a bounded prompt.
+- `WantEngine` coordinates the pipeline.
+- `GenesisEngine` proposes a platform scaffold without writing files.
+- `ForgeEngine` prepares a reviewable candidate without committing, pushing, or deploying.
+- `PantheonEngine` evaluates policy before execution.
+- `HumanApprovalGate` authenticates and atomically consumes a single-use approval.
+- `StrideEngine` is the only mutating execution boundary and receives the exact approval.
+- `EvolutionVerifier` checks the execution receipt and evidence.
+- `RewardLedger` records an idempotent reward only after verification.
+
+The unit-test source is
+`app/src/test/java/com/vanellye/eria/evolution/WantEngineTest.kt`. It covers proposal-only preparation, missing or mismatched approval, policy denial, out-of-scope paths, expired approval, replay rejection, and evidence-gated rewards.
+
+**Implementation status:** the orchestration contracts and test source are committed. Concrete GENESIS, FORGE, PANTHEON, and STRIDE adapters are still required; the Android app does not yet instantiate this pipeline. Tests have not been run in this change session. The approval gate must be backed by an authenticated, persistent, atomic single-use approval store before production use. The in-memory reward ledger is a reference implementation, not durable storage.
