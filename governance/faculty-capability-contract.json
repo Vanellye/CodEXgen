@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "name": "ERIA Faculty always capability governance",
+  "faculty_presence": "required_at_each_lifecycle_checkpoint",
+  "lifecycle": [
+    "intent",
+    "authority",
+    "permission",
+    "readiness",
+    "evidence",
+    "closure"
+  ],
+  "decision_states": [
+    "proposed",
+    "approved",
+    "denied",
+    "executed",
+    "failed",
+    "revoked"
+  ],
+  "invariants": {
+    "human_principal_required": true,
+    "delegated_role_required": true,
+    "scoped_approval": true,
+    "approval_expires": true,
+    "revocation_supported": true,
+    "proposer_may_self_approve": false,
+    "silent_permission_escalation": false,
+    "append_only_audit_reference": true,
+    "redact_secrets_and_sensitive_payloads": true,
+    "fail_closed_on_unknown_or_missing_authority": true
+  },
+  "capabilities": {
+    "credentials": {
+      "mode": "approved_secret_manager_only",
+      "least_privilege": true,
+      "secret_values_in_logs": false,
+      "extraction_or_harvesting": "denied"
+    },
+    "execution": {
+      "mode": "visible_user_authorized",
+      "operation_manifest_required": true,
+      "hidden_execution": "denied"
+    },
+    "dispatch": {
+      "mode": "authenticated_allowlisted_integrations",
+      "consent_required": true,
+      "trigger_is_not_authorization": true
+    },
+    "hardware": {
+      "mode": "documented_device_api",
+      "operator_confirmation": true,
+      "interlocks_required": true,
+      "emergency_stop_required": true
+    },
+    "biological_research": {
+      "mode": "literature_and_non_interventional_simulation",
+      "automated_intervention": "denied"
+    }
+  },
+  "merge_release_deployment": "separate_human_authorization_required",
+  "note": "Faculty is a governance and delegated-authority model, not a claim of machine consciousness or autonomous authority."
+}
