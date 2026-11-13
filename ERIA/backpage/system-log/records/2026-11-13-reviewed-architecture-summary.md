@@ -42,11 +42,11 @@ These documents consistently support a provenance-first review model: preserve s
 
 | Intervention | State | Evidence / rationale |
 |---|---|---|
-| Create the Backpage system-log documentation directory and recording contract | PROPOSED at review start; documentation commit is the implementation evidence once this commit is published | This change adds a documentation convention only. |
+| Create the Backpage system-log documentation directory and recording contract | EXECUTED | Commit `6747a09afaa4f81115b70eb9ac11bf4412934715` adds the three documentation files on this feature branch. This is a completed repository documentation change only. |
 | Automatically execute interventions after review | NOT_APPLICABLE / NOT AUTHORIZED | No such execution pathway is specified or enabled by this record. |
 | Modify protected refs, merge branches, rewrite history, or dispatch external actions | NOT_APPLICABLE / NOT AUTHORIZED | No such action was requested or performed in this review. |
 
-**Important:** The act of reviewing the sources did not execute any operational intervention. The only change made by this work is the addition of these documentation files on the named feature branch. After the commit is confirmed, that file addition may be recorded as an executed repository documentation change; it does not mean any separately proposed intervention was executed.
+**Important:** Reviewing the sources did not execute any operational intervention. The documentation addition is the one completed intervention, evidenced by commit `6747a09afaa4f81115b70eb9ac11bf4412934715`. No separately proposed runtime, external, physical, biological, branch-merging, or history-rewriting intervention was executed.
 
 ## Review outcome
 
