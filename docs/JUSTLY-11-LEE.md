@@ -9,9 +9,12 @@ This record names and preserves the SKRIBED and transmission-audio integration m
 - Original merge commit (@11): `b60fac42ba0573c251cf7f7fe139bfa0f9c078f8`
 - Integrated change set: 7 files, 445 additions, 0 deletions
 
-## New Main record — #991
+## Main-line designation
 
-The subsequent Main documentation commit is identified by commit message `#991`. It records this designation without rewriting the original merge commit.
+- `#991` identifies the preceding Main documentation update.
+- This commit is the **11th commit ahead** of the requested Main anchor.
+- Commit message: `11th commit ahead — JUSTLY 11 (LEE)`.
+- This commit records the designation in repository history; it is not a Git tag and does not rewrite the original merge commit.
 
 ## Included paths
 
@@ -27,4 +30,4 @@ The subsequent Main documentation commit is identified by commit message `#991`.
 
 The merged implementation supports local PCM16-to-WAV generation and explicit local playback. It does not enable external network dispatch, webhook delivery, Bluetooth routing, or automatic playback on receipt. Tests were added but were not reported as executed at merge time.
 
-This file is a provenance marker; it does not alter or rewrite the historical merge commit.
+This file is a provenance marker; it does not alter the historical merge commit.
