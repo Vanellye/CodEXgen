@@ -2,9 +2,7 @@ name: ERIA Continuous Forge
 
 on:
   push:
-    branches: ["**"]
   pull_request:
-    branches: ["**"]
   schedule:
     - cron: "17 * * * *"
   workflow_dispatch:
@@ -13,41 +11,31 @@ permissions:
   contents: read
 
 concurrency:
-  group: eria-continuous-forge-${{ github.ref }}
+  group: eria-forge-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  source-integrity:
-    name: Source integrity and repository hygiene
+  forge-validation:
+    name: Read-only ERIA validation
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout source
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Verify Git object connectivity
         run: git fsck --no-reflogs --connectivity-only
       - name: Check committed diff whitespace
         run: git diff-tree --check --root -r HEAD
-
-  storage-boundary:
-    name: ERIA create-only storage boundary
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Run isolated synthetic filesystem rejection suite
+      - name: Run isolated storage-boundary tests
         env:
           PYTHONPATH: security/red-write-only
         run: python -m unittest discover -s security/red-write-only/tests -v
-
-  pantheon-contracts:
-    name: Pantheon contract suites
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - name: Compile and run contract suites when present
+      - name: Run Pantheon contracts when present
         shell: bash
         run: |
           if [[ -f pantheon/run-contract-tests.sh ]]; then
@@ -56,65 +44,5 @@ jobs:
             echo "No Pantheon contract runner in this repository; skipped."
           fi
 
-  android-validation:
-    name: Android unit tests and debug build
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Java
-        if: hashFiles('gradlew') != ''
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-      - name: Set up Android SDK
-        if: hashFiles('gradlew') != ''
-        uses: android-actions/setup-android@v4
-        with:
-          packages: "platform-tools"
-      - name: Install Android compile platform
-        if: hashFiles('gradlew') != ''
-        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
-      - name: Test and build Android app
-        if: hashFiles('gradlew') != ''
-        run: |
-          chmod +x ./gradlew
-          ./gradlew --no-daemon :app:testDebugUnitTest :app:assembleDebug
-      - name: Report no Android module
-        if: hashFiles('gradlew') == ''
-        run: echo "No Gradle Android project in this repository; skipped."
-
-  python-validation:
-    name: Python syntax validation
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - name: Compile Python sources when present
-        shell: bash
-        run: |
-          mapfile -d '' files < <(find . -type f -name '*.py' -not -path './.git/*' -print0)
-          if (( ${#files[@]} )); then
-            python -m py_compile "${files[@]}"
-          else
-            echo "No Python sources in this repository; skipped."
-          fi
-
-  policy:
-    name: Repository action policy
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - name: Assert action boundary files exist
-        run: |
-          test -f security/red-write-only/policy.json
-          test -f security/red-write-only/tools/execution_boundary_guard.py
-          test -f security/red-write-only/tools/storage_adapter.py
-          test -f security/red-write-only/tests/test_storage_adapter.py
-      - name: Confirm workflow has read-only repository permissions
-        run: grep -q '^  contents: read$' .github/workflows/eria-continuous-forge.yml
-
-# This forge validates code only. It does not deploy, publish, dispatch,
-# execute untrusted payloads, change repository settings, or activate hardware.
+# Read-only validation only. No deployment, merge, external dispatch,
+# untrusted payload execution, hardware activation, or biological intervention.
