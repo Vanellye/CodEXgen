@@ -5,7 +5,6 @@ on:
     types: [opened, reopened, synchronize, ready_for_review]
   pull_request_review:
     types: [submitted, dismissed]
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -18,7 +17,7 @@ concurrency:
 jobs:
   human-approval-gate:
     name: eria-human-approval-gate
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request != null
+    if: github.event.pull_request != null
     runs-on: ubuntu-24.04
     steps:
       - name: Check out the exact reviewed commit
@@ -46,13 +45,6 @@ jobs:
             --reviews reviews.json \
             --head-sha "${HEAD_SHA}" \
             --pr-author "${PR_AUTHOR}"
-
-      - name: Explain manual-dispatch limitation
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          echo "Manual dispatch has no pull-request approval context."
-          echo "No approval is inferred; use a pull_request event."
-          exit 1
 
   verifier-tests:
     name: eria-approval-verifier-tests
