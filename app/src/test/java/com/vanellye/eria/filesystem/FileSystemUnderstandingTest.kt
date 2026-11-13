@@ -37,7 +37,7 @@ class FileSystemUnderstandingTest {
     fun excludesSensitiveFilesAndBuildDirectories() {
         val root = temporaryFolder.newFolder("workspace")
         root.resolve(".env").writeText("API_KEY=do-not-read")
-        root.resolve("build").mkdir().resolve("generated.kt").writeText("secret = false")
+        root.resolve("build").apply { mkdirs() }.resolve("generated.kt").writeText("secret = false")
         root.resolve("safe.kt").writeText("fun main() = Unit")
 
         val report = FileSystemUnderstanding().scan(root)
