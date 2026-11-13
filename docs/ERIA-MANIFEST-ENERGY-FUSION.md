@@ -22,7 +22,7 @@ Run from this directory:
 
 ```bash
 bash verify_manifest.sh manifest.json integrity.sha256
-bash -n verify_manifest.sh tests/test_manifest_bridge.sh
+bash -n verify_manifest.sh && bash -n tests/test_manifest_bridge.sh
 bash tests/test_manifest_bridge.sh
 ```
 
