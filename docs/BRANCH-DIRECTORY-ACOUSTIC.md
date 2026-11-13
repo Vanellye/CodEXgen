@@ -262,3 +262,32 @@ This directory is a semantic map and audit aid. It does not rewrite Git history,
 - [PR #39 — correction lineage runtime](https://github.com/Vanellye/CodEXgen/pull/39)
 
 **Directory invariant:** preserve source identity, make every crossing explicit, retain the return receipt, and never confuse transmission with authorization.
+
+
+## 10. ·L·L·ịṅë — shared lineage marker
+
+**Marker:** `·L·L·ịṅë`  
+**Status:** Proposed shared convention; this section records the intended cross-reference policy, not completion of every branch update.
+
+Use this marker to identify a traceable line between a repository, branch/ref, full commit SHA, path, and any derived artifact. The marker is descriptive metadata only: it is not executable syntax, merge authorization, permission, or a command to move refs.
+
+### Application rules
+
+1. Record the exact repository identity, ref name, full 40-character commit SHA, and path for every application.
+2. Preserve the source commit and branch ancestry; record derived work as a child with explicit parent references.
+3. Inspect all branches individually before applying the marker. A branch listing is an inventory, not evidence that its content was inspected or updated.
+4. Inspect `.gitmodules` and gitlink entries before classifying nested repositories. Record each submodule path, URL, and pinned commit independently.
+5. Add the marker through an additive, reviewable change. Do not force-push, rewrite history, silently retarget a branch, or move `main`.
+6. If a branch, file, or nested repository is unavailable, conflicting, or has unknown ancestry, emit an explicit `BREAK`/hold record and stop propagation to dependent targets.
+7. Marker presence does not imply trust, approval, CI success, or permission to execute.
+8. Do not auto-commit, merge, dispatch externally, activate a runtime, or actuate a device merely because the marker is found.
+
+### Current staging receipt
+
+- Root convention: `L-L-LINE.md`
+- Existing directory placement: this section in `docs/BRANCH-DIRECTORY-ACOUSTIC.md`
+- Staging ref: `2cce11ɣ`
+- Baseline Main commit: `2cce68f258f46058f18c108c264db9cc85200590`
+- All-other-branches and nested-repository rollout: **proposed; not yet applied**
+
+The shared convention is available for review from this branch. Branch-by-branch adoption remains a separately verifiable operation.
