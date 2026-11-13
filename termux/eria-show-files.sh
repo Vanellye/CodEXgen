@@ -21,20 +21,13 @@ ROOT="$(cd -- "$ROOT" 2>/dev/null && pwd -P)" || {
   exit 3
 }
 
-case "$OUT" in
-  "$ROOT"/*)
-    printf 'ERROR: inventory output must be outside the scanned directory.\n' >&2
-    exit 4
-    ;;
-esac
-
 TMP="${OUT}.tmp.$$"
 ERR="${OUT}.errors.$$"
 trap 'rm -f -- "$TMP" "$ERR"' EXIT HUP INT TERM
 
 # find includes hidden entries automatically; -P behavior is the default,
 # so symbolic links are listed but not traversed.
-if ! find "$ROOT" -print >"$TMP" 2>"$ERR"; then
+if ! find "$ROOT" -path "$OUT" -prune -o -path "$TMP" -prune -o -path "$ERR" -prune -o -print >"$TMP" 2>"$ERR"; then
   FIND_STATUS=1
 else
   FIND_STATUS=0
