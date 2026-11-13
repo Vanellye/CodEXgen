@@ -33,4 +33,12 @@ PROGRAM
 if bash "$(dirname "$0")/bdyt.sh" "$root/bad.bdyt" >/dev/null 2>&1; then
   echo 'expected unknown identifier to fail' >&2; exit 1
 fi
+printf 'a\0b' > "$root/binary.bin"
+cat > "$root/binary.bdyt" <<PROGRAM
+ºŌº binary "$root/binary.bin"
+----
+PROGRAM
+if bash "$(dirname "$0")/bdyt.sh" "$root/binary.bdyt" >/dev/null 2>&1; then
+  echo 'expected NUL input to fail' >&2; exit 1
+fi
 printf 'BDYT_TESTS=PASS\n'
