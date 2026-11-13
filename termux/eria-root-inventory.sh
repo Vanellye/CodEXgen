@@ -51,7 +51,7 @@ else
 fi
 
 # Remove the temporary inventory and final output if encountered during scan.
-grep -Fvx -e "$TMP" -e "$OUT" "$TMP" > "${TMP}.filtered" 2>/dev/null || true
+grep -Fvx -e "$TMP" -e "$ERR" -e "$OUT" "$TMP" > "${TMP}.filtered" 2>/dev/null || true
 mv -- "${TMP}.filtered" "$TMP" || exit 5
 mv -- "$TMP" "$OUT" || {
   printf 'ERROR: cannot write inventory: %s\n' "$OUT" >&2
