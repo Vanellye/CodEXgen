@@ -88,3 +88,8 @@ Hold the affected stage on missing prerequisites, unknown provenance, failed tes
 The proposed physical architecture and staged requirements are recorded separately in [ERIA-PERCEPTION-REASONING-IC-SPEC.md](ERIA-PERCEPTION-REASONING-IC-SPEC.md). It defines a standalone sensory acquisition, DSP, perception, reasoning, context, and safety/actuation-boundary processor that interoperates with ERIA, Pantheon, Stride, PonsLucis, and Transmission through versioned contracts.
 
 That document is a requirements baseline only. It does not add RTL, select a foundry/PDK, define a final bus/pinout or power budget, claim subjective consciousness, or produce a netlist/GDSII/fabrication package. The initial prototype is observe/propose mode; physical actuation remains separately inhibited and authorization-gated. Hardware design and signoff remain independent of the existing C99 Integration Core CI tests.
+
+
+## 9. FPGA prototype specification
+
+The platform-independent, measurable FPGA prototype plan is recorded in [ERIA-FPGA-PROTOTYPE-SPEC.md](ERIA-FPGA-PROTOTYPE-SPEC.md). It defines the observe/propose data path, interface decisions required before board selection, reproducible test matrix, measurement methods for throughput/latency/integrity/resources/power/thermal/perception quality, fault tests, and a hardware-inhibit acceptance gate. Performance thresholds that depend on the actual sensor, workload, and board remain explicitly TBD; missing results must be reported as NOT MEASURED, never estimated. The plan distinguishes software CI, FPGA simulation, measured board validation, and ASIC signoff.
