@@ -5,6 +5,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.io.File
 import java.nio.charset.StandardCharsets
 
 class SkribedAndTransmissionTest {
@@ -71,6 +72,37 @@ class SkribedAndTransmissionTest {
         )
         assertEquals(2, document.correctionTiers().size)
         assertEquals("source", document.originalText)
+    }
+
+    @Test
+    fun fileJournalPersistsCorrectionTiersAcrossJournalInstances() {
+        val file = File.createTempFile("eria-corrections-", ".log")
+        try {
+            val firstJournal = FileCorrectionLineageJournal(file)
+            val document = SkribedDocument(
+                originalText = "source",
+                correctionJournal = firstJournal
+            )
+            val correction = document.derive(
+                WritingVariantKind.CORRECTED,
+                "corrected",
+                "persisted-correction",
+                "1",
+                correctionPoint = "test.persisted-correction"
+            )
+
+            val restored = FileCorrectionLineageJournal(file).readAll()
+            assertEquals(1, restored.size)
+            assertEquals(correction.correctionTier.correctionId, restored.single().correctionId)
+            assertEquals(
+                CorrectionTierLine.ORIGINAL_SOURCE_TIER_COMMIT,
+                restored.single().originalSourceTierCommit
+            )
+            assertEquals(correction.correctionTier.fromSha256, restored.single().fromSha256)
+            assertEquals(correction.correctionTier.toSha256, restored.single().toSha256)
+        } finally {
+            file.delete()
+        }
     }
 
     @Test(expected = IllegalArgumentException::class)
