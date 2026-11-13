@@ -1,0 +1,6 @@
+#!/data/data/com.termux/files/usr/bin/bash
+set -euo pipefail
+HERE="$(cd "$(dirname "$0")" && pwd)"
+cd "$HERE"
+command -v python >/dev/null || { echo "Run: pkg install python" >&2; exit 1; }
+exec python eria_server.py --host 127.0.0.1 --port "${ERIA_PAINTING_PORT:-8765}"
