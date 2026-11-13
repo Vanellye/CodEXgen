@@ -28,8 +28,8 @@ class InMemoryCorrectionLineageJournal : CorrectionLineageJournal {
 
 /**
  * Durable append-only journal. V2 records include the future marker anchor and direction.
- * V1 records remain readable and are interpreted as forward tiers using the designated
- * future marker anchor; old records are never rewritten in place.
+ * V1 records remain readable but keep a null marker anchor: their provenance is not
+ * retroactively rewritten or falsely attributed to the later 7129618 marker.
  */
 class FileCorrectionLineageJournal(private val file: File) : CorrectionLineageJournal {
     @Synchronized
@@ -58,7 +58,7 @@ class FileCorrectionLineageJournal(private val file: File) : CorrectionLineageJo
             tier.correctionId,
             tier.originalSourceTierRef,
             tier.originalSourceTierCommit,
-            tier.futureMarkerAnchorCommit,
+            tier.futureMarkerAnchorCommit.orEmpty(),
             tier.sourceContentSha256,
             tier.sourceCorrectionId.orEmpty(),
             tier.correctionPoint,
@@ -83,7 +83,7 @@ class FileCorrectionLineageJournal(private val file: File) : CorrectionLineageJo
                     correctionId = fields[1],
                     originalSourceTierRef = fields[2],
                     originalSourceTierCommit = fields[3],
-                    futureMarkerAnchorCommit = CorrectionTierLine.FUTURE_MARKER_ANCHOR_COMMIT,
+                    futureMarkerAnchorCommit = null,
                     sourceContentSha256 = fields[4],
                     sourceCorrectionId = fields[5].ifEmpty { null },
                     correctionPoint = fields[6],
@@ -103,7 +103,7 @@ class FileCorrectionLineageJournal(private val file: File) : CorrectionLineageJo
                     correctionId = fields[1],
                     originalSourceTierRef = fields[2],
                     originalSourceTierCommit = fields[3],
-                    futureMarkerAnchorCommit = fields[4],
+                    futureMarkerAnchorCommit = fields[4].ifEmpty { null },
                     sourceContentSha256 = fields[5],
                     sourceCorrectionId = fields[6].ifEmpty { null },
                     correctionPoint = fields[7],
