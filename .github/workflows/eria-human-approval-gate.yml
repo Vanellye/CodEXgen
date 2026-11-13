@@ -41,7 +41,7 @@ jobs:
             echo "::error::A pull-request event with exact head SHA and author is required."
             exit 2
           fi
-          gh api --paginate "repos/${GH_REPO}/pulls/${PR_NUMBER}/reviews" > reviews.json
+          gh api --paginate --slurp "repos/${GH_REPO}/pulls/${PR_NUMBER}/reviews" | jq 'add' > reviews.json
           python tools/eria/approval_gate.py \
             --reviews reviews.json \
             --head-sha "${HEAD_SHA}" \
