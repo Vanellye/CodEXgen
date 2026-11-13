@@ -1,0 +1,42 @@
+{
+  "suite": "ERIA-RED-WRITE-ONLY-SYNTHETIC",
+  "version": "1.0.0",
+  "fixtures": [
+    {
+      "operation": "create_new_report",
+      "path": "reports/synthetic-findings.json",
+      "expected": "ALLOW"
+    },
+    {
+      "operation": "create_new_evidence_manifest",
+      "path": "evidence-manifests/sample.json",
+      "expected": "ALLOW"
+    },
+    {
+      "operation": "create_new_remediation_proposal",
+      "path": "proposals/example.patch",
+      "expected": "ALLOW"
+    },
+    {
+      "operation": "create_new_report",
+      "path": "src/app.py",
+      "expected": "DENY"
+    },
+    {
+      "operation": "create_new_report",
+      "path": "reports/../../secrets.txt",
+      "expected": "DENY"
+    },
+    {
+      "operation": "execute",
+      "path": "reports/payload.sh",
+      "expected": "DENY"
+    },
+    {
+      "operation": "create_new_report",
+      "path": "reports/overwrite.json",
+      "target_exists": true,
+      "expected": "DENY"
+    }
+  ]
+}
