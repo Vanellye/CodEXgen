@@ -19,7 +19,7 @@ class SkribedAndTransmissionTest {
     }
 
     @Test
-    fun derivedWritingDoesNotReplaceOriginal() {
+    fun derivedWritingDoesNotReplaceOriginalAndCreatesAnchoredCorrectionTier() {
         val source = "Original: e\u0301 / Ĉ̣"
         val document = SkribedDocument(source)
         val corrected = document.derive(
@@ -32,6 +32,79 @@ class SkribedAndTransmissionTest {
         assertEquals(source, document.originalText)
         assertNotEquals(document.originalSha256, corrected.outputSha256)
         assertEquals(WritingVariantKind.CORRECTED, corrected.kind)
+        assertEquals(
+            CorrectionTierLine.ORIGINAL_SOURCE_TIER_COMMIT,
+            corrected.correctionTier.originalSourceTierCommit
+        )
+        assertEquals(document.originalSha256, corrected.correctionTier.fromSha256)
+        assertEquals(corrected.outputSha256, corrected.correctionTier.toSha256)
+        assertEquals(CorrectionChangeKind.REPLACE, corrected.correctionTier.changeKind)
+        assertEquals(1, document.correctionTiers().size)
+    }
+
+    @Test
+    fun chainedCorrectionsRetainTheFullTierLineage() {
+        val document = SkribedDocument("source")
+        val first = document.derive(
+            WritingVariantKind.CORRECTED,
+            "first correction",
+            "correction-one",
+            "1"
+        )
+        val second = document.derive(
+            WritingVariantKind.CORRECTED,
+            "second correction",
+            "correction-two",
+            "1",
+            basedOn = first
+        )
+
+        assertEquals(first.outputSha256, second.correctionTier.fromSha256)
+        assertEquals(first.correctionTier.correctionId, second.correctionTier.sourceCorrectionId)
+        assertEquals(
+            listOf(first.correctionTier.correctionId),
+            second.correctionTier.lineageCorrectionIds
+        )
+        assertEquals(
+            CorrectionTierLine.ORIGINAL_SOURCE_TIER_COMMIT,
+            second.correctionTier.originalSourceTierCommit
+        )
+        assertEquals(2, document.correctionTiers().size)
+        assertEquals("source", document.originalText)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun rejectsCorrectionBasedOnDetachedVariant() {
+        val document = SkribedDocument("source")
+        val foreignDocument = SkribedDocument("other source")
+        val detached = foreignDocument.derive(
+            WritingVariantKind.CORRECTED,
+            "foreign correction",
+            "foreign-operation",
+            "1"
+        )
+        document.derive(
+            WritingVariantKind.CORRECTED,
+            "attempted detached correction",
+            "local-operation",
+            "1",
+            basedOn = detached
+        )
+    }
+
+    @Test
+    fun correctionHistoryIsReturnedAsASnapshot() {
+        val document = SkribedDocument("source")
+        document.derive(
+            WritingVariantKind.CORRECTED,
+            "corrected",
+            "editorial-correction",
+            "1"
+        )
+
+        val snapshot = document.correctionTiers()
+        assertEquals(1, snapshot.size)
+        assertTrue(snapshot.single().resultingCommitSha == null)
     }
 
     @Test(expected = IllegalArgumentException::class)
