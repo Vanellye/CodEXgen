@@ -39,7 +39,7 @@ defmodule Eria.Water.Recycling do
   defp target_use(attrs) do
     case Map.get(attrs, :target_use) do
       value when is_binary(value) ->
-        if value in @reuse_classes, do: {:ok, String.to_existing_atom(value)}, else: {:error, :unsupported_reuse_class}
+        if value in @reuse_classes, do: {:ok, value}, else: {:error, :unsupported_reuse_class}
       _ -> {:error, :invalid_reuse_class}
     end
   end
