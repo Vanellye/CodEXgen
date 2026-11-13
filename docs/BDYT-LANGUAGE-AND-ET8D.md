@@ -54,7 +54,7 @@ Run from the repository root:
 bash scripts/bdyt-reviewer.sh path/to/source path/to/candidate
 ```
 
-Dependencies: Bash, `sha256sum`, `wc`, `cmp`, `diff`, and `awk`.
+Dependencies: Bash, `sha256sum`, `wc`, `cmp`, `diff`, `awk`, and `tr`.
 
 ## Cost of Nothing
 
