@@ -36,10 +36,11 @@ data class WritingVariant(
 
 class SkribedDocument(
     originalText: String,
-    val provenance: WritingProvenance = WritingProvenance()
+    val provenance: WritingProvenance = WritingProvenance(),
+    private val correctionJournal: CorrectionLineageJournal = InMemoryCorrectionLineageJournal()
 ) {
     private val originalUtf8: ByteArray = originalText.toByteArray(StandardCharsets.UTF_8)
-    private val correctionHistory = mutableListOf<CorrectionTierLine>()
+    private val correctionLock = Any()
 
     /** Returns the exact original string; derived variants never replace it. */
     val originalText: String = originalText
@@ -49,19 +50,19 @@ class SkribedDocument(
     /** Returns a defensive copy of the original UTF-8 bytes. */
     fun originalBytes(): ByteArray = originalUtf8.copyOf()
 
-    /**
-     * Returns a snapshot of the append-only correction history.
-     * Callers cannot mutate the document's internal history through this list.
-     */
+    /** Read-only snapshot of the append-only correction journal. */
     fun correctionTiers(): List<CorrectionTierLine> =
-        synchronized(correctionHistory) { correctionHistory.toList() }
+        synchronized(correctionLock) { correctionJournal.readAll().toList() }
 
     /**
-     * Creates a derivative and records its correction tier before returning it.
+     * Creates a derivative and appends its correction tier before returning it.
      *
      * If basedOn is supplied, it must be a variant previously produced by this
      * document. This makes the correction's direct parent and full tier path
      * explicit instead of permitting detached or silently joined corrections.
+     *
+     * Supply FileCorrectionLineageJournal(appFilesDir.resolve("eria-corrections.log"))
+     * when constructing the document to retain tiers across process restarts.
      */
     fun derive(
         kind: WritingVariantKind,
@@ -79,56 +80,51 @@ class SkribedDocument(
         require(operationVersion.isNotBlank()) { "operationVersion must not be blank" }
         require(correctionPoint.isNotBlank()) { "correctionPoint must not be blank" }
 
-        val parentTier = basedOn?.correctionTier
-        val knownTiers = correctionTiers()
-        if (parentTier != null) {
-            require(knownTiers.any { it.correctionId == parentTier.correctionId }) {
-                "A correction cannot derive from a detached or foreign tier"
-            }
-        }
-
-        val fromHash = basedOn?.outputSha256 ?: originalSha256
-        val toHash = sha256(text.toByteArray(StandardCharsets.UTF_8))
-        val correctionId = UUID.randomUUID().toString()
-        val lineage = if (parentTier == null) {
-            emptyList()
-        } else {
-            parentTier.lineageCorrectionIds + parentTier.correctionId
-        }
-
-        val tier = CorrectionTierLine(
-            correctionId = correctionId,
-            originalSourceTierRef = CorrectionTierLine.ORIGINAL_SOURCE_TIER_REF,
-            originalSourceTierCommit = CorrectionTierLine.ORIGINAL_SOURCE_TIER_COMMIT,
-            sourceContentSha256 = fromHash,
-            sourceCorrectionId = parentTier?.correctionId,
-            correctionPoint = correctionPoint,
-            changeKind = changeKind,
-            fromSha256 = fromHash,
-            toSha256 = toHash,
-            operation = operation,
-            operationVersion = operationVersion,
-            lineageCorrectionIds = lineage
-        )
-
-        synchronized(correctionHistory) {
-            // Recheck parent membership while holding the append lock.
+        synchronized(correctionLock) {
+            val knownTiers = correctionJournal.readAll()
+            val parentTier = basedOn?.correctionTier
             if (parentTier != null) {
-                require(correctionHistory.any { it.correctionId == parentTier.correctionId }) {
+                require(knownTiers.any { it.correctionId == parentTier.correctionId }) {
                     "A correction cannot derive from a detached or foreign tier"
                 }
             }
-            correctionHistory.add(tier)
-        }
 
-        return WritingVariant(
-            kind = kind,
-            text = text,
-            operation = operation,
-            operationVersion = operationVersion,
-            outputSha256 = toHash,
-            correctionTier = tier
-        )
+            val fromHash = basedOn?.outputSha256 ?: originalSha256
+            val toHash = sha256(text.toByteArray(StandardCharsets.UTF_8))
+            val correctionId = UUID.randomUUID().toString()
+            val lineage = if (parentTier == null) {
+                emptyList()
+            } else {
+                parentTier.lineageCorrectionIds + parentTier.correctionId
+            }
+
+            val tier = CorrectionTierLine(
+                correctionId = correctionId,
+                originalSourceTierRef = CorrectionTierLine.ORIGINAL_SOURCE_TIER_REF,
+                originalSourceTierCommit = CorrectionTierLine.ORIGINAL_SOURCE_TIER_COMMIT,
+                sourceContentSha256 = fromHash,
+                sourceCorrectionId = parentTier?.correctionId,
+                correctionPoint = correctionPoint,
+                changeKind = changeKind,
+                fromSha256 = fromHash,
+                toSha256 = toHash,
+                operation = operation,
+                operationVersion = operationVersion,
+                lineageCorrectionIds = lineage
+            )
+
+            // Append must succeed before a derivative is returned to its caller.
+            correctionJournal.append(tier)
+
+            return WritingVariant(
+                kind = kind,
+                text = text,
+                operation = operation,
+                operationVersion = operationVersion,
+                outputSha256 = toHash,
+                correctionTier = tier
+            )
+        }
     }
 
     companion object {
