@@ -109,6 +109,9 @@ footer{margin-top:18px;color:var(--muted);font-size:.75rem;line-height:1.55}
     <button id="export" type="button" disabled>Export audit JSON</button>
   </div>
   <div id="events" aria-live="polite"><div class="empty">No transmissions recorded in this session.</div></div>
+  <div class="rule"></div>
+  <strong style="font-size:.88rem">Local destination inbox</strong>
+  <div id="inbox" aria-live="polite"><div class="empty">No payloads delivered in this session.</div></div>
   <footer>Audit entries contain timestamps, route names, payload length, and a content digest. Payload text is not retained in the ledger. Entries exist in memory for this browser session only; export them if you need a record.</footer>
 </aside>
 </div>
@@ -123,7 +126,7 @@ footer{margin-top:18px;color:var(--muted);font-size:.75rem;line-height:1.55}
 (() => {
   "use strict";
   const $ = id => document.getElementById(id);
-  const state = { events: [] };
+  const state = { events: [], inbox: [] };
   const source = $("source"), destination = $("destination"), payload = $("payload");
   const authorize = $("authorize"), transmit = $("transmit");
   const update = () => {
@@ -173,6 +176,25 @@ footer{margin-top:18px;color:var(--muted);font-size:.75rem;line-height:1.55}
       meta.textContent = event.timestamp + " · " + event.characters + " characters · SHA-256 " + event.sha256;
       item.append(head,meta); host.append(item);
     });
+    const inboxHost = $("inbox");
+    inboxHost.replaceChildren();
+    if (!state.inbox.length) {
+      const emptyInbox = document.createElement("div");
+      emptyInbox.className = "empty";
+      emptyInbox.textContent = "No payloads delivered in this session.";
+      inboxHost.append(emptyInbox);
+    } else {
+      state.inbox.slice(0,8).forEach(message => {
+        const card = document.createElement("div"); card.className = "event";
+        const head = document.createElement("div"); head.className = "event-head";
+        const route = document.createElement("span"); route.textContent = message.destination + " ← " + message.source;
+        const tag = document.createElement("span"); tag.className = "tag"; tag.textContent = message.id;
+        head.append(route,tag);
+        const body = document.createElement("div"); body.className = "event-meta";
+        body.style.whiteSpace = "pre-wrap"; body.textContent = message.payload;
+        card.append(head,body); inboxHost.append(card);
+      });
+    }
   };
   transmit.addEventListener("click", async () => {
     if (transmit.disabled) return;
@@ -192,11 +214,12 @@ footer{margin-top:18px;color:var(--muted);font-size:.75rem;line-height:1.55}
       authorization: "explicit-user-checkbox-and-button"
     };
     state.events.unshift(event);
+    state.inbox.unshift({id:event.id,source:event.source,destination:event.destination,payload:body,timestamp:event.timestamp});
     render();
     payload.value = "";
     authorize.checked = false;
     $("status-title").textContent = "Local transmission recorded";
-    $("status-detail").textContent = "The event was recorded in this page's session ledger. No network request or external dispatch occurred.";
+    $("status-detail").textContent = "The payload was routed to the selected in-page destination inbox and its metadata was recorded. No network request or external dispatch occurred.";
     update();
   });
   $("export").addEventListener("click", () => {
