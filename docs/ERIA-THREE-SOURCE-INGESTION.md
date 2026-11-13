@@ -14,11 +14,11 @@ Status: implemented initial in-memory FASTA/FASTQ intake and quality-gated compo
 2. Compute SHA-256 over the exact input text.
 3. Parse FASTA (multi-line records) or strict four-line FASTQ (Phred+33).
 4. Reject unsupported nucleotide symbols, malformed records, incomplete FASTQ records, and quality-length mismatches.
-5. Compute read count, total bases, mean read length, GC fraction, ambiguous-base fraction, and mean Phred where available.
-6. Apply explicit configurable minimum read/base counts, maximum ambiguous fraction, and optional mean Phred threshold.
-7. Build an EvolutionaryDataset with source origin, digest, quality state, parameter fingerprint, input digest, output digest, and evidence class.
-8. Run the existing dataset validator. Only then create QualifiedSequenceDataset.
-9. Pass the qualified object to EvolutionaryAnalysisEngine for a descriptive composition summary.
+5. Enforce configurable input-character and read-count ceilings before accepting the in-memory payload.\n6. Compute read count, total bases, mean read length, GC fraction, ambiguous-base fraction, and mean Phred where available.
+7. Apply explicit configurable minimum read/base counts, maximum ambiguous fraction, and optional mean Phred threshold.
+8. Build an EvolutionaryDataset with source origin, digest, quality state, parameter fingerprint, input digest, output digest, and evidence class.
+9. Run the existing dataset validator. Only then create QualifiedSequenceDataset.
+10. Pass the qualified object to EvolutionaryAnalysisEngine for a descriptive composition summary.
 
 ## Evidence semantics
 
