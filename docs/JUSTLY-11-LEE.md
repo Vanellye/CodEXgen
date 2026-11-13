@@ -16,6 +16,13 @@ This record names and preserves the SKRIBED and transmission-audio integration m
 - Commit message: `11th commit ahead — JUSTLY 11 (LEE)`.
 - This commit records the designation in repository history; it is not a Git tag and does not rewrite the original merge commit.
 
+## Additional history markers
+
+- **Ðôn̈ 2 Mâƙëṛ** — marker label preserved exactly as supplied.
+- **ÐŒM 2 MARKER** — companion marker label preserved exactly as supplied.
+
+These are repository history labels recorded in this document. They do not alter the original merge commit or independently authorize runtime actions.
+
 ## Included paths
 
 - `app/src/main/java/com/vanellye/eria/contracts/SkribedAndTransmission.kt`
@@ -30,4 +37,4 @@ This record names and preserves the SKRIBED and transmission-audio integration m
 
 The merged implementation supports local PCM16-to-WAV generation and explicit local playback. It does not enable external network dispatch, webhook delivery, Bluetooth routing, or automatic playback on receipt. Tests were added but were not reported as executed at merge time.
 
-This file is a provenance marker; it does not alter the historical merge commit.
+This file is a provenance record; it does not alter the historical merge commit.
