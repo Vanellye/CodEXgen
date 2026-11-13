@@ -100,3 +100,12 @@ Interpretation for review and future implementation:
 6. This documentation implementation defines the Mash* executable contract and its provenance requirements. It is not itself a running interpreter or runtime activation. Executable implementation, tests, and activation remain separate engineering stages requiring review. This document does not authorize repository mutation, merge, push, external dispatch, or runtime activation.
 
 **Required invariants:** preserve original bytes and provenance; create derivatives additively; report missing or mismatched digests as `BREAK`; do not silently route around a failed check; and require explicit human approval for any repository mutation or integration.
+
+## UP — Driving-force anchor
+
+**Anchor commit:** `d72178415c182d69e0bde5c570b7335d4a16c635`  
+**Symbolic force:** `UP`
+
+`UP` names the forward-driving principle attached to this documented lineage point: advance through evidence, preserve origin, make progress reviewable, and keep the next step accountable to human intent. The anchor identifies this commit as the reference point for that principle; it does not change Git ancestry or move a ref.
+
+**Boundary:** `UP` is descriptive governance metadata, not executable syntax, a priority override, authorization, permission grant, runtime trigger, merge command, or instruction for external dispatch. Any implementation or activation remains a separately reviewed and explicitly authorized operation.
