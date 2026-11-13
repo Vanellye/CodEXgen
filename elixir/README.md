@@ -55,3 +55,48 @@ The engine does not acquire sensor data, establish instrument calibration, infer
 make clinical diagnoses, authorize biological modification, or activate physical actuators.
 Those require independent data sources, validated methods, qualified review, and separate
 authorization systems.
+
+## Multi-omics research evidence extension
+
+The normalized ingestion API accepts records for genomics, transcriptomics,
+epigenomics, proteomics, metabolomics, lipidomics, microbiomics, and phenomics
+across all four supported organism domains. Each record retains its source,
+instrument identifier when supplied, timestamp, assay, method version,
+reference version, QC claims/metadata, and SHA-256 fingerprint of the raw
+payload. Rejections are returned with their input positions; they are not
+silently discarded.
+
+Example:
+
+```elixir
+ingestion = Eria.MultiOmics.Ingest.ingest([
+  %{
+    domain: "cellular_molecular",
+    subject_id: "sample-001",
+    modality: "transcriptomics",
+    assay: "RNA-seq",
+    feature: "GENE-A",
+    value: 4.2,
+    unit: "normalized_count",
+    source: "lab-export-01",
+    observed_at: "2026-11-13T10:00:00Z",
+    raw_payload: "raw-read-count-payload",
+    reference_version: "reference-build-1",
+    method_version: "pipeline-1.0"
+  }
+])
+
+{:ok, report} = Eria.Diagnostic.Support.build(ingestion)
+```
+
+The input contract is normalized maps, not direct FASTQ/BAM/CRAM/VCF or
+vendor-specific instrument decoding. Raw hashes establish byte identity only;
+they do not authenticate a source. QC metadata is retained as a supplied claim,
+not independently verified. Findings must cite known record IDs and include a
+method and uncertainty statement.
+
+All outputs are **research-only**. The support report contains no diagnosis or
+clinical recommendation, does not authorize intervention, and requires
+independent review. Any downstream action remains disabled unless a separate,
+scoped authorization process explicitly approves it. No instrument acquisition
+or physical actuation is implemented by this extension.
