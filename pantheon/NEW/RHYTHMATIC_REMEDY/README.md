@@ -41,3 +41,11 @@ productivity, devotion, nor loss determines a person's self-worth.
 
 This module is staged for later integration. It is not wired into a runtime
 entry point and does not alter existing modules or historical records.
+
+
+## STAR relationship
+
+STAR (Steady TAG Algo Rhythm) is a separate glyph-token and workflow contract. It does
+not change this module's stage machine or authorize actions. See
+[STAR documentation](../../../docs/STAR-STEADY-TAG-ALGO-RHYTHM.md) and the
+[STAR registry](../STAR/README.md).
