@@ -1,13 +1,17 @@
 # JUSTLY 11 (LEE)
 
-## Integration record
+## Original merge — preserved at @11
 
 This record names and preserves the SKRIBED and transmission-audio integration merged into `main`.
 
 - Original Main anchor: `9dfa9c1be99818b876df0a25f11986794e6daa6e`
 - Integration pull request: [#38](https://github.com/Vanellye/CodEXgen/pull/38)
-- Merge commit: `b60fac42ba0573c251cf7f7fe139bfa0f9c078f8`
+- Original merge commit (@11): `b60fac42ba0573c251cf7f7fe139bfa0f9c078f8`
 - Integrated change set: 7 files, 445 additions, 0 deletions
+
+## New Main record — #991
+
+The subsequent Main documentation commit is identified by commit message `#991`. It records this designation without rewriting the original merge commit.
 
 ## Included paths
 
