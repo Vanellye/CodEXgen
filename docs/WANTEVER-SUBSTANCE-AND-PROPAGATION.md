@@ -119,3 +119,7 @@ Wantever can compose the ERIA inventory concepts defined in [ERIA — Inventory 
 Preserve each source entry and its provenance. Keep proposals distinct from confirmed facts and adopted changes. Destructive force pushes remain prohibited by default; any exceptional non-fast-forward update requires exact scoped authorization, a recoverable prior reference, and an expected-old-SHA lease check. If those conditions are not met, retain the existing history.
 
 This vocabulary is an ERIA design contract. It does not claim that every runtime or branch already enforces these controls.
+
+## 10. WANT-driven mini-prompt evolution
+
+See [WANTEVER × WANTs Evolution Engine](WANTEVER-WANTS-EVOLUTION-ENGINE.md) for the shared workflow that turns explicit WANT records and identified gaps into bounded mini-driving prompts, verified contributions, and evidence-linked rewards. This extension does not change the source-preservation, invitation, or authorization rules in this contract. A prompt is a proposal, and a reward is recognition—not permission.
