@@ -1,31 +1,46 @@
 # ERIA Correction Runtime
 
-## Scope
+## Anchors
 
-The runtime correction contract currently instruments the application's SKRIBED derivative operation, `SkribedDocument.derive()`. No other correction API was found in the inspected application source paths. Code generation is not classified as a correction and is not silently recorded as one.
+Two commit anchors have distinct purposes and must not be conflated:
 
-## Required behavior
+- Historical source anchor (@11): `b60fac42ba0573c251cf7f7fe139bfa0f9c078f8`. This remains the immutable origin for source provenance.
+- Future marker anchor: `712961866e615ff4db9e90cd40bece78a45afe39` (short SHA `7129618`). New correction tiers retain this anchor for future markers.
 
-- Every call to `derive()` must receive a document constructed with an explicit `CorrectionLineageJournal`; there is no default in-memory journal.
-- A correction tier is anchored to the immutable @11 commit `b60fac42ba0573c251cf7f7fe139bfa0f9c078f8`.
-- Each tier records a unique correction ID, correction point, operation/version, change kind, source and output SHA-256 hashes, direct parent correction ID, and the ordered correction-ID lineage.
-- A derivative is returned only after its tier has been appended successfully. A journal write failure aborts the operation.
-- A correction cannot derive from a variant that is not present in the same document's journal.
-- The original text remains immutable. Corrections are additive; existing journal records are never rewritten by this API.
-- Git commit SHA remains null until a real repository commit is associated with that correction. Runtime code must not fabricate one.
+The future marker anchor does not replace, rewrite, or rename the historical @11 source anchor.
 
-## Application wiring
+## Correction operations
 
-Use the application factory to place the journal in the app-private files directory:
+The runtime instruments `SkribedDocument.derive()`. Every derivative is written to an explicit `CorrectionLineageJournal` before it is returned. A failed journal append aborts the operation.
+
+Each tier records:
+- unique correction ID and correction point;
+- operation and operation version;
+- change kind and explicit direction (`FORWARD` or `REVERSE`);
+- from/to SHA-256 hashes;
+- direct parent correction ID and ordered lineage;
+- historical @11 source anchor and future marker anchor;
+- optional resulting Git commit SHA, left null until a real commit exists.
+
+The original source remains immutable. Corrections are append-only records; reversing a correction never deletes or edits its forward record.
+
+## From → to / to → from alternator
+
+Forward operation records `fromSha256 → toSha256`.
+
+Reverse operation is explicit through `reverseTo(prior, targetText, operationVersion)`. It records `prior.toSha256 → prior.fromSha256` as a new tier. The supplied target text must hash exactly to the prior tier's `fromSha256`; the runtime does not guess or synthesize an inverse.
+
+A reverse tier retains the forward tier ID as its parent and extends the lineage. A mismatch, detached parent, missing prior variant, or journal failure is rejected.
+
+Example:
 
 ```kotlin
 val document = EriaCorrectionRuntime.document(
     context = applicationContext,
-    originalText = sourceText,
-    provenance = WritingProvenance(sourceRef = sourceReference)
+    originalText = sourceText
 )
 
-val corrected = document.derive(
+val forward = document.derive(
     kind = WritingVariantKind.CORRECTED,
     text = correctedText,
     operation = "editorial-correction",
@@ -33,20 +48,27 @@ val corrected = document.derive(
     changeKind = CorrectionChangeKind.REPLACE,
     correctionPoint = "editorial.review"
 )
+
+val reverse = document.reverseTo(
+    prior = forward,
+    targetText = sourceText,
+    operationVersion = "1",
+    correctionPoint = "editorial.rollback"
+)
 ```
 
-For a correction derived from a previous variant, pass `basedOn = priorVariant`. The runtime checks that the parent tier belongs to the same document and records the complete lineage. Do not create a second document to continue an existing correction chain.
+Both tiers remain in the journal. The reverse operation is a new correction record, not a destructive rollback.
 
-The app-private journal is local to the installation. It is not network-dispatched or automatically synchronized. Backup, export, multi-device reconciliation, and signed approval attestations are not implemented by this change.
+## Persistence and boundaries
 
-## Files
-
-- `CorrectionLineage.kt` — immutable tier model and @11 anchor.
-- `CorrectionLineageJournal.kt` — append-only journal interface, in-memory test journal, and durable file journal.
+- `CorrectionLineage.kt` — immutable tier model, historical source anchor, future marker anchor, and direction.
+- `CorrectionLineageJournal.kt` — append-only journal; v2 records store direction and marker anchor; v1 records remain readable.
 - `EriaCorrectionRuntime.kt` — application-private journal factory.
-- `SkribedAndTransmission.kt` — instrumented `SkribedDocument.derive()`.
-- `SkribedAndTransmissionTest.kt` — lineage, detached-parent rejection, immutability, and persistence tests.
+- `SkribedAndTransmission.kt` — instrumented correction operations and reverse alternator.
+- `SkribedAndTransmissionTest.kt` — anchor, forward/reverse, hash-match, lineage, and persistence tests.
+
+The app-private journal is local to the installation. It is not network-dispatched or automatically synchronized. Backup, export, multi-device reconciliation, signed approval attestations, and a full audit of all future correction call sites are not implemented by this change.
 
 ## Verification boundary
 
-Tests have been added but must run in CI or a local Gradle environment before this implementation is considered verified. This branch does not claim that every possible correction feature elsewhere in the repository has been wired: the repository's complete source tree and all correction call sites must be audited before making that broader claim.
+Tests have been added but have not been run. The PR remains draft until CI or a local Gradle build verifies the implementation.
