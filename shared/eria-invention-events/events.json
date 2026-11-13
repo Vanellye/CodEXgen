@@ -1,0 +1,67 @@
+{
+  "schema": "ERIA-INVENTION-EVENTS",
+  "version": "1.0.0",
+  "mode": "proposal_only",
+  "invention_basis_dial": 3,
+  "dial_definition": {
+    "0": "observe_only",
+    "1": "single_idea_seed",
+    "2": "idea_plus_validation_plan",
+    "3": "multi_angle_invention_brief_plus_validation_and_risk_review"
+  },
+  "events": {
+    "push": {
+      "label": "Source change",
+      "inventions": [
+        "Identify one small additive capability that would make the changed area easier to verify.",
+        "Propose a compatibility-preserving interface or adapter for the changed area.",
+        "Derive a regression test that protects the source lineage and existing behavior."
+      ]
+    },
+    "pull_request": {
+      "label": "Integration proposal",
+      "inventions": [
+        "Propose an alternative implementation that reduces coupling without replacing existing foundations.",
+        "Identify a missing contract test, boundary test, or rollback note.",
+        "Draft an adversarial review question for provenance, authorization, and failure handling."
+      ]
+    },
+    "schedule": {
+      "label": "Hourly invention pulse",
+      "inventions": [
+        "Propose the next smallest independently reviewable infrastructure improvement.",
+        "Identify one unresolved interface that could be made provider-neutral.",
+        "Suggest a measurable acceptance test before any implementation is authorized."
+      ]
+    },
+    "workflow_run": {
+      "label": "Validation outcome",
+      "inventions": [
+        "For failures: propose a minimal reproduction, root-cause investigation, and non-mutating repair plan.",
+        "For successes: propose a regression test that would detect a nearby failure mode.",
+        "Identify whether the workflow outcome should block, warn, or merely inform a human reviewer."
+      ]
+    },
+    "workflow_dispatch": {
+      "label": "Human-seeded invention session",
+      "inventions": [
+        "Generate a bounded architecture experiment with an explicit hypothesis and falsifiable outcome.",
+        "Compare a minimal design with a more modular alternative.",
+        "Write a review checklist before proposing implementation."
+      ]
+    }
+  },
+  "guardrails": {
+    "default_decision": "DENY",
+    "may_create_proposals_in_job_summary": true,
+    "may_commit_or_push": false,
+    "may_open_or_merge_pull_requests": false,
+    "may_deploy_or_publish": false,
+    "may_execute_generated_code": false,
+    "may_dispatch_external_actions": false,
+    "may_access_secrets": false,
+    "may_activate_hardware_or_biological_interventions": false,
+    "human_review_required_before_implementation": true,
+    "preserve_source_history": true
+  }
+}
