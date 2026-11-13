@@ -6,7 +6,7 @@ spec="$root/docs/PERMINT-LANGUAGE-EXTENSION.md"
 for token in '***' '#' '&^&^&' '×' '^&&&^' '÷' '()'; do
   grep -Fq -- "$token" "$spec" || { printf 'MISSING_OPERATOR=%s\n' "$token" >&2; exit 1; }
 done
-for term in 'Proposed-@L·L Language' 'AðÐ' 'Bridge integrity' 'BREAK' '("a" a "m")' 'ion rinse' 'x ride z roll 2 þæč̣' '"T"' '"O"' '§ŢĀN̈ĎÏÑƔ' '"STride" Code' 'Forward Faculty'; do
+for term in 'Proposed-@L·L Language' 'AðÐ' 'Bridge integrity' 'BREAK' '("a" a "m")' 'ion rinse' 'x ride z roll 2 þæč̣' '"T"' '"O"' '§ŢĀN̈ĎÏÑƔ' '"STride" Code' 'Forward Faculty' 'A.M.A.' 'Auto Matic Ally Addinɣ' 'Code Genesis Extract' 'ALL·L·^' '*^\\_/^*' 'INCOMPLETE' 'NO_CONSENT'; do
   grep -Fq -- "$term" "$spec" || { printf 'MISSING_REQUIREMENT=%s\n' "$term" >&2; exit 1; }
 done
 grep -Fq 'not implemented by' "$spec"
