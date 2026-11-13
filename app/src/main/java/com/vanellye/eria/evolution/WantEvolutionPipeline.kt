@@ -99,6 +99,14 @@ data class HumanApproval(
     val expiresAtEpochMillis: Long
 )
 
+/**
+ * Trusted approval adapter. Implementations must authenticate the human decision
+ * and atomically consume approvalId so an approval cannot be replayed.
+ */
+interface HumanApprovalGate {
+    fun validateAndConsume(approval: HumanApproval): List<String>
+}
+
 data class ExecutionReceipt(
     val executionId: String,
     val candidateDigest: String,
@@ -190,6 +198,7 @@ class WantEngine(
     private val stride: StrideEngine,
     private val verifier: EvolutionVerifier,
     private val rewards: RewardLedger,
+    private val approvalGate: HumanApprovalGate,
     private val nowEpochMillis: () -> Long = System::currentTimeMillis
 ) {
     /**
@@ -242,6 +251,11 @@ class WantEngine(
             return EvolutionResult.Blocked(
                 verdict.reasons.ifEmpty { listOf("PANTHEON denied execution.") }
             )
+        }
+
+        val trustedApprovalProblems = approvalGate.validateAndConsume(approval)
+        if (trustedApprovalProblems.isNotEmpty()) {
+            return EvolutionResult.Blocked(trustedApprovalProblems)
         }
 
         val receipt = runCatching { stride.execute(candidate, approval) }
