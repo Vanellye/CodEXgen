@@ -33,6 +33,23 @@ typedef struct {
     int requires_approval;
 } ICGate;
 
+/*
+ * Aðð qualification: all seven independent checks must be present.
+ * These are caller-supplied evidence flags, not cryptographic attestations.
+ */
+typedef struct {
+    int intent;
+    int consent;
+    int evidence;
+    int forward;
+    int reverse;
+    int review;
+    int bridge_integrity;
+} ICAeddChecks;
+
+/* Read-only, fail-closed qualification of the seven Aðð checks. */
+int ic_aedd_qualifies(const ICAeddChecks *checks);
+
 /* True only when a pending gate has satisfied its dependencies and approval. */
 int ic_can_start(const ICGate *gate, int dependencies_passed);
 
