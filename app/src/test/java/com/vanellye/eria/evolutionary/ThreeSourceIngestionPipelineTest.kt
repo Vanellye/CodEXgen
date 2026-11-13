@@ -73,16 +73,16 @@ class ThreeSourceIngestionPipelineTest {
     }
 
     @Test fun rejectsBadFastaAndQualityThresholdFailure() {
-        val malformed = pipeline.ingest(ExistingSequenceAdapter(payload(content = ">r1\nACGT!\n")), "bad.fasta")
+        val malformed = pipeline.ingest(ExistingSequenceAdapter(payload(content = ">r1\nACGT!\n")), "bad.fasta", questionnaire())
         assertTrue(malformed is IngestionResult.Rejected)
         val strict = ThreeSourceIngestionPipeline(QualityThresholds(maximumAmbiguousFraction = 0.0))
-        val ambiguous = strict.ingest(ExistingSequenceAdapter(payload(content = ">r1\nACGTNN\n")), "ambiguous")
+        val ambiguous = strict.ingest(ExistingSequenceAdapter(payload(content = ">r1\nACGTNN\n")), "ambiguous", questionnaire())
         assertTrue(ambiguous is IngestionResult.Rejected)
     }
 
     @Test fun rejectsFastaWithoutHeaderAndInputOverLimit() {
         val noHeader = pipeline.ingest(
-            ExistingSequenceAdapter(payload(content = "ACGTACGT\\n")), "no-header")
+            ExistingSequenceAdapter(payload(content = "ACGTACGT\\n")), "no-header", questionnaire())
         assertTrue(noHeader is IngestionResult.Rejected)
         val bounded = ThreeSourceIngestionPipeline(QualityThresholds(maximumInputCharacters = 5))
         val oversized = bounded.ingest(ExistingSequenceAdapter(payload()), "oversized", questionnaire())
