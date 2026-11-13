@@ -136,3 +136,9 @@ These are intended integration roles. The presence of this document or the refer
 - [ ] Human-reviewed adoption workflow connected to the existing WANT evolution pipeline.
 
 The completed items above describe reference primitives only. No live GitHub scan, branch checkout, file mutation, merge, reward, or external dispatch is performed by this module.
+
+## 9. Source-linked implementation inventory
+
+See [NEXUS Source Records — Native Runtime and Higher Faculty](NEXUS-SOURCE-RECORDS.md) for commit-pinned records covering the PANTHEON Faculty Engine, runtime, 38-standard control gate, Stride input seam, Android JNI boundary, and Stride HTTP client.
+
+That inventory explicitly marks GENESIS and FORGE as unresolved in the inspected repository scopes rather than inventing implementations. It also distinguishes source presence from actual Android runtime wiring and records the separate CI evidence for the WANTEVER and OLPIRT candidate commits.
