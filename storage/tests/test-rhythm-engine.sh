@@ -34,7 +34,7 @@ mkdir -p "$TMP_ROOT/data"
 printf 'ERIA rhythm payload\n' > "$TMP_ROOT/data/source.txt"
 printf 'old payload\n' > "$TMP_ROOT/data/existing.txt"
 
-ok "read emits SHA-256" bash -c '"$1" read "$2" | grep -Eq "^[0-9a-f]{64}  "' _ bash "$ENGINE" "$TMP_ROOT/data/source.txt"
+ok "read emits SHA-256" bash -c 'bash "$1" read "$2" | grep -Eq "^[0-9a-f]{64}  "' _ "$ENGINE" "$TMP_ROOT/data/source.txt"
 ok "write creates destination" bash "$ENGINE" write "$TMP_ROOT/data/source.txt" "$TMP_ROOT/data/new.txt"
 ok "verify accepts identical content" bash "$ENGINE" verify "$TMP_ROOT/data/source.txt" "$TMP_ROOT/data/new.txt"
 expect_fail "write refuses overwrite by default" bash "$ENGINE" write "$TMP_ROOT/data/source.txt" "$TMP_ROOT/data/existing.txt"
@@ -50,7 +50,7 @@ expect_fail "checkpoint rejects unsafe label" bash "$ENGINE" checkpoint "$TMP_RO
 ok "checkpoint writes checksum manifest" bash -c '
     bash "$1" checkpoint "$2" unit-test >/dev/null &&
     grep -Eq "^sha256=[0-9a-f]{64}$" "$ERIA_STORAGE_ROOT"/checkpoints/*.checkpoint
-' _ bash "$ENGINE" "$TMP_ROOT/data/source.txt"
+' _ "$ENGINE" "$TMP_ROOT/data/source.txt"
 ok "sync copies and verifies" bash "$ENGINE" sync "$TMP_ROOT/data/source.txt" "$TMP_ROOT/data/synced.txt"
 
 printf '\nBash M*ASH tests: %d passed, %d failed\n' "$pass" "$fail"
