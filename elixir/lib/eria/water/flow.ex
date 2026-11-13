@@ -4,7 +4,7 @@ defmodule Eria.Water.Flow do
   It records a proposed logical route only; it does not dispatch commands.
   """
 
-  @ordered_stages ~w(collection purification storage distribution recycling)
+  @ordered_stages [:collection, :purification, :storage, :distribution, :recycling]
 
   def connect(stage_records) when is_list(stage_records) do
     names = Enum.map(stage_records, fn
@@ -13,11 +13,11 @@ defmodule Eria.Water.Flow do
       _ -> nil
     end)
 
-    if names == @ordered_stages do
+    if names == Enum.map(@ordered_stages, &Atom.to_string/1) do
       {:ok,
        %{
          workstream: :integration,
-         route: Enum.map(@ordered_stages, &String.to_existing_atom/1),
+         route: @ordered_stages,
          status: :logical_route_validated,
          execution_enabled: false,
          physical_dispatch: :disabled
