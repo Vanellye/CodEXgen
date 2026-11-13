@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "name": "ERIA M*ASH generation boundary",
+  "mode": "generate-validate-record-review",
+  "default_decision": "deny",
+  "allowed_capabilities": [
+    "code.generate",
+    "code.validate",
+    "tests.isolated",
+    "evidence.record",
+    "review.present"
+  ],
+  "prohibited_capabilities": [
+    "credentials.extract",
+    "execution.hidden",
+    "dispatch.external",
+    "patch.external",
+    "hardware.activate",
+    "biological.intervene",
+    "repository.merge",
+    "release.publish",
+    "deployment.perform"
+  ],
+  "storage": {
+    "mode": "create-only",
+    "overwrite": false,
+    "delete": false,
+    "follow_symlinks": false,
+    "path_traversal": false,
+    "parent_directories": "must-already-exist"
+  },
+  "consequential_actions": {
+    "automatic": false,
+    "human_review_required": true,
+    "independent_review_required_for_merge": true
+  },
+  "logging": {
+    "record_decision": true,
+    "record_secret_values_or_payloads": false
+  },
+  "limitations": [
+    "The guard protects callers that actually invoke it; it is not a sandbox.",
+    "It does not inspect arbitrary generated source for every possible malicious behavior.",
+    "It does not configure operating-system permissions, GitHub branch protection, or runtime network policy.",
+    "Integrations must enforce this contract at their own capability and storage boundaries."
+  ]
+}
