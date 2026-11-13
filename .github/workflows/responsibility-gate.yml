@@ -1,0 +1,58 @@
+name: ERIA Responsibility Gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  pull_request_review:
+    types: [submitted, dismissed]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: eria-responsibility-${{ github.event.pull_request.number || github.event.number }}
+  cancel-in-progress: false
+
+jobs:
+  independent-human-approval:
+    name: Independent human approval
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require evidence-based approval from a reviewer other than the author
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number || github.event.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login || github.event.sender.login }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          reviews="$(gh api --paginate "repos/${REPOSITORY}/pulls/${PR_NUMBER}/reviews" --jq '.[] | {user: .user.login, state: .state, submitted_at: .submitted_at, body: .body}')"
+          python -c '
+          import json, os, re, sys
+          author = os.environ["PR_AUTHOR"].lower()
+          rows = [json.loads(line) for line in sys.stdin if line.strip()]
+          latest = {}
+          for row in rows:
+              user = (row.get("user") or "").lower()
+              if user and (user not in latest or (row.get("submitted_at") or "") > (latest[user].get("submitted_at") or "")):
+                  latest[user] = row
+          def has_evidence(body):
+              body = body or ""
+              labels = ("SCOPE:", "EVIDENCE:", "RISKS:", "TESTS:")
+              positions = [body.upper().find(label) for label in labels]
+              if any(pos < 0 for pos in positions):
+                  return False
+              for i, pos in enumerate(positions):
+                  end = positions[i + 1] if i + 1 < len(positions) else len(body)
+                  section = body[pos + len(labels[i]):end]
+                  if len(re.sub(r"[\s*_#:-]", "", section)) < 12:
+                      return False
+              return True
+          qualified = [user for user, row in latest.items() if user != author and row.get("state") == "APPROVED" and has_evidence(row.get("body"))]
+          if not qualified:
+              print("BLOCKED: need a current non-author APPROVED review with substantive SCOPE:, EVIDENCE:, RISKS:, and TESTS: sections.")
+              sys.exit(1)
+          print("PASS: evidence-anchored independent approval from " + ", ".join(sorted(qualified)))
+          ' <<< "$reviews"
