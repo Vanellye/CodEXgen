@@ -23,6 +23,9 @@ data class ResearchIntakeQuestionnaire(
     val referenceAssembly: String? = null,
     val requestedAnalysisScopes: Set<String> = setOf("sequence_qc", "evolutionary_summary"),
     val containsDirectIdentifiers: Boolean = false,
+    /** Submitter declaration only; this is not independent verification or intervention authorization. */
+    val clinicalAuthorizationDeclared: Boolean = false,
+    val clinicalAuthorizationReference: String? = null,
     val completedAt: String = Instant.now().toString()
 )
 
@@ -37,11 +40,12 @@ object ResearchIntakeQuestionnaireValidator {
         if (form.organism.isBlank()) errors += "organism is required; use 'unknown' when not established"
         if (form.sourceOrigin != adapter.origin) errors += "questionnaire source origin does not match adapter"
         if (form.sequenceFormat != payload.format) errors += "questionnaire sequence format does not match payload"
-        if (form.completedAt.let { try { Instant.parse(it); false } catch (_: Exception) { true } })
-            errors += "completedAt must be ISO-8601"
+        try { Instant.parse(form.completedAt) } catch (_: Exception) { errors += "completedAt must be ISO-8601" }
         if (form.containsDirectIdentifiers) errors += "direct personal identifiers must be removed before intake"
         if (form.requestedAnalysisScopes.isEmpty()) errors += "at least one analysis scope is required"
         if (form.requestedAnalysisScopes.any { it !in allowedScopes }) errors += "questionnaire requests an unsupported analysis scope"
+        if (form.clinicalAuthorizationDeclared && form.clinicalAuthorizationReference.isNullOrBlank())
+            errors += "a reference is required when clinical authorization is declared"
         when (form.sourceOrigin) {
             IntakeOrigin.EXISTING_SEQUENCE -> {
                 if (form.authority != QuestionnaireAuthority.USER_AUTHORITY_RECORDED)
