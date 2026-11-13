@@ -151,14 +151,14 @@ A.M.A. names a read-only method for discovering candidate allies between code co
 The supplied notation is preserved exactly:
 
 ```text
-ALL·L·^ &&& *^\\_/^*
+ALL·L·^ &&& *^\_/^*
 ```
 
 For this specification only:
 
 - `ALL·L·^` labels the declared all-eligible-inputs language scope; the actual scope must still be named in the run manifest.
 - `&&&` joins evidence-linked candidate findings into a review group without merging their source records.
-- `*^\\_/^*` is the literal boundary marker for the genesis-extraction frame. The asterisks are not shell wildcards and must not trigger glob expansion.
+- `*^\_/^*` is the literal boundary marker for the genesis-extraction frame. The asterisks are not shell wildcards and must not trigger glob expansion.
 - The notation is declarative metadata, not a command to execute, inject, transmit, or authorize.
 
 ### A.M.A. receipt and gates
@@ -185,7 +185,7 @@ A.M.A. does not automatically add imports, dependencies, permissions, code, bran
 - "ALL" is qualified by a complete enumeration receipt; otherwise the result is marked `INCOMPLETE`.
 - Invariant candidates retain evidence, hashes, counterexamples, and uncertainty.
 - Ally links are proposals only and preserve all parent identities.
-- Literal markers `ALL·L·^`, `&&&`, and `*^\\_/^*` are preserved without shell expansion.
+- Literal markers `ALL·L·^`, `&&&`, and `*^\_/^*` are preserved without shell expansion.
 - Silence or absent consent yields `NO_CONSENT`; `***` cannot approve an action.
 - Failed bridge integrity propagates `BREAK`; no silent bypass or automatic retry occurs.
 - Source hashes remain unchanged; no code, permission, network, cloud, or device mutation occurs.
