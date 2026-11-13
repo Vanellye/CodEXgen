@@ -23,6 +23,7 @@ run_pair facade pantheon/NEW/FaCADE/FaCADE.c pantheon/NEW/FaCADE/tests/test_FaCA
 run_pair thought-tott pantheon/NEW/THOUGHT_TOTT/THOUGHT_TOTT.c pantheon/NEW/THOUGHT_TOTT/tests/test_THOUGHT_TOTT.c pantheon/NEW/THOUGHT_TOTT
 run_pair z-to-a pantheon/NEW/Z_TO_A/Z_TO_A.c pantheon/NEW/Z_TO_A/tests/test_Z_TO_A.c pantheon/NEW/Z_TO_A
 run_pair rhythmatic-remedy pantheon/NEW/RHYTHMATIC_REMEDY/RHYTHMATIC_REMEDY.c pantheon/NEW/RHYTHMATIC_REMEDY/tests/test_RHYTHMATIC_REMEDY.c pantheon/NEW/RHYTHMATIC_REMEDY
+run_pair star pantheon/NEW/STAR/STAR.c pantheon/NEW/STAR/tests/test_STAR.c pantheon/NEW/STAR
 run_pair i-inject pantheon/NEW/I_INJECT/I_INJECT.c pantheon/NEW/I_INJECT/tests/test_I_INJECT.c pantheon/NEW/I_INJECT
 run_pair walla-drop-out pantheon/NEW/WALLA_DROP_OUT/WALLA_DROP_OUT.c pantheon/NEW/WALLA_DROP_OUT/tests/test_WALLA_DROP_OUT.c pantheon/NEW/WALLA_DROP_OUT
 run_pair walla-regurgitation pantheon/NEW/WALLA_REGURGITATION/WALLA_REGURGITATION.c pantheon/NEW/WALLA_REGURGITATION/tests/test_WALLA_REGURGITATION.c pantheon/NEW/WALLA_REGURGITATION
