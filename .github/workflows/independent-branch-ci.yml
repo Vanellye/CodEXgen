@@ -107,6 +107,10 @@ jobs:
         working-directory: elixir
     steps:
       - uses: actions/checkout@v4
+      - name: Install samtools for BAM/CRAM integration fixtures
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes samtools
       - uses: erlef/setup-beam@v1
         with:
           otp-version: '27'

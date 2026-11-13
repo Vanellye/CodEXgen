@@ -47,7 +47,7 @@ defmodule EriaMultiOmicsAdaptersTest do
     assert hd(result.records).position == 10
   end
 
-  test "BAM and CRAM conversion plans are argv-only and never execute" do
+  test "BAM and CRAM conversion plans remain argv-only descriptions" do
     assert {:ok, bam} = SAM.conversion_plan(:bam, "reads.bam", "reads.sam")
     assert bam.shell == false
     assert bam.execution == :not_performed
@@ -55,6 +55,45 @@ defmodule EriaMultiOmicsAdaptersTest do
     assert "ref.fa" in cram.argv
     assert {:error, :cram_reference_required} =
              SAM.conversion_plan(:cram, "reads.cram", "reads.sam", nil)
+  end
+
+  test "BAM decode_file automatically converts, validates, and fingerprints output" do
+    dir = Path.join(System.tmp_dir!(), "eria-bam-test-#{System.unique_integer([:positive])}")
+    File.mkdir_p!(dir)
+    on_exit(fn -> File.rm_rf!(dir) end)
+
+    sam = Path.join(dir, "reads.sam")
+    bam = Path.join(dir, "reads.bam")
+    File.write!(sam, "@HD\tVN:1.6\n@SQ\tSN:chr1\tLN:100\nread-1\t0\tchr1\t10\t60\t4M\t*\t0\t0\tACGT\t!!!!\n")
+    {_, 0} = System.cmd("samtools", ["view", "-b", "-o", bam, sam])
+
+    assert {:ok, result} = SAM.decode_file(bam)
+    assert result.source_format == :bam
+    assert result.counts.records == 1
+    assert hd(result.records).position == 10
+    assert result.conversion.exit_status == 0
+    assert byte_size(result.conversion.output_sha256) == 64
+  end
+
+  test "CRAM decode_file requires an explicit reference and converts automatically" do
+    dir = Path.join(System.tmp_dir!(), "eria-cram-test-#{System.unique_integer([:positive])}")
+    File.mkdir_p!(dir)
+    on_exit(fn -> File.rm_rf!(dir) end)
+
+    reference = Path.join(dir, "ref.fa")
+    sam = Path.join(dir, "reads.sam")
+    cram = Path.join(dir, "reads.cram")
+    File.write!(reference, ">chr1\n" <> String.duplicate("A", 100) <> "\n")
+    {_, 0} = System.cmd("samtools", ["faidx", reference])
+    File.write!(sam, "@HD\tVN:1.6\n@SQ\tSN:chr1\tLN:100\nread-1\t0\tchr1\t10\t60\t4M\t*\t0\t0\tAAAA\t!!!!\n")
+    {_, 0} = System.cmd("samtools", ["view", "-C", "-T", reference, "-o", cram, sam])
+
+    assert {:error, :cram_reference_required} = SAM.decode_file(cram)
+    assert {:ok, result} = SAM.decode_file(cram, reference_path: reference)
+    assert result.source_format == :cram
+    assert result.counts.records == 1
+    assert hd(result.records).position == 10
+    assert result.conversion.exit_status == 0
   end
 
   test "vendor adapter returns normalized records and source digest" do
