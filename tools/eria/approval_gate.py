@@ -17,7 +17,7 @@ from typing import Any
 def has_current_human_approval(
     reviews: Iterable[dict[str, Any]], head_sha: str, pr_author: str = ""
 ) -> tuple[bool, str]:
-    if not head_sha or not pr_author and pr_author is None:
+    if not head_sha or not pr_author:
         return False, "Missing pull-request head SHA or author identity."
 
     latest_by_reviewer: dict[str, dict[str, Any]] = {}
