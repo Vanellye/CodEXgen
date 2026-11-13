@@ -1,6 +1,6 @@
 # ERIA Red Write-Only Ethical Tools
 
-**Status:** Draft security design; defensive, synthetic-fixture-only.
+**Status:** Draft security implementation; defensive, synthetic-fixture-only.
 
 ## Meaning of “write-only”
 
@@ -16,27 +16,28 @@ This is not a claim that a scanner can assess a target without reading any targe
 
 Create-new only. Existing files are never overwritten or deleted.
 
-## Explicitly out of scope
+## Shared execution boundary and storage enforcement
 
-- Credential collection, secret extraction, token dumping, or secret fingerprinting
-- Exploit payloads, persistence, stealth, evasion, lateral movement, or privilege escalation
-- Shell execution, dynamic code evaluation, command dispatch, or network callbacks
-- Changes to source, CI workflows, branch protections, secrets, permissions, or deployment settings
-- Hardware activation or biological intervention
+- `tools/validate_policy.py` is the pure path/operation policy validator.
+- `tools/execution_boundary_guard.py` defines the shared provider-neutral `ExecutionBoundaryGuard`. It requires an explicit, operation-specific, scoped, time-bounded, non-revoked human grant and an injected trusted grant verifier.
+- `tools/storage_adapter.py` is the actual filesystem mutation boundary. It requires a pre-opened trusted output-root directory descriptor and an append-only audit sink. It traverses pre-existing directories using directory descriptors and no-follow flags, then creates files with `O_CREAT | O_EXCL | O_NOFOLLOW` and owner-only mode `0600`. Existing targets, symlink traversal, invalid scopes, and unverified grants fail closed.
+- `tests/test_storage_adapter.py` exercises the real adapter against temporary synthetic directories. No production repository files are targets.
+- `.github/workflows/eria-write-only-boundary.yml` runs this suite in isolated CI.
 
-## Shared authorization
+The injected grant verifier is a required integration point, not a placeholder authorization scheme: production wiring must validate an authentic approval issued by the trusted human-approval authority and check current revocation state. The adapter does not mint grants. The host must provision the output root and the append-only audit sink securely. This code is not a complete OS sandbox and does not make arbitrary host processes safe.
 
-All future adapters must call the provider-neutral `ExecutionBoundaryGuard`. A glyph, symbolic energy annotation, `Ŷ`, test pass, or finding is not authorization. Approval must be explicit, operation-specific, scoped, time-bound, revocable, and recorded.
+## Explicitly denied
+
+- Source-tree modification, overwrite, delete, chmod, and writes outside the three output roots
+- Secret reads/extraction, credential harvesting, token dumping, and secret fingerprinting
+- Shell execution, dynamic evaluation, and exploit-payload operations
+- Network/webhook dispatch and hidden execution
+- Hardware activation and biological intervention
+
+The adapter treats artifact content as inert bytes; it never interprets or executes content. A separate scanner or reader is not included.
 
 ## Evidence discipline
 
 Findings are hypotheses until verified. Record the source revision, test method, limitations, and evidence status. Do not place secrets or secret-derived fingerprints in reports. Preserve original artifacts; append corrections rather than rewriting history.
 
-## Current implementation
-
-- `policy.json`: machine-readable deny-by-default policy.
-- `tools/validate_policy.py`: pure path/operation policy validator; no filesystem writes or network calls.
-- `test-vectors.json`: synthetic allow/deny cases.
-- `tests/test_red_write_only_policy.py`: unit tests for policy decisions.
-
-The validator is a policy helper, not a sandbox or a complete security boundary. Enforce filesystem permissions and authorization again at the actual storage adapter.
+Glyphs, symbolic energy annotations, `Ŷ`, a test pass, or a finding are never authorization.
