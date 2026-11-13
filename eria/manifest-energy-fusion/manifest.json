@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0.0",
+  "module": "ERIA Manifest Energy -> Fusion -> Matter Fulfilment",
+  "repository": "Vanellye/CodEXgen",
+  "anchor": {
+    "commit": "0b134ed2770c789e42e850ea7be4228c4514b989",
+    "tree": "a326ae27f427bf1c4b73f8d983609c8d6d11e7ae",
+    "signature_verified": true,
+    "role": "original provenance anchor; this PR is based directly on it"
+  },
+  "integration": {
+    "base_branch": "main",
+    "base_commit": "0b134ed2770c789e42e850ea7be4228c4514b989",
+    "ash_lineage": [
+      {
+        "branch": "archive/ashes-before-main-sync-2026-11-13",
+        "head": "d87c61bb0ce454050a956b661c5adbf8b2bfbf15",
+        "role": "ASH pre-sync archive"
+      },
+      {
+        "branch": "work/ashes-main-integration-2026-11-13",
+        "head": "d87c61bb0ce454050a956b661c5adbf8b2bfbf15",
+        "role": "ASH integration work snapshot"
+      },
+      {
+        "branch": "feature/ashes-to-angels-pheonix",
+        "head": "d87c61bb0ce454050a956b661c5adbf8b2bfbf15",
+        "role": "ASH feature snapshot"
+      }
+    ],
+    "bash_bridge": {
+      "branch": "feature/eria-bash-mash-ssd-rhythm",
+      "head": "f1d2b15ef39dba7c9b2538a9dfe7f2aba638957c",
+      "role": "Bash bridge source reference; not merged or executed by this PR"
+    }
+  },
+  "policy": {
+    "snapshot_only": true,
+    "automatic_merge": false,
+    "automatic_release": false,
+    "external_dispatch": false,
+    "hardware_or_biological_activation": false,
+    "secret_material_included": false,
+    "branch_heads_are_mutable_refs": true,
+    "integrity_scope": "SHA-256 detects changes to this manifest file; it does not make Git refs immutable or authenticate remote branch state."
+  },
+  "fulfilment": {
+    "status": "proposed-reviewable-artifact",
+    "produced": "read-only Bash manifest integrity verifier and isolated tests",
+    "not_produced": [
+      "merged code",
+      "release",
+      "deployment",
+      "external action",
+      "physical matter or energy"
+    ],
+    "approval_required": "independent human review of the exact PR head"
+  }
+}
