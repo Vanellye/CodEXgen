@@ -308,3 +308,12 @@ The proposed notation is:
 For this directory, it denotes a future, bounded Mash* code integrity/reporting step: fingerprint declared inputs, preserve the original source identity, and create a distinct origin-linked record for any derivative. The record should include parent refs, exact input/output SHA-256 values, operation/version, and review state. `*(ª)*` is a literal frame marker; `"ºƠºŘÏƔĮŒŉ"` is an exact symbolic origin label. Neither is executable syntax or authorization.
 
 **Status:** documentation implementation of the Mash* executable contract. This records the intended integrity/reporting behavior and provenance requirements; it is not a running interpreter or runtime activation. Executable implementation, tests, and activation remain separate engineering stages requiring review. Digest mismatch or unavailable provenance is an explicit `BREAK`; no silent bypass or alternate route. This notation does not authorize file mutation, commit, merge, push, external dispatch, or runtime activation. See `L-L-LINE.md` for the full contract.
+
+## 12. UP driving-force anchor
+
+**Anchor commit:** `d72178415c182d69e0bde5c570b7335d4a16c635`  
+**Symbolic force:** `UP`
+
+`UP` marks the forward-driving principle associated with this lineage point: progress grounded in evidence, source preservation, reviewable change, and accountable human intent. The anchor is a reference to the named commit, not a replacement for its Git identity or ancestry.
+
+**Boundary:** this is descriptive documentation metadata only. `UP` is not executable syntax, a priority override, authorization, permission grant, runtime trigger, merge command, or external-dispatch instruction. Executable implementation and runtime activation remain separate reviewed and explicitly authorized stages. See the root `L-L-LINE.md` anchor for the shared definition.
