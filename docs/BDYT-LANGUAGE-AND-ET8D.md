@@ -1,115 +1,98 @@
 # bđyt — Byte-Oriented Learning and Adaptation Language
 
-**Method identifier:** `ÆŤ8Ð`
-**Initial implementation:** Bash reference reviewer  
-**Baseline:** `2cce68f258f46058f18c108c264db9cc85200590`
-**Status:** Experimental; review-only reference implementation
+**Method identifier:** `ÆŤ8Ð`  
+**Executable reference:** Bash interpreter, `scripts/bdyt.sh`  
+**Status:** Experimental; local text interpreter and read-only reviewer
 
 ## Purpose
 
-bđyt is a proposed language for receiving source data, preserving its origin, constructing derivatives, and evaluating changes. Its first implementation is deliberately small: a deterministic byte-integrity and diff reviewer. It does not claim autonomous general intelligence, and it does not silently alter repository contents.
+bđyt is a small operator language for receiving source text, preserving its origin fingerprint, constructing named derivatives, comparing values, and routing reports. Its operators are executable statements interpreted by `scripts/bdyt.sh`; they are no longer merely descriptive notation.
 
-**Design rule:** Adopt verified inputs; adapt only in a bounded workspace; preserve the source; report every difference.
+**Design rule:** Adopt verified inputs; adapt into new values; preserve the origin; report every decision.
 
-## Invented operator grammar
+## Executable grammar (v0.1)
 
-| Token | Meaning | Initial behavior |
+One statement per line. Identifiers match `[A-Za-z_][A-Za-z0-9_]*`. Quoted strings cannot contain a quote or escape sequence in v0.1. Blank lines and full-line comments beginning with `#` are ignored.
+
+| Operator | Statement form | Executable behavior |
 |---|---|---|
-| `ºŌº` | Origin identity | Identify the immutable source input |
-| `*` | Adopt | Select a source without modifying it |
-| `+` | Adapt | Describe or stage a derivative; never overwrite origin |
-| `×` | Compose | Combine explicitly named inputs in a later language version |
-| `÷` | Partition | Split data into independently identified components |
-| `=` | Verify | Compare exact bytes or declared invariants |
-| `<>` | Review | Produce a difference report |
-| `/` | Route | Name a local destination; does not dispatch |
-| `----` | Boundary | End the operation and emit a receipt |
+| `ºŌº` | `ºŌº ID "path/to/file"` | Load a readable regular text file, reject symlinks/NULs and inputs over 1 MiB, retain its path and SHA-256 origin fingerprint |
+| `*` | `* ID` | Adopt an existing value as the active source |
+| `+` | `+ NEW_ID ACTIVE_ID "suffix"` | Create a new derived value by appending literal text; source must have been adopted; never overwrite an existing value |
+| `×` | `× NEW_ID LEFT_ID RIGHT_ID` | Compose two existing values, in order, into a new value |
+| `÷` | `÷ LEFT_ID RIGHT_ID SOURCE_ID "delimiter"` | Partition a value at the first occurrence of a non-empty delimiter into two new values |
+| `=` | `= LEFT_ID RIGHT_ID` | Compare two existing values and emit `VERIFY=TRUE` or `VERIFY=FALSE` |
+| `<>` | `<> LEFT_ID RIGHT_ID` | Review two values and emit an identical/different finding |
+| `/` | `/ ID` | Route a value to the local report stream (stdout only) |
+| `----` | `----` | End the program and emit a completion receipt; later statements are rejected |
 
-Example notation:
+### Complete example
 
 ```text
-ºŌº SOURCE("original.bin")
-  * ADOPT(read_only)
-  + ADAPT("candidate.bin")
-  <> REVIEW(source, candidate)
-  = VERIFY(sha256, byte_count)
-  / PROPOSE(local_target)
-  ---- RECEIPT(no_mutation)
+ºŌº origin "examples/origin.txt"
+* origin
++ adapted origin " — reviewed"
+× combined origin adapted
+÷ first second combined " — "
+= origin origin
+<> origin adapted
+/ adapted
+----
 ```
 
-This is a language design notation, not yet a parser or executable DSL. The Bash reviewer implements only source/candidate validation, byte counts, SHA-256, equality detection, and a unified diff.
-
-## ÆŤ8Ð — execution method
-
-1. **Receive:** accept two explicitly supplied regular files.
-2. **Validate:** reject missing files, symlinks, identical paths, missing utilities, and inputs larger than 10 MiB.
-3. **Fingerprint:** calculate SHA-256 and byte counts for both inputs.
-4. **Compare:** if bytes match, return `NO_OP`.
-5. **Review:** if bytes differ, print a unified diff and return `PROPOSE_ONLY`.
-6. **Receipt:** report that no input was modified and no external dispatch occurred.
-
-Run from the repository root:
+Run it from the repository root:
 
 ```bash
-bash scripts/bdyt-reviewer.sh path/to/source path/to/candidate
+bash scripts/bdyt.sh examples/demo.bdyt
 ```
 
-Dependencies: Bash, `sha256sum`, `wc`, `cmp`, `diff`, `awk`, and `tr`.
+The interpreter requires Bash 4+ (associative arrays) and standard utilities `wc`, `tr`, `cat`, `sha256sum`, and `awk`. It does not use `eval`, execute source/candidate content, expand variables from the language, or invoke a shell command named by a program.
 
-## Cost of Nothing
+## Operator semantics and limits
 
-When source and candidate are byte-identical:
+- `ºŌº` fingerprints the original file before loading its text value. Original files are never written.
+- Text values are held in Bash variables. Consequently, trailing newline bytes are stripped on load and NUL/binary data is rejected. SHA-256 and byte count still describe the original file, not the normalized in-memory value.
+- `*` sets the active source. `+` requires that exact source to be active and always creates a new identifier.
+- `×` concatenates without an implicit separator. Supply a separator as part of one input value if needed.
+- `÷` splits only at the first delimiter occurrence; both result identifiers must be unused.
+- `=` and `<>` report results; a false equality is a finding, not an interpreter crash.
+- `/` writes only to the process's stdout. It is not a network route, webhook, device action, or external dispatch.
+- `----` is mandatory and is the terminal statement.
 
-- no write;
-- no delete;
-- no commit;
-- no dispatch;
-- no adaptation;
-- return `DECISION=NO_OP`.
+## Smoke tests
 
-This is a deliberate successful result, not an error.
+Run:
 
-## Background reviewer behavior
+```bash
+bash scripts/test-bdyt.sh
+```
 
-The reviewer is deterministic and read-only. It can be invoked by a developer or a separately configured scheduler. This commit does not install a daemon, create a schedule, invoke an AI service, or run unattended.
+The test exercises every operator, checks that the source file's SHA-256 remains unchanged, and confirms that an unknown identifier is rejected.
 
-A future intelligence adapter may classify diffs or recommend transformations, but it must identify its model/version, disclose uncertainty, preserve the raw evidence, and emit proposals rather than silently applying changes.
+## ÆŤ8Ð reviewer and coiless report protocol
 
-## Authority and interference boundaries
+The separate byte reviewer remains available:
 
-This design removes a manual approval step from passive observation and reporting. It does **not** remove authorization from consequential operations.
+```bash
+bash scripts/bdyt-reviewer.sh SOURCE_FILE CANDIDATE_FILE
+```
 
-- Read-only inspection and digest generation may be automatic.
-- Candidate generation may occur in an isolated, bounded workspace.
-- Source deletion, persistent repository mutation, permission changes, merges, external dispatch, and device/physical actuation remain separately gated.
-- A trigger is not authorization.
-- A digest proves byte identity only, not truth, quality, authorship, or permission.
-- “Deleting interference” means filtering or excluding explicitly identified noise from a derived view; it never means deleting source records or hiding audit evidence.
+It fingerprints both files, compares exact bytes, and emits a unified diff for differing inputs. The coiless report markers remain report metadata:
 
-## Verification limits
+- `@§` — begin a structured report
+- `*(§)*` — noteworthy marker, not permission
+- `^&&&^` — coalesce findings while retaining their individual evidence
+- `coiless` — one bounded invocation; no persistent loop, hidden worker, or recursive trigger
 
-The reference reviewer is not a malware scanner, semantic verifier, AI model, compiler, or authorization service. It does not execute candidate files. It does not prove that a candidate is safe or correct. Review results must be interpreted within those limits.
+Proposed method identity: `ÆŤ8Ð-COILLESS-REPORT`.
 
-## Provenance invariant
+## Authority and provenance boundaries
 
-Original source bytes remain distinct from adapted bytes. All future transformations must record source digest, candidate digest, method version, and a return receipt. Historical evidence is append-only; corrections are additive.
+- Parsing and interpreting this v0.1 language is local and bounded.
+- No source file is modified, no candidate is executed, and no commit is created by the interpreter.
+- A route is a local report stream only. A trigger or parsed statement is never authorization for external dispatch.
+- Persistent repository changes, deletion, permission changes, merges, network calls, and device/physical actuation require separate action-specific authorization and implementations.
+- Digests prove byte identity only; they do not prove truth, quality, authorship, or permission.
+- Original source evidence remains distinct from derived values. Future transformations must preserve source digests, method version, and receipts.
 
-
-## Coiless report protocol
-
-**Proposed execution-method identity:** `ÆŤ8Ð-COILLESS-REPORT`
-
-| Marker | Meaning |
-|---|---|
-| `@§` | Begin a structured report |
-| `*(§)*` | Star marker: flag the report as noteworthy; it is metadata, not a permission |
-| `^&&&^` | Coalescence marker: group related findings into one report while retaining each original finding and digest |
-| `coiless` | Run without a persistent background loop, hidden worker, or recursive self-trigger |
-
-The reviewer emits these markers in its standard output. A byte-identical pair produces `COALESCED_NO_CHANGE`; differing inputs produce `COALESCED_DIFFERENCE_REPORT` and retain the unified diff. Coalescing organizes the report; it never merges or deletes source records.
-
-### Proposed action
-
-`@§ *(§)* ^&&&^ RUN(coiless, ÆŤ8Ð-COILLESS-REPORT) ---- RECEIPT`
-
-This action means: inspect the supplied pair, fingerprint both, coalesce the findings into one report, and stop. It does not mean execute the candidate, modify files, commit, dispatch externally, or start a daemon.
+This is an executable v0.1 text DSL, not a general-purpose programming language, binary-safe data processor, security sandbox, compiler, or autonomous agent.
