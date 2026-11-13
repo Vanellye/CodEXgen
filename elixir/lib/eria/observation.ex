@@ -15,12 +15,13 @@ defmodule Eria.Observation do
     :supersedes, quality: :unreviewed
   ]
 
-  @domains ~w(plant animal cellular_molecular ecosystem)
+  @domains ~w(plant animal cellular_molecular ecosystem earth)
   @metrics %{
     "plant" => ~w(photosynthesis_rate growth_rate water_exchange nutrient_uptake gene_expression),
     "animal" => ~w(physiology behavior development genetics population ecological_relationship),
     "cellular_molecular" => ~w(molecular_abundance sequence_variation cellular_signaling metabolism repair),
-    "ecosystem" => ~w(energy_flow biomass biodiversity environmental_change resilience)
+    "ecosystem" => ~w(energy_flow biomass biodiversity environmental_change resilience),
+    "earth" => ~w(soil_moisture soil_temperature land_cover surface_water_level precipitation water_exchange air_temperature particulate_matter air_quality_index biodiversity_index biomass species_observation_count carbon_flux environmental_change resilience)
   }
 
   def domains, do: @domains
