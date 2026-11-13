@@ -115,3 +115,97 @@ identity/approval provider. The function deliberately returns
 The diagnostic-support output always remains research-only and marks
 intervention as unauthorized. A review or authorization record does not
 convert research output into a diagnosis or enable biological intervention.
+
+## Code interpretation and transmission trace
+
+### Source documents used
+
+This section records the repository-cloud documentation consulted on `main`
+at commit `2cce68f258f46058f18c108c264db9cc85200590`. These documents are
+references for interpretation and governance; they are not evidence that every
+described capability exists in this Elixir application.
+
+| Source | Exact source revision | Contract carried into this application |
+|---|---|---|
+| `docs/TRUE-NORTH-DATA-ARCHITECTURE.md` | blob `0db1b3ff1799bd425b83fea7fdeb5a51b5413e19` | Preserve raw and derived records; record transformations, versions, units, provenance, validation and authorization; fail closed when evidence is missing. |
+| `docs/SKRIBED-TRANSMISSION-CONTRACT.md` | blob `b976ea94c2433c8ad256f640f00f49b94c3368bd` | Keep exact source text separate from interpretations and corrections; identify derivatives by operation/version/digest; internal receipt is not external dispatch authority. |
+| `docs/TWO-SNAPSHOT-SYNTHESIS.md` | blob `c2f361a5022e0d326be5caf9fb39d7d2b7a4fbfa` | Preserve independent branch identity; compare provenance and interfaces before integration; distinguish observed content from proposed interpretation. |
+| `pantheon/NEW/THOUGHT_TOTT/RETROSPECTIVE.md` | blob `0d10e846e3876ddb3eaa3618437ae8969b16a3ef` | Treat commit subjects as discovery clues, not proof; test negative paths; retain corrections and reversals as traceable history. |
+
+The exact cloud source was the repository's `main` branch at the commit above.
+No branch or file literally named `võîð` was returned by the repository
+branch/file search; therefore this documentation does not claim to have pulled
+from a separately named `võîð` object. If that is a distinct cloud location,
+its exact repository/path/ref must be supplied before it can be imported.
+
+### Interpretation pipeline
+
+The Elixir implementation follows this explicit separation:
+
+```text
+SOURCE / INSTRUMENT
+  -> CAPTURED OBSERVATION
+  -> STRUCTURAL QUALITY CHECK
+  -> NORMALIZED MULTI-OMICS RECORD
+  -> SOURCE-LINKED RESEARCH FINDING
+  -> INDEPENDENT REVIEW RECORD
+  -> EXPLICIT, SCOPED AUTHORIZATION RECORD
+```
+
+- **Source:** original instrument export, dataset, or supplied payload. The current
+  API accepts normalized maps; it does not decode vendor-specific raw files.
+- **Observation:** a source-linked measurement with subject, domain, metric,
+  value, unit, method, time, source, and raw-payload SHA-256 fingerprint.
+- **Quality result:** structural qualification or rejection. A pass does not
+  establish calibration, assay validity, source authenticity, or biological truth.
+- **Derived interpretation:** a separately identified research finding that
+  cites existing record IDs and states its method and uncertainty. Orphan
+  references are rejected.
+- **Review:** a reviewer distinct from the submitter records a decision and scope.
+- **Authorization:** a separate authorizer records an approved scope, action,
+  target, expiry, and approval reference. The record does not authenticate the
+  identity provider or cryptographically verify that external approval.
+
+### Transmission and lineage rules
+
+1. Preserve the source payload and its digest; do not replace it with an interpretation.
+2. Give each derived finding its own identity and retain the IDs of every source record.
+3. Preserve units, timestamps, assay, method version, reference version, and supplied QC metadata.
+4. Treat source-provided QC as an unverified claim until independently checked.
+5. Record rejected input with its input position and reason; never silently discard it.
+6. Corrections are additive records linked to prior identities, not in-place historical rewrites.
+7. A hash proves byte identity relative to the hashed input; it does not prove who supplied it.
+8. A review or authorization record is not an execution command. This engine has no connected action executor.
+
+### Interpretation boundary
+
+This is a **research-only** evidence interpretation system for plant, animal,
+cellular/molecular, and ecosystem records. Multi-omics modalities include
+genomics, transcriptomics, epigenomics, proteomics, metabolomics, lipidomics,
+microbiomics, and phenomics.
+
+The application does not generate clinical diagnoses, clinical recommendations,
+causal conclusions by default, or permissions to modify biological material.
+It does not verify instrument calibration, reference genome correctness, assay
+performance, signer identity, or clinical validity. Any future clinical use
+would require separately validated methods, qualified independent review, and
+the appropriate clinical governance. Any consequential downstream action
+requires a separate, trusted authorization system; this repository module
+keeps execution disabled.
+
+### Reproducibility record
+
+For each analysis, retain at minimum:
+
+- repository, branch, exact commit SHA, and source document blob SHAs;
+- dataset/source identifiers and raw-payload digests;
+- organism domain, subject/sample identifier, modality, assay, feature and units;
+- observed timestamp, method version, reference/database version, and instrument identifier where supplied;
+- quality checks, rejected records, and unresolved limitations;
+- finding IDs, source-record IDs, method, uncertainty, and reviewer decision;
+- Elixir/OTP versions, exact Mix commands, CI run URL, and test result for that commit.
+
+The workflow is reproducible only to the extent that the original inputs,
+toolchain, parameters, and referenced resources are available. Missing inputs
+or unavailable checks must be marked **not verified**, never silently treated
+as passing.
