@@ -26,7 +26,7 @@ candidate_file=$(cd -- "$(dirname -- "$candidate_arg")" && printf '%s/%s' "$PWD"
 
 [[ "$source_file" != "$candidate_file" ]] || fail "source and candidate must be distinct paths"
 
-for tool in sha256sum wc cmp diff awk; do
+for tool in sha256sum wc cmp diff awk tr; do
   command -v "$tool" >/dev/null 2>&1 || fail "required utility missing: $tool"
 done
 
