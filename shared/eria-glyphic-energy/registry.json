@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "registry_id": "ERIA-GLYPHIC-ENERGY",
+  "version": "1.0.0",
+  "status": "draft",
+  "policy": {
+    "token_mode": "data_only",
+    "preserve_original_codepoints": true,
+    "silent_conversion": false,
+    "automatic_semantic_translation": false,
+    "unknown_glyphs": "retain_and_flag",
+    "symbolic_energy_model": "metadata_only",
+    "physical_energy_measurement": false,
+    "biological_mapping": false,
+    "code_execution": false
+  },
+  "script_aliases": {
+    "egyptian_hieroglyphs": [
+      "hieroglyphs",
+      "Egyptian hieroglyphs"
+    ],
+    "cuneiform": [
+      "cuneiform",
+      "Qunəiforum",
+      "queneoforum"
+    ]
+  },
+  "energy_model": {
+    "classification": "symbolic_metadata_only",
+    "description": "An optional symbolic annotation field for ERIA compositions and relationships. It is not a physical energy, frequency, field-strength, physiological, or biological measurement.",
+    "unit": null,
+    "measurement_source": null,
+    "evidence_state": "NOT_ASSESSED"
+  },
+  "glyphs": [
+    {
+      "id": "EG_D010",
+      "glyph": "𓂀",
+      "script": "egyptian_hieroglyphs",
+      "codepoints": [
+        "U+13080"
+      ],
+      "unicode_name": "EGYPTIAN HIEROGLYPH D010",
+      "catalogue_label": "D010",
+      "transliteration": null,
+      "symbolic_role": "unassigned",
+      "energy_annotation": null
+    },
+    {
+      "id": "EG_N005",
+      "glyph": "𓇳",
+      "script": "egyptian_hieroglyphs",
+      "codepoints": [
+        "U+131F3"
+      ],
+      "unicode_name": "EGYPTIAN HIEROGLYPH N005",
+      "catalogue_label": "N005",
+      "transliteration": null,
+      "symbolic_role": "unassigned",
+      "energy_annotation": null
+    },
+    {
+      "id": "EG_Z001",
+      "glyph": "𓏤",
+      "script": "egyptian_hieroglyphs",
+      "codepoints": [
+        "U+133E4"
+      ],
+      "unicode_name": "EGYPTIAN HIEROGLYPH Z001",
+      "catalogue_label": "Z001",
+      "transliteration": null,
+      "symbolic_role": "unassigned",
+      "energy_annotation": null
+    },
+    {
+      "id": "CU_AN",
+      "glyph": "𒀭",
+      "script": "cuneiform",
+      "codepoints": [
+        "U+1202D"
+      ],
+      "unicode_name": "CUNEIFORM SIGN AN",
+      "catalogue_label": "AN",
+      "transliteration": null,
+      "symbolic_role": "unassigned",
+      "energy_annotation": null
+    },
+    {
+      "id": "CU_EN",
+      "glyph": "𒂗",
+      "script": "cuneiform",
+      "codepoints": [
+        "U+12097"
+      ],
+      "unicode_name": "CUNEIFORM SIGN EN",
+      "catalogue_label": "EN",
+      "transliteration": null,
+      "symbolic_role": "unassigned",
+      "energy_annotation": null
+    },
+    {
+      "id": "CU_KI",
+      "glyph": "𒆠",
+      "script": "cuneiform",
+      "codepoints": [
+        "U+121A0"
+      ],
+      "unicode_name": "CUNEIFORM SIGN KI",
+      "catalogue_label": "KI",
+      "transliteration": null,
+      "symbolic_role": "unassigned",
+      "energy_annotation": null
+    }
+  ]
+}
