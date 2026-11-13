@@ -4,7 +4,7 @@
 set -Eeuo pipefail
 umask 077
 
-ROOT="\${ERIA_STORAGE_ROOT:-./eria-storage}"
+ROOT="${ERIA_STORAGE_ROOT:-./eria-storage}"
 LOG="$ROOT/rhythm.log"
 CHECKPOINTS="$ROOT/checkpoints"
 
@@ -16,21 +16,21 @@ pulse() {
 }
 
 require_file() {
-    local path=\${1:-}
+    local path=${1:-}
     [[ -n "$path" && -f "$path" && -r "$path" ]]
 }
 
 read_rhythm() {
-    local source=\${1:-}
+    local source=${1:-}
     if ! require_file "$source"; then
-        pulse "READ_REJECTED: \${source:-<missing>}"
+        pulse "READ_REJECTED: ${source:-<missing>}"
         return 1
     fi
     sha256sum -- "$source"
 }
 
 write_rhythm() {
-    local source=\${1:-} destination=\${2:-} overwrite=\${3:-false}
+    local source=${1:-} destination=${2:-} overwrite=${3:-false}
     local destination_dir tmp
 
     if ! require_file "$source"; then
@@ -92,7 +92,7 @@ write_rhythm() {
 }
 
 verify_rhythm() {
-    local source=\${1:-} destination=\${2:-}
+    local source=${1:-} destination=${2:-}
     local source_hash destination_hash
 
     if ! require_file "$source" || ! require_file "$destination"; then
@@ -110,13 +110,13 @@ verify_rhythm() {
 }
 
 sync_rhythm() {
-    local source=\${1:-} destination=\${2:-} overwrite=\${3:-false}
+    local source=${1:-} destination=${2:-} overwrite=${3:-false}
     write_rhythm "$source" "$destination" "$overwrite"
     verify_rhythm "$source" "$destination"
 }
 
 checkpoint_rhythm() {
-    local source=\${1:-} label=\${2:-checkpoint}
+    local source=${1:-} label=${2:-checkpoint}
     local stamp manifest digest
 
     if ! require_file "$source"; then
@@ -131,7 +131,7 @@ checkpoint_rhythm() {
     init_storage
     stamp=$(date -u +%Y%m%dT%H%M%SZ)
     digest=$(sha256sum -- "$source" | cut -d ' ' -f1)
-    manifest=$(mktemp "$CHECKPOINTS/\${stamp}-\${label}.XXXXXX.checkpoint")
+    manifest=$(mktemp "$CHECKPOINTS/${stamp}-${label}.XXXXXX.checkpoint")
     {
         printf 'timestamp=%s\n' "$stamp"
         printf 'sha256=%s\n' "$digest"
@@ -159,7 +159,7 @@ USAGE
 }
 
 main() {
-    local command=\${1:-help}
+    local command=${1:-help}
     shift || true
 
     case "$command" in
@@ -169,7 +169,7 @@ main() {
             ;;
         write|sync)
             local overwrite=false
-            if [[ \${1:-} == --overwrite ]]; then
+            if [[ ${1:-} == --overwrite ]]; then
                 overwrite=true
                 shift
             fi
@@ -186,7 +186,7 @@ main() {
             ;;
         checkpoint)
             [[ $# -ge 1 && $# -le 2 ]] || { usage >&2; return 2; }
-            checkpoint_rhythm "$1" "\${2:-checkpoint}"
+            checkpoint_rhythm "$1" "${2:-checkpoint}"
             ;;
         help|-h|--help) usage ;;
         *) usage >&2; return 2 ;;
