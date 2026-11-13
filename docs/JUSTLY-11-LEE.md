@@ -12,16 +12,19 @@ This record names and preserves the SKRIBED and transmission-audio integration m
 
 ## Correction-lineage rule
 
-Every correction point in ERIA must carry a visible tier line back to the original source tier (@11). A correction adds a traceable descendant; it does not replace, absorb, or rewrite its source.
+Every correction point in ERIA must have a visible, traceable tier line back to the original source tier (@11). A correction is an additive descendant; it must never replace, absorb, obscure, or rewrite its source.
+
+**Prohibited:** detached corrections, overwritten origins, and silent merges. No correction may be accepted as lineage-complete unless its source tier, direction of change, resulting tier, and full ancestry are recorded. A merge must explicitly identify all parent commits and the review/approval that authorized the merge. If any required fact is unavailable, mark the record **pending** and do not represent the correction as fully traced or merged.
 
 Each correction record must state:
 
 1. **Original source tier:** the @11 merge commit, or the exact descendant source commit from which this correction was made, with an explicit ancestry path to @11.
 2. **Correction point:** the affected path, contract, behavior, or decision and the exact change made.
-3. **New correction tier:** the resulting commit SHA and branch/ref, once created.
-4. **Provenance:** the parent/source commit SHA, authorizing review or approval reference when applicable, and links to the related change or test evidence.
+3. **Direction of change:** an explicit `from` state/contract/value and `to` state/contract/value, plus whether the change adds, removes, replaces, or constrains behavior. Do not describe direction with an ambiguous label such as “updated.”
+4. **New correction tier:** the resulting commit SHA and branch/ref, once created.
+5. **Full provenance:** ordered lineage from @11 through each source/parent commit to the new correction commit; all merge parent SHAs; authorizing review or approval reference when applicable; and links to related changes and test evidence.
 
-For a correction spanning multiple paths, record each affected path under the same correction-point ID. If a source or resulting SHA is not yet known, mark it **pending**; never invent or infer a commit identifier. Corrections must be additive and reviewable. No correction-lineage entry grants runtime permission, external dispatch, or automatic execution.
+For a correction spanning multiple paths, record each affected path under the same correction-point ID and describe the direction of change for each path. If a source, parent, approval, or resulting SHA is not known, mark that field **pending**; never invent or infer a commit identifier. Preserve prior entries append-only: corrections amend the record by adding a new entry, not by erasing or overwriting an earlier origin. No correction-lineage entry grants runtime permission, external dispatch, or automatic execution.
 
 ### Correction-lineage entry template
 
@@ -33,19 +36,27 @@ original_source_tier:
 correction_point:
   paths: []
   change: "<specific change>"
+direction_of_change:
+  from: "<prior state or contract>"
+  to: "<resulting state or contract>"
+  operation: "<add | remove | replace | constrain>"
 new_correction_tier:
   branch: "<branch>"
   commit: "pending"
 provenance:
+  lineage_from_at_11:
+    - "b60fac42ba0573c251cf7f7fe139bfa0f9c078f8"
+    - "<each exact intermediate/source commit, in order>"
   source_commit: "<exact parent/source SHA>"
-  review: "pending"
+  merge_parents: []
+  review_or_approval: "pending"
   tests: "not-run"
 runtime_authorization: "none"
 ```
 
 ## Recorded correction tiers
 
-The following entries record known Main-line documentation corrections after @11. They are historical records, not a claim that each marker changed application runtime code.
+The following entries record known Main-line documentation corrections after @11. They are historical records, not a claim that each marker changed application runtime code. The listed commits are known descendants; exact intermediate ancestry and merge-parent details must be expanded in a correction entry when documenting a specific future change.
 
 | Correction point | Change / marker | New correction tier | Source lineage |
 |---|---|---|---|
@@ -83,4 +94,4 @@ These are repository history labels recorded in this document. They do not alter
 
 The merged implementation supports local PCM16-to-WAV generation and explicit local playback. It does not enable external network dispatch, webhook delivery, Bluetooth routing, or automatic playback on receipt. Tests were added but were not reported as executed at merge time.
 
-This file is a provenance record; it does not alter the historical merge commit. Future correction points must append a correction-lineage entry rather than overwrite prior entries.
+This file is a provenance record; it does not alter the historical merge commit. Future correction points must append a complete correction-lineage entry rather than overwrite prior entries.
