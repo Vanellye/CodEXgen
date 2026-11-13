@@ -87,3 +87,21 @@ instrument is connected, no circuit is energized or programmed, and no
 physical test is performed by this code. Instrument verification does not
 establish water potability. Equipment actuation, product release, and water
 potability remain separate authorization decisions.
+
+## Defect detection, mirror multiplication, and oscillation
+
+`python/mirror_oscillation.py` adds three read-only diagnostics:
+
+- **Mirror multiplication:** compares independently supplied left×right and
+  right×left results against the expected product, with explicit numeric
+  tolerances. A mismatch is reported as a defect; values are never silently
+  corrected.
+- **Oscillation analysis:** reports mean, peak-to-peak range, sign crossings,
+  and alternating behavior in a supplied sample series. It does not infer the
+  physical cause of a signal.
+- **Main → round → master audit:** checks a repeated logical verification
+  order and reports complete/partial cycles. These are labels in a test
+  sequence, not instructions to merge, synchronize, or mutate Git branches.
+
+All three operate on supplied test data only. They do not alter `main` or
+`master`, operate equipment, authorize release, or determine water potability.
