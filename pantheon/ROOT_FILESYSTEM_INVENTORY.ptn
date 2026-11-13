@@ -1,0 +1,32 @@
+# Pantheon draft contract — not executable until a compiler/runtime exists.
+LANGUAGE Pantheon;
+MODULE ERIA.RootFilesystem.Inventory VERSION "1.0";
+TARGET ANDROID.ALREADY_ROOTED_DEVICE;
+MODE READ_ONLY;
+AUTHORIZATION {
+  REQUIRE installed_root_manager;
+  REQUIRE explicit_user_approval_for_su;
+  DENY exploit_or_privilege_bypass;
+  DENY permission_or_mount_changes;
+}
+SCOPE {
+  INCLUDE mounted_filesystem_paths;
+  EXCLUDE /proc, /sys, /dev, /run;
+  DO_NOT follow_symbolic_links;
+  DO_NOT read_file_contents;
+  DO_NOT modify_targets;
+}
+PROVENANCE {
+  RECORD UTC_timestamp;
+  RECORD device_model;
+  RECORD execution_mode;
+  RECORD exit_status;
+  RECORD entry_count;
+  RECORD error_count;
+  RECORD script_SHA256;
+  RECORD inventory_SHA256;
+}
+ON root_denied HOLD;
+ON scan_error RECORD_AND_CONTINUE;
+DECISION INVENTORY_ONLY;
+END MODULE;
