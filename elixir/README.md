@@ -209,3 +209,28 @@ The workflow is reproducible only to the extent that the original inputs,
 toolchain, parameters, and referenced resources are available. Missing inputs
 or unavailable checks must be marked **not verified**, never silently treated
 as passing.
+
+## Separate source-format adapter task
+
+This adapter work is isolated in its own branch and pull request, based on
+this observation-engine branch. It adds structural readers and adapter
+contracts without changing the parent branch's normalized ingestion API.
+
+- **FASTQ:** bounded four-line record validation, sequence/quality length
+  checks, per-sequence and whole-source SHA-256 fingerprints. It does not
+  calculate Phred statistics or certify sequencing quality.
+- **VCF:** bounded text parsing, header retention, coordinate/column checks,
+  and raw field retention. It does not annotate variants or infer clinical
+  significance.
+- **SAM:** bounded text parsing and mandatory-field checks.
+- **BAM/CRAM:** binary decoding is not embedded. The adapter returns an
+  argv-only `samtools view` conversion plan (CRAM requires a reference path);
+  it never launches a process or invokes a shell. The resulting SAM text must
+  be passed through the SAM validator.
+- **Instrument exports:** an explicit Elixir behavior defines the vendor
+  adapter contract. Vendor SDKs, device connections, calibration registries,
+  and manufacturer-specific implementations remain separately reviewed.
+
+All parsers enforce configurable input and record limits. They preserve a
+source digest, but a digest is not source authentication. Parser success means
+structural acceptance only, not scientific validity or clinical interpretation.
