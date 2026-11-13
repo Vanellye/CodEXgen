@@ -48,3 +48,16 @@ int ic_can_publish(const ICGate *gate, int all_quality_checks_passed) {
     }
     return 1;
 }
+
+int ic_aedd_qualifies(const ICAeddChecks *checks) {
+    if (checks == 0) {
+        return 0;
+    }
+    return checks->intent &&
+           checks->consent &&
+           checks->evidence &&
+           checks->forward &&
+           checks->reverse &&
+           checks->review &&
+           checks->bridge_integrity;
+}
