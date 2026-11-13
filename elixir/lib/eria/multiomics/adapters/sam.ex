@@ -8,7 +8,7 @@ defmodule Eria.MultiOmics.Adapters.SAM do
   @default_max_bytes 50_000_000
   @default_max_records 1_000_000
 
-  def decode(binary, opts \\ []) when is_binary(binary) do
+  def decode(input, opts \\ [])\n\n  def decode(binary, opts) when is_binary(binary) do
     max_bytes = Keyword.get(opts, :max_bytes, @default_max_bytes)
     max_records = Keyword.get(opts, :max_records, @default_max_records)
 
@@ -34,7 +34,7 @@ defmodule Eria.MultiOmics.Adapters.SAM do
             shell: false, execution: :not_performed}}
   end
 
-  def conversion_plan(:cram, input_path, output_path, reference_path)
+  def conversion_plan(_, _, _), do: {:error, :unsupported_alignment_format}\n\n  def conversion_plan(:cram, input_path, output_path, reference_path)
       when is_binary(input_path) and is_binary(output_path) and is_binary(reference_path) do
     {:ok, %{executable: "samtools",
             argv: ["view", "-T", reference_path, "-h", "-o", output_path, input_path],
