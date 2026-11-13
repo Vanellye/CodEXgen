@@ -1,0 +1,67 @@
+name: ERIA Human Approval Gate
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+  pull_request_review:
+    types: [submitted, dismissed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: eria-human-approval-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  human-approval-gate:
+    name: eria-human-approval-gate
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request != null
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out the exact reviewed commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Collect current pull-request review evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${PR_NUMBER}" || -z "${HEAD_SHA}" || -z "${PR_AUTHOR}" ]]; then
+            echo "::error::A pull-request event with exact head SHA and author is required."
+            exit 2
+          fi
+          gh api --paginate "repos/${GH_REPO}/pulls/${PR_NUMBER}/reviews" > reviews.json
+          python tools/eria/approval_gate.py \
+            --reviews reviews.json \
+            --head-sha "${HEAD_SHA}" \
+            --pr-author "${PR_AUTHOR}"
+
+      - name: Explain manual-dispatch limitation
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "Manual dispatch has no pull-request approval context."
+          echo "No approval is inferred; use a pull_request event."
+          exit 1
+
+  verifier-tests:
+    name: eria-approval-verifier-tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Run fail-closed approval tests
+        env:
+          PYTHONPATH: tools/eria
+        run: python -m unittest discover -s tools/eria -p 'test_approval_gate.py' -v
