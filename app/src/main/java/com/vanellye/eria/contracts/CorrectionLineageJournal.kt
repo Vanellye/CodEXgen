@@ -5,10 +5,7 @@ import java.io.FileOutputStream
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 
-/**
- * Append-only persistence boundary for correction tiers.
- * Implementations must never replace an earlier record.
- */
+/** Append-only persistence boundary for correction tiers. */
 interface CorrectionLineageJournal {
     fun append(tier: CorrectionTierLine)
     fun readAll(): List<CorrectionTierLine>
@@ -31,22 +28,18 @@ class InMemoryCorrectionLineageJournal : CorrectionLineageJournal {
 }
 
 /**
- * Durable, append-only journal backed by a private application file.
- *
- * Each record is a versioned tab-separated line whose fields are URL-safe Base64,
- * avoiding delimiter and newline ambiguity. The file is synced before append returns.
+ * Durable append-only journal backed by a private application file.
+ * Versioned tab-separated records use URL-safe Base64 fields; "~" represents empty.
  */
 class FileCorrectionLineageJournal(private val file: File) : CorrectionLineageJournal {
     @Synchronized
     override fun append(tier: CorrectionTierLine) {
-        val existing = readAll()
-        require(existing.none { it.correctionId == tier.correctionId }) {
+        require(readAll().none { it.correctionId == tier.correctionId }) {
             "Duplicate correction tier ID"
         }
         file.parentFile?.mkdirs()
-        val line = encode(tier) + "\n"
         FileOutputStream(file, true).use { output ->
-            output.write(line.toByteArray(StandardCharsets.UTF_8))
+            output.write((encode(tier) + "\n").toByteArray(StandardCharsets.UTF_8))
             output.fd.sync()
         }
     }
@@ -101,10 +94,14 @@ class FileCorrectionLineageJournal(private val file: File) : CorrectionLineageJo
         )
     }
 
-    private fun encodeField(value: String): String =
-        Base64.getUrlEncoder().withoutPadding()
+    private fun encodeField(value: String): String {
+        if (value.isEmpty()) return "~"
+        return Base64.getUrlEncoder().withoutPadding()
             .encodeToString(value.toByteArray(StandardCharsets.UTF_8))
+    }
 
-    private fun decodeField(value: String): String =
-        String(Base64.getUrlDecoder().decode(value), StandardCharsets.UTF_8)
+    private fun decodeField(value: String): String {
+        if (value == "~") return ""
+        return String(Base64.getUrlDecoder().decode(value), StandardCharsets.UTF_8)
+    }
 }
