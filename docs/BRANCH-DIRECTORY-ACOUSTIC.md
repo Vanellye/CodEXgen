@@ -305,6 +305,6 @@ The proposed notation is:
 
 `§ĤÆ SHA RUN *(ª)* "ºƠºŘÏƔĮŒŉ" — ORIGIN CREATION ·.·`
 
-For this directory, it denotes a future, bounded Bash integrity/reporting step: fingerprint declared inputs, preserve the original source identity, and create a distinct origin-linked record for any derivative. The record should include parent refs, exact input/output SHA-256 values, operation/version, and review state. `*(ª)*` is a literal frame marker; `"ºƠºŘÏƔĮŒŉ"` is an exact symbolic origin label. Neither is executable syntax or authorization.
+For this directory, it denotes a future, bounded Mash* code integrity/reporting step: fingerprint declared inputs, preserve the original source identity, and create a distinct origin-linked record for any derivative. The record should include parent refs, exact input/output SHA-256 values, operation/version, and review state. `*(ª)*` is a literal frame marker; `"ºƠºŘÏƔĮŒŉ"` is an exact symbolic origin label. Neither is executable syntax or authorization.
 
-**Status:** specification only; no Bash execution, file mutation, commit, merge, push, external dispatch, or runtime activation is authorized by this notation. Digest mismatch or unavailable provenance is an explicit `BREAK`; no silent bypass or alternate route. See `L-L-LINE.md` for the full contract.
+**Status:** specification only; no Mash* code execution, file mutation, commit, merge, push, external dispatch, or runtime activation is authorized by this notation. Digest mismatch or unavailable provenance is an explicit `BREAK`; no silent bypass or alternate route. See `L-L-LINE.md` for the full contract.
