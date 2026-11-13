@@ -50,3 +50,17 @@ sensors, pumps, valves, treatment equipment, or external services. Recorded
 quality observations are not interpreted as proof of potability. All records
 remain `UNKNOWN`, unvalidated, and `not_authorized`; physical actuation and
 potability determination are explicitly disabled.
+
+## Water equipment inventory
+
+`python/water_equipment.py` defines metadata-only inventory records for pumps,
+valves, sensors, and treatment equipment. A connection may be recorded as
+`reported_connected`, but that is an inventory assertion only: no device
+driver, network transport, command path, or external I/O is present. Every
+record explicitly keeps `control_enabled`, `potability_claim_allowed`, and
+`external_io_performed` false. Calibration references may be recorded for
+traceability, but their presence does not validate calibration or water quality.
+
+Equipment connection metadata does not change the WATER runflow's
+simulation-only, non-authorizing status. Physical actuation and potability
+determination remain disabled.
