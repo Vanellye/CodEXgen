@@ -17,6 +17,7 @@ echo "== DO authorization self-test =="
 "$CC" "${COMMON[@]}" -DDO_C_SELF_TEST "$ROOT/pantheon/DO.c" -o "$BUILD_DIR/do-self-test"
 "$BUILD_DIR/do-self-test"
 
+run_pair integration-core pantheon/IC/IC.c pantheon/IC/tests/test_IC.c pantheon/IC
 run_pair factual-logic pantheon/FACTUAL_LOGIC/FACTUAL_LOGIC.c pantheon/FACTUAL_LOGIC/tests/test_FACTUAL_LOGIC.c pantheon/FACTUAL_LOGIC
 run_pair new pantheon/NEW/NEW.c pantheon/NEW/tests/test_NEW.c pantheon/NEW
 run_pair facade pantheon/NEW/FaCADE/FaCADE.c pantheon/NEW/FaCADE/tests/test_FaCADE.c pantheon/NEW/FaCADE
