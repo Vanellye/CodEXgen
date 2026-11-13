@@ -1,12 +1,13 @@
 # ERIA Observation Engine (Elixir)
 
 A small, dependency-free Elixir application for source-linked biological and
-ecological measurements. It supports four domains:
+ecological measurements. It supports five observation domains:
 
 - `plant`: photosynthesis, growth, water exchange, nutrient uptake, gene expression
 - `animal`: physiology, behavior, development, genetics, population, ecological relationships
 - `cellular_molecular`: molecular abundance, sequence variation, cellular signaling, metabolism, repair
 - `ecosystem`: energy flow, biomass, biodiversity, environmental change, resilience
+- `earth`: land, water, air, life, and climate measurements (see `Eria.Earth` for subdomain mapping)
 
 ## Design contract
 
@@ -209,3 +210,20 @@ The workflow is reproducible only to the extent that the original inputs,
 toolchain, parameters, and referenced resources are available. Missing inputs
 or unavailable checks must be marked **not verified**, never silently treated
 as passing.
+
+## Earth domain and Sacral-Lift
+
+The `earth` observation domain organizes environmental measurements into five
+subdomains: `land`, `water`, `air`, `life`, and `climate`. Earth metrics are
+validated against their subdomain map by `Eria.Earth`.
+
+`Eria.Earth.SacralLift` is a separate, consent-gated descriptive cue-pattern
+engine. The requested "subliminal" label is constrained to analysis of
+user-submitted or otherwise explicitly consented patterns. It requires an
+explicit consent flag, stated purpose, and source-observation IDs. It produces
+a reviewable metadata record only; it does not generate hidden messages,
+deliver covert stimuli, infer subconscious states, or influence behavior.
+Interpretation, execution, and external dispatch remain disabled. A qualified
+human reviewer must assess any proposed interpretation independently.
+
+Run the Earth/Sacral-Lift tests with `mix test` from this directory.
