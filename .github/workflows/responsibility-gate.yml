@@ -1,0 +1,52 @@
+name: ERIA Responsibility Gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  pull_request_review:
+    types: [submitted, dismissed]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: eria-responsibility-${{ github.event.pull_request.number || github.event.number }}
+  cancel-in-progress: false
+
+jobs:
+  independent-human-approval:
+    name: Independent human approval
+    if: github.event_name == 'pull_request' || github.event.review.state == 'approved' || github.event.review.state == 'dismissed' || github.event_name == 'pull_request_review'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require a current approval from someone other than the PR author
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number || github.event.number }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          reviews="$(gh api --paginate "repos/${REPOSITORY}/pulls/${PR_NUMBER}/reviews" --jq '.[] | {user: .user.login, state: .state, submitted_at: .submitted_at}')"
+          author="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}" --jq '.user.login')"
+          python -c '
+          import json, os, sys
+          author = os.environ["PR_AUTHOR"]
+          rows = [json.loads(line) for line in sys.stdin if line.strip()]
+          latest = {}
+          for row in rows:
+              user = row.get("user")
+              if user:
+                  key = user
+                  if key not in latest or (row.get("submitted_at") or "") > (latest[key].get("submitted_at") or ""):
+                      latest[key] = row
+          approved = [user for user, row in latest.items()
+                      if user != author and row.get("state") == "APPROVED"]
+          if not approved:
+              print("BLOCKED: an approval from a reviewer other than the PR author is required.")
+              sys.exit(1)
+          print("PASS: independent approval recorded from " + ", ".join(sorted(approved)))
+          ' <<< "$reviews"
+        env:
+          PR_AUTHOR: ${{ github.event.pull_request.user.login || github.event.sender.login }}
