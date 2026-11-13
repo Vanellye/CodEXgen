@@ -7,7 +7,7 @@ defmodule Eria.MultiOmics.Adapters.FASTQ do
   @default_max_bytes 50_000_000
   @default_max_records 1_000_000
 
-  def decode(binary, opts \\ []) when is_binary(binary) do
+  def decode(input, opts \\ [])\n\n  def decode(binary, opts) when is_binary(binary) do
     max_bytes = Keyword.get(opts, :max_bytes, @default_max_bytes)
     max_records = Keyword.get(opts, :max_records, @default_max_records)
 
