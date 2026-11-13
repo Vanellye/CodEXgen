@@ -1,15 +1,14 @@
 package com.vanellye.eria.contracts
 
 enum class CorrectionChangeKind { ADD, REMOVE, REPLACE, CONSTRAIN }
-
-/** Direction is explicit: reverse creates a new tier; it never erases the forward tier. */
 enum class CorrectionDirection { FORWARD, REVERSE }
 
 data class CorrectionTierLine(
     val correctionId: String,
     val originalSourceTierRef: String,
     val originalSourceTierCommit: String,
-    val futureMarkerAnchorCommit: String,
+    /** Null only for legacy v1 records created before the future marker anchor existed. */
+    val futureMarkerAnchorCommit: String?,
     val sourceContentSha256: String,
     val sourceCorrectionId: String?,
     val correctionPoint: String,
@@ -28,9 +27,10 @@ data class CorrectionTierLine(
         require(originalSourceTierCommit == ORIGINAL_SOURCE_TIER_COMMIT) {
             "Correction lineage must retain the immutable @11 source commit"
         }
-        require(futureMarkerAnchorCommit == FUTURE_MARKER_ANCHOR_COMMIT) {
-            "Future markers must retain the designated 7129618 anchor"
-        }
+        require(
+            futureMarkerAnchorCommit == null ||
+                futureMarkerAnchorCommit == FUTURE_MARKER_ANCHOR_COMMIT
+        ) { "Future markers must retain the designated 7129618 anchor" }
         require(sourceContentSha256.matches(SHA256_PATTERN))
         require(fromSha256.matches(SHA256_PATTERN))
         require(toSha256.matches(SHA256_PATTERN))
