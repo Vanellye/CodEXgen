@@ -4,7 +4,6 @@ import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.util.UUID
 
-/** Original writing is immutable; every derivative is a separately tiered correction. */
 enum class WritingVariantKind { ORIGINAL, CORRECTED, INTERPRETED, TRANSLATED }
 
 data class WritingProvenance(
@@ -35,14 +34,13 @@ class SkribedDocument(
 
     fun originalBytes(): ByteArray = originalUtf8.copyOf()
 
-    /** Read-only snapshot of the append-only correction journal. */
     fun correctionTiers(): List<CorrectionTierLine> =
         synchronized(correctionLock) { correctionJournal.readAll().toList() }
 
     /**
-     * Every derivative operation is journaled before the variant is returned.
-     * The caller must explicitly inject durable app-private storage or a test journal;
-     * there is intentionally no silent in-memory default.
+     * Records a forward or reverse correction as a new append-only tier.
+     * REVERSE requires output bytes that exactly match the source hash of basedOn;
+     * no inverse is guessed, synthesized, or silently applied.
      */
     fun derive(
         kind: WritingVariantKind,
@@ -51,7 +49,8 @@ class SkribedDocument(
         operationVersion: String,
         changeKind: CorrectionChangeKind = CorrectionChangeKind.REPLACE,
         correctionPoint: String = operation,
-        basedOn: WritingVariant? = null
+        basedOn: WritingVariant? = null,
+        direction: CorrectionDirection = CorrectionDirection.FORWARD
     ): WritingVariant {
         require(kind != WritingVariantKind.ORIGINAL) {
             "ORIGINAL is immutable; use the originalText property"
@@ -59,6 +58,9 @@ class SkribedDocument(
         require(operation.isNotBlank()) { "operation must not be blank" }
         require(operationVersion.isNotBlank()) { "operationVersion must not be blank" }
         require(correctionPoint.isNotBlank()) { "correctionPoint must not be blank" }
+        require(direction != CorrectionDirection.REVERSE || basedOn != null) {
+            "A reverse correction requires the exact prior variant"
+        }
 
         synchronized(correctionLock) {
             val knownTiers = correctionJournal.readAll()
@@ -71,14 +73,22 @@ class SkribedDocument(
 
             val fromHash = basedOn?.outputSha256 ?: originalSha256
             val toHash = sha256(text.toByteArray(StandardCharsets.UTF_8))
+            if (direction == CorrectionDirection.REVERSE) {
+                require(toHash == parentTier!!.fromSha256) {
+                    "Reverse correction output must exactly match the prior tier's from hash"
+                }
+            }
+
             val tier = CorrectionTierLine(
                 correctionId = UUID.randomUUID().toString(),
                 originalSourceTierRef = CorrectionTierLine.ORIGINAL_SOURCE_TIER_REF,
                 originalSourceTierCommit = CorrectionTierLine.ORIGINAL_SOURCE_TIER_COMMIT,
+                futureMarkerAnchorCommit = CorrectionTierLine.FUTURE_MARKER_ANCHOR_COMMIT,
                 sourceContentSha256 = fromHash,
                 sourceCorrectionId = parentTier?.correctionId,
                 correctionPoint = correctionPoint,
                 changeKind = changeKind,
+                direction = direction,
                 fromSha256 = fromHash,
                 toSha256 = toHash,
                 operation = operation,
@@ -103,6 +113,23 @@ class SkribedDocument(
             )
         }
     }
+
+    /** Explicit to → from operation; the caller supplies the exact target text. */
+    fun reverseTo(
+        prior: WritingVariant,
+        targetText: String,
+        operationVersion: String,
+        correctionPoint: String = "correction.reverse"
+    ): WritingVariant = derive(
+        kind = WritingVariantKind.CORRECTED,
+        text = targetText,
+        operation = "reverse:" + prior.operation,
+        operationVersion = operationVersion,
+        changeKind = prior.correctionTier.changeKind,
+        correctionPoint = correctionPoint,
+        basedOn = prior,
+        direction = CorrectionDirection.REVERSE
+    )
 
     companion object {
         internal fun sha256(bytes: ByteArray): String =
@@ -156,7 +183,6 @@ data class TransmissionReceipt(
     val responsePayload: ByteArray
 )
 
-/** A local endpoint; implementations must not silently dispatch to a network or device. */
 fun interface InternalTransmissionEndpoint {
     fun receive(frame: TransmissionFrame): ByteArray
 }
@@ -168,7 +194,6 @@ interface TransmissionTransceiver {
     ): TransmissionReceipt
 }
 
-/** In-process closed-loop transceiver; no network, hardware, or automatic playback. */
 class InMemoryTransmissionTransceiver : TransmissionTransceiver {
     override fun transceive(
         frame: TransmissionFrame,
