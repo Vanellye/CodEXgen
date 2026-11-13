@@ -2,8 +2,9 @@ package com.vanellye.eria.contracts
 
 import java.io.File
 import java.io.FileOutputStream
+import java.net.URLDecoder
+import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import java.util.Base64
 
 /** Append-only persistence boundary for correction tiers. */
 interface CorrectionLineageJournal {
@@ -11,7 +12,7 @@ interface CorrectionLineageJournal {
     fun readAll(): List<CorrectionTierLine>
 }
 
-/** Process-local journal for callers that have not supplied durable storage. */
+/** Process-local journal for tests and explicitly ephemeral use. */
 class InMemoryCorrectionLineageJournal : CorrectionLineageJournal {
     private val entries = mutableListOf<CorrectionTierLine>()
 
@@ -29,7 +30,8 @@ class InMemoryCorrectionLineageJournal : CorrectionLineageJournal {
 
 /**
  * Durable append-only journal backed by a private application file.
- * Versioned tab-separated records use URL-safe Base64 fields; "~" represents empty.
+ * Versioned tab-separated records use URL encoding; "~" represents an empty field.
+ * Uses java.net encoding APIs compatible with the app's minSdk.
  */
 class FileCorrectionLineageJournal(private val file: File) : CorrectionLineageJournal {
     @Synchronized
@@ -94,14 +96,9 @@ class FileCorrectionLineageJournal(private val file: File) : CorrectionLineageJo
         )
     }
 
-    private fun encodeField(value: String): String {
-        if (value.isEmpty()) return "~"
-        return Base64.getUrlEncoder().withoutPadding()
-            .encodeToString(value.toByteArray(StandardCharsets.UTF_8))
-    }
+    private fun encodeField(value: String): String =
+        if (value.isEmpty()) "~" else URLEncoder.encode(value, "UTF-8")
 
-    private fun decodeField(value: String): String {
-        if (value == "~") return ""
-        return String(Base64.getUrlDecoder().decode(value), StandardCharsets.UTF_8)
-    }
+    private fun decodeField(value: String): String =
+        if (value == "~") "" else URLDecoder.decode(value, "UTF-8")
 }
