@@ -50,10 +50,15 @@ for scan in "${ROOTS[@]}"; do
 
   if [ "$MODE" = "ROOT" ] && [ "$real" = "/" ]; then
     find -P "$real" \
-      \( -path /proc -o -path /sys -o -path /dev -o -path /acct -o -path /config \) -prune \
+      \( -path /proc -o -path /sys -o -path /dev -o -path /acct -o -path /config \
+         -o -path "$OUT" -o -path "$TMP" -o -path "$ERRTMP" \
+         -o -path "$ERRORS" -o -path "$AUDIT" \) -prune \
       -o -print >> "$TMP" 2>> "$ERRTMP" || true
   else
-    find -P "$real" -print >> "$TMP" 2>> "$ERRTMP" || true
+    find -P "$real" \
+      \( -path "$OUT" -o -path "$TMP" -o -path "$ERRTMP" \
+         -o -path "$ERRORS" -o -path "$AUDIT" \) -prune \
+      -o -print >> "$TMP" 2>> "$ERRTMP" || true
   fi
 done
 
