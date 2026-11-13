@@ -3,6 +3,11 @@ name: ERIA Continuous Forge
 on:
   push:
   pull_request:
+  workflow_run:
+    workflows:
+      - "Independent Branch CI"
+      - "ERIA Write-Only Storage Boundary CI"
+    types: [completed]
   schedule:
     - cron: "17 * * * *"
   workflow_dispatch:
@@ -35,6 +40,18 @@ jobs:
         env:
           PYTHONPATH: security/red-write-only
         run: python -m unittest discover -s security/red-write-only/tests -v
+      - name: Run invention event tests
+        env:
+          PYTHONPATH: tools
+        run: python -m unittest discover -s tests -p 'test_eria_invention_events.py' -v
+      - name: Generate event-driven invention pulse
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_EVENT_PATH: ${{ github.event_path }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_REF: ${{ github.ref }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: python tools/eria_invention_events.py
       - name: Run Pantheon contracts when present
         shell: bash
         run: |
@@ -44,5 +61,6 @@ jobs:
             echo "No Pantheon contract runner in this repository; skipped."
           fi
 
-# Read-only validation only. No deployment, merge, external dispatch,
-# untrusted payload execution, hardware activation, or biological intervention.
+# Read-only validation and proposal generation only. No deployment, merge,
+# source mutation, external dispatch, generated-code execution, hardware
+# activation, or biological intervention.
