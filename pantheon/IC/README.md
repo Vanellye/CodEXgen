@@ -15,12 +15,21 @@ IC means **Integration Core** in this software layer. It is not an integrated-ci
 - Keep validation success separate from permission to publish.
 - Never run shell commands, invoke GitHub Actions, write files, upload artifacts, synthesize RTL, or control hardware.
 
+## Aðð qualification
+
+The IC exposes a read-only, fail-closed seven-check qualification contract:
+Intent, Consent, Evidence, Forward, Reverse, Review, and Bridge Integrity.
+`ic_aedd_qualifies` returns true only when all seven caller-supplied
+flags are nonzero. These flags are inputs to a software gate, not verified
+identity, cryptographic evidence, or authorization to execute an action.
+
 ## API
 
 - `ic_can_start`: read-only eligibility check.
 - `ic_start`: transition pending to running, or blocked if prerequisites are not met.
 - `ic_finish`: record the result of an already-running check.
 - `ic_can_publish`: read-only publication eligibility check; it does not publish.
+- `ic_aedd_qualifies`: read-only qualification of the seven Aðð checks.
 
 ## Test
 
