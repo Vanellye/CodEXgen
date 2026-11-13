@@ -60,7 +60,13 @@ The existing `ÆŤ8Ð` method remains: receive, validate, fingerprint, compare, 
 
 **Forward Faculty** may suggest a next transformation, identify missing evidence, and prepare a reversible proposal. It cannot approve its own proposal, commit repository changes, upload records, call external services, or actuate a device.
 
-`ƏæŘ` is retained as a literal reversible-method identifier pending an explicit user-authored expansion. Its required properties are evidence preservation, explicit authorization, and a recoverable reverse path. No acronym expansion is inferred here.
+### ƏæŘ — user-defined expansion
+
+The user-defined expansion of `ƏæŘ` is exactly:
+
+**`§ŢĀN̈ĎÏÑƔ` — "STride" Code**
+
+This spelling and capitalization are preserved as supplied. It names the reversible-method identity within the Permint specification. Its operational requirements remain evidence preservation, explicit authorization, and a recoverable reverse path. The expansion is a language definition, not an execution command or authorization token.
 
 Incoming sound or other signals are treated as evidence to inspect—not commands to execute.
 
@@ -93,7 +99,8 @@ A future implementation must test:
 6. `#` remains inert annotation and cannot smuggle executable content.
 7. `()` creates a versioned Permint declaration; prior versions remain unchanged.
 8. Forward Faculty cannot approve or execute its own proposal.
-9. A before/after SHA-256 check proves source files remain unchanged.
-10. No network, cloud upload, repository mutation, or device action occurs.
+9. The exact `ƏæŘ` expansion `§ŢĀN̈ĎÏÑƔ` — "STride" Code is preserved without normalization.
+10. A before/after SHA-256 check proves source files remain unchanged.
+11. No network, cloud upload, repository mutation, or device action occurs.
 
 The current test script checks that this specification and its seven operator definitions remain present. It does not claim that these proposed operators are executable.
