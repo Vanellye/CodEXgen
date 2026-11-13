@@ -5,15 +5,15 @@
 Two commit anchors have distinct purposes and must not be conflated:
 
 - Historical source anchor (@11): `b60fac42ba0573c251cf7f7fe139bfa0f9c078f8`. This remains the immutable origin for source provenance.
-- Future marker anchor: `712961866e615ff4db9e90cd40bece78a45afe39` (short SHA `7129618`). New correction tiers retain this anchor for future markers.
+- Future marker anchor: `712961866e615ff4db9e90cd40bece78a45afe39` (short SHA `7129618`). Every newly created correction tier retains this anchor for future markers.
 
-The future marker anchor does not replace, rewrite, or rename the historical @11 source anchor.
+The future marker anchor does not replace, rewrite, or rename the historical @11 source anchor. Legacy v1 journal records have a null future-marker anchor because that marker did not exist when they were recorded; their provenance is not retroactively altered.
 
 ## Correction operations
 
 The runtime instruments `SkribedDocument.derive()`. Every derivative is written to an explicit `CorrectionLineageJournal` before it is returned. A failed journal append aborts the operation.
 
-Each tier records:
+Each new tier records:
 - unique correction ID and correction point;
 - operation and operation version;
 - change kind and explicit direction (`FORWARD` or `REVERSE`);
@@ -62,7 +62,7 @@ Both tiers remain in the journal. The reverse operation is a new correction reco
 ## Persistence and boundaries
 
 - `CorrectionLineage.kt` — immutable tier model, historical source anchor, future marker anchor, and direction.
-- `CorrectionLineageJournal.kt` — append-only journal; v2 records store direction and marker anchor; v1 records remain readable.
+- `CorrectionLineageJournal.kt` — append-only journal; v2 records store direction and marker anchor; v1 records remain readable with no retroactive marker attribution.
 - `EriaCorrectionRuntime.kt` — application-private journal factory.
 - `SkribedAndTransmission.kt` — instrumented correction operations and reverse alternator.
 - `SkribedAndTransmissionTest.kt` — anchor, forward/reverse, hash-match, lineage, and persistence tests.
