@@ -202,12 +202,14 @@ object SequenceQualityControl {
 class ThreeSourceIngestionPipeline(
     private val thresholds: QualityThresholds = QualityThresholds()
 ) {
-    fun ingest(adapter: SequenceSourceAdapter, datasetId: String): IngestionResult {
+    fun ingest(adapter: SequenceSourceAdapter, datasetId: String, questionnaire: ResearchIntakeQuestionnaire): IngestionResult {
         val now = Instant.now().toString()
         var digest: String? = null
         try {
             require(datasetId.matches(Regex("^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"))) { "invalid datasetId" }
             val payload = adapter.load()
+            val questionnaireErrors = ResearchIntakeQuestionnaireValidator.validate(questionnaire, adapter, payload)
+            require(questionnaireErrors.isEmpty()) { questionnaireErrors.joinToString("; ") }
             require(payload.metadata.sourceName.isNotBlank()) { "source name is required" }
             require(payload.metadata.licenseOrTerms.isNotBlank()) { "source license/terms are required" }
             Instant.parse(payload.metadata.retrievedAt)
@@ -246,7 +248,7 @@ class ThreeSourceIngestionPipeline(
                 IntakeOrigin.SYNTHETIC -> DatasetOrigin.SYNTHETIC
             }
             val parametersDigest = sha256(
-                "${thresholds.minimumReads}|${thresholds.minimumBases}|${thresholds.maximumAmbiguousFraction}|${thresholds.minimumMeanPhred}|${thresholds.maximumInputCharacters}|${thresholds.maximumReads}"
+                "${thresholds.minimumReads}|${thresholds.minimumBases}|${thresholds.maximumAmbiguousFraction}|${thresholds.minimumMeanPhred}|${thresholds.maximumInputCharacters}|${thresholds.maximumReads}|${questionnaire.projectId}|${questionnaire.researchPurpose}|${questionnaire.organism}|${questionnaire.authority}|${questionnaire.dataSensitivity}|${questionnaire.requestedAnalysisScopes.sorted()}"
             )
             val summary = listOf(metrics.readCount, metrics.totalBases, metrics.gcFraction, metrics.ambiguousFraction, metrics.meanPhred).joinToString("|")
             val dataset = EvolutionaryDataset(
