@@ -100,3 +100,18 @@ clinical recommendation, does not authorize intervention, and requires
 independent review. Any downstream action remains disabled unless a separate,
 scoped authorization process explicitly approves it. No instrument acquisition
 or physical actuation is implemented by this extension.
+
+## Independent review and authorization records
+
+`Eria.Governance.record_review/1` requires a reviewer distinct from the
+submitter and records the decision, scope, evidence IDs, and review time.
+`Eria.Governance.record_authorization/1` requires an approved review, a
+separate authorizer, a matching scope, an explicit action/target, expiry, and
+an approval reference. These records do not authenticate identities or verify
+the external approval reference cryptographically; that requires a trusted
+identity/approval provider. The function deliberately returns
+`execution_enabled: false`. No action executor is connected.
+
+The diagnostic-support output always remains research-only and marks
+intervention as unauthorized. A review or authorization record does not
+convert research output into a diagnosis or enable biological intervention.
