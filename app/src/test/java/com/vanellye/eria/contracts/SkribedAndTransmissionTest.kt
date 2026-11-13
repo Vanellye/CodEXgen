@@ -12,7 +12,7 @@ class SkribedAndTransmissionTest {
     @Test
     fun originalWritingPreservesUnicodeAndPunctuationExactly() {
         val source = "Öôŕîɣîñäl·l  e\u0301 Ĉ̣ — Ɓûîľð"
-        val document = SkribedDocument(source)
+        val document = document(source)
 
         assertEquals(source, document.originalText)
         assertArrayEquals(source.toByteArray(StandardCharsets.UTF_8), document.originalBytes())
@@ -22,7 +22,7 @@ class SkribedAndTransmissionTest {
     @Test
     fun derivedWritingDoesNotReplaceOriginalAndCreatesAnchoredCorrectionTier() {
         val source = "Original: e\u0301 / Ĉ̣"
-        val document = SkribedDocument(source)
+        val document = document(source)
         val corrected = document.derive(
             WritingVariantKind.CORRECTED,
             "Corrected: é / Ĉ̣",
@@ -45,7 +45,7 @@ class SkribedAndTransmissionTest {
 
     @Test
     fun chainedCorrectionsRetainTheFullTierLineage() {
-        val document = SkribedDocument("source")
+        val document = document("source")
         val first = document.derive(
             WritingVariantKind.CORRECTED,
             "first correction",
@@ -107,8 +107,8 @@ class SkribedAndTransmissionTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun rejectsCorrectionBasedOnDetachedVariant() {
-        val document = SkribedDocument("source")
-        val foreignDocument = SkribedDocument("other source")
+        val document = document("source")
+        val foreignDocument = document("other source")
         val detached = foreignDocument.derive(
             WritingVariantKind.CORRECTED,
             "foreign correction",
@@ -126,7 +126,7 @@ class SkribedAndTransmissionTest {
 
     @Test
     fun correctionHistoryIsReturnedAsASnapshot() {
-        val document = SkribedDocument("source")
+        val document = document("source")
         document.derive(
             WritingVariantKind.CORRECTED,
             "corrected",
@@ -141,7 +141,7 @@ class SkribedAndTransmissionTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun originalCannotBeReplacedByDerivative() {
-        SkribedDocument("source").derive(
+        document("source").derive(
             WritingVariantKind.ORIGINAL,
             "replacement",
             "rewrite",
