@@ -37,3 +37,12 @@ Existing sequence input is labeled observed input; public reference sequence is 
 ## Tests
 
 Tests cover all three source paths, exact public accession matching, synthetic evidence labeling, FASTA parsing, FASTQ quality scores, malformed input, and threshold rejection.
+
+
+## Explicit research intake questionnaire
+
+Every intake call now requires a completed `ResearchIntakeQuestionnaire`. It records project identifier, purpose, organism (or "unknown"), source origin, format, authority/terms basis, data sensitivity, optional accession and assembly, requested analysis scopes, direct-identifier declaration, and completion timestamp.
+
+Validation binds questionnaire origin and format to the adapter and payload. Existing sequence input requires recorded authority and restricted-genomic classification; public references require recorded terms review and an exact accession match; synthetic data must be explicitly marked synthetic. Direct personal identifiers and unsupported analysis scopes are rejected.
+
+The questionnaire is not consent collection, proof of legal authority, ethics approval, or human authorization to modify biological material. It is a declared intake record. Dataset-specific human approval remains a separate digest-bound review contract. The questionnaire's relevant fields are included in the pipeline-parameter fingerprint; the raw questionnaire text is not persisted by this pipeline.
