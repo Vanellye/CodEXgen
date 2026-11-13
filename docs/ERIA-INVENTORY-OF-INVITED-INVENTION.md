@@ -137,3 +137,7 @@ Do not infer a person's intention from silence. Do not convert an unknown into a
 ## 8. Implementation boundary
 
 This document establishes a shared design specification. It does not claim that the vocabulary, archive, approval workflow, or Git protections are implemented in every ERIA component or branch. Each implementation requires a separate reviewable change and focused tests. Until those controls are demonstrated, this document is a design contract—not a technical enforcement guarantee.
+
+## 9. WANT-driven mini-prompt evolution
+
+The [WANTEVER × WANTs Evolution Engine](WANTEVER-WANTS-EVOLUTION-ENGINE.md) composes this inventory with Wantever propagation. It preserves each original WITHOUT/WONT entry, derives bounded mini-prompts from explicit goals, and rewards only verified, reviewable contributions. Neither an intention nor a reward grants execution authority.
