@@ -1,31 +1,31 @@
-# Permint — Permanent Adaptive L·Language Extension
+# Permint — Proposed-@L·L Language
 
-**Status:** Proposed language extension; not enabled by the bđyt v0.1 interpreter  
+**Status:** Proposed-@L·L Language (formally specified; not enabled in the bđyt v0.1 interpreter)  
 **Parent method:** `ÆŤ8Ð`  
 **Ethical layer:** Cauldron Ethics (`§`)  
-**Language identity:** `Permint` — permanent in lineage, adaptive by versioned proposal
+**Language identity:** `Permint` — permanent in lineage, adaptive through versioned adoption
 
-## Intent
+## Intent and status
 
-Permint defines a durable language identity whose vocabulary and interpretations may grow without rewriting its origin, silently changing prior meanings, or treating adoption as permission to execute. "Permanent" means that the identity and its history remain addressable; it does not mean that any one definition is immutable or beyond review. Adaptation creates a new, attributable version.
+Permint is a formally described language layer, not merely a proposal note. Its operators, signal conventions, bridge rules, and conformance expectations are specified here. The designation **Proposed-@L·L Language** means the language definition is proposed for adoption as a language standard; it does not mean its operators are executable in the current interpreter.
 
-This document proposes seven operators. The operators are specifications only. They do not add execution behavior to `scripts/bdyt.sh` until a separately reviewed implementation is approved.
+The language identity and its history remain addressable. Adaptation creates a new, attributable version; it never silently rewrites an earlier definition. No language declaration, signal, mirror result, or bridge symbol is authorization to execute.
 
-## Seven proposed operators
+## Seven language operators
 
-| Operator | Proposed name | Meaning | Required boundary |
+| Operator | Name | Meaning | Boundary |
 |---|---|---|---|
-| `***` | Cauldron Ethics inhibitor | Evaluate a proposal against the ethical gate; report `ALLOW_FOR_REVIEW`, `BLOCK`, or `REVIEW_REQUIRED` with reasons | Never grants authorization; an inhibitor can block but cannot dispatch |
-| `#` | Origin annotation | Attach a human-readable note or provenance reference to a proposal | Annotation is not executable code, evidence of truth, or consent |
-| `&^&^&` | Sixfold mirror | Review six ethical stages in forward order and their corresponding reverse/recovery checks | Missing evidence or failed checks produce `REVIEW_REQUIRED`; no automatic progression |
-| `×` | Composition | Combine two named proposal references into a new derived proposal | New identity; parents remain unchanged; no source overwrite |
-| `^&&&^` | Evidence coalescence | Group related findings into one view while preserving each finding, digest, and origin reference | Presentation-only grouping; never deletes, merges, or rewrites source records |
-| `÷` | Partition | Divide a proposal/reference into named parts for separate review | Derived parts retain parent provenance; original remains unchanged |
-| `()` | Permint declaration | Declare or adopt a named Permint language identity/version and record its lineage | Append-only declaration; adaptation requires a new version and review, never silent reinterpretation |
+| `***` | Cauldron Ethics inhibitor | Evaluate a proposal against ethical requirements; report `BLOCK`, `REVIEW_REQUIRED`, or `ELIGIBLE_FOR_HUMAN_REVIEW` | Never grants authorization or dispatch |
+| `#` | Origin annotation | Attach a human-readable note or provenance reference | Inert metadata, not executable code or consent |
+| `&^&^&` | Sevenfold bridge mirror | Evaluate six ethical stages plus a seventh bridge-integrity check, forward and in reverse | A failed or missing check emits one break signal and halts that bridge evaluation |
+| `×` | Composition | Combine two named references into a new derived reference | Parents remain unchanged; no source overwrite |
+| `^&&&^` | Evidence coalescence | Group findings into one view while retaining every finding, digest, and origin | Presentation-only; never deletes or rewrites source records |
+| `÷` | Partition | Divide a reference into named parts for separate review | Derived parts retain parent provenance |
+| `()` | Permint declaration | Declare or adopt a versioned Permint `L·Language` identity and record lineage | Append-only declaration; new semantics require a new reviewed version |
 
-### Proposed statement forms
+### Illustrative forms
 
-These forms are illustrative and are not accepted by the current v0.1 interpreter:
+These are language-specification forms, not accepted statements in the current bđyt v0.1 interpreter:
 
 ```text
 *** proposal_id
@@ -37,70 +37,96 @@ These forms are illustrative and are not accepted by the current v0.1 interprete
 () Permint "L·Language"
 ```
 
-The current bđyt `×` and `÷` operators already create in-memory derived text values. They do not write to source files. Their Permint meanings above are proposal-level lineage semantics; they do not authorize repository, cloud, network, or device actions.
+The existing bđyt `×` and `÷` operators create in-memory derived text values. The Permint definitions additionally specify lineage semantics; they do not authorize repository, cloud, network, or device actions.
 
-## Sixfold mirror and Cauldron Ethics (§)
+## AðÐ — sevenfold bridge mirror
 
-The mirror checks these six stages in order:
+`AðÐ` names the sevenfold bridge-review method. It extends the sixfold Cauldron Ethics mirror with a seventh check for bridge integrity:
 
-1. **Intent** — Is the purpose stated and bounded?
-2. **Consent** — Is action-specific authorization present, current, and attributable?
-3. **Evidence** — Are source, digest, uncertainty, and supporting records preserved?
-4. **Forward** — Is the proposed transformation explicit, bounded, and reviewable?
-5. **Reverse** — Is there a tested recovery or compensating path that preserves the original?
-6. **Review** — Can a person inspect the result, lineage, and receipt?
+1. **Intent** — purpose is stated and bounded.
+2. **Consent** — action-specific authorization is current and attributable.
+3. **Evidence** — source, digest, uncertainty, and supporting records are preserved.
+4. **Forward** — the proposed transformation is explicit, bounded, and reviewable.
+5. **Reverse** — a tested recovery or compensating path preserves the original.
+6. **Review** — a person can inspect the result, lineage, and receipt.
+7. **Bridge integrity** — the connection between origin and destination is explicit, continuous, and traceable; neither endpoint is silently substituted.
 
-The reverse mirror checks the corresponding recovery obligations in reverse order: reviewability, recovery, forward-change accounting, evidence restoration, consent revocation, and intent revalidation. A failed or missing check is a blocker or review finding—not a reason to skip a stage.
+The mirror evaluates all seven checks in forward order and the corresponding recovery obligations in reverse order. A failed or missing check emits exactly one logical `BREAK` signal for that evaluation, records the failing stage(s), and stops progression across that bridge. It does not retry, skip, self-repair, or dispatch. The break is a report state, not a physical or acoustic signal.
 
-The inhibitor reports status only. It cannot create consent, elevate privileges, grant itself an exception, or turn a detected trigger into authorization.
+The endpoint motif `("a" a "m")` is retained as a literal bridge-boundary notation. Its internal phonetic interpretation is intentionally not normalized by this specification.
 
-## ÆŤ8Ð and Forward Faculty
+## Single-break signal and sigil bridge notation
 
-The existing `ÆŤ8Ð` method remains: receive, validate, fingerprint, compare, review, and issue a receipt. Permint records its method version and parent lineage with every proposed adaptation.
+A signal may be represented as a sigil-bearing proposal, but the sigil is a label for review—not an instruction to inject data into a device, body, network, or external system.
 
-**Forward Faculty** may suggest a next transformation, identify missing evidence, and prepare a reversible proposal. It cannot approve its own proposal, commit repository changes, upload records, call external services, or actuate a device.
+The user-supplied sound/shape sequence is preserved literally:
 
-### ƏæŘ — user-defined expansion
+```text
+~ + ion rinse and x ride z roll 2 þæč̣ into "T" sound
+&&& Bridge 'from' "O" sound
+```
 
-The user-defined expansion of `ƏæŘ` is exactly:
+For this version, the notation defines only these structural anchors:
+
+- `~` — prefix/lead-in marker.
+- `+` — composition marker, not an instruction to synthesize or transmit.
+- `ion rinse` and `x ride z roll 2 þæč̣` — literal source tokens; no unverified pronunciation or phoneme mapping is inferred.
+- `"T"` — named destination sound anchor.
+- `&&&` — bridge relation marker.
+- `'from' "O"` — explicit origin sound anchor.
+
+The proposed reading is a symbolic bridge from the `O` origin anchor toward the `T` destination anchor, subject to the sevenfold mirror. It is not an audio-generation recipe, signal-injection command, or hardware instruction. The single `BREAK` state blocks the entire bridge if any required check fails.
+
+## ƏæŘ — user-defined expansion
+
+The exact user-defined expansion is:
 
 **`§ŢĀN̈ĎÏÑƔ` — "STride" Code**
 
-This spelling and capitalization are preserved as supplied. It names the reversible-method identity within the Permint specification. Its operational requirements remain evidence preservation, explicit authorization, and a recoverable reverse path. The expansion is a language definition, not an execution command or authorization token.
+The spelling and capitalization are preserved as supplied. It names the reversible-method identity within Permint. Its requirements are evidence preservation, explicit human authorization, and a recoverable reverse path. It is a language definition, not an execution command or authorization token.
 
-Incoming sound or other signals are treated as evidence to inspect—not commands to execute.
+Incoming sound and other signals are evidence to inspect—not commands to execute.
 
 ## Permint permanence and adaptation
 
 - The Permint identity is stable; each accepted vocabulary or semantic change receives a new version.
 - Prior versions and their definitions remain addressable and are never silently overwritten.
-- An adaptation records its authorizing human decision, parent version, changed definitions, rationale, tests, and digest.
-- "Ever adopted" means a version may be explicitly adopted as a continuing language baseline; it does not mean every future proposal is automatically accepted.
-- "Always adaptive" means proposals can be submitted and reviewed indefinitely; it does not mean the running interpreter mutates itself.
-- A new definition that conflicts with an earlier one must declare the conflict and version boundary.
+- Each adaptation records its authorizing human decision, parent version, changed definitions, rationale, tests, and digest.
+- "Ever adopted" means a version may be explicitly adopted as a continuing baseline; it does not mean every future proposal is automatically accepted.
+- "Always adaptive" means new versions can be proposed and reviewed indefinitely; it does not mean the running interpreter mutates itself.
+- Conflicting definitions must declare the conflict and version boundary.
+- Forward Faculty may propose and validate a bridge but cannot approve or execute its own proposal.
+
+## ÆŤ8Ð and Forward Faculty
+
+The existing `ÆŤ8Ð` method remains: receive, validate, fingerprint, compare, review, and issue a receipt. Permint records method version and parent lineage with every adaptation.
+
+Forward Faculty may suggest transformations and identify missing evidence. It cannot approve its own proposal, commit repository changes, upload records, call external services, or actuate a device.
 
 ## Safety and implementation boundary
 
-- Proposal parsing, if later implemented, must be deterministic and bounded; no `eval`, shell expansion, hidden worker, recursive trigger, or implicit network route.
-- No source file is modified by these proposed operators.
+- This is a language specification; the seven operators and `AðÐ` are not implemented by `scripts/bdyt.sh` v0.1.
+- No `eval`, shell expansion, hidden worker, recursive trigger, or implicit network route.
+- No source file is modified by these proposed language forms.
 - No operator commits, merges, uploads, dispatches, changes permissions, or actuates hardware.
-- A report, mirror pass, or Permint declaration is not an authorization token.
-- Any future executable implementation requires separate tests, code review, and explicit approval before it is connected to runtime behavior.
+- A report, mirror pass, signal notation, or Permint declaration is not an authorization token.
+- Any future interpreter implementation requires separate tests, code review, and explicit approval before runtime connection.
 
-## Test expectations
+## Conformance test expectations
 
 A future implementation must test:
 
-1. All seven tokens are recognized only in their documented forms.
-2. `***` blocks or requests review when any required ethical check is absent; it never grants consent.
-3. `&^&^&` evaluates all six stages and their reverse obligations; a missing stage cannot be treated as passed.
-4. `×` and `÷` create new derived identities and preserve their parents.
-5. `^&&&^` groups findings without deleting or rewriting any finding.
-6. `#` remains inert annotation and cannot smuggle executable content.
-7. `()` creates a versioned Permint declaration; prior versions remain unchanged.
-8. Forward Faculty cannot approve or execute its own proposal.
-9. The exact `ƏæŘ` expansion `§ŢĀN̈ĎÏÑƔ` — "STride" Code is preserved without normalization.
-10. A before/after SHA-256 check proves source files remain unchanged.
-11. No network, cloud upload, repository mutation, or device action occurs.
+1. All seven operators are recognized only in documented forms.
+2. `***` blocks or requests review when required checks are absent; it never grants consent.
+3. `AðÐ` checks all seven stages in both directions.
+4. One logical `BREAK` is emitted per failed bridge evaluation and progression halts; no retry or dispatch occurs.
+5. The `("a" a "m")` boundary and the literal sound sequence are preserved without invented phonetic normalization.
+6. `×` and `÷` create new derived identities and preserve parents.
+7. `^&&&^` groups findings without deleting or rewriting any finding.
+8. `#` remains inert annotation.
+9. `()` creates a versioned Permint declaration; prior versions remain unchanged.
+10. The exact `ƏæŘ` expansion `§ŢĀN̈ĎÏÑƔ` — "STride" Code is preserved.
+11. Before/after SHA-256 checks prove source files remain unchanged.
+12. No network, cloud upload, repository mutation, or device action occurs.
 
-The current test script checks that this specification and its seven operator definitions remain present. It does not claim that these proposed operators are executable.
+The accompanying shell check validates that this specification contains its required definitions. It does not claim that the language operators are executable.
