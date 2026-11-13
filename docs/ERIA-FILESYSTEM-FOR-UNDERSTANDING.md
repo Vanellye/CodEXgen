@@ -56,3 +56,8 @@ Filesystem discovery is not authorization to interpret sensitive personal data,
 upload content, execute code, alter source files, or publish findings. Any such
 operation requires a separate purpose, explicit permission, data-minimization
 review, and auditable approval.
+
+
+## Verification note
+
+The filesystem test suite uses temporary directories and does not write into the inspected fixture after setup. CI must pass against the latest branch head before this capability is considered validated.
