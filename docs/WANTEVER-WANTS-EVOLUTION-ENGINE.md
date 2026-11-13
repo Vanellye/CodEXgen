@@ -252,3 +252,13 @@ The unit-test source is
 `app/src/test/java/com/vanellye/eria/evolution/WantEngineTest.kt`. It covers proposal-only preparation, missing or mismatched approval, policy denial, out-of-scope paths, expired approval, replay rejection, and evidence-gated rewards.
 
 **Implementation status:** the orchestration contracts and test source are committed. Concrete GENESIS, FORGE, PANTHEON, and STRIDE adapters are still required; the Android app does not yet instantiate this pipeline. Tests have not been run in this change session. The approval gate must be backed by an authenticated, persistent, atomic single-use approval store before production use. The in-memory reward ledger is a reference implementation, not durable storage.
+
+## 13. NEXUS knowledge discovery and direction
+
+The [ERIA NEXUS contract](NEXUS.md) defines how WANT-driven branch discovery records
+what is known, how it is known, where its source is held, and what bounded direction
+may follow. The read-only Kotlin reference types are in
+`app/src/main/java/com/vanellye/eria/evolution/WantBranchIntelligence.kt`.
+
+NEXUS discovery results are review candidates only. They do not change branch refs,
+copy source, authorize adoption, or bypass the human approval gate defined above.
