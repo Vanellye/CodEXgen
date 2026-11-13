@@ -28,9 +28,9 @@ defmodule Eria.Observation do
 
   def new(attrs) when is_map(attrs) do
     with {:ok, domain} <- required_string(attrs, :domain),
-         true <- domain in @domains or {:error, :unsupported_domain},
+         true <- domain in @domains || {:error, :unsupported_domain},
          {:ok, metric} <- required_string(attrs, :metric),
-         true <- metric in Map.fetch!(@metrics, domain) or {:error, :unsupported_metric},
+         true <- metric in Map.fetch!(@metrics, domain) || {:error, :unsupported_metric},
          {:ok, observed_at} <- parse_datetime(Map.get(attrs, :observed_at)),
          {:ok, raw_payload} <- required_string(attrs, :raw_payload),
          {:ok, source} <- required_string(attrs, :source),
