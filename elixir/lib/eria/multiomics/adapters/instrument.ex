@@ -10,6 +10,8 @@ defmodule Eria.MultiOmics.Adapters.Instrument do
               {:ok, [map()]} | {:error, term()}
 
   def decode_with(adapter, binary, opts \\ [])
+
+  def decode_with(adapter, binary, opts)
       when is_atom(adapter) and is_binary(binary) and is_list(opts) do
     if Code.ensure_loaded?(adapter) and function_exported?(adapter, :vendor_id, 0)
        and function_exported?(adapter, :decode, 2) do
