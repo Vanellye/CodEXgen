@@ -37,7 +37,7 @@ Allow automation to prepare, validate, and present development work while preser
 
 A later `CHANGES_REQUESTED`, `COMMENTED`, or `DISMISSED` review supersedes that reviewer's earlier approval. Any new commit makes an earlier approval stale for this gate.
 
-The verifier is wired into the repository's existing `.github/workflows/independent-branch-ci.yml` pull-request workflow, which already exists on `main`. It checks review evidence on pull-request runs and runs the regression suite. Unit tests cover missing, stale, bot-only, unknown-identity, author-self-approval, superseded, and valid current-SHA cases.
+The verifier regression suite is wired into the repository's existing `.github/workflows/independent-branch-ci.yml` pull-request workflow. The approval check itself is a separate `.github/workflows/eria-human-approval-gate.yml` workflow using `pull_request_target` and `pull_request_review`. It checks out only the trusted base branch, never checks out or executes PR-head code, uses a read-only token only to collect review metadata, and invokes the verifier in a later step without the token in its environment. Unit tests cover missing, stale, bot-only, unknown-identity, author-self-approval, superseded, and valid current-SHA cases.
 
 ## Important enforcement limitation
 
@@ -50,6 +50,19 @@ The protection should also require pull requests, at least one approving review 
 The current GitHub integration can inspect rulesets but cannot configure branch protection. Therefore this PR does not claim that `main` is already protected by this check. Until an administrator configures and verifies the required rule, treat the workflow as an advisory gate and do not claim enforcement.
 
 GitHub's `User` account classification is an API-level identity signal, not proof that a natural person personally operated the account. Repository administrators must use trusted reviewer membership and their account-security policy (including MFA where available) for the actual human-authentication boundary. The verifier deliberately rejects accounts classified as `Bot` or with an unknown account type; it cannot detect a compromised human account.
+
+## Bootstrap and test sequencing
+
+This is the initial introduction of the gate. A workflow introduced by a pull request cannot reliably enforce that same pull request before the workflow exists on the base branch. Therefore this PR is the bootstrap change: its verifier tests can run in the existing CI, but the new trusted-base approval workflow becomes active for subsequent PRs only after this bootstrap PR is merged through the repository's existing human-review process.
+
+After the bootstrap merge:
+1. An authorized repository administrator configures the required `eria-human-approval-gate` status check and human-review rules on `main`.
+2. Open a disposable test PR and verify that no approval blocks it.
+3. Exercise stale-SHA and bot-only review fixtures in the CI verifier suite; do not impersonate a bot or fabricate a human review to manufacture integration evidence.
+4. Confirm the status check is required and failing cases cannot merge.
+5. Only then treat the gate as operational for protected progression.
+
+Until the workflow is on the base branch and the rules are configured, the new approval gate is not active on `main`. The bootstrap PR itself remains subject to existing repository controls and explicit human review. No bypass or self-approval is authorized.
 
 ## Approval semantics
 
