@@ -17,10 +17,9 @@ concurrency:
 jobs:
   independent-human-approval:
     name: Independent human approval
-    if: github.event_name == 'pull_request' || github.event.review.state == 'approved' || github.event.review.state == 'dismissed' || github.event_name == 'pull_request_review'
     runs-on: ubuntu-24.04
     steps:
-      - name: Require a current approval from someone other than the PR author
+      - name: Require evidence-based approval from a reviewer other than the author
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
@@ -29,23 +28,31 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          reviews="$(gh api --paginate "repos/${REPOSITORY}/pulls/${PR_NUMBER}/reviews" --jq '.[] | {user: .user.login, state: .state, submitted_at: .submitted_at}')"
-          author="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}" --jq '.user.login')"
+          reviews="$(gh api --paginate "repos/${REPOSITORY}/pulls/${PR_NUMBER}/reviews" --jq '.[] | {user: .user.login, state: .state, submitted_at: .submitted_at, body: .body}')"
           python -c '
-          import json, os, sys
-          author = os.environ["PR_AUTHOR"]
+          import json, os, re, sys
+          author = os.environ["PR_AUTHOR"].lower()
           rows = [json.loads(line) for line in sys.stdin if line.strip()]
           latest = {}
           for row in rows:
-              user = row.get("user")
-              if user:
-                  key = user
-                  if key not in latest or (row.get("submitted_at") or "") > (latest[key].get("submitted_at") or ""):
-                      latest[key] = row
-          approved = [user for user, row in latest.items()
-                      if user != author and row.get("state") == "APPROVED"]
-          if not approved:
-              print("BLOCKED: an approval from a reviewer other than the PR author is required.")
+              user = (row.get("user") or "").lower()
+              if user and (user not in latest or (row.get("submitted_at") or "") > (latest[user].get("submitted_at") or "")):
+                  latest[user] = row
+          def has_evidence(body):
+              body = body or ""
+              labels = ("SCOPE:", "EVIDENCE:", "RISKS:", "TESTS:")
+              positions = [body.upper().find(label) for label in labels]
+              if any(pos < 0 for pos in positions):
+                  return False
+              for i, pos in enumerate(positions):
+                  end = positions[i + 1] if i + 1 < len(positions) else len(body)
+                  section = body[pos + len(labels[i]):end]
+                  if len(re.sub(r"[\s*_#:-]", "", section)) < 12:
+                      return False
+              return True
+          qualified = [user for user, row in latest.items() if user != author and row.get("state") == "APPROVED" and has_evidence(row.get("body"))]
+          if not qualified:
+              print("BLOCKED: need a current non-author APPROVED review with substantive SCOPE:, EVIDENCE:, RISKS:, and TESTS: sections.")
               sys.exit(1)
-          print("PASS: independent approval recorded from " + ", ".join(sorted(approved)))
+          print("PASS: evidence-anchored independent approval from " + ", ".join(sorted(qualified)))
           ' <<< "$reviews"
