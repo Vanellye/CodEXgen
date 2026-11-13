@@ -97,19 +97,19 @@ Original source bytes remain distinct from adapted bytes. All future transformat
 
 ## Coiless report protocol
 
-**Proposed execution-method identity:** \`ÆŤ8Ð-COILLESS-REPORT\`
+**Proposed execution-method identity:** `ÆŤ8Ð-COILLESS-REPORT`
 
 | Marker | Meaning |
 |---|---|
-| \`@§\` | Begin a structured report |
-| \`*(§)*\` | Star marker: flag the report as noteworthy; it is metadata, not a permission |
-| \`^&&&^\` | Coalescence marker: group related findings into one report while retaining each original finding and digest |
-| \`coiless\` | Run without a persistent background loop, hidden worker, or recursive self-trigger |
+| `@§` | Begin a structured report |
+| `*(§)*` | Star marker: flag the report as noteworthy; it is metadata, not a permission |
+| `^&&&^` | Coalescence marker: group related findings into one report while retaining each original finding and digest |
+| `coiless` | Run without a persistent background loop, hidden worker, or recursive self-trigger |
 
-The reviewer emits these markers in its standard output. A byte-identical pair produces \`COALESCED_NO_CHANGE\`; differing inputs produce \`COALESCED_DIFFERENCE_REPORT\` and retain the unified diff. Coalescing organizes the report; it never merges or deletes source records.
+The reviewer emits these markers in its standard output. A byte-identical pair produces `COALESCED_NO_CHANGE`; differing inputs produce `COALESCED_DIFFERENCE_REPORT` and retain the unified diff. Coalescing organizes the report; it never merges or deletes source records.
 
 ### Proposed action
 
-\`@§ *(§)* ^&&&^ RUN(coiless, ÆŤ8Ð-COILLESS-REPORT) ---- RECEIPT\`
+`@§ *(§)* ^&&&^ RUN(coiless, ÆŤ8Ð-COILLESS-REPORT) ---- RECEIPT`
 
 This action means: inspect the supplied pair, fingerprint both, coalesce the findings into one report, and stop. It does not mean execute the candidate, modify files, commit, dispatch externally, or start a daemon.
