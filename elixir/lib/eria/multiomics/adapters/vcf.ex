@@ -44,7 +44,7 @@ defmodule Eria.MultiOmics.Adapters.VCF do
 
     case fields do
       [chrom, pos, id, ref, alt, qual, filter, info | sample_fields]
-      when chrom != "" and ref != "" and alt != "" and length(sample_fields) >= 0 ->
+      when chrom != "" and ref != "" and alt != "" ->
         with {position, ""} <- Integer.parse(pos),
              true <- position > 0 do
           record = %{chrom: chrom, position: position, id: id, ref: ref,
