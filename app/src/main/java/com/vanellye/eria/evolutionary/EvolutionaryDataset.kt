@@ -93,7 +93,7 @@ object SyntheticEvolutionaryFixture {
             licenseOrTerms = "Generated test fixture; not biological data"
         ),
         layers = setOf(OmicsLayer.GENOME, OmicsLayer.DNA_REPAIR, OmicsLayer.TELOMERE),
-        evidenceState = EvidenceState.OBSERVED,
+        evidenceState = EvidenceState.UNKNOWN,
         quality = DatasetQuality("synthetic_test_only", 30.0, 0.99, 0.0),
         pipeline = PipelineFingerprint("eria-fixture", "1.0.0", "Kotlin/JVM",
             "b".repeat(64), "a".repeat(64), "c".repeat(64)),
