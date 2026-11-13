@@ -54,8 +54,11 @@ defmodule Eria.MultiOmics.Adapters.SAM do
 
       case String.downcase(Path.extname(path)) do
         ".sam" ->
-          with {:ok, decoded} <- decode(source, max_bytes: max_input_bytes,
-                                        max_records: Keyword.get(opts, :max_records, @default_max_records)) do
+          with {:ok, decoded} <-
+                 decode(source,
+                   max_bytes: max_input_bytes,
+                   max_records: Keyword.get(opts, :max_records, @default_max_records)
+                 ) do
             {:ok, Map.merge(decoded, %{source_format: :sam, source_sha256: source_digest})}
           end
 
@@ -104,53 +107,62 @@ defmodule Eria.MultiOmics.Adapters.SAM do
   def conversion_plan(_, _, _), do: {:error, :unsupported_alignment_format}
   def conversion_plan(_, _, _, _), do: {:error, :unsupported_alignment_format}
 
-  defp convert_and_decode(:cram, _path, _digest, opts)
-       when not is_binary(Keyword.get(opts, :reference_path)),
-       do: {:error, :cram_reference_required}
-
   defp convert_and_decode(format, input_path, source_digest, opts) do
     samtools = Keyword.get(opts, :samtools_path, "samtools")
     max_output_bytes = Keyword.get(opts, :max_output_bytes, @default_max_bytes)
-    temp_path =
-      Path.join(System.tmp_dir!(), "eria-convert-#{:erlang.unique_integer([:positive, :monotonic])}.sam")
-
     reference_path = Keyword.get(opts, :reference_path)
 
-    args =
+    args_result =
       case format do
-        :bam -> ["view", "-h", "-o", temp_path, input_path]
-        :cram -> ["view", "-T", reference_path, "-h", "-o", temp_path, input_path]
+        :bam ->
+          {:ok, ["view", "-h"]}
+
+        :cram when is_binary(reference_path) and reference_path != "" ->
+          {:ok, ["view", "-T", reference_path, "-h"]}
+
+        :cram ->
+          {:error, :cram_reference_required}
       end
 
-    try do
-      with {:ok, tool_version} <- samtools_version(samtools),
-           {:ok, exit_status} <- execute_samtools(samtools, args),
-           {:ok, stat} <- File.stat(temp_path),
-           true <- stat.type == :regular and stat.size > 0 and stat.size <= max_output_bytes,
-           {:ok, sam_text} <- File.read(temp_path),
-           {:ok, decoded} <-
-             decode(sam_text,
-               max_bytes: max_output_bytes,
-               max_records: Keyword.get(opts, :max_records, @default_max_records)
-             ) do
-        {:ok,
-         Map.merge(decoded, %{
-           source_format: format,
-           source_sha256: source_digest,
-           conversion: %{
-             tool: Path.basename(samtools),
-             tool_version: tool_version,
-             exit_status: exit_status,
-             output_sha256: digest(sam_text),
-             output_bytes: stat.size
-           }
-         })}
-      else
-        false -> {:error, :converted_output_invalid_or_too_large}
-        {:error, reason} -> {:error, reason}
+    with {:ok, args_prefix} <- args_result do
+      temp_path =
+        Path.join(
+          System.tmp_dir!(),
+          "eria-convert-#{:erlang.unique_integer([:positive, :monotonic])}.sam"
+        )
+
+      args = args_prefix ++ ["-o", temp_path, input_path]
+
+      try do
+        with {:ok, tool_version} <- samtools_version(samtools),
+             {:ok, exit_status} <- execute_samtools(samtools, args),
+             {:ok, stat} <- File.stat(temp_path),
+             true <- stat.type == :regular and stat.size > 0 and stat.size <= max_output_bytes,
+             {:ok, sam_text} <- File.read(temp_path),
+             {:ok, decoded} <-
+               decode(sam_text,
+                 max_bytes: max_output_bytes,
+                 max_records: Keyword.get(opts, :max_records, @default_max_records)
+               ) do
+          {:ok,
+           Map.merge(decoded, %{
+             source_format: format,
+             source_sha256: source_digest,
+             conversion: %{
+               tool: Path.basename(samtools),
+               tool_version: tool_version,
+               exit_status: exit_status,
+               output_sha256: digest(sam_text),
+               output_bytes: stat.size
+             }
+           })}
+        else
+          false -> {:error, :converted_output_invalid_or_too_large}
+          {:error, reason} -> {:error, reason}
+        end
+      after
+        File.rm(temp_path)
       end
-    after
-      File.rm(temp_path)
     end
   end
 
@@ -172,8 +184,11 @@ defmodule Eria.MultiOmics.Adapters.SAM do
   defp execute_samtools(executable, args) do
     try do
       case System.cmd(executable, args, stderr_to_stdout: true) do
-        {_output, 0} -> {:ok, 0}
-        {output, status} -> {:error, {:samtools_conversion_failed, status, String.slice(output, 0, 4000)}}
+        {_output, 0} ->
+          {:ok, 0}
+
+        {output, status} ->
+          {:error, {:samtools_conversion_failed, status, String.slice(output, 0, 4000)}}
       end
     rescue
       error in ErlangError -> {:error, {:samtools_unavailable, Exception.message(error)}}
