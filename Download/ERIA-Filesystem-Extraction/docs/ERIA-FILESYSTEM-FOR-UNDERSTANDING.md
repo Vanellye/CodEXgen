@@ -57,8 +57,7 @@ upload content, execute code, alter source files, or publish findings. Any such
 operation requires a separate purpose, explicit permission, data-minimization
 review, and auditable approval.
 
-## Export note
 
-This directory is a copy of the three source artifacts from the extraction branch.
-The authoritative source files remain at their original paths outside this export.
-No scan of the user's phone or private storage was performed.
+## Verification note
+
+The filesystem test suite uses temporary directories and does not write into the inspected fixture after setup. CI must pass against the latest branch head before this capability is considered validated.
