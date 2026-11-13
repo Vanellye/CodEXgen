@@ -4,6 +4,19 @@ ERIA is the canonical project identity for this codebase. The GitHub repository 
 `Vanellye/CodEXgen` during this migration so existing clone URLs, issues, pull requests,
 and provenance links continue to resolve.
 
+## NEXUS — WANT branch knowledge and direction
+
+[NEXUS](docs/NEXUS.md) is the cross-reference contract for discovering relevant WANT
+branches and connecting source-bound knowledge. It records **what is claimed**, **how
+it is known**, **where the evidence lives**, and **what bounded direction may follow**.
+
+The Kotlin reference implementation is
+`app/src/main/java/com/vanellye/eria/evolution/WantBranchIntelligence.kt`.
+It provides deterministic ranking of supplied branch candidates, explicit evidence
+statuses, and typed knowledge relationships. It is read-only: live GitHub enumeration,
+persistent storage, UI, and adoption adapters remain future work. A match score is
+triage guidance, not proof or authorization.
+
 ## Android identity
 
 - Gradle root project: `ERIA`
@@ -34,6 +47,7 @@ Debug APK: `app/build/outputs/apk/debug/app-debug.apk`
 - `compose/` — generated mirror of the three `CodeGen*.kt` files
 - `python/` — extracted Python demos and deterministic code generator
 - `generated_modules/` — deterministic output of `python/code_generator.py`
+- `docs/NEXUS.md` — knowledge lineage, branch detection, and direction data contract
 
 ## Pre-commit hook
 
