@@ -248,7 +248,7 @@ class ThreeSourceIngestionPipeline(
                 IntakeOrigin.SYNTHETIC -> DatasetOrigin.SYNTHETIC
             }
             val parametersDigest = sha256(
-                "${thresholds.minimumReads}|${thresholds.minimumBases}|${thresholds.maximumAmbiguousFraction}|${thresholds.minimumMeanPhred}|${thresholds.maximumInputCharacters}|${thresholds.maximumReads}|${questionnaire.projectId}|${questionnaire.researchPurpose}|${questionnaire.organism}|${questionnaire.authority}|${questionnaire.dataSensitivity}|${questionnaire.requestedAnalysisScopes.sorted()}"
+                "${thresholds.minimumReads}|${thresholds.minimumBases}|${thresholds.maximumAmbiguousFraction}|${thresholds.minimumMeanPhred}|${thresholds.maximumInputCharacters}|${thresholds.maximumReads}|${questionnaire.projectId}|${questionnaire.researchPurpose}|${questionnaire.organism}|${questionnaire.authority}|${questionnaire.dataSensitivity}|${questionnaire.requestedAnalysisScopes.sorted()}|${questionnaire.sourceOrigin}|${questionnaire.sequenceFormat}|${questionnaire.declaredAccession}|${questionnaire.referenceAssembly}|${questionnaire.containsDirectIdentifiers}|${questionnaire.completedAt}"
             )
             val summary = listOf(metrics.readCount, metrics.totalBases, metrics.gcFraction, metrics.ambiguousFraction, metrics.meanPhred).joinToString("|")
             val dataset = EvolutionaryDataset(
