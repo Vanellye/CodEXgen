@@ -4,20 +4,8 @@ import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.util.UUID
 
-/**
- * SKRIBED writing contract.
- *
- * The original text is retained byte-for-byte as UTF-8. No Unicode normalization,
- * spelling correction, transliteration, or formatting rewrite is performed here.
- * Any edited form is a separately labelled derivative with an immutable correction
- * tier linked back to the original @11 source.
- */
-enum class WritingVariantKind {
-    ORIGINAL,
-    CORRECTED,
-    INTERPRETED,
-    TRANSLATED
-}
+/** Original writing is immutable; every derivative is a separately tiered correction. */
+enum class WritingVariantKind { ORIGINAL, CORRECTED, INTERPRETED, TRANSLATED }
 
 data class WritingProvenance(
     val authorRef: String? = null,
@@ -36,18 +24,15 @@ data class WritingVariant(
 
 class SkribedDocument(
     originalText: String,
-    val provenance: WritingProvenance = WritingProvenance(),
-    private val correctionJournal: CorrectionLineageJournal = InMemoryCorrectionLineageJournal()
+    private val correctionJournal: CorrectionLineageJournal,
+    val provenance: WritingProvenance = WritingProvenance()
 ) {
-    private val originalUtf8: ByteArray = originalText.toByteArray(StandardCharsets.UTF_8)
+    private val originalUtf8 = originalText.toByteArray(StandardCharsets.UTF_8)
     private val correctionLock = Any()
 
-    /** Returns the exact original string; derived variants never replace it. */
     val originalText: String = originalText
-
     val originalSha256: String = sha256(originalUtf8)
 
-    /** Returns a defensive copy of the original UTF-8 bytes. */
     fun originalBytes(): ByteArray = originalUtf8.copyOf()
 
     /** Read-only snapshot of the append-only correction journal. */
@@ -55,14 +40,9 @@ class SkribedDocument(
         synchronized(correctionLock) { correctionJournal.readAll().toList() }
 
     /**
-     * Creates a derivative and appends its correction tier before returning it.
-     *
-     * If basedOn is supplied, it must be a variant previously produced by this
-     * document. This makes the correction's direct parent and full tier path
-     * explicit instead of permitting detached or silently joined corrections.
-     *
-     * Supply FileCorrectionLineageJournal(appFilesDir.resolve("eria-corrections.log"))
-     * when constructing the document to retain tiers across process restarts.
+     * Every derivative operation is journaled before the variant is returned.
+     * The caller must explicitly inject durable app-private storage or a test journal;
+     * there is intentionally no silent in-memory default.
      */
     fun derive(
         kind: WritingVariantKind,
@@ -91,15 +71,8 @@ class SkribedDocument(
 
             val fromHash = basedOn?.outputSha256 ?: originalSha256
             val toHash = sha256(text.toByteArray(StandardCharsets.UTF_8))
-            val correctionId = UUID.randomUUID().toString()
-            val lineage = if (parentTier == null) {
-                emptyList()
-            } else {
-                parentTier.lineageCorrectionIds + parentTier.correctionId
-            }
-
             val tier = CorrectionTierLine(
-                correctionId = correctionId,
+                correctionId = UUID.randomUUID().toString(),
                 originalSourceTierRef = CorrectionTierLine.ORIGINAL_SOURCE_TIER_REF,
                 originalSourceTierCommit = CorrectionTierLine.ORIGINAL_SOURCE_TIER_COMMIT,
                 sourceContentSha256 = fromHash,
@@ -110,10 +83,14 @@ class SkribedDocument(
                 toSha256 = toHash,
                 operation = operation,
                 operationVersion = operationVersion,
-                lineageCorrectionIds = lineage
+                lineageCorrectionIds = if (parentTier == null) {
+                    emptyList()
+                } else {
+                    parentTier.lineageCorrectionIds + parentTier.correctionId
+                }
             )
 
-            // Append must succeed before a derivative is returned to its caller.
+            // A failed append aborts the operation: no untracked derivative escapes.
             correctionJournal.append(tier)
 
             return WritingVariant(
@@ -135,10 +112,7 @@ class SkribedDocument(
     }
 }
 
-/**
- * An immutable internal transmission frame. Payload access always returns a copy.
- * The digest covers the exact bytes and is checked before endpoint delivery.
- */
+/** Immutable internal transmission frame; payload access always returns a copy. */
 class TransmissionFrame private constructor(
     val transmissionId: String,
     val correlationId: String,
@@ -182,7 +156,7 @@ data class TransmissionReceipt(
     val responsePayload: ByteArray
 )
 
-/** A local endpoint. Implementations must not silently dispatch to a network or device. */
+/** A local endpoint; implementations must not silently dispatch to a network or device. */
 fun interface InternalTransmissionEndpoint {
     fun receive(frame: TransmissionFrame): ByteArray
 }
@@ -194,18 +168,13 @@ interface TransmissionTransceiver {
     ): TransmissionReceipt
 }
 
-/**
- * In-process, closed-loop transceiver. No sockets, webhooks, media players, hardware
- * actuators, or external destinations are available through this implementation.
- */
+/** In-process closed-loop transceiver; no network, hardware, or automatic playback. */
 class InMemoryTransmissionTransceiver : TransmissionTransceiver {
     override fun transceive(
         frame: TransmissionFrame,
         endpoint: InternalTransmissionEndpoint
     ): TransmissionReceipt {
         require(frame.hasValidIntegrity()) { "Transmission integrity check failed" }
-
-        // Reconstruct the frame so the endpoint receives a defensive payload copy.
         val delivered = TransmissionFrame.create(
             transmissionId = frame.transmissionId,
             correlationId = frame.correlationId,
@@ -213,7 +182,6 @@ class InMemoryTransmissionTransceiver : TransmissionTransceiver {
             payload = frame.payload()
         )
         val response = endpoint.receive(delivered).copyOf()
-
         return TransmissionReceipt(
             transmissionId = frame.transmissionId,
             correlationId = frame.correlationId,
