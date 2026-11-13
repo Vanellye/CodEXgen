@@ -48,7 +48,6 @@ data class CorrectionTierLine(
         const val ORIGINAL_SOURCE_TIER_REF = "archive/justly-11-merge"
         const val ORIGINAL_SOURCE_TIER_COMMIT =
             "b60fac42ba0573c251cf7f7fe139bfa0f9c078f8"
-        const val FUTURE_MARKER_ANCHOR_REF = "main-at-pr-39-base"
         const val FUTURE_MARKER_ANCHOR_COMMIT =
             "712961866e615ff4db9e90cd40bece78a45afe39"
 
