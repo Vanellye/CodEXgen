@@ -74,4 +74,28 @@ defmodule EriaMultiOmicsTest do
     assert report.interpretation_boundary.explicit_authorization_required_for_any_downstream_action
     assert length(report.evidence_graph.edges) == 1
   end
+
+  test "review requires a reviewer distinct from the submitter" do
+    attrs = %{submitter_id: "analyst-1", reviewer_id: "analyst-1",
+              decision: :approved, scope: "research-summary",
+              evidence_ids: ["omics-1"], reviewed_at: "2026-11-13T10:00:00Z"}
+    assert {:error, :reviewer_must_be_independent} = Eria.Governance.record_review(attrs)
+  end
+
+  test "authorization requires approved independent review and remains non-executing" do
+    review_attrs = %{submitter_id: "analyst-1", reviewer_id: "reviewer-2",
+                     decision: :approved, scope: "research-export",
+                     evidence_ids: ["omics-1"], reviewed_at: "2026-11-13T10:00:00Z"}
+    assert {:ok, review} = Eria.Governance.record_review(review_attrs)
+
+    authorization_attrs = %{review: review, requester_id: "analyst-1",
+      authorizer_id: "approver-3", action: "export_research_report",
+      target: "research-archive", scope: "research-export",
+      expires_at: "2026-11-13T11:00:00Z", approval_reference: "approval-ticket-123"}
+
+    assert {:ok, authorization} = Eria.Governance.record_authorization(authorization_attrs)
+    assert authorization.status == :recorded_not_cryptographically_verified
+    assert authorization.execution_enabled == false
+  end
+
 end
