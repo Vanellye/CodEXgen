@@ -46,3 +46,12 @@ Every intake call now requires a completed `ResearchIntakeQuestionnaire`. It rec
 Validation binds questionnaire origin and format to the adapter and payload. Existing sequence input requires recorded authority and restricted-genomic classification; public references require recorded terms review and an exact accession match; synthetic data must be explicitly marked synthetic. Direct personal identifiers and unsupported analysis scopes are rejected.
 
 The questionnaire is not consent collection, proof of legal authority, ethics approval, or human authorization to modify biological material. It is a declared intake record. Dataset-specific human approval remains a separate digest-bound review contract. The questionnaire's relevant fields are included in the pipeline-parameter fingerprint; the raw questionnaire text is not persisted by this pipeline.
+
+
+## Interactive Android intake questionnaire
+
+The launcher now opens `ResearchIntakeScreen`, a Compose form for project ID, purpose, organism, source origin, FASTA/FASTQ format, public accession, optional assembly, data-use/terms attestation, direct-identifier declaration, and a separately recorded clinical/ethics authorization declaration with a reference.
+
+The clinical/ethics fields are submitter assertions only. ERIA does not independently verify an approval, consent, protocol scope, or issuing institution. A reference should be a non-identifying protocol/approval identifier; do not enter patient names or other direct identifiers. The questionnaire is currently held in memory for the active screen session. The screen does not yet select a sequence file, persist the form, retrieve a public accession, or invoke ingestion. The verified ingestion API remains a separate programmatic step.
+
+The form explicitly warns that genomic sequence can be identifying even without direct identifiers. The existing pipeline's output remains descriptive and is not a clinical diagnosis, treatment recommendation, or authorization for biological intervention.
