@@ -1,0 +1,28 @@
+name: ERIA Write-Only Storage Boundary CI
+
+on:
+  push:
+    paths:
+      - "security/red-write-only/**"
+      - ".github/workflows/eria-write-only-boundary.yml"
+  pull_request:
+    paths:
+      - "security/red-write-only/**"
+      - ".github/workflows/eria-write-only-boundary.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-storage-boundary:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run isolated synthetic filesystem rejection suite
+        env:
+          PYTHONPATH: security/red-write-only
+        run: python -m unittest discover -s security/red-write-only/tests -v
