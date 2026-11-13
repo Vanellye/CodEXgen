@@ -32,7 +32,7 @@ trap 'rm -f -- "$TMP" "$ERRTMP"' EXIT HUP INT TERM
 # User mode scans Termux home and shared storage. Root mode additionally
 # attempts common Android filesystem roots; find reports denied paths.
 if [ "$MODE" = "ROOT" ]; then
-  ROOTS=(/ /data /storage /system /vendor /product /metadata /mnt)
+  ROOTS=(/)
 else
   ROOTS=("$HOME" "$HOME/storage/shared" /storage/emulated/0 /sdcard)
 fi
