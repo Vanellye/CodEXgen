@@ -69,7 +69,7 @@ jobs:
           set -euo pipefail
           mkdir -p approval-evidence
           python3 - <<'PY'
-          import json, os
+          import json, os\n          from datetime import datetime, timezone
           record = {
               "schema_version": "1.0.0",
               "request_id": os.environ["REQUEST_ID"],
@@ -80,7 +80,7 @@ jobs:
               "operation": os.environ["OPERATION"],
               "scope": [s.strip() for s in os.environ["SCOPE"].split(",") if s.strip()],
               "request_digest": os.environ["REQUEST_DIGEST"],
-              "expires_at": os.environ["EXPIRES_AT"],
+              "requested_at": datetime.now(timezone.utc).isoformat(),\n              "expires_at": os.environ["EXPIRES_AT"],
               "workflow_run": os.environ["WORKFLOW_RUN"],
               "environment": "eria-human-approval",
               "note": "This artifact records a checkpoint after the configured GitHub Environment gate. Consult GitHub environment/deployment history for reviewer identity. This workflow does not execute the requested operation."
