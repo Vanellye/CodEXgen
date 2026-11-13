@@ -43,7 +43,9 @@ defmodule Eria.MultiOmics.Adapters.SAM do
   during this explicit call. Options: :reference_path (required for CRAM),
   :samtools_path, :max_input_bytes, :max_output_bytes, and :max_records.
   """
-  def decode_file(path, opts \\ []) when is_binary(path) do
+  def decode_file(path, opts \\ [])
+
+  def decode_file(path, opts) when is_binary(path) do
     max_input_bytes = Keyword.get(opts, :max_input_bytes, @default_max_bytes)
 
     with {:ok, stat} <- File.stat(path),
@@ -90,6 +92,8 @@ defmodule Eria.MultiOmics.Adapters.SAM do
      }}
   end
 
+  def conversion_plan(_, _, _), do: {:error, :unsupported_alignment_format}
+
   def conversion_plan(:cram, input_path, output_path, reference_path)
       when is_binary(input_path) and is_binary(output_path) and is_binary(reference_path) do
     {:ok,
@@ -104,7 +108,6 @@ defmodule Eria.MultiOmics.Adapters.SAM do
   def conversion_plan(:cram, _input, _output, _reference),
     do: {:error, :cram_reference_required}
 
-  def conversion_plan(_, _, _), do: {:error, :unsupported_alignment_format}
   def conversion_plan(_, _, _, _), do: {:error, :unsupported_alignment_format}
 
   defp convert_and_decode(format, input_path, source_digest, opts) do
