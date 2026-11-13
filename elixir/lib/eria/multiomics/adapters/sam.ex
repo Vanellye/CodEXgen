@@ -36,7 +36,9 @@ defmodule Eria.MultiOmics.Adapters.SAM do
             shell: false, execution: :not_performed}}
   end
 
-  def conversion_plan(_, _, _), do: {:error, :unsupported_alignment_format}\n\n  def conversion_plan(:cram, input_path, output_path, reference_path)
+  def conversion_plan(_, _, _), do: {:error, :unsupported_alignment_format}\n\n  def conversion_plan(_, _, _), do: {:error, :unsupported_alignment_format}
+
+  def conversion_plan(:cram, input_path, output_path, reference_path)
       when is_binary(input_path) and is_binary(output_path) and is_binary(reference_path) do
     {:ok, %{executable: "samtools",
             argv: ["view", "-T", reference_path, "-h", "-o", output_path, input_path],
@@ -44,7 +46,6 @@ defmodule Eria.MultiOmics.Adapters.SAM do
   end
 
   def conversion_plan(:cram, _input, _output, _reference), do: {:error, :cram_reference_required}
-  def conversion_plan(_, _, _), do: {:error, :unsupported_alignment_format}
 
   defp parse_records([], acc, _index, headers, source) do
     {:ok, %{format: :sam, headers: headers, records: Enum.reverse(acc),
