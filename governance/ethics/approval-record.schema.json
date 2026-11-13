@@ -12,7 +12,7 @@
   "properties": {
     "schema_version": { "const": "1.0.0" },
     "request_id": { "type": "string", "minLength": 1, "maxLength": 128 },
-    "status": { "enum": ["proposed", "validated", "eligible", "approved", "denied", "expired", "blocked", "executed", "audited"] },
+    "status": { "enum": ["proposed", "validated", "eligible", "approved", "denied", "expired", "blocked", "executed", "audited", "review_checkpoint_recorded"] },
     "requested_by": { "type": "string", "minLength": 1 },
     "approved_by": { "type": "string", "minLength": 1 },
     "repository": { "type": "string", "pattern": "^[^/]+/[^/]+$" },
