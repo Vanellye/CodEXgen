@@ -76,3 +76,27 @@ Do not alter a submodule pointer or write to a separate repository without a sep
 - Repository-wide branch/subrepository propagation: `PROPOSED — NOT YET APPLIED`.
 
 **Invariant:** `·L·L·ịṅë` identifies a lineage trail; it never claims ownership of the source or authority over its destination.
+
+
+## 8. Code Genesis symbolic anchor and §ĤÆ SHA-run notation
+
+**Symbolic Code Genesis anchor (verbatim):**
+
+`2cce11f2983f46Œ58f18c1ọ8c264db9cc852⁰ơⁿ5991.1`
+
+This string is an intentional symbolic identifier supplied for Code Genesis. It is not a Git object ID and MUST NOT be parsed, normalized, truncated, or substituted for a repository commit SHA. Preserve the exact Unicode characters and punctuation when quoting this anchor. The actual Git commit for the current staging head is recorded separately in the PR metadata and receipts.
+
+**Proposed notation (descriptive; not executable):**
+
+`§ĤÆ SHA RUN *(ª)* "ºƠºŘÏƔĮŒŉ" — ORIGIN CREATION ·.·`
+
+Interpretation for review and future implementation:
+
+1. `§ĤÆ SHA RUN` names a bounded Bash-side integrity operation: inspect the declared source/candidate inputs, compute SHA-256 fingerprints, and emit a receipt that distinguishes source identity from derived output.
+2. `*(ª)*` is a literal framing marker for this proposed operation; it grants no authority and causes no shell expansion.
+3. `"ºƠºŘÏƔĮŒŉ"` is the exact symbolic origin label, retained as an origin-creation marker. It is metadata, not a command, executable, credential, or destination.
+4. **ORIGIN CREATION** means create a new attributable record for a derived artifact, linking its parent source reference, exact input digest(s), operation/version, output digest, and review state. It never replaces or claims ownership of the original source.
+5. The receipt must keep the symbolic Code Genesis anchor and the actual full Git commit SHA in separate fields. A symbolic label is never accepted where a 40-character Git SHA is required.
+6. Until an implementation and its tests are separately reviewed, this notation remains a specification only. It does not run Bash, alter files, commit, merge, push, dispatch externally, or activate a runtime.
+
+**Required invariants:** preserve original bytes and provenance; create derivatives additively; report missing or mismatched digests as `BREAK`; do not silently route around a failed check; and require explicit human approval for any repository mutation or integration.
