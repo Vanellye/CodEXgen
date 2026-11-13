@@ -81,3 +81,10 @@ Hold the affected stage on missing prerequisites, unknown provenance, failed tes
 5. Separately collect the IC hardware design brief, RTL, PDK/toolchain access, and acceptance criteria before implementing EDA jobs.
 
 **Invariant:** CI verifies declared work; IC models the gates; neither creates authority. Hardware implementation and fabrication remain separate, evidence-based, human-approved stages.
+
+
+## 8. Standalone perception and reasoning processor specification
+
+The proposed physical architecture and staged requirements are recorded separately in [ERIA-PERCEPTION-REASONING-IC-SPEC.md](ERIA-PERCEPTION-REASONING-IC-SPEC.md). It defines a standalone sensory acquisition, DSP, perception, reasoning, context, and safety/actuation-boundary processor that interoperates with ERIA, Pantheon, Stride, PonsLucis, and Transmission through versioned contracts.
+
+That document is a requirements baseline only. It does not add RTL, select a foundry/PDK, define a final bus/pinout or power budget, claim subjective consciousness, or produce a netlist/GDSII/fabrication package. The initial prototype is observe/propose mode; physical actuation remains separately inhibited and authorization-gated. Hardware design and signoff remain independent of the existing C99 Integration Core CI tests.
