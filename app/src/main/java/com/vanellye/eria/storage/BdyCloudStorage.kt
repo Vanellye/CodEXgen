@@ -10,19 +10,22 @@ import java.security.MessageDigest
  */
 enum class BdyRecordKind { SOURCE, DERIVED, EXECUTION_RECEIPT }
 
-data class BdyCloudRecord(
+class BdyCloudRecord private constructor(
     val recordId: String,
     val kind: BdyRecordKind,
-    val payload: ByteArray,
+    private val content: ByteArray,
     val sha256: String,
-    val parentRecordIds: List<String> = emptyList(),
+    val parentRecordIds: List<String>,
     val methodVersion: String,
     val createdAtEpochMillis: Long,
 ) {
-    val byteCount: Long get() = payload.size.toLong()
+    val byteCount: Long get() = content.size.toLong()
+
+    /** Return a defensive copy so providers cannot mutate the retained source bytes. */
+    fun payloadCopy(): ByteArray = content.copyOf()
 
     fun verifyIntegrity(): Boolean =
-        sha256.equals(sha256(payload), ignoreCase = true)
+        sha256.equals(sha256(content), ignoreCase = true)
 
     companion object {
         fun create(
@@ -35,7 +38,7 @@ data class BdyCloudRecord(
         ) = BdyCloudRecord(
             recordId = recordId,
             kind = kind,
-            payload = payload.copyOf(),
+            content = payload.copyOf(),
             sha256 = sha256(payload),
             parentRecordIds = parentRecordIds.toList(),
             methodVersion = methodVersion,
@@ -44,7 +47,7 @@ data class BdyCloudRecord(
 
         private fun sha256(bytes: ByteArray): String =
             MessageDigest.getInstance("SHA-256").digest(bytes)
-                .joinToString("") { "%02x".format(it) }
+                .joinToString("") { "%02x".format(it.toInt() and 0xff) }
     }
 }
 
