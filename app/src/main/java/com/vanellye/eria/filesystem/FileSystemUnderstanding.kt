@@ -89,7 +89,9 @@ class FileSystemUnderstanding(
                     notes += "Symbolic link skipped: ${relative(canonicalRoot, child)}"
                     continue
                 }
-                if (!child.canonicalFile.toPath().startsWith(canonicalRoot.toPath())) {
+                val canonicalChildPath = child.canonicalFile.path
+                val rootPrefix = canonicalRoot.path.trimEnd(File.separatorChar) + File.separator
+                if (canonicalChildPath != canonicalRoot.path && !canonicalChildPath.startsWith(rootPrefix)) {
                     notes += "Path outside root skipped: ${child.name}"
                     continue
                 }
