@@ -2,9 +2,16 @@
 #include "IC.h"
 
 int main(void) {
+    ICAeddChecks complete_aedd = { 1, 1, 1, 1, 1, 1, 1 };
+    ICAeddChecks missing_consent = { 1, 0, 1, 1, 1, 1, 1 };
     ICGate observe = { IC_STAGE_PENDING, IC_APPROVAL_UNSET, 0 };
     ICGate protected_gate = { IC_STAGE_PENDING, IC_APPROVAL_UNSET, 1 };
     ICGate denied_gate = { IC_STAGE_PENDING, IC_APPROVAL_DENIED, 0 };
+
+    /* Aðð fails closed unless all seven checks are present. */
+    assert(ic_aedd_qualifies(&complete_aedd));
+    assert(!ic_aedd_qualifies(&missing_consent));
+    assert(!ic_aedd_qualifies(0));
 
     /* Ordinary read-only validation can start when dependencies pass. */
     assert(ic_can_start(&observe, 1));
