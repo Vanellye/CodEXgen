@@ -10,10 +10,16 @@ graph TD
     hyp --> mind["fiction-mind"]
     hyp --> creation["fiction-creation"]
     hyp --> mini["mini-bigger placeholders"]
+    hyp --> water["water runflow simulation"]
     body --- mind
     mind --- creation
     creation --- body
     mini -->|parent_record_id| hyp
+    water --> collect["collection"]
+    collect --> treat["treatment"]
+    treat --> store["storage"]
+    store --> distribute["distribution"]
+    distribute --> reuse["reuse"]
 ```
 
 The three fiction branches form a triangle around `hypotheticals`; `main`
@@ -31,3 +37,16 @@ Their envelopes remain `UNKNOWN`, `not_empirical_evidence`, and
 cannot name itself as its own parent. Parent links do not imply that the parent
 record exists or has been validated; a catalog-level referential-integrity
 check is still required before treating a collection as complete.
+
+## Water runflow
+
+`python/water_runflow.py` models a data-only sequence of collection,
+treatment, storage, distribution, and reuse. Each step is a provenance-bearing
+record linked to the preceding step. Partial flows are allowed; stage order and
+parent continuity are checked.
+
+This is a simulation and record-keeping contract only. It does not connect to
+sensors, pumps, valves, treatment equipment, or external services. Recorded
+quality observations are not interpreted as proof of potability. All records
+remain `UNKNOWN`, unvalidated, and `not_authorized`; physical actuation and
+potability determination are explicitly disabled.
