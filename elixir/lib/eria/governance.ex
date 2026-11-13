@@ -37,6 +37,8 @@ defmodule Eria.Governance do
     end
   end
 
+  def record_review(_), do: {:error, :invalid_review_attributes}
+
   def record_authorization(attrs) when is_map(attrs) do
     review = Map.get(attrs, :review)
     requester = Map.get(attrs, :requester_id)
@@ -76,7 +78,6 @@ defmodule Eria.Governance do
     end
   end
 
-  def record_review(_), do: {:error, :invalid_review_attributes}
   def record_authorization(_), do: {:error, :invalid_authorization_attributes}
 
   defp nonempty?(value), do: is_binary(value) and byte_size(value) > 0
