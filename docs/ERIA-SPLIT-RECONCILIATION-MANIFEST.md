@@ -7,14 +7,14 @@
 
 ## Split workstreams
 
-| Workstream | PR | Branch | Pinned head |
+| Workstream | PR | Branch | Split-content commit |
 |---|---:|---|---|
 | Lineage and governance | [#43](https://github.com/Vanellye/CodEXgen/pull/43) | `reconcile/lineage-governance` | `654a20040546522616ee879003edce2d9072a27c` |
 | Transmission metadata | [#44](https://github.com/Vanellye/CodEXgen/pull/44) | `reconcile/transmission-metadata` | `341d09f4809ddee003e9f9fae38755f6b6976054` |
 | Pantheon Integration Core | [#45](https://github.com/Vanellye/CodEXgen/pull/45) | `reconcile/pantheon-integration-core` | `13dba05589f68297d3b1f5e2fd2fe3bff9bf765c` |
 | ERIA hardware specifications | [#46](https://github.com/Vanellye/CodEXgen/pull/46) | `reconcile/eria-hardware` | `9245345444d0e6c796ad80bdfce8a1430a03ac93` |
 
-## Reconciliation and dependency edges
+The listed SHA for PR #43 is the lineage/governance content commit before this manifest was added. PR #43's live head also contains the subsequent manifest commit; use the live PR metadata for the current head. The other three SHAs identify their split-content commits and are the live heads at the time this manifest was written.\n\n## Reconciliation and dependency edges
 
 - PR #43 is the provenance and branch-governance reference for the split.
 - PR #44 is an independent metadata/documentation track; it does not configure a signal generator or audio output.
