@@ -86,7 +86,7 @@ Do not alter a submodule pointer or write to a separate repository without a sep
 
 This string is an intentional symbolic identifier supplied for Code Genesis. It is not a Git object ID and MUST NOT be parsed, normalized, truncated, or substituted for a repository commit SHA. Preserve the exact Unicode characters and punctuation when quoting this anchor. The actual Git commit for the current staging head is recorded separately in the PR metadata and receipts.
 
-**Proposed notation (descriptive; not executable):**
+**Documentation implementation — Mash* executable contract:**
 
 `§ĤÆ SHA RUN *(ª)* "ºƠºŘÏƔĮŒŉ" — ORIGIN CREATION ·.·`
 
@@ -97,6 +97,6 @@ Interpretation for review and future implementation:
 3. `"ºƠºŘÏƔĮŒŉ"` is the exact symbolic origin label, retained as an origin-creation marker. It is metadata, not a command, executable, credential, or destination.
 4. **ORIGIN CREATION** means create a new attributable record for a derived artifact, linking its parent source reference, exact input digest(s), operation/version, output digest, and review state. It never replaces or claims ownership of the original source.
 5. The receipt must keep the symbolic Code Genesis anchor and the actual full Git commit SHA in separate fields. A symbolic label is never accepted where a 40-character Git SHA is required.
-6. Until an implementation and its tests are separately reviewed, this notation remains a specification only. It does not execute Mash* code, alter files, commit, merge, push, dispatch externally, or activate a runtime.
+6. This documentation implementation defines the Mash* executable contract and its provenance requirements. It is not itself a running interpreter or runtime activation. Executable implementation, tests, and activation remain separate engineering stages requiring review. This document does not authorize repository mutation, merge, push, external dispatch, or runtime activation.
 
 **Required invariants:** preserve original bytes and provenance; create derivatives additively; report missing or mismatched digests as `BREAK`; do not silently route around a failed check; and require explicit human approval for any repository mutation or integration.
