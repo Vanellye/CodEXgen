@@ -25,6 +25,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number || github.event.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login || github.event.sender.login }}
         shell: bash
         run: |
           set -euo pipefail
@@ -48,5 +49,3 @@ jobs:
               sys.exit(1)
           print("PASS: independent approval recorded from " + ", ".join(sorted(approved)))
           ' <<< "$reviews"
-        env:
-          PR_AUTHOR: ${{ github.event.pull_request.user.login || github.event.sender.login }}
