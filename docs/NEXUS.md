@@ -142,3 +142,21 @@ The completed items above describe reference primitives only. No live GitHub sca
 See [NEXUS Source Records — Native Runtime and Higher Faculty](NEXUS-SOURCE-RECORDS.md) for commit-pinned records covering the PANTHEON Faculty Engine, runtime, 38-standard control gate, Stride input seam, Android JNI boundary, and Stride HTTP client.
 
 That inventory explicitly marks GENESIS and FORGE as unresolved in the inspected repository scopes rather than inventing implementations. It also distinguishes source presence from actual Android runtime wiring and records the separate CI evidence for the WANTEVER and OLPIRT candidate commits.
+
+## 10. Read-only GitHub branch discovery adapter
+
+The Kotlin adapter at
+`app/src/main/java/com/vanellye/eria/evolution/GitHubWantBranchDiscovery.kt`
+implements a GET-only GitHub API boundary:
+
+- enumerates branch names and exact head commit SHAs;
+- resolves each commit to its recursive tree;
+- creates source-linked `OPEN_QUESTION` records for WANT-relevant file paths;
+- retains the branch head SHA and Git blob object ID separately;
+- marks path-only findings `UNKNOWN` until file content is fetched and reviewed;
+- reports truncated Git trees instead of treating them as complete;
+- returns detector rankings and a NEXUS index in memory.
+
+The adapter has no checkout, file-write, ref-update, pull-request, merge, or dispatch operation. A token is optional for public repositories and must be supplied through a caller-owned provider; the adapter does not persist credentials. Android declares INTERNET permission for this read-only network capability.
+
+This is a discovery adapter, not durable NEXUS storage. The returned source records must be persisted through a separately reviewed append-only store before they become a durable repository knowledge base. Branch heads must be re-fetched before any adoption decision.
