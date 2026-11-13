@@ -6,10 +6,10 @@ spec="$root/docs/PERMINT-LANGUAGE-EXTENSION.md"
 for token in '***' '#' '&^&^&' '×' '^&&&^' '÷' '()'; do
   grep -Fq -- "$token" "$spec" || { printf 'MISSING_OPERATOR=%s\n' "$token" >&2; exit 1; }
 done
-for term in 'Intent' 'Consent' 'Evidence' 'Forward' 'Reverse' 'Review' 'Forward Faculty' 'Permint' '§ŢĀN̈ĎÏÑƔ' '"STride" Code'; do
+for term in 'Proposed-@L·L Language' 'AðÐ' 'Bridge integrity' 'BREAK' '("a" a "m")' 'ion rinse' 'x ride z roll 2 þæč̣' '"T"' '"O"' '§ŢĀN̈ĎÏÑƔ' '"STride" Code' 'Forward Faculty'; do
   grep -Fq -- "$term" "$spec" || { printf 'MISSING_REQUIREMENT=%s\n' "$term" >&2; exit 1; }
 done
-grep -Fq 'not accepted by the current v0.1 interpreter' "$spec"
+grep -Fq 'not implemented by' "$spec"
 grep -Fq 'No source file is modified' "$spec"
-grep -Fq 'cannot approve or execute its own proposal' "$spec"
+grep -Fq 'no retry or dispatch occurs' "$spec"
 printf 'PERMINT_SPEC_TESTS=PASS\n'
