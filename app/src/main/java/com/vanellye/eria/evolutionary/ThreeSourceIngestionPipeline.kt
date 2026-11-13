@@ -69,11 +69,15 @@ data class QualityThresholds(
     val minimumReads: Int = 1,
     val minimumBases: Long = 1,
     val maximumAmbiguousFraction: Double = 0.05,
-    val minimumMeanPhred: Double? = null
+    val minimumMeanPhred: Double? = null,
+    val maximumInputCharacters: Int = 20_000_000,
+    val maximumReads: Int = 2_000_000
 ) {
     init {
         require(minimumReads >= 1)
         require(minimumBases >= 1)
+        require(maximumInputCharacters >= 1)
+        require(maximumReads >= 1)
         require(maximumAmbiguousFraction in 0.0..1.0)
         require(minimumMeanPhred == null || minimumMeanPhred in 0.0..93.0)
     }
@@ -131,6 +135,7 @@ object SequenceQualityControl {
         require(lines.isNotEmpty()) { "sequence file is empty" }
         return when (payload.format) {
             SequenceFormat.FASTA -> {
+                require(lines.first().startsWith(">")) { "FASTA must begin with a header" }
                 val reads = mutableListOf<String>()
                 var current = StringBuilder()
                 lines.forEach { line ->
@@ -216,7 +221,9 @@ class ThreeSourceIngestionPipeline(
                 IntakeOrigin.EXISTING_SEQUENCE -> Unit
             }
             digest = sha256(payload.content)
+            require(payload.content.length <= thresholds.maximumInputCharacters) { "input exceeds configured character limit" }
             val metrics = SequenceQualityControl.measure(payload)
+            require(metrics.readCount <= thresholds.maximumReads) { "read count exceeds configured maximum" }
             val failures = mutableListOf<String>()
             val warnings = mutableListOf<String>()
             if (metrics.readCount < thresholds.minimumReads) failures += "read count below configured minimum"
@@ -239,7 +246,7 @@ class ThreeSourceIngestionPipeline(
                 IntakeOrigin.SYNTHETIC -> DatasetOrigin.SYNTHETIC
             }
             val parametersDigest = sha256(
-                "${thresholds.minimumReads}|${thresholds.minimumBases}|${thresholds.maximumAmbiguousFraction}|${thresholds.minimumMeanPhred}"
+                "${thresholds.minimumReads}|${thresholds.minimumBases}|${thresholds.maximumAmbiguousFraction}|${thresholds.minimumMeanPhred}|${thresholds.maximumInputCharacters}|${thresholds.maximumReads}"
             )
             val summary = listOf(metrics.readCount, metrics.totalBases, metrics.gcFraction, metrics.ambiguousFraction, metrics.meanPhred).joinToString("|")
             val dataset = EvolutionaryDataset(
