@@ -1,6 +1,6 @@
 # Sensitive governance and execution boundaries require explicit review.
 # Branch protection must require Code Owner review for this file to be enforced.
- /.github/ @Vanellye
+/.github/ @Vanellye
 /deploy/ @Vanellye
 /hardware/ @Vanellye
 /actuators/ @Vanellye
