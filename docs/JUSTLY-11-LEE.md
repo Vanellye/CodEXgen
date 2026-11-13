@@ -20,6 +20,7 @@ This record names and preserves the SKRIBED and transmission-audio integration m
 
 - **Ðôn̈ 2 Mâƙëṛ** — marker label preserved exactly as supplied.
 - **ÐŒM 2 MARKER** — companion marker label preserved exactly as supplied.
+- **MÆṛƙêŕ** — third independent marker, preserved exactly as supplied.
 
 These are repository history labels recorded in this document. They do not alter the original merge commit or independently authorize runtime actions.
 
