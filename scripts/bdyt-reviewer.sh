@@ -43,6 +43,13 @@ candidate_digest=$(sha256sum -- "$candidate_file" | awk '{print $1}')
 
 printf 'BDYT_REVIEW=COMPLETE\n'
 printf 'METHOD=ÆŤ8Ð\n'
+printf 'RUN_MODE=coiless\n'
+printf 'REPORT_MARKER=@§\n'
+printf 'STAR_MARKER=*(§)*\n'
+printf 'STAR_COUNT=1\n'
+printf 'COALESCENCE_MARKER=^&&&^\n'
+printf 'METHOD_ID=ÆŤ8Ð-COILLESS-REPORT\n'
+printf 'ACTION=REPORT_ONLY\n'
 printf 'SOURCE_BYTES=%s\n' "$source_bytes"
 printf 'SOURCE_SHA256=%s\n' "$source_digest"
 printf 'CANDIDATE_BYTES=%s\n' "$candidate_bytes"
@@ -50,12 +57,14 @@ printf 'CANDIDATE_SHA256=%s\n' "$candidate_digest"
 
 if cmp -s -- "$source_file" "$candidate_file"; then
   printf 'DECISION=NO_OP\n'
+  printf 'REPORT_STATUS=COALESCED_NO_CHANGE\n'
   printf 'COST_OF_NOTHING=NO_WRITE_NO_DELETE_NO_DISPATCH\n'
   printf 'REASON=byte-identical; no adaptation is necessary\n'
   exit 0
 fi
 
 printf 'DECISION=DIFFERENT\n'
+printf 'REPORT_STATUS=COALESCED_DIFFERENCE_REPORT\n'
 printf 'COST_OF_NOTHING=REVIEW_ONLY\n'
 printf 'REVIEW=DIFF_AVAILABLE\n'
 printf 'NOTICE=content differences are not proof of correctness or authorization\n'
