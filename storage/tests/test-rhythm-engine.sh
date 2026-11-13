@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
-ENGINE="$(cd "$(dirname "\${BASH_SOURCE[0]}")/.." && pwd)/rhythm-engine.sh"
+ENGINE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/rhythm-engine.sh"
 TMP_ROOT=$(mktemp -d)
 trap 'rm -rf -- "$TMP_ROOT"' EXIT
 export ERIA_STORAGE_ROOT="$TMP_ROOT/state"
