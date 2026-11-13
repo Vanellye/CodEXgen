@@ -234,3 +234,36 @@ contracts without changing the parent branch's normalized ingestion API.
 All parsers enforce configurable input and record limits. They preserve a
 source digest, but a digest is not source authentication. Parser success means
 structural acceptance only, not scientific validity or clinical interpretation.
+
+
+## BAM/CRAM automatic conversion gate
+
+The separate execution-gate branch adds `Eria.MultiOmics.Adapters.SAM.decode_file/2`.
+When a caller explicitly invokes this function with a `.bam` or `.cram` file,
+the adapter invokes an installed `samtools` executable using `System.cmd/3`
+with a discrete argument list (no shell command string), converts to a unique
+temporary SAM file, validates that file with the SAM parser, records the
+samtools version/exit status and source/output SHA-256 digests, and removes the
+temporary file. CRAM requires an explicit `:reference_path`.
+
+Example:
+
+```elixir
+{:ok, bam_report} = Eria.MultiOmics.Adapters.SAM.decode_file("reads.bam")
+
+{:ok, cram_report} =
+  Eria.MultiOmics.Adapters.SAM.decode_file("reads.cram", reference_path: "reference.fa")
+```
+
+The caller can set `:samtools_path`, `:max_input_bytes`, `:max_output_bytes`,
+and `:max_records`. Unsupported extensions, missing inputs, missing CRAM
+references, unavailable samtools, nonzero conversion exits, empty/oversized
+outputs, and malformed SAM are returned as errors. The operation is automatic
+within an explicit ingestion call; no watcher, background task, or hidden
+execution is installed. The CI workflow installs samtools and runs integration
+fixtures for both BAM and CRAM.
+
+Instrument SDK connections, device acquisition, calibration registries, and
+calibration verification remain separate work. A successful conversion is not
+a sequencing-quality assessment, clinical interpretation, or authorization to
+modify biological material.
