@@ -64,3 +64,26 @@ traceability, but their presence does not validate calibration or water quality.
 Equipment connection metadata does not change the WATER runflow's
 simulation-only, non-authorizing status. Physical actuation and potability
 determination remain disabled.
+
+## IC verification workstreams
+
+`python/ic_verification.py` keeps the two meanings of IC separate:
+
+1. **Instrument Connection** checks: identity/tagging, wiring and pinout,
+   protective earth/isolation, loop continuity, signal range/scaling,
+   communications/protocol, calibration traceability, alarm/fault behavior,
+   and fail-safe state.
+2. **Integrated Circuit** checks: part identity/revision, package pinout,
+   power rails/sequence, supply current, clock/reset, logic function,
+   timing constraints, interface compatibility, and thermal/operating limits.
+
+Each verification record identifies its subject, check, method, evidence
+references, outcome, and reviewer. A PASS requires evidence references and an
+independent reviewer; it applies only to that specific check. The summary
+reports missing and non-passing checks and never grants release authority.
+
+These are verification-record contracts, not hardware test drivers. No
+instrument is connected, no circuit is energized or programmed, and no
+physical test is performed by this code. Instrument verification does not
+establish water potability. Equipment actuation, product release, and water
+potability remain separate authorization decisions.
