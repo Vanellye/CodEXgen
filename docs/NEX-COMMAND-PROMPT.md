@@ -16,7 +16,7 @@ NEX does not infer missing destination details, repair malformed addresses by gu
 | Field | Supplied value | Current assessment |
 |---|---|---|
 | Destination label | `Godspeed` | Proposed name only |
-| Service URL | `HTTPS:/\\|\\Decent.scent.org` | Malformed; corrected canonical HTTPS URL required |
+| Service URL | `HTTPS:/\|\Decent.scent.org` | Malformed; corrected canonical HTTPS URL required |
 | Engine identifier | `GodDoes` | Unverified; receiving identity and interface required |
 | Destination repository | `https://github.com/Vanellye.Ɣ` | Invalid/incomplete GitHub address; canonical owner/repository required |
 
