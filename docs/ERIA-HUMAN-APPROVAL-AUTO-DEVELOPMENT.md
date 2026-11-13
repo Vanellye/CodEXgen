@@ -49,6 +49,8 @@ The protection should also require pull requests, at least one approving review 
 
 The current GitHub integration can inspect rulesets but cannot configure branch protection. Therefore this PR does not claim that `main` is already protected by this check. Until an administrator configures and verifies the required rule, treat the workflow as an advisory gate and do not claim enforcement.
 
+GitHub's `User` account classification is an API-level identity signal, not proof that a natural person personally operated the account. Repository administrators must use trusted reviewer membership and their account-security policy (including MFA where available) for the actual human-authentication boundary. The verifier deliberately rejects accounts classified as `Bot` or with an unknown account type; it cannot detect a compromised human account.
+
 ## Approval semantics
 
 Approval is a scoped, attributable human decision over a specific change. A changed head SHA, changed target branch, materially changed diff, revoked review, or changed intent requires renewed review. CI success proves only that configured checks passed; it never supplies consent.
