@@ -45,6 +45,15 @@ class ThreeSourceIngestionPipelineTest {
         assertTrue(ambiguous is IngestionResult.Rejected)
     }
 
+    @Test fun rejectsFastaWithoutHeaderAndInputOverLimit() {
+        val noHeader = pipeline.ingest(
+            ExistingSequenceAdapter(payload(content = "ACGTACGT\\n")), "no-header")
+        assertTrue(noHeader is IngestionResult.Rejected)
+        val bounded = ThreeSourceIngestionPipeline(QualityThresholds(maximumInputCharacters = 5))
+        val oversized = bounded.ingest(ExistingSequenceAdapter(payload()), "oversized")
+        assertTrue(oversized is IngestionResult.Rejected)
+    }
+
     @Test fun parsesFastqAndComputesMeanPhred() {
         val fastq = payload(format = SequenceFormat.FASTQ, content = "@r1\nACGT\n+\nIIII\n")
         val result = pipeline.ingest(ExistingSequenceAdapter(fastq), "fastq.test-1")
