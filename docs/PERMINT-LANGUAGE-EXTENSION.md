@@ -130,3 +130,62 @@ A future implementation must test:
 12. No network, cloud upload, repository mutation, or device action occurs.
 
 The accompanying shell check validates that this specification contains its required definitions. It does not claim that the language operators are executable.
+
+## A.M.A. — Auto Matic Ally Addinɣ: Code Genesis Extract
+
+**Status:** Proposed-@L·L language extension; specification only, not an enabled runtime feature.
+
+A.M.A. names a read-only method for discovering candidate allies between code contracts and extracting their shared invariants into a reviewable, provenance-preserving genesis record. An "ally" is a compatible, evidence-linked code reference or contract—not an automatically trusted component, installed dependency, merged branch, or granted permission.
+
+### Genesis extraction scope
+
+- **ALL** means all eligible inputs inside an explicitly declared repository, directory, revision, and file-type scope. It never means every file on a machine, every connected account, or unrestricted external discovery.
+- **Invariably** means a candidate property appears stable across the inspected evidence. It is a hypothesis until a human reviewer confirms its scope, counterexamples, and applicability.
+- Extraction is read-only. Each finding records the source path, revision/commit, source range where available, SHA-256 digest, extraction method/version, and uncertainty.
+- Preserve exclusions, unreadable inputs, skipped binary files, failed checks, and counterexamples in the receipt. An incomplete scan must say **INCOMPLETE**, never imply ALL was exhaustively covered.
+- A candidate invariant must distinguish observed fact, inferred pattern, and proposed rule. Do not promote an inference to a fact or silently generalize across modules.
+- Ally relationships are proposals with explicit parent references and compatibility evidence. Conflicts remain visible; no source is overwritten, deleted, reformatted, or silently normalized.
+
+### A.M.A. symbolic frame
+
+The supplied notation is preserved exactly:
+
+```text
+ALL·L·^ &&& *^\\_/^*
+```
+
+For this specification only:
+
+- `ALL·L·^` labels the declared all-eligible-inputs language scope; the actual scope must still be named in the run manifest.
+- `&&&` joins evidence-linked candidate findings into a review group without merging their source records.
+- `*^\\_/^*` is the literal boundary marker for the genesis-extraction frame. The asterisks are not shell wildcards and must not trigger glob expansion.
+- The notation is declarative metadata, not a command to execute, inject, transmit, or authorize.
+
+### A.M.A. receipt and gates
+
+A conforming proposal receipt reports:
+
+1. Declared scope and exact revision.
+2. Enumerated eligible inputs, exclusions, and incomplete reads.
+3. Per-input byte count and SHA-256 digest.
+4. Candidate invariant, evidence references, counterexamples, and confidence/uncertainty.
+5. Proposed ally links and compatibility rationale.
+6. Human review decision and any rejected or deferred findings.
+7. Before/after source digests demonstrating that extraction made no source changes.
+
+The `***` ethics gate may return `BLOCK`, `REVIEW_REQUIRED`, or `ELIGIBLE_FOR_HUMAN_REVIEW`; it never grants consent. Silence, missing response, timeout, or an absent consent signal equals `NO_CONSENT`. No ally may approve itself or convert a discovered invariant into execution authority.
+
+### Explicit non-actions
+
+A.M.A. does not automatically add imports, dependencies, permissions, code, branches, commits, PR approvals, cloud uploads, network routes, retries, or device actions. It does not repair failed connections or bypass an `AðÐ` `BREAK`. Any later implementation must be separately reviewed, tested against incomplete and adversarial inputs, and explicitly authorized before a distinct mutation step.
+
+### A.M.A. conformance expectations
+
+- Scope is explicit and bounded; out-of-scope inputs are never silently included.
+- "ALL" is qualified by a complete enumeration receipt; otherwise the result is marked `INCOMPLETE`.
+- Invariant candidates retain evidence, hashes, counterexamples, and uncertainty.
+- Ally links are proposals only and preserve all parent identities.
+- Literal markers `ALL·L·^`, `&&&`, and `*^\\_/^*` are preserved without shell expansion.
+- Silence or absent consent yields `NO_CONSENT`; `***` cannot approve an action.
+- Failed bridge integrity propagates `BREAK`; no silent bypass or automatic retry occurs.
+- Source hashes remain unchanged; no code, permission, network, cloud, or device mutation occurs.
