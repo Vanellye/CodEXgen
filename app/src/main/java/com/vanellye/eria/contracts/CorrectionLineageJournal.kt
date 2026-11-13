@@ -6,13 +6,11 @@ import java.net.URLDecoder
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
-/** Append-only persistence boundary for correction tiers. */
 interface CorrectionLineageJournal {
     fun append(tier: CorrectionTierLine)
     fun readAll(): List<CorrectionTierLine>
 }
 
-/** Process-local journal for tests and explicitly ephemeral use. */
 class InMemoryCorrectionLineageJournal : CorrectionLineageJournal {
     private val entries = mutableListOf<CorrectionTierLine>()
 
@@ -29,9 +27,9 @@ class InMemoryCorrectionLineageJournal : CorrectionLineageJournal {
 }
 
 /**
- * Durable append-only journal backed by a private application file.
- * Versioned tab-separated records use URL encoding; "~" represents an empty field.
- * Uses java.net encoding APIs compatible with the app's minSdk.
+ * Durable append-only journal. V2 records include the future marker anchor and direction.
+ * V1 records remain readable and are interpreted as forward tiers using the designated
+ * future marker anchor; old records are never rewritten in place.
  */
 class FileCorrectionLineageJournal(private val file: File) : CorrectionLineageJournal {
     @Synchronized
@@ -56,14 +54,16 @@ class FileCorrectionLineageJournal(private val file: File) : CorrectionLineageJo
 
     private fun encode(tier: CorrectionTierLine): String {
         val fields = listOf(
-            "v1",
+            "v2",
             tier.correctionId,
             tier.originalSourceTierRef,
             tier.originalSourceTierCommit,
+            tier.futureMarkerAnchorCommit,
             tier.sourceContentSha256,
             tier.sourceCorrectionId.orEmpty(),
             tier.correctionPoint,
             tier.changeKind.name,
+            tier.direction.name,
             tier.fromSha256,
             tier.toSha256,
             tier.operation,
@@ -76,24 +76,49 @@ class FileCorrectionLineageJournal(private val file: File) : CorrectionLineageJo
 
     private fun decode(line: String): CorrectionTierLine {
         val fields = line.split('\t').map(::decodeField)
-        require(fields.size == 14 && fields[0] == "v1") {
-            "Unsupported or malformed correction journal record"
+        return when (fields.firstOrNull()) {
+            "v1" -> {
+                require(fields.size == 14) { "Malformed v1 correction journal record" }
+                CorrectionTierLine(
+                    correctionId = fields[1],
+                    originalSourceTierRef = fields[2],
+                    originalSourceTierCommit = fields[3],
+                    futureMarkerAnchorCommit = CorrectionTierLine.FUTURE_MARKER_ANCHOR_COMMIT,
+                    sourceContentSha256 = fields[4],
+                    sourceCorrectionId = fields[5].ifEmpty { null },
+                    correctionPoint = fields[6],
+                    changeKind = CorrectionChangeKind.valueOf(fields[7]),
+                    direction = CorrectionDirection.FORWARD,
+                    fromSha256 = fields[8],
+                    toSha256 = fields[9],
+                    operation = fields[10],
+                    operationVersion = fields[11],
+                    lineageCorrectionIds = fields[12].split(',').filter { it.isNotEmpty() },
+                    resultingCommitSha = fields[13].ifEmpty { null }
+                )
+            }
+            "v2" -> {
+                require(fields.size == 16) { "Malformed v2 correction journal record" }
+                CorrectionTierLine(
+                    correctionId = fields[1],
+                    originalSourceTierRef = fields[2],
+                    originalSourceTierCommit = fields[3],
+                    futureMarkerAnchorCommit = fields[4],
+                    sourceContentSha256 = fields[5],
+                    sourceCorrectionId = fields[6].ifEmpty { null },
+                    correctionPoint = fields[7],
+                    changeKind = CorrectionChangeKind.valueOf(fields[8]),
+                    direction = CorrectionDirection.valueOf(fields[9]),
+                    fromSha256 = fields[10],
+                    toSha256 = fields[11],
+                    operation = fields[12],
+                    operationVersion = fields[13],
+                    lineageCorrectionIds = fields[14].split(',').filter { it.isNotEmpty() },
+                    resultingCommitSha = fields[15].ifEmpty { null }
+                )
+            }
+            else -> error("Unsupported correction journal record version")
         }
-        return CorrectionTierLine(
-            correctionId = fields[1],
-            originalSourceTierRef = fields[2],
-            originalSourceTierCommit = fields[3],
-            sourceContentSha256 = fields[4],
-            sourceCorrectionId = fields[5].ifEmpty { null },
-            correctionPoint = fields[6],
-            changeKind = CorrectionChangeKind.valueOf(fields[7]),
-            fromSha256 = fields[8],
-            toSha256 = fields[9],
-            operation = fields[10],
-            operationVersion = fields[11],
-            lineageCorrectionIds = fields[12].split(',').filter { it.isNotEmpty() },
-            resultingCommitSha = fields[13].ifEmpty { null }
-        )
     }
 
     private fun encodeField(value: String): String =
