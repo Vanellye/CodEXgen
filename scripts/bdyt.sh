@@ -25,7 +25,7 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     [[ -f "$path" && ! -L "$path" && -r "$path" ]] || fail "origin '$path' must be a readable regular non-symlink file"
     size=$(wc -c < "$path"); size=${size//[[:space:]]/}
     (( size <= 1048576 )) || fail 'origin exceeds 1 MiB text input limit'
-    text_size=$(LC_ALL=C tr -d '\\000' < "$path" | wc -c); text_size=${text_size//[[:space:]]/}
+    text_size=$(LC_ALL=C tr -d '\000' < "$path" | wc -c); text_size=${text_size//[[:space:]]/}
     [[ "$text_size" == "$size" ]] || fail 'NUL/binary input is not supported'
     values[$id]=$(cat -- "$path")
     origins[$id]=$path
