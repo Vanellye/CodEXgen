@@ -9,6 +9,9 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 
 class SkribedAndTransmissionTest {
+    private fun document(source: String): SkribedDocument =
+        SkribedDocument(source, InMemoryCorrectionLineageJournal())
+
     @Test
     fun originalWritingPreservesUnicodeAndPunctuationExactly() {
         val source = "Öôŕîɣîñäl·l  e\u0301 Ĉ̣ — Ɓûîľð"
@@ -33,10 +36,7 @@ class SkribedAndTransmissionTest {
         assertEquals(source, document.originalText)
         assertNotEquals(document.originalSha256, corrected.outputSha256)
         assertEquals(WritingVariantKind.CORRECTED, corrected.kind)
-        assertEquals(
-            CorrectionTierLine.ORIGINAL_SOURCE_TIER_COMMIT,
-            corrected.correctionTier.originalSourceTierCommit
-        )
+        assertEquals(CorrectionTierLine.ORIGINAL_SOURCE_TIER_COMMIT, corrected.correctionTier.originalSourceTierCommit)
         assertEquals(document.originalSha256, corrected.correctionTier.fromSha256)
         assertEquals(corrected.outputSha256, corrected.correctionTier.toSha256)
         assertEquals(CorrectionChangeKind.REPLACE, corrected.correctionTier.changeKind)
@@ -62,14 +62,8 @@ class SkribedAndTransmissionTest {
 
         assertEquals(first.outputSha256, second.correctionTier.fromSha256)
         assertEquals(first.correctionTier.correctionId, second.correctionTier.sourceCorrectionId)
-        assertEquals(
-            listOf(first.correctionTier.correctionId),
-            second.correctionTier.lineageCorrectionIds
-        )
-        assertEquals(
-            CorrectionTierLine.ORIGINAL_SOURCE_TIER_COMMIT,
-            second.correctionTier.originalSourceTierCommit
-        )
+        assertEquals(listOf(first.correctionTier.correctionId), second.correctionTier.lineageCorrectionIds)
+        assertEquals(CorrectionTierLine.ORIGINAL_SOURCE_TIER_COMMIT, second.correctionTier.originalSourceTierCommit)
         assertEquals(2, document.correctionTiers().size)
         assertEquals("source", document.originalText)
     }
@@ -78,10 +72,9 @@ class SkribedAndTransmissionTest {
     fun fileJournalPersistsCorrectionTiersAcrossJournalInstances() {
         val file = File.createTempFile("eria-corrections-", ".log")
         try {
-            val firstJournal = FileCorrectionLineageJournal(file)
             val document = SkribedDocument(
                 originalText = "source",
-                correctionJournal = firstJournal
+                correctionJournal = FileCorrectionLineageJournal(file)
             )
             val correction = document.derive(
                 WritingVariantKind.CORRECTED,
@@ -94,10 +87,7 @@ class SkribedAndTransmissionTest {
             val restored = FileCorrectionLineageJournal(file).readAll()
             assertEquals(1, restored.size)
             assertEquals(correction.correctionTier.correctionId, restored.single().correctionId)
-            assertEquals(
-                CorrectionTierLine.ORIGINAL_SOURCE_TIER_COMMIT,
-                restored.single().originalSourceTierCommit
-            )
+            assertEquals(CorrectionTierLine.ORIGINAL_SOURCE_TIER_COMMIT, restored.single().originalSourceTierCommit)
             assertEquals(correction.correctionTier.fromSha256, restored.single().fromSha256)
             assertEquals(correction.correctionTier.toSha256, restored.single().toSha256)
         } finally {
@@ -162,10 +152,7 @@ class SkribedAndTransmissionTest {
         assertEquals("tx-1", receipt.transmissionId)
         assertEquals("corr-1", receipt.correlationId)
         assertEquals("audio.capture", receipt.sourceRef)
-        assertEquals(
-            "sound-data-returned",
-            String(receipt.responsePayload, StandardCharsets.UTF_8)
-        )
+        assertEquals("sound-data-returned", String(receipt.responsePayload, StandardCharsets.UTF_8))
         assertTrue(receipt.responseSha256.matches(Regex("^[0-9a-f]{64}$")))
     }
 
