@@ -37,7 +37,7 @@ Allow automation to prepare, validate, and present development work while preser
 
 A later `CHANGES_REQUESTED`, `COMMENTED`, or `DISMISSED` review supersedes that reviewer's earlier approval. Any new commit makes an earlier approval stale for this gate.
 
-The workflow checks this evidence on pull-request updates and review submissions/dismissals. Unit tests cover missing, stale, bot-only, unknown-identity, author-self-approval, superseded, and valid current-SHA cases.
+The verifier is wired into the repository's existing `.github/workflows/independent-branch-ci.yml` pull-request workflow, which already exists on `main`. It checks review evidence on pull-request runs and runs the regression suite. Unit tests cover missing, stale, bot-only, unknown-identity, author-self-approval, superseded, and valid current-SHA cases.
 
 ## Important enforcement limitation
 
