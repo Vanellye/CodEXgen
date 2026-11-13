@@ -1,0 +1,52 @@
+# ERIA Pantheon filesystem audit contract
+# Draft specification; not executable until a Pantheon compiler/runtime exists.
+
+LANGUAGE Pantheon;
+MODULE ERIA.Filesystem.RootAwareAudit VERSION "1.0";
+
+TARGET TERMUX.ANDROID_FILESYSTEM;
+MODE READ_ONLY;
+PURPOSE "Inventory filesystem paths available to the current process and record provenance.";
+
+IDENTITY {
+  OBSERVE effective_uid;
+  IF effective_uid == 0 THEN access_mode ROOT;
+  ELSE access_mode USER;
+  NEVER invoke su implicitly;
+}
+
+SCOPE {
+  USER: Termux_home, user_granted_shared_storage;
+  ROOT: filesystem_roots_readable_by_current_root_process;
+  EXCLUDE volatile_pseudo_filesystems where traversal is unsafe;
+  DO_NOT assume root access from presence of su binary;
+}
+
+COLLECT {
+  PATHS_ONLY;
+  INCLUDE hidden_entries;
+  DO_NOT read file_contents;
+  DO_NOT follow symbolic_links;
+  RECORD inaccessible_paths;
+  RECORD scan_errors;
+}
+
+GOVERNANCE {
+  PRESERVE source_root;
+  RECORD UTC_timestamp;
+  RECORD effective_uid;
+  RECORD access_mode;
+  RECORD inventory_SHA256;
+  APPEND audit_ledger;
+  DO_NOT change permissions;
+  DO_NOT remount filesystems;
+  DO_NOT escalate privileges;
+  DO_NOT transmit results;
+}
+
+ON permission_denied RECORD AND CONTINUE;
+ON invalid_root HOLD;
+ON audit_write_failure FAIL_CLOSED;
+
+DECISION PROPOSAL_ONLY;
+END MODULE;
