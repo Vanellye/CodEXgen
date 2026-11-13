@@ -109,3 +109,14 @@ Interpretation for review and future implementation:
 `UP` names the forward-driving principle attached to this documented lineage point: advance through evidence, preserve origin, make progress reviewable, and keep the next step accountable to human intent. The anchor identifies this commit as the reference point for that principle; it does not change Git ancestry or move a ref.
 
 **Boundary:** `UP` is descriptive governance metadata, not executable syntax, a priority override, authorization, permission grant, runtime trigger, merge command, or instruction for external dispatch. Any implementation or activation remains a separately reviewed and explicitly authorized operation.
+
+
+## Frequency metadata cross-reference
+
+The repository's user-specified nominal frequency values are registered in the root-level `FREQUENCY-REGISTER.md`:
+
+- `FREQ-556` — 556 Hz
+- `FREQ-772` — 772 Hz
+- `FREQ-420` — 420 Hz
+
+This is a documentation cross-reference, not a claim that every branch or nested repository has been updated. The values carry no inferred effect, signal parameters, execution authority, or permission to emit or dispatch a signal. See the register for provenance and implementation boundaries.
