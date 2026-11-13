@@ -317,3 +317,10 @@ For this directory, it denotes a future, bounded Mash* code integrity/reporting 
 `UP` marks the forward-driving principle associated with this lineage point: progress grounded in evidence, source preservation, reviewable change, and accountable human intent. The anchor is a reference to the named commit, not a replacement for its Git identity or ancestry.
 
 **Boundary:** this is descriptive documentation metadata only. `UP` is not executable syntax, a priority override, authorization, permission grant, runtime trigger, merge command, or external-dispatch instruction. Executable implementation and runtime activation remain separate reviewed and explicitly authorized stages. See the root `L-L-LINE.md` anchor for the shared definition.
+
+
+## 13. User-specified frequency metadata
+
+The canonical register is `FREQUENCY-REGISTER.md` at the repository root. It records the supplied values in order: `FREQ-556` (556 Hz), `FREQ-772` (772 Hz), and `FREQ-420` (420 Hz).
+
+These are nominal metadata values only. They do not describe a waveform or validated effect and do not cause audio generation, transmission, playback, Bluetooth routing, or physical actuation. Branch-by-branch and nested-repository propagation remains unverified; each target requires inspection and its own reviewable receipt. The register is authoritative for the values and boundaries; do not create conflicting local definitions.
