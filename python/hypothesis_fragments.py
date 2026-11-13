@@ -44,7 +44,6 @@ class MiniBiggerRecord:
             "is_placeholder": True,
             "runtime_injection_allowed": False,
         })
-        base["provenance"]["parent_record_id"] = self.parent_record_id
         return base
 
 
