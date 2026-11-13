@@ -17,9 +17,9 @@ defmodule Eria.MultiOmics.Record do
 
   def new(attrs) when is_map(attrs) do
     with {:ok, domain} <- required_string(attrs, :domain),
-         true <- domain in Eria.Observation.domains() or {:error, :unsupported_domain},
+         true <- domain in Eria.Observation.domains() || {:error, :unsupported_domain},
          {:ok, modality} <- required_string(attrs, :modality),
-         true <- modality in @modalities or {:error, :unsupported_modality},
+         true <- modality in @modalities || {:error, :unsupported_modality},
          {:ok, subject_id} <- required_string(attrs, :subject_id),
          {:ok, assay} <- required_string(attrs, :assay),
          {:ok, feature} <- required_string(attrs, :feature),
