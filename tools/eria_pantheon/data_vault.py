@@ -104,6 +104,21 @@ def _wordplay(data: bytes, path: str) -> dict[str, Any] | None:
     }
 
 
+def _atomic_replace(path: Path, data: bytes) -> None:
+    """Atomically replace a derived index; source objects remain immutable."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temporary = tempfile.mkstemp(prefix=".index-", dir=str(path.parent))
+    try:
+        with os.fdopen(fd, "wb") as stream:
+            stream.write(data)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
 def _atomic_object(path: Path, data: bytes) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.exists():
@@ -206,8 +221,6 @@ def acquire_commit(repository: str | Path, commit: str, vault: str | Path = DEFA
                             existing.add(row.get("path"))
         new_records = []
         for entry in entries:
-            if not entry:
-                continue
             try:
                 metadata, raw_path = entry.split(b"\t", 1)
                 mode, kind, blob = metadata.decode("ascii").split(" ", 2)
@@ -256,13 +269,18 @@ def acquire_commit(repository: str | Path, commit: str, vault: str | Path = DEFA
                 stream.flush()
                 os.fsync(stream.fileno())
             index_path = indexes / (commit + ".json")
-            index_payload = {
-                "schema": "eria-vault-wordplay-v1", "commit_sha": commit,
-                "records": [{"path": r["path"], "sha256": r["sha256"],
-                             "wordplay": r["wordplay"]}
-                            for r in new_records if r["wordplay"] is not None],
-            }
-            _atomic_object(index_path, json.dumps(
+            commit_records = []
+            with manifest.open("r", encoding="utf-8") as stream:
+                for line in stream:
+                    if not line.strip():
+                        continue
+                    record = json.loads(line)
+                    if record.get("commit_sha") == commit and record.get("wordplay") is not None:
+                        commit_records.append({"path": record["path"], "sha256": record["sha256"],
+                                               "wordplay": record["wordplay"]})
+            index_payload = {"schema": "eria-vault-wordplay-v1",
+                             "commit_sha": commit, "records": commit_records}
+            _atomic_replace(index_path, json.dumps(
                 index_payload, ensure_ascii=False, sort_keys=True, indent=2
             ).encode("utf-8"))
         fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
