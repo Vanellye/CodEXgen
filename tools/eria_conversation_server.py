@@ -28,6 +28,7 @@ UI_FILE = HERE / "eria_conversation.html"
 sys.path.insert(0, str(TOOLS))
 from eria_repository_conversation import Conversation, Repository  # noqa: E402
 from eria_pantheon.pons import Pons  # noqa: E402
+from eria_file_pull import FilePullService, start_scheduler
 
 DB_DEFAULT = Path.home() / ".eria" / "data" / "eria_conversation.sqlite3"
 MAX_BODY = 16_384
@@ -343,6 +344,9 @@ class Handler(BaseHTTPRequestHandler):
             except Exception as exc:
                 self.send_json(400, {"error": "File inspection unavailable: " + type(exc).__name__})
             return
+        if route == "/api/pull/status":
+            self.send_json(200, self.app.file_pull.status())
+            return
         if route == "/api/status":
             self.send_json(200, {
                 "ok": True, "repository": str(self.app.repository.root),
@@ -372,6 +376,10 @@ class Handler(BaseHTTPRequestHandler):
         route = urlparse(self.path).path
         try:
             data = self.read_json()
+            if route == "/api/pull":
+                result = self.app.file_pull.sync_all()
+                self.send_json(200 if result.get("ok") else 502, result)
+                return
             if route == "/api/chat":
                 question = data.get("message")
                 session = str(data.get("session_id", "default"))[:80]
@@ -415,6 +423,7 @@ class App:
         self.conversation = Conversation(self.repository)
         self.store = Store(database)
         self.store.index_repository(self.repository)
+        self.file_pull = FilePullService(self.repository.root, self.store.path)
 
 
 def main():
@@ -428,6 +437,7 @@ def main():
     if args.host not in {"127.0.0.1", "localhost", "::1"}:
         parser.error("ERIA server only binds to loopback.")
     app = App(Path(args.repository), args.database)
+    start_scheduler(app.file_pull)
     server = ThreadingHTTPServer((args.host, args.port), Handler)
     server.app = app
     print("ERIA HTML Conversation")
