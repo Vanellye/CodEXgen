@@ -123,6 +123,22 @@
           "size_bytes": {
             "type": "integer",
             "minimum": 0
+          },
+          "record_type": {
+            "enum": [
+              "original",
+              "translation",
+              "interpretation",
+              "correction"
+            ]
+          },
+          "source_relative_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_filename": {
+            "type": "string",
+            "minLength": 1
           }
         }
       }
