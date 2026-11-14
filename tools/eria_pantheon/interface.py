@@ -52,6 +52,7 @@ class ERIAPantheonInterface:
             "repository.ask <question>, "
             "aei.inspect <repo-relative-path>, "
             "aei.translate <repo-relative-path> (read-only), "
+            "aei.compile <repo-relative-path> (store derived copy), "
             "ai.ask <repo-relative-path> --question <text>, "
             "code.bypass <repo-relative-path> --reason <text>"
         )
