@@ -6,7 +6,8 @@ capture metadata, creates a collaboration reference, and appends a lineage event
 
 ## Storage layout
 
-- ORIGINAL_DATA/objects/<first-two-hex>/<sha256> — exact original bytes.
+- ORIGINAL_DATA/objects/<first-two-hex>/<sha256> — exact original bytes, unchanged.
+- SHOP/objects/<first-two-hex>/<sha256> — every non-original typed descendant.
 - SOURCE_PROVENANCE/records/<uuid>.json — capture metadata and parent IDs.
 - LINEAGE/events.jsonl — append-only ingestion events.
 - COLLABORATION/records/<uuid>/source-reference.json — collaboration pointer.
@@ -76,21 +77,20 @@ snapshot command, not a watcher or unattended device-wide crawler. See
 [Repository forge SOW](SOW/AUTONOMOUS_REPOSITORY_INTERPRETATION_REPRESENTATION_FORGE.md)
 for the complete contract and limitations.
 
-## Typed derivative records
+## SHOP typed lineage and derivation records
 
 `tools/god_derivatives.py` exposes
-`create_derived_record(...)` for `translation`,
-`interpretation`, and `correction` descendants. It requires
+`create_derived_record(...)` for any explicitly typed non-original descendant. Record types use a lowercase identifier (1–64 characters; letters, digits, `_`, and `-`), with `original` reserved. It requires
 a trusted PONS grant for `god.derive` scoped to the resolved vault,
 one or more validated parent IDs, an operation and method description, and an
 exact source context (`relative_path`, `filename`, and
 `source_sha256`) matching a direct parent. The API hashes the new
-output, stores it under `DERIVED_DATA/objects/`, revalidates the
+output, stores it under `SHOP/objects/`, revalidates the
 parents immediately before creating a new provenance record, stores a
 direct-parent digest/size manifest, and appends a typed lineage event.
 
-Original objects remain under `ORIGINAL_DATA/objects/`. Derived
-records use the distinct `derived-not-validated-as-fact` authority
+Original objects remain under `ORIGINAL_DATA/objects/` with their existing metadata format. Every non-original typed descendant
+record uses the distinct `derived-not-validated-as-fact` authority
 marker; creating a correction does not amend or supersede an original. The
 validator checks that the derivation's source-relative path, filename, and
 hash match the direct parent it claims to derive from. A derived record must
