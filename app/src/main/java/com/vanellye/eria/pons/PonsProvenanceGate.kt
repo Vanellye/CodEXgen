@@ -40,7 +40,7 @@ data class PonsComponentPin(
     val sha256: String
 )
 
-data class PonsProvenanceResult(
+data class PonsProvenanceResult internal constructor(
     val componentId: String,
     val state: PonsProvenanceState,
     val expectedSha256: String?,
@@ -66,7 +66,7 @@ class PonsProvenanceGate(
         require(anchor == PonsAnchorIdentity.CANONICAL) {
             "PONS canonical anchor mismatch; refusing initialization"
         }
-        pins.forEach { (key, pin) ->
+        this.pins.forEach { (key, pin) ->
             require(key == pin.componentId) { "PONS manifest key/component mismatch" }
             require(pin.sha256.matches(Regex("^[0-9a-f]{64}$"))) {
                 "PONS pin must be lowercase SHA-256"
