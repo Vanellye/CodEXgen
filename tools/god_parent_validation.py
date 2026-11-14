@@ -327,7 +327,22 @@ def validate_parent_chain(
             "record_type": record["record_type"],
             "sha256": record["sha256"],
             "size_bytes": record["size_bytes"],
+            "source_relative_path": record["source"].get(
+                "relative_path", record["source"]["filename"]
+            ),
+            "source_filename": record["source"]["filename"],
         }
+        if record["record_type"] in DERIVED_TYPES:
+            context = record["derivation"]["source_context"]
+            if not any(
+                item["sha256"] == context["source_sha256"]
+                and item["source_relative_path"] == context["relative_path"]
+                and item["source_filename"] == context["filename"]
+                for item in ancestor_proofs
+            ):
+                raise ParentValidationError(
+                    "derived source context does not match a direct parent record"
+                )
         visited[record_id] = proof
         return proof
 
