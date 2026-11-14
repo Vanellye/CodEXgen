@@ -76,7 +76,7 @@ def acquire_repository(repository: str | Path) -> dict[str, Any]:
     for directory, dirnames, filenames in os.walk(root, followlinks=False):
         dirnames[:] = sorted(
             name for name in dirnames
-            if name not in SKIP_DIRS and not name.startswith(".")
+            if name not in SKIP_DIRS and (not name.startswith(".") or name == ".github")
             and not (Path(directory) / name).is_symlink()
         )
         for filename in sorted(filenames):
