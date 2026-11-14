@@ -2,3 +2,9 @@
 !/compiled/.gitkeep
 /manifests/*
 !/manifests/.gitkeep
+/acquisitions/*
+!/acquisitions/.gitkeep
+/resonance/*
+!/resonance/.gitkeep
+/inbox/*
+!/inbox/.gitkeep
