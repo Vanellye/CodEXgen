@@ -30,13 +30,7 @@ typedef struct {
     const char *anchor_ref;
 } PonsCManifestPin;
 
-typedef struct {
-    PonsCState state;
-    char component_id[128];
-    char expected_sha256[65];
-    char actual_sha256[65];
-    char reason[160];
-} PonsCProof;
+typedef struct PonsCProof PonsCProof;
 
 /* Pin must come from an independently reviewed manifest.
  * Hash callback must be a real SHA-256 implementation in production.
@@ -46,9 +40,10 @@ PonsCState pons_c_verify(const PonsCManifestPin *pin,
                          size_t source_length,
                          PonsCSha256Fn sha256_fn,
                          void *sha256_context,
-                         PonsCProof *proof);
+                         PonsCProof **proof_out);
 
 int pons_c_proof_is_valid(const PonsCProof *proof, const char *component_id);
+void pons_c_proof_destroy(PonsCProof *proof);
 
 #ifdef __cplusplus
 }
