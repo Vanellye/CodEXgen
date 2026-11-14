@@ -50,7 +50,7 @@ class PONSRegistry:
         self.anchor = anchor
         self.ledger_path = Path(ledger_path) if ledger_path else None
         self._components: Dict[str, Component] = {}
-        self._observations: Dict[str, dict] = {}
+        self._observations: Dict[str, dict] = {}\n        self._provenance: Dict[str, dict] = {}
         self._lock = RLock()
         self._last_event_hash = "0" * 64
         if self.ledger_path and self.ledger_path.exists():
@@ -115,7 +115,7 @@ class PONSRegistry:
             "component_id": component_id,
             "reported_state": obs["state"],
             "detail": obs.get("detail", ""),
-            "provenance_state": "NOT_CHECKED",
+            "provenance_state": self._provenance.get(component_id, {"state": "NOT_CHECKED"})["state"],\n            "actual_sha256": self._provenance.get(component_id, {}).get("actual_sha256"),
             "source_ref": component.source_ref,
             "source_path": component.source_path,
             "expected_sha256": component.expected_sha256,
