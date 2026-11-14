@@ -54,6 +54,35 @@ class PONSTests(unittest.TestCase):
         self.assertEqual(report["anchor"]["anchor_id"], "7f7a43a973a96a06dd432bf94843213d09133323")
         self.assertEqual(report["components"][0]["reported_state"], "UNKNOWN")
 
+    def test_guarded_operation_runs_only_with_matching_provenance(self):
+        source = b"trusted source"
+        digest = hashlib.sha256(source).hexdigest()
+        registry = PONSRegistry()
+        registry.register(Component("guarded", "ref-1", "module.py", digest, "reviewed-v1"))
+        called = []
+        denied = registry.execute_guarded("guarded", b"altered", lambda: called.append("bad"))
+        self.assertFalse(denied["executed"])
+        self.assertEqual(denied["state"], "HOLD")
+        self.assertEqual(called, [])
+        allowed = registry.execute_guarded("guarded", source, lambda value: value + 1, 41)
+        self.assertTrue(allowed["executed"])
+        self.assertEqual(allowed["result"], 42)
+
+    def test_ledger_replay_restores_registry_state(self):
+        source = b"ledger-backed"
+        digest = hashlib.sha256(source).hexdigest()
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "events.jsonl"
+            registry = PONSRegistry(str(path))
+            registry.register(Component("replayed", "ref-2", "replayed.py", digest, "manifest-2"))
+            registry.observe_status("replayed", "READY", "unit test")
+            registry.verify_provenance("replayed", source)
+            restored = PONSRegistry(str(path))
+            status = restored.component_status("replayed")
+            self.assertEqual(status["reported_state"], "READY")
+            self.assertEqual(status["provenance_state"], "VERIFIED")
+            self.assertEqual(status["effective_state"], "READY")
+
 
 if __name__ == "__main__":
     unittest.main()
