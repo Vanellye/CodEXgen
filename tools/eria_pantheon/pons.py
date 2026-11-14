@@ -99,7 +99,10 @@ class Pons:
     Resolution itself has no implicit network, filesystem, process, Git, or
     hardware behavior. Factories are caller-supplied and remain explicit.
     """
-    def __init__(self, *, reviewer_root_public_key_b64: Optional[str] = None) -> None:
+    def __init__(
+        self, *, reviewer_root_public_key_b64: Optional[str] = None,
+        revoked_reviewer_key_ids: Optional[set[str]] = None,
+    ) -> None:
         self._factories: Dict[Type[Any], tuple[Callable[[], Any], Lifetime]] = {}
         self._singletons: Dict[Type[Any], Any] = {}
         self._lock = threading.RLock()
@@ -107,7 +110,9 @@ class Pons:
         self._reviewer_identity = None
         if reviewer_root_public_key_b64:
             from .reviewer_identity import ReviewerIdentityAuthority
-            self._reviewer_identity = ReviewerIdentityAuthority(reviewer_root_public_key_b64)
+            self._reviewer_identity = ReviewerIdentityAuthority(
+                reviewer_root_public_key_b64, revoked_key_ids=revoked_reviewer_key_ids
+            )
 
     def register(self, key: Type[Any], factory: Callable[[], Any], *,
                  lifetime: Lifetime = Lifetime.TRANSIENT) -> None:
@@ -151,6 +156,9 @@ class Pons:
                     ledger_path, authority=_PONS_AUTHORITY
                 )
         return {"installed": True, "authority": "PONS_ONLY"}
+
+    def reviewer_identity_configured(self) -> bool:
+        return self._reviewer_identity is not None
 
     def issue_reviewer_challenge(self, certificate: Dict[str, Any]) -> Dict[str, str]:
         if self._reviewer_identity is None:
