@@ -27,6 +27,8 @@ class PactTests(unittest.TestCase):
   self.assertEqual(out["status"],"COMPLETED"); self.assertEqual((self.root/"a.py").read_text(),"def shared():\n    return 3\n")
   msg=subprocess.run(["git","-C",str(self.root),"log","-1","--pretty=%s"],capture_output=True,text=True,check=True).stdout.strip()
   self.assertEqual(msg,"PACT approved change")
+  with self.assertRaisesRegex(ValueError,"one-shot"):
+   self.rt.execute(grant["grant_id"])
  def test_main_branch_is_prohibited(self):
   subprocess.run(["git","-C",str(self.root),"branch","-M","main"],check=True)
   with self.assertRaisesRegex(ValueError,"branch/HEAD changed|main/master writes are prohibited"):

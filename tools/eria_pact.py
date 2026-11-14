@@ -57,6 +57,9 @@ class PactRuntime:
             CREATE TABLE IF NOT EXISTS pact_requests(request_id TEXT PRIMARY KEY,patch_grant_id TEXT NOT NULL,program TEXT NOT NULL,plan_json TEXT NOT NULL,plan_sha256 TEXT NOT NULL,created_at TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS pact_grants(grant_id TEXT PRIMARY KEY,request_id TEXT NOT NULL,plan_sha256 TEXT NOT NULL,capabilities_json TEXT NOT NULL,decision TEXT NOT NULL,approved_at TEXT NOT NULL,confirmation TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS pact_events(event_id TEXT PRIMARY KEY,grant_id TEXT NOT NULL,operation TEXT NOT NULL,outcome TEXT NOT NULL,detail_json TEXT NOT NULL,created_at TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS pact_runs(run_id TEXT PRIMARY KEY,grant_id TEXT NOT NULL UNIQUE,started_at TEXT NOT NULL);
+            CREATE TRIGGER IF NOT EXISTS pact_run_u BEFORE UPDATE ON pact_runs BEGIN SELECT RAISE(ABORT,'PACT run claims append-only'); END;
+            CREATE TRIGGER IF NOT EXISTS pact_run_d BEFORE DELETE ON pact_runs BEGIN SELECT RAISE(ABORT,'PACT run claims append-only'); END;
             CREATE UNIQUE INDEX IF NOT EXISTS pact_one_grant ON pact_grants(request_id);
             CREATE TRIGGER IF NOT EXISTS pact_req_u BEFORE UPDATE ON pact_requests BEGIN SELECT RAISE(ABORT,'PACT requests append-only'); END;
             CREATE TRIGGER IF NOT EXISTS pact_req_d BEFORE DELETE ON pact_requests BEGIN SELECT RAISE(ABORT,'PACT requests append-only'); END;
@@ -129,6 +132,10 @@ class PactRuntime:
         if not g or not r or g["decision"]!="REVIEW_READY": raise ValueError("No PACT execution grant.")
         digest=hashlib.sha256(r["plan_json"].encode()).hexdigest()
         if digest!=g["plan_sha256"]: raise ValueError("Approved PACT plan changed.")
+        with self.connect() as db:
+            prior=db.execute("SELECT run_id FROM pact_runs WHERE grant_id=?",(gid,)).fetchone()
+            if prior: raise ValueError("PACT grant is one-shot and has already been consumed.")
+            db.execute("INSERT INTO pact_runs VALUES(?,?,?)",(str(uuid.uuid4()),gid,now()))
         p=json.loads(r["plan_json"]); branch,head=self.state()
         if branch.lower() in MAIN or (branch,head)!=(p["branch"],p["head"]): raise ValueError("Branch/HEAD invalidated approval.")
         _,patch_text=self.patch(p["patch_grant_id"]); self.approvals.verify_patch_grant(p["patch_grant_id"],patch_text); self.clean()
