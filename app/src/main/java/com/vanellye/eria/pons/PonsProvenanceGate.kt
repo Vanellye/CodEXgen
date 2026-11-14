@@ -43,9 +43,12 @@ data class PonsProvenanceResult(
  * computes source digests itself and never accepts a component's accuracy claim.
  */
 class PonsProvenanceGate(
-    private val pins: Map<String, PonsComponentPin>,
+    pins: Map<String, PonsComponentPin>,
     val anchor: PonsAnchorIdentity = PonsAnchorIdentity.CANONICAL
 ) {
+    // Defensive snapshot: callers cannot mutate trust pins after gate construction.
+    private val pins: Map<String, PonsComponentPin> = pins.toMap()
+
     init {
         require(anchor == PonsAnchorIdentity.CANONICAL) {
             "PONS canonical anchor mismatch; refusing initialization"
