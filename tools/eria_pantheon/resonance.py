@@ -12,6 +12,8 @@ import math
 import os
 import struct
 import wave
+import threading
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -145,3 +147,83 @@ def acquire_inbox(repository: str | Path, *, approval_grant: dict[str, Any] | No
     return {"status": "complete", "acquired": acquired, "duplicates": duplicates,
             "held": held, "source_files_modified": False,
             "authority": "NON_AUTHORITATIVE"}
+
+
+class InboxMonitor:
+    """Persistent, pause/resume inbox monitor; inactive until explicit start.
+
+    The approval is a local-console action scoped only to storage/inbox/.
+    It is an application-level gate, not OS-level authentication.
+    """
+    def __init__(self, repository: str | Path):
+        self.root = Path(repository).resolve(strict=True)
+        self._lock = threading.RLock()
+        self._stop = threading.Event()
+        self._thread: threading.Thread | None = None
+        self._state = "paused"
+        self._approval_reference: str | None = None
+        self._last_result: dict[str, Any] | None = None
+        self._last_error: str | None = None
+
+    def status(self) -> dict[str, Any]:
+        with self._lock:
+            return {
+                "state": self._state,
+                "scope": "storage/inbox/",
+                "approval_required": True,
+                "approval_reference": self._approval_reference,
+                "last_result": self._last_result,
+                "last_error": self._last_error,
+                "source_files_modified": False,
+            }
+
+    def start(self, approval_reference: str) -> dict[str, Any]:
+        if not isinstance(approval_reference, str) or not approval_reference.strip():
+            raise ResonanceHold("An explicit approval reference is required.")
+        with self._lock:
+            if self._thread and self._thread.is_alive():
+                self._state = "running"
+                return self.status()
+            self._approval_reference = approval_reference.strip()
+            self._stop.clear()
+            self._state = "running"
+            self._last_error = None
+            self._thread = threading.Thread(
+                target=self._run, name="eria-inbox-monitor", daemon=True
+            )
+            self._thread.start()
+            return self.status()
+
+    def pause(self) -> dict[str, Any]:
+        with self._lock:
+            self._stop.set()
+            self._state = "paused"
+            thread = self._thread
+        if thread and thread.is_alive():
+            thread.join(timeout=2.0)
+        return self.status()
+
+    def _run(self) -> None:
+        while not self._stop.is_set():
+            try:
+                config = load_config(self.root)
+                interval = int(config["automatic_capture"].get("poll_interval_seconds", 10))
+                policy = config["automatic_capture"]
+                if not policy.get("approval_required") or not policy.get("enabled"):
+                    raise ResonanceHold("Acquisition is disabled by storage/settings.json.")
+                grant = {
+                    "capability": "eria.acquire",
+                    "scope": "storage/inbox/",
+                    "approved": True,
+                    "approval_reference": self._approval_reference,
+                }
+                result = acquire_inbox(self.root, approval_grant=grant)
+                with self._lock:
+                    self._last_result = result
+                    self._last_error = None
+            except Exception as exc:
+                with self._lock:
+                    self._last_error = str(exc)
+            self._stop.wait(max(2, min(interval if "interval" in locals() else 10, 300)))
+        with self._lock:
+            self._state = "paused"
