@@ -24,6 +24,8 @@ class ERIAPantheonInterface:
         state = self.bridge.describe()
         state["repository"] = str(self.repository.root)
         state["conversation_engine"] = "connected"
+        state["service_state"] = "ON"
+        state["higher_faculty_pipeline"] = "Discovery -> Antithesis -> Verification -> Creation"
         try:
             import eria_ttt_bypass  # noqa: F401
             state["code_bypass_module"] = "available"
