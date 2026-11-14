@@ -219,13 +219,14 @@ class FilePullService:
         started = utc_now()
         commit = git_read(self.root, "rev-parse", "HEAD")
         branch = git_read(self.root, "branch", "--show-current") or "unknown"
-        seen = set()
+        observed = set()
         counts = {"scanned": 0, "imported": 0, "unchanged": 0, "skipped": 0}
         for base, directories, files in os.walk(self.root, followlinks=False):
             directories[:] = [name for name in directories if name not in SKIP_DIRS]
             for filename in files:
                 path = Path(base) / filename
                 relative = path.relative_to(self.root).as_posix()
+                observed.add(relative)
                 if SECRET_NAME.search(filename) or path.is_symlink():
                     counts["skipped"] += 1
                     continue
@@ -238,12 +239,11 @@ class FilePullService:
                     if content is None:
                         counts["skipped"] += 1
                         continue
-                    seen.add(relative)
                     key = "imported" if self._record("local", relative, content, branch, commit) else "unchanged"
                     counts[key] += 1
                 except OSError:
                     counts["skipped"] += 1
-        missing = self._mark_missing("local", seen)
+        missing = self._mark_missing("local", observed)
         self._finish_job("local", started, branch, commit, counts, missing)
         return {"source": "local", **counts, "missing": missing, "branch": branch, "commit": commit}
 
@@ -288,12 +288,14 @@ class FilePullService:
         )
         if tree.get("truncated"):
             raise RuntimeError("GitHub tree is truncated; refusing to mark unseen paths missing")
-        seen = set()
+        observed = set()
         counts = {"scanned": 0, "imported": 0, "unchanged": 0, "skipped": 0}
         for item in tree.get("tree", []):
             if item.get("type") != "blob":
                 continue
             path = item.get("path", "")
+            if path:
+                observed.add(path)
             if (
                 not path or any(part in SKIP_DIRS for part in Path(path).parts)
                 or SECRET_NAME.search(Path(path).name)
@@ -311,14 +313,13 @@ class FilePullService:
                 if content is None:
                     counts["skipped"] += 1
                     continue
-                seen.add(path)
                 key = "imported" if self._record(
                     "github", path, content, self.remote_branch, commit
                 ) else "unchanged"
                 counts[key] += 1
             except Exception:
                 counts["skipped"] += 1
-        missing = self._mark_missing("github", seen)
+        missing = self._mark_missing("github", observed)
         self._finish_job("github", started, self.remote_branch, commit, counts, missing)
         return {
             "source": "github", **counts, "missing": missing,
