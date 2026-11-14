@@ -74,3 +74,54 @@ The output must be a new path outside the worktree. This is an explicit
 snapshot command, not a watcher or unattended device-wide crawler. See
 [Repository forge SOW](SOW/AUTONOMOUS_REPOSITORY_INTERPRETATION_REPRESENTATION_FORGE.md)
 for the complete contract and limitations.
+
+## Typed derivative records
+
+`tools/god_derivatives.py` exposes
+`create_derived_record(...)` for `translation`,
+`interpretation`, and `correction` descendants. It requires
+a trusted PONS grant for `god.derive` scoped to the resolved vault,
+one or more validated parent IDs, an operation and method description, and an
+exact source context (`relative_path`, `filename`, and
+`source_sha256`) matching a direct parent. The API hashes the new
+output, stores it under `DERIVED_DATA/objects/`, revalidates the
+parents immediately before creating a new provenance record, stores a
+direct-parent digest/size manifest, and appends a typed lineage event.
+
+Original objects remain under `ORIGINAL_DATA/objects/`. Derived
+records use the distinct `derived-not-validated-as-fact` authority
+marker; creating a correction does not amend or supersede an original. The
+validator checks that the derivation's source-relative path, filename, and
+hash match the direct parent it claims to derive from. A derived record must
+have at least one parent. Original records remain valid ancestry roots.
+
+Directory collection now records each file's path relative to the selected
+source root. A direct single-file ingestion can supply
+`source_relative_path` and `source_root_label` explicitly.
+All relative paths are normalized POSIX paths; absolute paths and traversal
+components are rejected.
+
+Example API shape (the caller must obtain `grant` from the trusted
+PONS adapter; do not construct it from untrusted input):
+
+```python
+create_derived_record(
+    translated_bytes,
+    vault,
+    grant,
+    record_type="translation",
+    parent_record_ids=[original_record_id],
+    operation="translate source text",
+    method="human-reviewed translation",
+    source_context={
+        "relative_path": "documents/source.txt",
+        "filename": "source.txt",
+        "source_sha256": original_sha256,
+    },
+    actor="authorized-operator",
+)
+```
+
+No tests were run as part of this change; parent-validation test execution
+remains paused by operator instruction. CI status must be checked separately
+before treating this implementation as verified.
