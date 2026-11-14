@@ -255,3 +255,11 @@ def run_repository_review(repository: str | Path) -> dict[str, Any]:
 
 def to_json(repository: str | Path) -> str:
     return json.dumps(run_repository_review(repository), ensure_ascii=False, indent=2)
+
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("repository", nargs="?", default=".")
+    args = parser.parse_args()
+    print(to_json(args.repository))
