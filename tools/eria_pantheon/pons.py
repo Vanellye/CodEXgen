@@ -137,6 +137,18 @@ class Pons:
         return Decision.PROPOSAL_ONLY
 
     @staticmethod
+    def authorize_source_write(grant: Optional[CapabilityGrant], capability: str,
+                               scope_sha256: str) -> Decision:
+        """Authorize one exact source-change scope after the local human adapter confirms it.
+
+        This decision records authorization only; it does not execute a patch.
+        """
+        if (grant is None or len(scope_sha256) != 64
+                or not grant.permits(capability, scope_sha256)):
+            return Decision.HOLD
+        return Decision.REVIEW_READY
+
+    @staticmethod
     def describe() -> Dict[str, Any]:
         return {
             "bridge": "PONS",
