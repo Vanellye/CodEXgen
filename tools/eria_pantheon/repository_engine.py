@@ -161,11 +161,11 @@ def _counts(values):
 
 
 STATIC_RULES = (
-    ("DYNAMIC-EVAL", re.compile(r"\\b(?:eval|exec)\\s*\\("), "Dynamic execution candidate; inspect input provenance and authorization."),
-    ("SHELL-EXECUTION", re.compile(r"\\b(?:os\\.system|subprocess\\.(?:run|Popen|call)|Runtime\\.getRuntime\\(\\)\\.exec)"), "Process execution candidate; review argument handling and privilege boundaries."),
-    ("REMOTE-PIPE-TO-SHELL", re.compile(r"curl\\b[^\\n]*[|]\\s*(?:sh|bash)\\b"), "Remote content may be piped directly to a shell."),
-    ("UNSAFE-DESERIALIZATION", re.compile(r"\\b(?:pickle\\.loads|yaml\\.load\\s*\\(|ObjectInputStream)"), "Unsafe deserialization candidate; establish whether input is trusted."),
-    ("SQL-MUTATION", re.compile(r"\\b(?:INSERT\\s+INTO|UPDATE\\s+\\w+|DELETE\\s+FROM|DROP\\s+TABLE)\\b", re.I), "Database mutation candidate; review parameterization and authorization."),
+    ("DYNAMIC-EVAL", re.compile(r"\b(?:eval|exec)\s*\("), "Dynamic execution candidate; inspect input provenance and authorization."),
+    ("SHELL-EXECUTION", re.compile(r"\b(?:os\.system|subprocess\.(?:run|Popen|call)|Runtime\.getRuntime\(\)\.exec)"), "Process execution candidate; review argument handling and privilege boundaries."),
+    ("REMOTE-PIPE-TO-SHELL", re.compile(r"curl\b[^\n]*[|]\s*(?:sh|bash)\b"), "Remote content may be piped directly to a shell."),
+    ("UNSAFE-DESERIALIZATION", re.compile(r"\b(?:pickle\.loads|yaml\.load\s*\(|ObjectInputStream)"), "Unsafe deserialization candidate; establish whether input is trusted."),
+    ("SQL-MUTATION", re.compile(r"\b(?:INSERT\s+INTO|UPDATE\s+\w+|DELETE\s+FROM|DROP\s+TABLE)\b", re.I), "Database mutation candidate; review parameterization and authorization."),
 )
 
 
