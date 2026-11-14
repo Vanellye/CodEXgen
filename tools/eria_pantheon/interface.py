@@ -25,9 +25,7 @@ class ERIAPantheonInterface:
             state["code_bypass_module"] = "available"
         except ImportError:
             state["code_bypass_module"] = "missing"
-        return "ERIA/PANTHEON integration status
-" + "
-".join(
+        return "ERIA/PANTHEON integration status\n" + "\n".join(
             f"{key}: {value}" for key, value in state.items()
         )
 
@@ -38,13 +36,6 @@ class ERIAPantheonInterface:
         if low == "pons.avs.status":
             state = self.avs.ledger.verify()
             return "PONS AVS ledger status\n" + "\n".join(
-                f"{key}: {value}" for key, value in state.items()
-            )
-        if low == "pons.avs.status":
-            state = self.avs.ledger.verify()
-            return "PONS AVS ledger status
-" + "
-".join(
                 f"{key}: {value}" for key, value in state.items()
             )
         if low.startswith("code.bypass "):
@@ -102,16 +93,9 @@ class ERIAPantheonInterface:
             bypass_status=result.status, audit_path=result.audit_path,
         )
         return (
-            f"{result.status}
-source: {source_name}
-"
-            f"source_sha256: {envelope.source_sha256}
-"
-            f"source_authority: {envelope.source_authority}
-"
-            "translator_invoked: false
-transmitter_invoked: false
-"
-            f"audit: {result.audit_path}
-repository_mutated: false"
+            f"{result.status}\nsource: {source_name}\n"
+            f"source_sha256: {envelope.source_sha256}\n"
+            f"source_authority: {envelope.source_authority}\n"
+            "translator_invoked: false\ntransmitter_invoked: false\n"
+            f"audit: {result.audit_path}\nrepository_mutated: false"
         )
