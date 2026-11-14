@@ -106,6 +106,15 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
 <div class="quality-actions"><button class="small" id="globScan" type="button">Scan Repository</button><button class="small" id="globStatus" type="button">.glob Status</button></div>
 <pre id="globResults" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:320px;overflow:auto">No .glob scan yet.</pre>
 <p id="globState" aria-live="polite">Scanning is read-only. No files are changed.</p>
+<hr>
+<h4>PONS · New-file bootstrap</h4>
+<p>Submit a JSON array of path/content objects. Review the exact path and SHA-256 manifest, confirm the phrase, then apply the one-time create-only grant.</p>
+<textarea id="globBootstrapManifest" rows="5" spellcheck="false" style="width:100%;margin:8px 0;padding:10px;border-radius:8px" placeholder='[{"path":"tools/new_faculty.py","content":"# reviewed"}]'></textarea>
+<input id="globBootstrapPurpose" type="text" style="width:100%;margin:8px 0;padding:10px;border-radius:8px" placeholder="Purpose for this new-file request">
+<div class="quality-actions"><button class="small" id="globBootstrapRequest" type="button">Request New-file Approval</button><button class="small" id="globBootstrapApprove" type="button" disabled>Approve Exact Scope</button><button class="small" id="globBootstrapApply" type="button" disabled>Create Approved Files</button></div>
+<pre id="globBootstrapScope" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:260px;overflow:auto">No bootstrap request.</pre>
+<input id="globBootstrapConfirmation" type="text" autocomplete="off" spellcheck="false" style="width:100%;margin:8px 0;padding:10px;border-radius:8px" placeholder="Exact phrase from scope manifest">
+<p id="globBootstrapState" aria-live="polite">Bootstrap: HOLD. No new files may be created without exact approval.</p>
 </section>
 <section id="chat" class="chat" aria-live="polite">
 <div class="welcome"><h2>Welcome to ERIA</h2><p>Ask questions about repository files, branches, commits, architecture, provenance, or the PONS bridge. Original source remains non-authoritative; translations are derived records, not replacements.</p></div>
@@ -214,6 +223,44 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault(); $("form").requestSubmit();
     }
+  });
+  let globBootstrapRequest=null, globBootstrapGrant=null;
+  $("globBootstrapRequest").addEventListener("click",async()=>{
+    try{
+      const files=JSON.parse($("globBootstrapManifest").value);
+      const purpose=$("globBootstrapPurpose").value.trim();
+      globBootstrapGrant=null; $("globBootstrapApprove").disabled=true; $("globBootstrapApply").disabled=true;
+      globBootstrapRequest=await api("/api/glob/bootstrap/request",{method:"POST",body:JSON.stringify({files,purpose})});
+      $("globBootstrapScope").textContent=JSON.stringify(globBootstrapRequest,null,2);
+      $("globBootstrapConfirmation").value="";
+      $("globBootstrapApprove").disabled=false;
+      $("globBootstrapState").textContent="HOLD · Verify every path, content hash, branch and HEAD before confirming.";
+    }catch(error){$("globBootstrapState").textContent="HOLD: "+error.message;}
+  });
+  $("globBootstrapApprove").addEventListener("click",async()=>{
+    if(!globBootstrapRequest){$("globBootstrapState").textContent="HOLD: create a request first.";return;}
+    try{
+      const result=await api("/api/glob/bootstrap/confirm",{method:"POST",body:JSON.stringify({
+        request_id:globBootstrapRequest.request_id,scope_sha256:globBootstrapRequest.scope_sha256,
+        confirmation:$("globBootstrapConfirmation").value
+      })});
+      globBootstrapGrant=result; $("globBootstrapApply").disabled=false;
+      $("globBootstrapConfirmation").value="";
+      $("globBootstrapState").textContent=result.decision+" · Grant "+result.grant_id+" · No files created yet.";
+      $("globBootstrapScope").textContent+="\\n\\nPONS GRANT\\n"+JSON.stringify(result,null,2);
+    }catch(error){$("globBootstrapState").textContent="HOLD: "+error.message;}
+  });
+  $("globBootstrapApply").addEventListener("click",async()=>{
+    if(!globBootstrapGrant)return;
+    if(!confirm("Create only the exact new files in this approved PONS manifest?"))return;
+    const button=$("globBootstrapApply");button.disabled=true;
+    try{
+      const result=await api("/api/glob/bootstrap/apply",{method:"POST",body:JSON.stringify({grant_id:globBootstrapGrant.grant_id})});
+      $("globBootstrapState").textContent=result.status+" · "+result.paths.join(", ")+" · not staged or committed";
+      $("globBootstrapScope").textContent+="\\n\\nCREATE RESULT\\n"+JSON.stringify(result,null,2);
+      globBootstrapGrant=null;
+    }catch(error){$("globBootstrapState").textContent="HOLD: "+error.message;}
+    finally{button.disabled=true;}
   });
   $("globScan").addEventListener("click", async () => {
     const patterns=$("globPatterns").value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
