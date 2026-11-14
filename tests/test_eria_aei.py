@@ -7,6 +7,7 @@ import unittest
 from pathlib import Path
 
 from tools.eria_pantheon.aei import AeiError, inspect_file
+from tools.eria_pantheon.interface import ERIAPantheonInterface
 
 
 class AeiTranslatorTests(unittest.TestCase):
@@ -70,6 +71,18 @@ class AeiTranslatorTests(unittest.TestCase):
         link.symlink_to(target)
         with self.assertRaises(AeiError):
             inspect_file(self.root, "link.txt")
+
+
+    def test_pantheon_interface_exposes_aei_inspect_and_translate(self):
+        class Repository:
+            def __init__(self, root):
+                self.root = root
+        (self.root / "question.json").write_text('{"answer":42}', encoding="utf-8")
+        interface = ERIAPantheonInterface(Repository(self.root))
+        for command in ("aei.inspect question.json", "aei.translate question.json"):
+            response = json.loads(interface.handle(command))
+            self.assertEqual(response["translator"], "Æị")
+            self.assertEqual(response["data"]["value"]["answer"], 42)
 
     def test_binary_is_metadata_only(self):
         (self.root / "blob.bin").write_bytes(b"\x00\x01\x02")
