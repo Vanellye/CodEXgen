@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import errno
 import hashlib
 import io
 import json
@@ -149,6 +150,27 @@ def atomic_write_new(path: Path, data: bytes) -> None:
             os.link(temporary, path)
         except FileExistsError as exc:
             raise ConversionError(f"Output appeared during conversion: {path}") from exc
+        except OSError as exc:
+            # Android shared storage may not support hard links. Fall back to
+            # exclusive creation, which still guarantees no overwrite.
+            unsupported = {errno.EPERM, errno.EOPNOTSUPP, errno.ENOTSUP, errno.EXDEV}
+            if exc.errno not in unsupported:
+                raise
+            try:
+                out_fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            except FileExistsError as exists:
+                raise ConversionError(f"Output appeared during conversion: {path}") from exists
+            try:
+                with os.fdopen(out_fd, "wb") as output:
+                    output.write(data)
+                    output.flush()
+                    os.fsync(output.fileno())
+            except Exception:
+                try:
+                    path.unlink()
+                except OSError:
+                    pass
+                raise
     finally:
         try:
             os.unlink(temporary)
