@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Append-only creation of typed GOD descendants.
 
-Derived bytes are stored separately from originals. This module never edits an
-ancestor record or object and requires a trusted PONS grant for god.derive.
+All non-original typed descendants are stored in SHOP, separately from originals.
+This module never edits an ancestor and requires a trusted PONS grant.
 """
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from tools.eria_pantheon.pons import CapabilityGrant, Decision, Pons
-from tools.god_parent_validation import DERIVED_TYPES, ParentValidationError, validate_parent_chain
+from tools.god_parent_validation import ParentValidationError, _valid_record_type, validate_parent_chain
 
 CAPABILITY = "god.derive"
 SCHEMA = "eria.god.record/1"
@@ -85,13 +85,13 @@ def create_derived_record(
     method: str = "operator-supplied",
     actor: str = "eria",
 ) -> dict[str, Any]:
-    """Create a translation, interpretation, or correction as a new GOD child.
+    """Create any explicitly typed non-original GOD descendant as a new child.
 
     source_context must identify the source-relative path, filename, and SHA-256
     of one of the direct parents. No parent bytes or metadata are overwritten.
     """
-    if record_type not in DERIVED_TYPES:
-        raise DerivationError("record_type must be translation, interpretation, or correction")
+    if not _valid_record_type(record_type) or record_type == "original":
+        raise DerivationError("record_type must be a lowercase non-original type identifier (1-64 characters)")
     if not isinstance(operation, str) or not operation.strip():
         raise DerivationError("operation must be non-empty text")
     if not isinstance(method, str) or not method.strip():
@@ -136,7 +136,7 @@ def create_derived_record(
 
     digest = hashlib.sha256(raw).hexdigest()
     record_id = str(uuid.uuid4())
-    object_path = vault_path / "DERIVED_DATA" / "objects" / digest[:2] / digest
+    object_path = vault_path / "SHOP" / "objects" / digest[:2] / digest
     metadata_path = vault_path / "SOURCE_PROVENANCE" / "records" / f"{record_id}.json"
     ledger_path = vault_path / "LINEAGE" / "events.jsonl"
 
@@ -223,7 +223,7 @@ def create_derived_record(
     _ensure_directory_chain(vault_path, ledger_path.parent)
     _append_event(ledger_path, event)
     return {
-        "status": "derived",
+        "status": "stored-in-shop",
         "record_id": record_id,
         "record_type": record_type,
         "sha256": digest,
