@@ -33,6 +33,15 @@ footer{color:var(--muted);font-size:.76rem;line-height:1.55;margin-top:18px}@med
 <div class="row"><button id="ai-ask">Ask Âï</button><span id="ai-status" class="status" role="status" aria-live="polite">Evidence-grounded mode · no generative model connected</span></div>
 <pre id="ai-answer" aria-live="polite">No question submitted yet.</pre>
 </section>
+<section class="panel"><h2>ERIA Resonance · Live local playback</h2>
+<p class="sub">Generate and play a short test tone locally. Playback starts only after pressing Play. Peak volume is hard-limited to 50%; no external hardware transmission is initiated.</p>
+<div class="metrics">
+<div><label for="tone-frequency">Frequency (Hz)</label><input id="tone-frequency" type="number" min="20" max="20000" value="440"></div>
+<div><label for="tone-volume">Volume (%) · maximum 50</label><input id="tone-volume" type="number" min="0" max="50" value="25"></div>
+</div>
+<div class="row"><button id="tone-play">Play tone</button><button id="tone-stop" type="button">Stop</button><span id="tone-status" class="status" role="status">Ready · user initiated</span></div>
+<audio id="tone-audio" controls></audio>
+</section>
 <footer>Local endpoint: 127.0.0.1 · No cloud endpoint · No background transmission · Source bytes remain unchanged.</footer>
 </main><script>
 (()=>{"use strict";const $=id=>document.getElementById(id),button=$("inspect");
@@ -65,5 +74,23 @@ $("ai-ask").addEventListener("click",async()=>{
  }catch(e){$("ai-status").textContent="Conversation request failed · "+e.message;}
  finally{ask.disabled=false;}
 });
+let toneUrl=null;
+const audio=$("tone-audio");
+$("tone-play").addEventListener("click",async()=>{
+ const frequency=Number($("tone-frequency").value),volume=Number($("tone-volume").value);
+ if(!Number.isFinite(frequency)||frequency<20||frequency>20000||!Number.isFinite(volume)||volume<0||volume>50){
+  $("tone-status").textContent="HOLD · frequency 20–20000 Hz and volume 0–50% required";return;
+ }
+ $("tone-play").disabled=true;$("tone-status").textContent="Generating local WAV…";
+ try{
+  const response=await fetch("/api/resonance/tone?frequency="+encodeURIComponent(frequency)+"&duration=2&volume="+encodeURIComponent(volume),{cache:"no-store"});
+  if(!response.ok){const err=await response.json();throw new Error(err.error||"Tone generation failed");}
+  const blob=await response.blob();if(toneUrl)URL.revokeObjectURL(toneUrl);
+  toneUrl=URL.createObjectURL(blob);audio.src=toneUrl;await audio.play();
+  $("tone-status").textContent="Playing locally · peak capped at 50%";
+ }catch(e){$("tone-status").textContent="Playback held · "+e.message;}
+ finally{$("tone-play").disabled=false;}
+});
+$("tone-stop").addEventListener("click",()=>{audio.pause();audio.currentTime=0;$("tone-status").textContent="Stopped";});
 health();})();
 </script></body></html>
