@@ -331,6 +331,10 @@ class Handler(BaseHTTPRequestHandler):
             try:
                 content = self.app.repository.show(rel)
                 record = next((x for x in self.app.store.provenance(rel) if x["path"] == rel), None)
+                self.app.store.add_audit("repository_file_previewed", "RECORDED", {
+                    "path": rel,
+                    "source_sha256": record.get("source_sha256", "") if record else "",
+                })
                 self.send_json(200, {
                     "path": rel, "content_preview": content[:12000],
                     "truncated": len(content) > 12000, "provenance": record,
@@ -356,7 +360,11 @@ class Handler(BaseHTTPRequestHandler):
             query = urlparse(self.path).query
             from urllib.parse import parse_qs
             term = parse_qs(query).get("q", [""])[0][:200]
-            self.send_json(200, {"files": self.app.store.search_files(term)})
+            results = self.app.store.search_files(term)
+            self.app.store.add_audit("repository_paths_searched", "RECORDED", {
+                "result_count": len(results), "query_length": len(term),
+            })
+            self.send_json(200, {"files": results})
             return
         self.send_error(404)
 
