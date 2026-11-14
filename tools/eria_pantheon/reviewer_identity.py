@@ -154,7 +154,14 @@ class ReviewerIdentityAuthority:
         signature_b64: str,
     ) -> VerifiedReviewer:
         """Re-verify a persisted signed claim without reusing its consumed challenge."""
-        reviewer = self.verify_certificate(certificate)
+        signed_at = signed_payload.get("signed_at")
+        try:
+            signed_time = datetime.fromisoformat(signed_at)
+            if signed_time.tzinfo is None:
+                raise ValueError("timezone required")
+        except (TypeError, ValueError) as exc:
+            raise ReviewerAuthenticationError("Signed evidence timestamp is invalid.") from exc
+        reviewer = self.verify_certificate(certificate, now=signed_time)
         public_key = Ed25519PublicKey.from_public_bytes(b64decode(certificate["public_key"]))
         try:
             public_key.verify(b64decode(signature_b64), canonical_json(signed_payload))
