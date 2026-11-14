@@ -2,7 +2,7 @@ package com.vanellye.eria.pons
 
 enum class PonsEffectiveState { READY, DEGRADED, HOLD, UNKNOWN }
 
-data class PonsComponentStatus(
+data class PonsComponentStatus internal constructor(
     val componentId: String,
     val operationalState: PonsOperationalState,
     val provenance: PonsProvenanceResult,
