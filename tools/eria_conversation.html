@@ -46,6 +46,7 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
 <button class="small" id="translateBtn" type="button">Translate source</button>
 <button class="small" id="higherAiBtn" type="button">Ask Âï</button>\n<button class="small" id="repositoryReviewBtn" type="button">Whole-repository review</button>
 <button class="small" id="runApprovedBtn" type="button">Run approved check</button>
+ <button class="small" id="githubValidationBtn" type="button">GitHub validation evidence</button>
 </div></div>
 </main>
 <footer>Local Termux session · SQLite stored under ~/.eria · No automatic Git mutation or remote transmission</footer>
@@ -220,6 +221,26 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
       }
     } catch (error) { addMessage("assistant", "Isolated execution HOLD: " + error.message); }
     finally { $("runApprovedBtn").disabled = false; }
+  });
+  $("githubValidationBtn").addEventListener("click", async () => {
+    $("githubValidationBtn").disabled = true;
+    try {
+      const result = await api("/api/github/actions/validation");
+      if (!result.runs.length) {
+        addMessage("assistant", "GitHub Actions validation: no runs found for " + result.workflow + " on " + result.branch + ". The manual workflow must be launched in GitHub Actions first.\n" + result.workflow_url);
+      } else {
+        result.runs.forEach(run => {
+          const artifacts = run.artifacts.length
+            ? run.artifacts.map(a => a.name + " · " + a.size_in_bytes + " bytes · expired: " + a.expired).join("\n")
+            : "No artifacts listed";
+          addMessage("assistant", "GitHub isolated validation #" + run.run_number + " — " + run.status + " / " + (run.conclusion || "pending") +
+            "\nCommit: " + run.head_sha + "\nUpdated: " + run.updated_at + "\n" +
+            "Run: " + run.html_url + "\nArtifacts:\n" + artifacts);
+        });
+      }
+      addMessage("assistant", "Read-only inspection only. No workflow was started and no artifact was downloaded. " + result.signature_note);
+    } catch (error) { addMessage("assistant", "GitHub evidence HOLD: " + error.message); }
+    finally { $("githubValidationBtn").disabled = false; }
   });
   $("refreshBtn").addEventListener("click", async () => {
     $("refreshBtn").disabled = true;
