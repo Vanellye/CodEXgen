@@ -33,3 +33,18 @@ repository. Its design is specified in
 [SOW: Autonomous Repository Interpretation and Representation Forge](SOW/AUTONOMOUS_REPOSITORY_INTERPRETATION_REPRESENTATION_FORGE.md).
 The parent-validation requirements remain specified in
 [SOW: Ethical Information and Parent-Record Validation](SOW/ETHICAL_INFORMATION_PARENT_RECORD_VALIDATION.md).
+
+
+## Derived descendants
+
+Translations, interpretations, and corrections are separate, append-only
+records created by `tools/god_derivatives.py`. Their bytes live in
+`DERIVED_DATA/objects/`; original bytes remain in
+`ORIGINAL_DATA/objects/`. Each descendant names its direct parent records,
+stores parent digest/size proofs, and records the exact source-relative path,
+filename, and source hash used for the derivation. Corrections are descendants,
+not edits to originals or prior descendants.
+
+The creation API requires a trusted PONS `god.derive` capability grant and
+revalidates ancestry immediately before writing the new provenance record.
+See [the collector and derivative API contract](COLLECTOR.md).
