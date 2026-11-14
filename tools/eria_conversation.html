@@ -44,6 +44,7 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
 <button class="small" id="filesBtn" type="button">Search indexed paths</button>
 <button class="small" id="refreshBtn" type="button">Refresh index</button>
 <button class="small" id="translateBtn" type="button">Translate source</button>
+<button class="small" id="higherAiBtn" type="button">Ask Âï</button>
 </div></div>
 </main>
 <footer>Local Termux session · SQLite stored under ~/.eria · No automatic Git mutation or remote transmission</footer>
@@ -144,6 +145,26 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
         ? "Indexed path matches:\n" + data.files.map(x => x.path + " (" + x.size_bytes + " bytes)").join("\n")
         : "No indexed paths matched: " + query);
     } catch (error) { addMessage("assistant", "HOLD: " + error.message); }
+  });
+  $("higherAiBtn").addEventListener("click", async () => {
+    const path = prompt("Repository-relative source-code path:");
+    if (path === null || !path.trim()) return;
+    const question = prompt("Ask Âï about purpose, dependencies, conflicts, security, improvements, or translation comparison:");
+    if (question === null || !question.trim()) return;
+    const comparisonPath = prompt("Optional comparison source path (leave blank to skip):") || "";
+    $("higherAiBtn").disabled = true;
+    try {
+      const payload = {path:path.trim(), question:question.trim()};
+      if (comparisonPath.trim()) payload.comparison_path = comparisonPath.trim();
+      const result = await api("/api/ai/higher-faculty", {method:"POST",body:JSON.stringify(payload)});
+      addMessage("assistant", "Âï Higher Faculty Analysis — " + result.status + "\n" +
+        "Source: " + result.source.path + "\nSHA-256: " + result.source.sha256 + "\n\n" +
+        result.answer + "\n\n" + JSON.stringify(result.analysis, null, 2) +
+        (result.comparison ? "\n\nComparison: " + JSON.stringify(result.comparison, null, 2) : "") +
+        "\n\nPONS: " + result.pons.service_state + " · execution: " + result.pons.execution_enabled +
+        "\n\nLimits: " + result.limitations.join(" "));
+    } catch (error) { addMessage("assistant", "Âï analysis HOLD: " + error.message); }
+    finally { $("higherAiBtn").disabled = false; }
   });
   $("translateBtn").addEventListener("click", async () => {
     const path = prompt("Repository-relative source-code path to translate:");
