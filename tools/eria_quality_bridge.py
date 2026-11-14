@@ -14,7 +14,10 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-from eria_quality_mixer import scan
+try:
+    from .eria_quality_mixer import scan
+except ImportError:  # Termux script execution with tools/ on sys.path
+    from eria_quality_mixer import scan
 
 
 def now():
@@ -279,6 +282,35 @@ class QualityBridge:
         ]
         return "\n".join(lines)
 
+
+
+    def inspect(self, relative_path: str):
+        """Æị read-only source inspection linked to report fingerprints and findings."""
+        report = self.latest()
+        if report is None:
+            raise ValueError("Refresh the qualitative report before inspecting a candidate.")
+        rel = Path(relative_path)
+        if rel.is_absolute() or ".." in rel.parts or not relative_path or len(relative_path) > 500:
+            raise ValueError("A safe repository-relative path is required.")
+        if re.search(r"secret|credential|token|password|private[_-]?key|^\\.env", rel.name, re.I):
+            raise ValueError("Sensitive-looking paths are excluded from inspection.")
+        target = (self.root / rel).resolve()
+        if self.root not in target.parents or not target.is_file():
+            raise ValueError("The requested source path is unavailable inside the repository.")
+        if target.stat().st_size > 1_000_000:
+            raise ValueError("Source exceeds the 1 MB inspection limit.")
+        raw = target.read_bytes()
+        if b"\\0" in raw[:8192]:
+            raise ValueError("Binary source is not eligible for text inspection.")
+        entry = next((x for x in report.get("files", []) if x.get("path") == rel.as_posix()), None)
+        digest = hashlib.sha256(raw).hexdigest()
+        return {"path": rel.as_posix(), "content_preview": raw.decode("utf-8", errors="replace")[:12000],
+                "truncated": len(raw) > 12000, "current_sha256": digest,
+                "report_sha256": entry.get("sha256", "") if entry else "",
+                "matches_report_snapshot": bool(entry and entry.get("sha256") == digest),
+                "findings": [x for x in report.get("findings", []) if x.get("path") == rel.as_posix()],
+                "report_id": report["report_id"],
+                "provenance": report.get("provenance", {})}
 
     def answer(self, question: str):
         """Deterministic evidence explanation for quality-related Âï questions."""
