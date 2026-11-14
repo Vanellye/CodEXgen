@@ -425,6 +425,8 @@ class Handler(BaseHTTPRequestHandler):
                 return
             if route == "/api/pull":
                 result = self.app.file_pull.sync_all()
+                quality_report = self.app.quality.refresh()
+                result["quality_report_id"] = quality_report["report_id"]
                 self.send_json(200 if result.get("ok") else 502, result)
                 return
             if route == "/api/chat":
@@ -488,7 +490,7 @@ def main():
     if args.host not in {"127.0.0.1", "localhost", "::1"}:
         parser.error("ERIA server only binds to loopback.")
     app = App(Path(args.repository), args.database)
-    start_scheduler(app.file_pull)
+    start_scheduler(app.file_pull, app.quality.refresh)
     server = ThreadingHTTPServer((args.host, args.port), Handler)
     server.app = app
     print("ERIA HTML Conversation")
