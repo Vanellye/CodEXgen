@@ -9,7 +9,9 @@ from urllib.parse import urlparse, parse_qs
 from eria_pantheon.aei import AeiError, inspect_file
 from eria_pantheon.interface import ERIAPantheonInterface
 from eria_pantheon.resonance import synthesize_tone, InboxMonitor, load_config, ResonanceHold
-import os
+from eria_pantheon.approval import verify_signed_grant, ApprovalError
+import os, threading
+REMOTE_APPROVAL_LOCK=threading.Lock()
 MAX_BODY=4096
 UI_FILE=Path(__file__).resolve().parents[1]/"interfaces"/"aei-interface.html"
 def make_handler(repository: Path):
@@ -73,7 +75,7 @@ def make_handler(repository: Path):
             if origin and origin not in allowed_origins:
                 self._json(403,{"status":"HOLD","error":"Cross-origin requests are not permitted"}); return
             route=urlparse(self.path).path
-            if route not in {"/api/aei/inspect","/api/ai/ask","/api/aei/compile","/api/acquisition/start","/api/acquisition/pause"}:
+            if route not in {"/api/aei/inspect","/api/ai/ask","/api/aei/compile","/api/acquisition/start","/api/acquisition/pause","/api/pons/remote-approve"}:
                 self._json(404,{"status":"HOLD","error":"Not found"}); return
             if self.headers.get("Content-Type","").split(";")[0].strip().lower()!="application/json":
                 self._json(415,{"status":"HOLD","error":"Content-Type must be application/json"}); return
@@ -85,6 +87,45 @@ def make_handler(repository: Path):
             try:
                 request=json.loads(self.rfile.read(length).decode("utf-8"))
                 if not isinstance(request,dict): raise ValueError("JSON object required.")
+                if route=="/api/pons/remote-approve":
+                    key=os.environ.get("ERIA_PONS_APPROVAL_KEY","")
+                    grant=verify_signed_grant(request.get("grant"),key,
+                        capability="eria.acquire",scope="storage/inbox/")
+                    approval_dir=root/"storage"/"approvals"
+                    if approval_dir.is_symlink():
+                        raise ApprovalError("Approval ledger directory cannot be a symlink.")
+                    approval_dir.mkdir(parents=True,exist_ok=True)
+                    if root not in approval_dir.resolve(strict=True).parents:
+                        raise ApprovalError("Approval ledger path escapes repository.")
+                    ledger=approval_dir/"consumed-grants.jsonl"
+                    with REMOTE_APPROVAL_LOCK:
+                        if ledger.exists():
+                            for line in ledger.read_text(encoding="utf-8").splitlines():
+                                try:
+                                    if json.loads(line).get("grant_id")==grant["grant_id"]:
+                                        raise ApprovalError("PONS grant has already been consumed.")
+                                except json.JSONDecodeError:
+                                    raise ApprovalError("Approval ledger is malformed; remote approval held.")
+                        record={"grant_id":grant["grant_id"],"capability":grant["capability"],
+                            "scope":grant["scope"],"consumed_at":__import__("datetime").datetime.now(
+                            __import__("datetime").timezone.utc).isoformat(),"status":"verified"}
+                        fd=os.open(ledger,os.O_WRONLY|os.O_CREAT|os.O_APPEND|getattr(os,"O_NOFOLLOW",0),0o600)
+                        with os.fdopen(fd,"a",encoding="utf-8") as stream:
+                            stream.write(json.dumps(record,sort_keys=True)+"\\n")
+                            stream.flush()
+                            os.fsync(stream.fileno())
+                    settings=root/"storage"/"settings.json"
+                    config=load_config(root)
+                    config["automatic_capture"]["enabled"]=True
+                    config["automatic_capture"]["approval_reference"]="pons:"+grant["grant_id"]
+                    temp=settings.with_suffix(".json.tmp")
+                    temp.write_text(json.dumps(config,indent=2)+"\\n",encoding="utf-8")
+                    os.replace(temp,settings)
+                    status=inbox_monitor.start("pons:"+grant["grant_id"])
+                    self._json(200,{"approval":"VERIFIED","grant_id":grant["grant_id"],
+                        "capability":grant["capability"],"scope":grant["scope"],
+                        "monitor":status,"status":"RUNNING" if status.get("state")=="running" else "HOLD"})
+                    return
                 if route=="/api/acquisition/start":
                     reference=request.get("approval_reference")
                     if not isinstance(reference,str) or not reference.strip(): raise ResonanceHold("Explicit approval reference required.")
@@ -122,7 +163,7 @@ def make_handler(repository: Path):
                         raise ValueError("Pantheon returned a non-JSON response.")
                 else:
                     result=inspect_file(root,relative.strip()).to_dict()
-            except (UnicodeDecodeError,json.JSONDecodeError,ValueError,AeiError,ResonanceHold,OSError) as exc:
+            except (UnicodeDecodeError,json.JSONDecodeError,ValueError,AeiError,ResonanceHold,ApprovalError,OSError) as exc:
                 self._json(400,{"translator":"ERIA","status":"HOLD","error":str(exc)}); return
             self._json(200,result.to_dict() if hasattr(result,"to_dict") else result)
         def log_message(self,_format,*_args): return
