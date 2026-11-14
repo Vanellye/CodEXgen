@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import shlex
+import os
 from typing import Any
 
 from .pons import BridgeEnvelope, Pons
@@ -11,12 +12,22 @@ from .pons import BridgeEnvelope, Pons
 class ERIAPantheonInterface:
     def __init__(self, repository: Any) -> None:
         self.repository = repository
-        self.bridge = Pons()
+        revoked = {x.strip() for x in os.environ.get("ERIA_PONS_REVOKED_REVIEWER_KEYS", "").split(",") if x.strip()}
+        self.bridge = Pons(
+            reviewer_root_public_key_b64=os.environ.get("ERIA_PONS_REVIEWER_ROOT_PUBKEY"),
+            revoked_reviewer_key_ids=revoked,
+        )
+        self.bridge.install_accuracy_service(
+            str(repository.root / ".eria" / "avs" / "evidence.jsonl")
+        )
 
     def status(self) -> str:
         state = self.bridge.describe()
         state["repository"] = str(self.repository.root)
         state["conversation_engine"] = "connected"
+        state["reviewer_identity"] = (
+            "configured" if self.bridge.reviewer_identity_configured() else "NOT_CONFIGURED_FAIL_CLOSED"
+        )
         try:
             import eria_ttt_bypass  # noqa: F401
             state["code_bypass_module"] = "available"
@@ -30,6 +41,11 @@ class ERIAPantheonInterface:
         low = command.strip().lower()
         if low in {"integration.status", "bridge.status", "pons.status"}:
             return self.status()
+        if low == "pons.avs.status":
+            state = self.bridge.accuracy_ledger_status()
+            return "PONS AVS ledger status\n" + "\n".join(
+                f"{key}: {value}" for key, value in state.items()
+            )
         if low.startswith("code.bypass "):
             return self._code_bypass(command.strip()[len("code.bypass "):])
         if low.startswith("repository.ask "):
@@ -37,7 +53,7 @@ class ERIAPantheonInterface:
         return (
             "Supported commands: integration.status, bridge.status, "
             "repository.ask <question>, "
-            "code.bypass <repo-relative-path> --reason <text>"
+            "code.bypass <repo-relative-path> --reason <text>, pons.avs.status"
         )
 
     def _code_bypass(self, arguments: str) -> str:
