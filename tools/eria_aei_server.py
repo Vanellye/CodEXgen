@@ -30,7 +30,7 @@ def make_handler(repository: Path):
                 self._json(403,{"status":"HOLD","error":"Host header is not a permitted loopback host"}); return
             route=urlparse(self.path).path
             if route=="/api/status":
-                self._json(200,{"service":"ERIA Æị","status":"ready","mode":"read-only","repository":str(root)}); return
+                self._json(200,{"service":"ERIA Æị","status":"ready","mode":"read-only","conversation":"Âï via Pantheon/PONS","endpoints":["/api/aei/inspect","/api/ai/ask"],"repository":str(root)}); return
             if route in {"/","/aei-interface.html"}:
                 try: page=UI_FILE.read_bytes()
                 except OSError:
