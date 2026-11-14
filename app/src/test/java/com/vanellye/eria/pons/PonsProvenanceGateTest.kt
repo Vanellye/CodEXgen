@@ -63,4 +63,30 @@ class PonsProvenanceGateTest {
     }
 
 
+    @Test fun signedManifestFactoryRequiresTrustedVerifier() {
+        val source = "manifest-backed".toByteArray()
+        val id = "signed.component"
+        val pin = PonsComponentPin(
+            id, "reviewed-commit", "app/src/main/java/Signed.kt",
+            PonsProvenanceGate.sha256(source)
+        )
+        val manifest = PonsSignedManifest(
+            version = "manifest-v1",
+            keyId = "review-key",
+            signature = "signature",
+            anchor = PonsAnchorIdentity.CANONICAL,
+            pins = listOf(pin)
+        )
+        try {
+            PonsProvenanceGate.fromSignedManifest(manifest) { _, _, _ -> false }
+            throw AssertionError("rejected signature must not create a gate")
+        } catch (_: IllegalArgumentException) {
+            // expected fail-closed result
+        }
+        val gate = PonsProvenanceGate.fromSignedManifest(manifest) { payload, key, signature ->
+            payload.isNotEmpty() && key == "review-key" && signature == "signature"
+        }
+        assertEquals(PonsProvenanceState.VERIFIED, gate.verify(id, source).state)
+    }
+
 }
