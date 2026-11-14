@@ -8,11 +8,13 @@ from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 from eria_pantheon.aei import AeiError, inspect_file
 from eria_pantheon.interface import ERIAPantheonInterface
-from eria_pantheon.resonance import synthesize_tone
+from eria_pantheon.resonance import synthesize_tone, InboxMonitor, load_config, ResonanceHold
+import os
 MAX_BODY=4096
 UI_FILE=Path(__file__).resolve().parents[1]/"interfaces"/"aei-interface.html"
 def make_handler(repository: Path):
     root=repository.resolve(strict=True)
+    inbox_monitor=InboxMonitor(root)
     class Handler(BaseHTTPRequestHandler):
         server_version="ERIA-AEI/0.1"
         def _local_host(self):
@@ -43,8 +45,10 @@ def make_handler(repository: Path):
                 self.send_response(200); self.send_header("Content-Type","audio/wav")
                 self.send_header("Content-Length",str(len(payload))); self.send_header("Cache-Control","no-store")
                 self.end_headers(); self.wfile.write(payload); return
+            if route=="/api/acquisition/status":
+                self._json(200,inbox_monitor.status()); return
             if route=="/api/status":
-                self._json(200,{"service":"ERIA Æị","status":"ready","mode":"source-read-only; derived-storage-enabled","conversation":"Âï via Pantheon/PONS","endpoints":["/api/aei/inspect","/api/ai/ask","/api/aei/compile"],"repository":str(root)}); return
+                self._json(200,{"service":"ERIA Æị","status":"ready","mode":"source-read-only; derived-storage-enabled","conversation":"Âï via Pantheon/PONS","acquisition":inbox_monitor.status(),"endpoints":["/api/aei/inspect","/api/ai/ask","/api/aei/compile","/api/acquisition/start","/api/acquisition/pause","/api/acquisition/status","/api/resonance/tone"],"repository":str(root)}); return
             if route in {"/","/aei-interface.html"}:
                 try: page=UI_FILE.read_bytes()
                 except OSError:
@@ -61,7 +65,7 @@ def make_handler(repository: Path):
             if origin and origin not in allowed_origins:
                 self._json(403,{"status":"HOLD","error":"Cross-origin requests are not permitted"}); return
             route=urlparse(self.path).path
-            if route not in {"/api/aei/inspect","/api/ai/ask","/api/aei/compile"}:
+            if route not in {"/api/aei/inspect","/api/ai/ask","/api/aei/compile","/api/acquisition/start","/api/acquisition/pause"}:
                 self._json(404,{"status":"HOLD","error":"Not found"}); return
             if self.headers.get("Content-Type","").split(";")[0].strip().lower()!="application/json":
                 self._json(415,{"status":"HOLD","error":"Content-Type must be application/json"}); return
@@ -72,7 +76,28 @@ def make_handler(repository: Path):
                 self._json(413,{"status":"HOLD","error":"Request body size is outside the allowed limit"}); return
             try:
                 request=json.loads(self.rfile.read(length).decode("utf-8"))
-                relative=request.get("path") if isinstance(request,dict) else None
+                if not isinstance(request,dict): raise ValueError("JSON object required.")
+                if route=="/api/acquisition/start":
+                    reference=request.get("approval_reference")
+                    if not isinstance(reference,str) or not reference.strip(): raise ResonanceHold("Explicit approval reference required.")
+                    settings=root/"storage"/"settings.json"
+                    config=load_config(root)
+                    config["automatic_capture"]["enabled"]=True
+                    config["automatic_capture"]["approval_reference"]=reference.strip()
+                    temp=settings.with_suffix(".json.tmp")
+                    temp.write_text(json.dumps(config,indent=2)+"\n",encoding="utf-8")
+                    os.replace(temp,settings)
+                    self._json(200,inbox_monitor.start(reference)); return
+                if route=="/api/acquisition/pause":
+                    result=inbox_monitor.pause()
+                    settings=root/"storage"/"settings.json"
+                    config=load_config(root)
+                    config["automatic_capture"]["enabled"]=False
+                    temp=settings.with_suffix(".json.tmp")
+                    temp.write_text(json.dumps(config,indent=2)+"\n",encoding="utf-8")
+                    os.replace(temp,settings)
+                    self._json(200,result); return
+                relative=request.get("path")
                 if not isinstance(relative,str) or not relative.strip(): raise ValueError("Provide a repository-relative path.")
                 if route in {"/api/ai/ask","/api/aei/compile"}:
                     adapter=ERIAPantheonInterface(SimpleNamespace(root=root))
