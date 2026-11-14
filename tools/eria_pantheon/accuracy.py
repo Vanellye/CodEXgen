@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 
-class LedgerIntegrityError(RuntimeError):
+_PONS_AUTHORITY = object()\n\n\nclass LedgerIntegrityError(RuntimeError):
     pass
 
 
@@ -95,15 +95,19 @@ class AccuracyValidationService:
     truth; verifier quality and source quality remain explicit dependencies.
     """
 
-    def __init__(self, ledger_path: str | Path):
+    def __init__(self, ledger_path: str | Path, *, authority: object):
+        if authority is not _PONS_AUTHORITY:
+            raise PermissionError("AVS may only be constructed by PONS.")
         self.ledger = EvidenceLedger(ledger_path)
         self._lock = threading.RLock()
 
     def submit_evidence(
         self, *, claim_id: str, subject_component: str, verifier_id: str,
         evidence_ref: str, outcome: bool, weight: float = 1.0,
-        method: str = "independent_review",
+        method: str = "independent_review", _authority: object = None,
     ) -> dict[str, Any]:
+        if _authority is not _PONS_AUTHORITY:
+            raise PermissionError("Evidence intake is restricted to the PONS facade.")
         fields = (claim_id, subject_component, verifier_id, evidence_ref, method)
         if not all(isinstance(x, str) and x.strip() for x in fields):
             raise EvidenceRejected("All evidence identity and reference fields are required.")
@@ -132,7 +136,9 @@ class AccuracyValidationService:
                 raise EvidenceRejected("This verifier has already submitted evidence for this claim.")
             return self.ledger.append(record)
 
-    def evaluate(self, required_claims: Iterable[str]) -> dict[str, Any]:
+    def evaluate(self, required_claims: Iterable[str], *, _authority: object = None) -> dict[str, Any]:
+        if _authority is not _PONS_AUTHORITY:
+            raise PermissionError("AVS score issuance is restricted to the PONS facade.")
         claims = list(dict.fromkeys(str(x).strip() for x in required_claims if str(x).strip()))
         if not claims:
             return {"status": "NOT_EVALUATED", "accuracy_score": None,
@@ -162,5 +168,5 @@ class AccuracyValidationService:
             "evidence_records": sum(len(by_claim.get(c, [])) for c in verified),
             "ledger": self.ledger.verify(),
             "issued_by": "PONS/AccuracyValidationService",
-            "self_certification_allowed": False,
+            "self_certification_allowed": False,\n            "verifier_identity": "UNAUTHENTICATED_LABEL",
         }
