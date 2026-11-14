@@ -486,7 +486,10 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json(200, result)
                 return
             if route == "/api/repository/review":
-                execution_results = data.get("execution_results", [])\n                if not isinstance(execution_results, list) or len(execution_results) > 20:\n                    raise ValueError("execution_results must be a list of at most 20 signed runner results.")\n                raw_result = self.app.pantheon.handle("repository.review")
+                execution_results = data.get("execution_results", [])
+                if not isinstance(execution_results, list) or len(execution_results) > 20:
+                    raise ValueError("execution_results must be a list of at most 20 signed runner results.")
+                raw_result = self.app.pantheon.handle("repository.review")
                 try:
                     result = json.loads(raw_result)
                 except json.JSONDecodeError:
@@ -504,6 +507,11 @@ class Handler(BaseHTTPRequestHandler):
                     "execution_state": result.get("execution_plan", {}).get("execution_state", "UNKNOWN"),
                     "source_mutations": False,
                 })
+                if execution_results:
+                    from eria_pantheon.repository_engine import acquire_repository, quality_analysis, execution_plan, synthesize
+                    inventory = acquire_repository(self.app.repository.root)
+                    result["quality"] = quality_analysis(inventory, execution_results)
+                    result["synthesis"] = synthesize(inventory, result["quality"], execution_plan(inventory))
                 self.send_json(200, result)
                 return
             if route == "/api/index":
