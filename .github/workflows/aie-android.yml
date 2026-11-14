@@ -8,6 +8,7 @@ on:
       - ".github/workflows/aie-android.yml"
   pull_request:
     branches: [feature/aie-standalone-and-apk]
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
