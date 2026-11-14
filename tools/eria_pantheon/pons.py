@@ -136,6 +136,23 @@ class Pons:
             return Decision.HOLD
         return Decision.PROPOSAL_ONLY
 
+    def install_accuracy_service(self, ledger_path: str) -> Any:
+        """Install the sole AVS authority as a PONS-owned singleton."""
+        from .accuracy import AccuracyValidationService
+        with self._lock:
+            if AccuracyValidationService not in self._factories:
+                self.register(
+                    AccuracyValidationService,
+                    lambda: AccuracyValidationService(ledger_path),
+                    lifetime=Lifetime.SINGLETON,
+                )
+        return self.resolve(AccuracyValidationService)
+
+    def accuracy_service(self) -> Any:
+        """Resolve AVS only after explicit PONS installation."""
+        from .accuracy import AccuracyValidationService
+        return self.resolve(AccuracyValidationService)
+
     @staticmethod
     def describe() -> Dict[str, Any]:
         return {
@@ -147,7 +164,7 @@ class Pons:
             "capability_policy": "exact-scope; missing-or-unverified-approval=HOLD",
             "execution_enabled": False,
             "git_mutation_enabled": False,
-            "transmission_enabled": False,
+            "transmission_enabled": False,\n            "accuracy_authority": "PONS_ONLY",\n            "self_certification_allowed": False,
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
