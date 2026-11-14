@@ -51,3 +51,33 @@ result = verify_authorship_claim(
 
 The `cryptography` package must be available in the runtime for Ed25519 PEM
 handling. If it is unavailable, verification fails closed.
+
+## Protected GitHub Actions signing workflow
+
+Manual workflow: `.github/workflows/eria-authorship-signing.yml`.
+
+It runs only on the ERIA feature branch and requires the protected Actions
+environment `eria-signing`. It consumes:
+
+- Variable `ERIA_AUTHORSHIP_PUBLIC_KEY`: PEM public key.
+- Variable `ERIA_AUTHORSHIP_KEY_FINGERPRINT`: SHA-256 fingerprint of the
+  DER SubjectPublicKeyInfo bytes.
+- Secret `ERIA_AUTHORSHIP_PRIVATE_KEY`: PEM private key; never printed or
+  included in the artifact.
+
+The workflow checks that the private key derives the configured public key,
+checks the separately supplied fingerprint, validates the claim scope, signs
+the canonical claim with Ed25519, verifies the signature, writes a temporary
+artifact, and atomically renames it to `signed-authorship-claim.json`.
+Only that signed claim is uploaded.
+
+Before enabling the environment secret, an administrator must configure
+required reviewers and restrict deployment branches. Review the workflow code
+and branch protection before approving a signing run: anyone able to alter
+trusted signing workflow code could otherwise attempt to misuse its secret.
+Do not dispatch this workflow until the protected environment and all three
+settings have been configured and independently checked.
+
+The workflow does not force-push, modify source files, rewrite Git metadata,
+or change `main`. Its signature establishes signer approval of the claim
+payload, not the truth of authorship.
