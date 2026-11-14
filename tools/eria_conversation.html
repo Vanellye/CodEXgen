@@ -42,6 +42,7 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
 <button class="small" id="statusBtn" type="button">Integration status</button>
 <button class="small" id="filesBtn" type="button">Search indexed paths</button>
 <button class="small" id="refreshBtn" type="button">Refresh index</button>
+<button class="small" id="pullBtn" type="button">Pull local + GitHub</button>
 </div></div>
 </main>
 <footer>Local Termux session · SQLite stored under ~/.eria · No automatic Git mutation or remote transmission</footer>
@@ -149,6 +150,15 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
       addMessage("assistant", "Repository index refreshed. Files indexed: " + data.indexed);
     } catch (error) { addMessage("assistant", "Index refresh failed: " + error.message); }
     finally { $("refreshBtn").disabled = false; }
+  });
+  $("pullBtn").addEventListener("click", async () => {
+    const button = $("pullBtn"); button.disabled = true; button.textContent = "Pulling…";
+    try {
+      const result = await api("/api/pull", {method:"POST", body:"{}"});
+      addMessage("assistant", "File Pull results:\\n" + JSON.stringify(result.results, null, 2));
+    } catch (error) {
+      addMessage("assistant", "File Pull failed: " + error.message);
+    } finally { button.disabled = false; button.textContent = "Pull local + GitHub"; }
   });
   status(); history();
 })();
