@@ -199,7 +199,7 @@ def _static_findings(root: Path, files: list[dict[str, Any]]) -> list[dict[str, 
     return findings
 
 
-def quality_analysis(inventory: dict[str, Any]) -> dict[str, Any]:
+def quality_analysis(inventory: dict[str, Any], execution_results: list[dict[str, Any]] | None = None) -> dict[str, Any]:
     """Produce repository-wide quality coverage and missing-evidence findings."""
     files = inventory["files"]
     paths = {item["path"] for item in files}
@@ -219,7 +219,33 @@ def quality_analysis(inventory: dict[str, Any]) -> dict[str, Any]:
     if inventory["limits"]["truncated"]:
         findings.append({"class": "UNKNOWN", "severity": "HIGH",
                          "finding": "Inventory reached its file cap; repository coverage is incomplete."})
+    verified_runs = []
+    for run in execution_results or []:
+        if run.get("commit") != inventory["git"]["commit"]:
+            findings.append({"class": "UNKNOWN", "severity": "HIGH",
+                             "finding": "Execution evidence revision mismatch; result excluded."})
+            continue
+        if run.get("status") not in {"PASSED", "FAILED", "TIMEOUT"} or run.get("authority") != "EXECUTION_EVIDENCE_NOT_SOURCE_TRUTH":
+            findings.append({"class": "UNKNOWN", "severity": "HIGH",
+                             "finding": "Execution evidence did not meet the runner result contract; result excluded."})
+            continue
+        verified_runs.append({
+            "command_id": run.get("command_id"), "status": run.get("status"),
+            "exit_code": run.get("exit_code"), "commit": run.get("commit"),
+            "approval_id": run.get("approval_id"),
+            "stdout_sha256": run.get("stdout_sha256"),
+            "stderr_sha256": run.get("stderr_sha256"),
+            "duration_seconds": run.get("duration_seconds"),
+            "runner": run.get("runner"),
+        })
     return {
+        "execution_evidence": verified_runs,
+        "execution_summary": {
+            "runs": len(verified_runs),
+            "passed": sum(run["status"] == "PASSED" for run in verified_runs),
+            "failed": sum(run["status"] == "FAILED" for run in verified_runs),
+            "timed_out": sum(run["status"] == "TIMEOUT" for run in verified_runs),
+        },
         "coverage": {
             "inventory_files": len(files), "manifests": manifests,
             "test_candidates": tests, "workflow_files": workflows,
@@ -262,7 +288,7 @@ def execution_plan(inventory: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def synthesize(inventory: dict[str, Any], quality: dict[str, Any], plan: dict[str, Any]) -> dict[str, Any]:
+def synthesize(inventory: dict[str, Any], quality: dict[str, Any], plan: dict[str, Any], ai_synthesis: dict[str, Any] | None = None) -> dict[str, Any]:
     """Combine evidence without upgrading inferred claims into verified facts."""
     return {
         "repository": inventory["repository"],
@@ -274,7 +300,7 @@ def synthesize(inventory: dict[str, Any], quality: dict[str, Any], plan: dict[st
             "state": plan["execution_state"], "candidate_count": len(plan["commands"]),
             "commands": plan["commands"],
         },
-        "next_stage": "review execution plan, provision isolated runner, then run approved checks",
+        "ai_synthesis": ai_synthesis or {"status": "NOT_REQUESTED"},\n        "next_stage": "review execution evidence and source findings; authorize any repair separately",
         "authority": "NON_AUTHORITATIVE",
         "synthesis_is_not_source_truth": True,
     }
