@@ -171,8 +171,10 @@ def ingest_file(
         "captured_at": captured_at,
         "parent_record_ids": requested_parent_ids,
         "validated_parents": [
-            {"record_id": item["record_id"], "sha256": item["sha256"],
-             "size_bytes": item["size_bytes"]}
+            {"record_id": item["record_id"], "record_type": item["record_type"],
+             "sha256": item["sha256"], "size_bytes": item["size_bytes"],
+             "source_relative_path": item["source_relative_path"],
+             "source_filename": item["source_filename"]}
             for item in current_parent_proofs
         ],
         "authority": "preserved-source-not-validated-as-fact",
