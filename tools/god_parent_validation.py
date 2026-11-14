@@ -168,6 +168,11 @@ def _validate_record_shape(record: dict[str, Any], requested_id: str) -> None:
     for key in ("relative_path", "root_label"):
         if key in source and (not isinstance(source[key], str) or not source[key]):
             raise ParentValidationError(f"parent source {key} must be non-empty text")
+    if "relative_path" in source:
+        rel_source = PurePosixPath(source["relative_path"])
+        if ("\\" in source["relative_path"] or rel_source.is_absolute()
+                or any(part in {"", ".", ".."} for part in rel_source.parts)):
+            raise ParentValidationError("source relative_path must be a normalized safe POSIX path")
     if record_type == "original":
         if record.get("authority") != "preserved-source-not-validated-as-fact":
             raise ParentValidationError("original authority marker is invalid")
@@ -195,6 +200,10 @@ def _validate_record_shape(record: dict[str, Any], requested_id: str) -> None:
         if not all(isinstance(context.get(k), str) and context[k]
                    for k in ("relative_path", "filename", "source_sha256")):
             raise ParentValidationError("derivation source_context fields must be non-empty text")
+        rel_context = PurePosixPath(context["relative_path"])
+        if ("\\" in context["relative_path"] or rel_context.is_absolute()
+                or any(part in {"", ".", ".."} for part in rel_context.parts)):
+            raise ParentValidationError("derivation relative_path must be a normalized safe POSIX path")
         if len(context["source_sha256"]) != 64 or any(
             c not in "0123456789abcdef" for c in context["source_sha256"]
         ):
