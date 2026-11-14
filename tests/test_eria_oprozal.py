@@ -6,6 +6,24 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
 from eria_oprozal import OprozalAdvisor, classify
+from eria_repository_conversation import Conversation
+
+
+class FakeRepository:
+    root = Path("/synthetic/eria")
+
+    def git(self, *args):
+        if args[:2] == ("rev-parse", "HEAD"):
+            return "abc123\n"
+        if args and args[0] == "ls-files":
+            return ""
+        return ""
+
+    def search(self, query):
+        return []
+
+    def files(self):
+        return []
 
 
 class OprozalTests(unittest.TestCase):
@@ -58,6 +76,19 @@ class OprozalTests(unittest.TestCase):
         }
         for text, expected in cases.items():
             self.assertEqual(classify(text), expected, text)
+
+    def test_conversation_ask_attaches_oprozal_reaction(self):
+        conversation = Conversation(FakeRepository())
+        answer = conversation.ask("The runtime is lagging.")
+        self.assertIn("Oprozal advisory", answer)
+        self.assertEqual(conversation.last_oprozal_advice["source_revision"], "abc123")
+        self.assertEqual(conversation.last_oprozal_advice["pons"]["status"], "HOLD")
+
+    def test_conversation_keeps_normal_questions_unmodified_by_oprozal(self):
+        conversation = Conversation(FakeRepository())
+        answer = conversation.ask("Show me all files.")
+        self.assertNotIn("Oprozal advisory", answer)
+        self.assertIsNone(conversation.last_oprozal_advice)
 
 
 if __name__ == "__main__":
