@@ -12,6 +12,19 @@ Read-only local conversation interface for repository metadata and text evidence
 ## Start
     eria-repo-chat "$HOME/CodEXgen"
 
+Æị read-only format inspection:
+    python tools/eria_pantheon/aei.py path/to/file.json --root .
+
+From the conversation prompt:
+    aei.inspect path/to/file.json
+    aei.translate path/to/database.sqlite3
+
+Supported deterministic adapters: JSON, CSV, XML, TOML, YAML (optional PyYAML),
+SQLite in read-only mode, and bounded UTF-8 text/source previews. Unknown or binary
+formats return metadata only when decoding is not safe. Æị never edits the source,
+executes source code, or transmits data. “Translate” means structural interpretation,
+not automatic natural-language translation or code rewriting.
+
 Example questions:
 - what is the git status?
 - show all branches
