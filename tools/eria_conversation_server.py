@@ -29,6 +29,7 @@ sys.path.insert(0, str(TOOLS))
 from eria_repository_conversation import Conversation, Repository  # noqa: E402
 from eria_pantheon.pons import Pons  # noqa: E402
 from eria_file_pull import FilePullService, start_scheduler
+from eria_quality_bridge import QualityBridge
 
 DB_DEFAULT = Path.home() / ".eria" / "data" / "eria_conversation.sqlite3"
 MAX_BODY = 16_384
@@ -344,6 +345,25 @@ class Handler(BaseHTTPRequestHandler):
             except Exception as exc:
                 self.send_json(400, {"error": "File inspection unavailable: " + type(exc).__name__})
             return
+        if route == "/api/quality/summary":
+            self.send_json(200, self.app.quality.summary())
+            return
+        if route == "/api/quality/findings":
+            params = parse_qs(urlparse(self.path).query)
+            try:
+                records = self.app.quality.findings(
+                    params.get("severity", [""])[0][:10],
+                    params.get("path", [""])[0][:300])
+                self.send_json(200, {"findings": records, "count": len(records)})
+            except ValueError as exc:
+                self.send_json(400, {"error": str(exc)})
+            return
+        if route == "/api/quality/candidates":
+            self.send_json(200, {"candidates": self.app.quality.candidates()})
+            return
+        if route == "/api/quality/proposals":
+            self.send_json(200, {"proposals": self.app.quality.proposal_history()})
+            return
         if route == "/api/pull/status":
             self.send_json(200, self.app.file_pull.status())
             return
@@ -376,6 +396,22 @@ class Handler(BaseHTTPRequestHandler):
         route = urlparse(self.path).path
         try:
             data = self.read_json()
+            if route == "/api/quality/refresh":
+                report = self.app.quality.refresh()
+                self.app.store.add_audit("quality_report_refreshed", "RECORDED", {
+                    "report_id": report["report_id"], "report_sha256": report["report_sha256"],
+                    "files_assessed": report.get("summary", {}).get("files_assessed", 0)})
+                self.send_json(200, {"summary": self.app.quality.summary()})
+                return
+            if route == "/api/quality/proposals":
+                symbol = data.get("symbol")
+                if not isinstance(symbol, str) or not symbol.strip() or len(symbol) > 200:
+                    raise ValueError("A candidate symbol is required.")
+                proposal = self.app.quality.prepare_proposal(symbol.strip())
+                self.app.store.add_audit("quality_proposal_prepared", "REVIEW_REQUIRED", {
+                    "proposal_id": proposal["proposal_id"], "symbol": symbol.strip()})
+                self.send_json(201, proposal)
+                return
             if route == "/api/pull":
                 result = self.app.file_pull.sync_all()
                 self.send_json(200 if result.get("ok") else 502, result)
@@ -388,6 +424,9 @@ class Handler(BaseHTTPRequestHandler):
                 question = question.strip()[:8000]
                 self.app.store.add_message(session, "user", question)
                 answer = self.app.conversation.ask(question)
+                quality_answer = self.app.quality.answer(question)
+                if quality_answer:
+                    answer += "\n\n" + quality_answer
                 self.app.store.add_message(session, "assistant", answer)
                 self.send_json(200, {"answer": answer})
                 return
@@ -424,6 +463,7 @@ class App:
         self.store = Store(database)
         self.store.index_repository(self.repository)
         self.file_pull = FilePullService(self.repository.root, self.store.path)
+        self.quality = QualityBridge(self.repository.root, self.store.path)
 
 
 def main():
