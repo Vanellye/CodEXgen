@@ -30,6 +30,11 @@ class ERIAPantheonInterface:
         low = command.strip().lower()
         if low in {"integration.status", "bridge.status", "pons.status"}:
             return self.status()
+        if low == "pons.avs.status":
+            state = self.avs.ledger.verify()
+            return "PONS AVS ledger status\n" + "\n".join(
+                f"{key}: {value}" for key, value in state.items()
+            )
         if low.startswith("code.bypass "):
             return self._code_bypass(command.strip()[len("code.bypass "):])
         if low.startswith("repository.ask "):
