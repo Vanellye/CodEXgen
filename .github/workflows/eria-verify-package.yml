@@ -108,7 +108,7 @@ jobs:
           }
           with open("dist/deployment-manifest.json", "w", encoding="utf-8") as f:
               json.dump(manifest, f, indent=2)
-              f.write("\\n")
+              f.write("\n")
           PY
           (cd dist && sha256sum eria-debug-unsigned.apk eria-termux-source.tar.gz deployment-manifest.json > SHA256SUMS)
 
