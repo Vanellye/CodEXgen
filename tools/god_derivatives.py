@@ -10,6 +10,7 @@ import hashlib
 import json
 import mimetypes
 import os
+import stat
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -28,6 +29,20 @@ class DerivationError(RuntimeError):
 
 def _json_bytes(value: Any) -> bytes:
     return (json.dumps(value, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode("utf-8")
+
+
+def _ensure_directory_chain(vault: Path, directory: Path) -> None:
+    try:
+        relative = directory.relative_to(vault)
+    except ValueError as exc:
+        raise DerivationError("GOD write path escapes the vault") from exc
+    current = vault
+    for part in relative.parts:
+        current = current / part
+        current.mkdir(mode=0o700, exist_ok=True)
+        info = current.lstat()
+        if stat.S_ISLNK(info.st_mode) or not stat.S_ISDIR(info.st_mode):
+            raise DerivationError("symlink or non-directory in GOD write path")
 
 
 def _write_new(path: Path, data: bytes) -> None:
@@ -125,7 +140,11 @@ def create_derived_record(
     metadata_path = vault_path / "SOURCE_PROVENANCE" / "records" / f"{record_id}.json"
     ledger_path = vault_path / "LINEAGE" / "events.jsonl"
 
-    if object_path.exists():
+    _ensure_directory_chain(vault_path, object_path.parent)
+    if object_path.exists() or object_path.is_symlink():
+        info = object_path.lstat()
+        if stat.S_ISLNK(info.st_mode) or not stat.S_ISREG(info.st_mode):
+            raise DerivationError("existing derived object must be a regular non-symlink file")
         existing = hashlib.sha256(object_path.read_bytes()).hexdigest()
         if existing != digest:
             raise DerivationError("derived content-address collision or corruption")
@@ -181,6 +200,7 @@ def create_derived_record(
             "created_by": actor,
         },
     }
+    _ensure_directory_chain(vault_path, metadata_path.parent)
     _write_new(metadata_path, _json_bytes(metadata))
 
     event = {
@@ -198,6 +218,7 @@ def create_derived_record(
         "object_relative_path": relative_object,
         "metadata_relative_path": metadata_path.relative_to(vault_path).as_posix(),
     }
+    _ensure_directory_chain(vault_path, ledger_path.parent)
     _append_event(ledger_path, event)
     return {
         "status": "derived",
