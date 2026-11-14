@@ -62,7 +62,7 @@ def sniff_format(path: Path, raw: bytes) -> str:
     if ext in (".toml",): return "toml"
     if ext in (".txt", ".md", ".log"): return "text"
     if ext in (".sqlite", ".sqlite3", ".db"): return "sqlite"
-    if raw.startswith(b"SQLite format 3\\x00"): return "sqlite"
+    if raw.startswith(b"SQLite format 3\x00"): return "sqlite"
     try:
         raw.decode("utf-8")
     except UnicodeDecodeError:
@@ -75,9 +75,11 @@ def decode_source(path: Path, raw: bytes, fmt: str) -> dict[str, Any]:
         return {"kind": "opaque", "encoding": "base64",
                 "data": base64.b64encode(raw).decode("ascii")}
     if fmt == "sqlite":
-        # SQLite input is opened immutable/read-only; no SQL writes are exposed.
-        uri = path.resolve().as_uri() + "?mode=ro&immutable=1"
+        # Read-only mode honors a live WAL; immutable mode would ignore WAL
+        # state and could silently export a stale snapshot.
+        uri = path.resolve().as_uri() + "?mode=ro"
         con = sqlite3.connect(uri, uri=True)
+        con.execute("PRAGMA query_only=ON")
         try:
             tables = [r[0] for r in con.execute(
                 "SELECT name FROM sqlite_master WHERE type='table' "
@@ -87,8 +89,12 @@ def decode_source(path: Path, raw: bytes, fmt: str) -> dict[str, Any]:
             for table in tables:
                 quoted = '"' + table.replace('"', '""') + '"'
                 cols = [r[1] for r in con.execute(f"PRAGMA table_info({quoted})")]
+                row_count = con.execute(f"SELECT COUNT(*) FROM {quoted}").fetchone()[0]
                 rows = con.execute(f"SELECT * FROM {quoted}").fetchmany(100000)
-                payload[table] = {"columns": cols, "rows": rows}
+                payload[table] = {
+                    "columns": cols, "rows": rows, "row_count": row_count,
+                    "rows_limit": 100000, "truncated": row_count > len(rows)
+                }
             return {"kind": "database", "engine": "sqlite",
                     "tables": payload, "integrity": con.execute(
                         "PRAGMA integrity_check"
