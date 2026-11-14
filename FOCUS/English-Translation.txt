@@ -1,0 +1,252 @@
+ERIA / CodEXgen — FOCUS ENGLISH TRANSLATION
+============================================
+
+PURPOSE
+-------
+This file is the plain-text edition of the first English repository navigation
+and prioritization guide. It explains where important systems live, what they
+are intended to do, and what must be reviewed first.
+
+Repository: Vanellye/CodEXgen
+Source anchor: 2590ef3001d0f79b7cef7955c97c0894f0e31283
+Guide branch: feature/apifany2-focus-english-index
+
+IMPORTANT STATUS
+----------------
+This is an English navigation and interpretation index. It is NOT a
+line-by-line translation of every repository file, a security certification,
+an approval, or a deployment instruction.
+
+PONS hash approval remains pending. Keep main unchanged. Do not inject patches,
+run privileged operations, or deploy development builds until the applicable
+PONS approval has been verified. Missing, expired, mismatched, or ambiguous
+approval means HOLD.
+
+READ IN ORDER OF NECESSITY
+==========================
+
+0. STOP CONDITIONS AND SAFETY BOUNDARIES — READ FIRST
+-----------------------------------------------------
+These documents define the limits of system authority.
+
+- docs/CODE-ETHICS.md
+  Human authority, least privilege, source provenance, evidence, privacy,
+  reversibility, and fail-closed behavior.
+
+- docs/PONS-REMOTE-APPROVAL.md
+  Describes signed, time-limited, capability-scoped approval checks. An
+  approval verifier checks authorization; it does not grant permission by
+  itself.
+
+- docs/ERIA_ISOLATED_EXECUTION.md
+  Describes fixed-command execution, one-use approvals, and temporary
+  isolated workspaces.
+
+- docs/TRUE-NORTH-IMPLEMENTATION-STATUS.md
+  Records implementation evidence and known limitations.
+
+Known source issue at the anchor:
+tools/eria_aei_server.py contains malformed literal backslash-n sequences in
+route-dispatch source code. A repair must change only verified code separators
+into actual source line breaks. Preserve legitimate newline escapes inside
+strings, such as the characters used to write JSONL records. Preserve original
+bytes and record the candidate hash separately. This guide does not perform
+that repair.
+
+1. PRESERVE ORIGINAL DATA AND HISTORY
+-------------------------------------
+Relevant locations:
+
+- docs/ERIA_DATA_VAULT.md
+  Describes commit-anchored acquisition, original-byte objects, and
+  append-only provenance manifests.
+
+- storage/README.md
+  Explains inbox, acquisition records, compiled inspection snapshots,
+  manifests, and settings.
+
+- docs/ERIA_REPOSITORY_ENGINEERING.md
+  Repository-level engineering and preservation practices.
+
+- docs/ROOT-FILESYSTEM-INVENTORY.md
+  Filesystem inventory and organization context.
+
+Plain-English rule:
+Keep every original source file unchanged. Store translations, indexes,
+repairs, and interpretations as separate derived records. Link each derived
+record to its exact source path, commit, and digest.
+
+2. TRANSLATE SOURCE INTO UNDERSTANDABLE ENGLISH
+-----------------------------------------------
+Relevant locations:
+
+- docs/ERIA_HIGHER_FACULTY_INSPECTION.md
+  Explains how source inspection can produce line-anchored English
+  explanations.
+
+- docs/ERIA_AII_HIGHER_FACULTY.md
+  Describes conversational analysis of purpose, dependencies, conflicts,
+  security indicators, possible improvements, and comparisons.
+
+- docs/AEI-LOCAL-INTERFACE.md
+  Describes the local browser interface for read-only inspection.
+
+- tools/eria_pantheon/ai.py
+  Conversational analysis adapter.
+
+- tools/eria_pantheon/higher_faculties.py
+  Deterministic source-to-English analysis pipeline.
+
+- tools/eria_pantheon/interface.py
+  Routes commands into ERIA capabilities.
+
+Interpretation rule:
+An English explanation is a review aid, not the source of truth. Label
+observed facts, inferences, and unknowns separately. Static indicators do not
+prove malicious intent, emotion, or actual runtime behavior.
+
+3. UNDERSTAND APPROVALS, PATCHING, AND DATA MOVEMENT
+----------------------------------------------------
+Relevant locations:
+
+- tools/eria_pantheon/approval.py
+  Checks signed capability grants, scope, expiry, and replay constraints.
+
+- tools/eria_pantheon/pons.py
+  Application-level authorization decisions and policy enforcement.
+
+- tools/eria_pantheon/patch_executor.py
+  Bounded exact-patch mechanism. It must remain blocked without matching
+  approval.
+
+- tools/eria_pantheon/isolated_runner.py
+  Fixed allowlisted commands in an isolated temporary workspace.
+
+- tools/eria_pantheon/relay_lifecycle.py
+  Coordinates the local relay lifecycle.
+
+- tools/eria_pantheon/data_vault.py
+  Handles source acquisition and provenance storage.
+
+Current governance:
+Feature-branch commits and reviewed integration branches may be used for
+candidate work. Keep main unchanged. Do not inject patches, execute privileged
+operations, or deploy development builds until applicable PONS approval is
+verified.
+
+4. APPLICATION INTERFACES AND DEVICE INTEGRATION
+------------------------------------------------
+- interfaces/
+  Browser interfaces and local portals.
+
+- tools/eria_aei_server.py
+  Local AEI HTTP bridge. Inspect and repair the anchor version before relying
+  on it.
+
+- tools/eria_conversation_server.py
+  Local conversational server.
+
+- termux/
+  Android and Termux integration and operating instructions.
+
+- app/
+  Android application source.
+
+- README-ANDROID-ERIA.md
+  Android client guidance, package identity, server connection, and build
+  requirements.
+
+5. BUILD, TESTS, AND GENERATED OUTPUT
+-------------------------------------
+- .github/workflows/
+  Continuous integration and manually dispatched validation workflows.
+
+- tests/
+  Repository-level regression tests.
+
+- tools/tests/
+  Higher Faculty and conversational-analysis tests.
+
+- pantheon/tests/
+  Pantheon contract tests.
+
+- compose/ and generated_modules/
+  Generated or mirrored outputs. Confirm their source-of-truth rules before
+  editing them directly.
+
+- gradle/, build.gradle.kts, settings.gradle.kts
+  Android build configuration.
+
+A passing workflow proves only the steps it actually ran. Inspect test
+discovery paths before concluding that a test suite was covered.
+
+6. RESEARCH, HYPOTHESES, AND LEGACY MATERIAL
+--------------------------------------------
+- hypotheticals/
+  Explicitly hypothetical material. Do not describe it as verified evidence.
+
+- docs/
+  Architecture, governance, history, and subsystem explanations.
+
+- EDIFY.md, HEROES.md, NEW.md, and other narrative records
+  Preserve these as source material. Translate or summarize separately;
+  do not silently rewrite the originals.
+
+PLAIN-ENGLISH DIRECTORY MAP
+===========================
+
+app/                Android application code
+compose/            Generated or mirrored Kotlin source
+docs/               Architecture, governance, and operating guides
+generated_modules/  Generated code output
+hypotheticals/      Explicitly hypothetical examples
+interfaces/         HTML user interfaces
+pantheon/           Pantheon runtime and language contracts
+python/             Python tools, demos, and generators
+security/           Security-related assets and controls
+shared/             Shared application components
+storage/            Acquisition and derived-data directories
+termux/             Android shell integration
+tests/              Repository-level tests
+tools/              ERIA servers, adapters, analyzers, and utilities
+
+RECOMMENDED ENGLISH TRANSLATION RECORD
+======================================
+
+For every translated or explained source item, record:
+
+1. Source repository-relative path.
+2. Source commit and Git blob identity.
+3. Source SHA-256 digest.
+4. Programming language and detected file format.
+5. Line range or symbol name.
+6. Plain-English explanation.
+7. Evidence class: observed, inferred, or unknown.
+8. Confidence and review state.
+9. Derived-record hash and parent lineage.
+
+Never replace original source with its English explanation. Keep the source
+and interpretation as separate artifacts.
+
+SAVEs PRINCIPLE
+===============
+SAVEs means: "Save All Victory's Everything."
+
+Founding statement:
+"Preserve the victory. Preserve the journey. Preserve the source."
+
+Preserve achievements, failed attempts, repairs, evidence, and their lineage
+without overwriting original history. The marker "ị/" is a diagnostic
+lineage/story marker. It is not a replacement for valid source syntax or
+functional newline escapes.
+
+LIMITATION AND NEXT WORK
+========================
+This guide is a prioritized starting index, not a claim that every repository
+file has been translated or independently verified. Continue by inspecting
+the actual repository tree and producing source-linked, line-by-line English
+records. Update evidence and review status as each file is examined.
+
+PONS hash approval: PENDING
+Main branch: MUST REMAIN UNCHANGED
+Injection / privileged execution / development deployment: HOLD UNTIL APPROVAL
