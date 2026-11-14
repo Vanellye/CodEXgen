@@ -206,32 +206,27 @@ def ingest_file(
 
 
 def verify_record(vault: str | Path, record_id: str) -> dict[str, Any]:
-    """Verify an object's bytes against its immutable provenance record."""
+    """Verify this record and its complete ancestry without trusting stored paths."""
     vault_path = Path(vault).expanduser().resolve()
-    metadata_path = vault_path / "SOURCE_PROVENANCE" / "records" / f"{record_id}.json"
-    if metadata_path.is_symlink() or not metadata_path.is_file():
-        raise FileNotFoundError("GOD provenance record not found")
-    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
-    if metadata.get("record_id") != record_id:
-        raise PreservationError("Record identity mismatch")
-    object_path = vault_path / metadata["object_relative_path"]
-    digest, size = sha256_file(object_path)
     try:
-        validate_parent_chain(
-            vault_path, metadata.get("parent_record_ids", []),
-            child_record_type=metadata.get("record_type", "original")
-        )
-        ancestry_valid = True
-    except ParentValidationError:
-        ancestry_valid = False
+        proof = validate_parent_chain(
+            vault_path, [record_id], child_record_type="original"
+        )[0]
+    except ParentValidationError as exc:
+        return {
+            "record_id": record_id,
+            "valid": False,
+            "ancestry_valid": False,
+            "error": str(exc),
+        }
     return {
         "record_id": record_id,
-        "valid": digest == metadata["sha256"] and size == metadata["size_bytes"] and ancestry_valid,
-        "ancestry_valid": ancestry_valid,
-        "expected_sha256": metadata["sha256"],
-        "actual_sha256": digest,
-        "expected_size_bytes": metadata["size_bytes"],
-        "actual_size_bytes": size,
+        "valid": True,
+        "ancestry_valid": True,
+        "expected_sha256": proof["sha256"],
+        "actual_sha256": proof["sha256"],
+        "expected_size_bytes": proof["size_bytes"],
+        "actual_size_bytes": proof["size_bytes"],
     }
 
 
