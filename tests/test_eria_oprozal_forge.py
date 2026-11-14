@@ -1,8 +1,8 @@
-import json
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
@@ -17,7 +17,8 @@ class OprozalForgeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             (root / "candidate.py").write_text("def answer():\n    return 42\n", encoding="utf-8")
-            packet = build_packet(root, "Runtime latency needs profiling.", "candidate.py")
+            with patch("eria_oprozal_forge.git_revision", return_value="abc123"):
+                packet = build_packet(root, "Runtime latency needs profiling.", "candidate.py")
             self.assertEqual(packet["status"], "STATIC_REVIEW_READY")
             self.assertEqual(packet["preflight"]["checks"]["python_ast_parse"], "PASS")
             self.assertEqual(packet["quality_report"]["gates"]["pons_authorization"], "HOLD")
@@ -28,16 +29,16 @@ class OprozalForgeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             (root / "candidate.py").write_text("def broken(:\n", encoding="utf-8")
-            packet = build_packet(root, "Missing capability.", "candidate.py")
+            with patch("eria_oprozal_forge.git_revision", return_value="abc123"):
+                packet = build_packet(root, "Missing capability.", "candidate.py")
             self.assertEqual(packet["preflight"]["status"], "STATIC_CHECKS_FAILED")
             self.assertEqual(packet["quality_report"]["overall"], "STATIC_CHECKS_FAILED")
             self.assertEqual(packet["quality_report"]["gates"]["python_syntax"], "FAIL")
 
     def test_path_traversal_is_rejected(self):
         with tempfile.TemporaryDirectory() as td:
-            root = Path(td)
             with self.assertRaises(PreflightError):
-                inspect_python(root, "../outside.py", "rev")
+                inspect_python(Path(td), "../outside.py", "rev")
 
     def test_binary_file_is_rejected(self):
         with tempfile.TemporaryDirectory() as td:
@@ -45,6 +46,18 @@ class OprozalForgeTests(unittest.TestCase):
             (root / "candidate.py").write_bytes(b"\x00binary")
             with self.assertRaises(PreflightError):
                 inspect_python(root, "candidate.py", "rev")
+
+    def test_symlink_candidate_is_rejected(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            outside = root.parent / (root.name + "-outside.py")
+            outside.write_text("pass\n", encoding="utf-8")
+            try:
+                (root / "candidate.py").symlink_to(outside)
+                with self.assertRaises(PreflightError):
+                    inspect_python(root, "candidate.py", "rev")
+            finally:
+                outside.unlink(missing_ok=True)
 
     def test_no_deficiency_signal_does_not_create_proposal(self):
         with tempfile.TemporaryDirectory() as td:
