@@ -27,7 +27,7 @@ COMMANDS = {
 }
 MAX_SECONDS = 900
 MAX_OUTPUT = 2_000_000
-SENSITIVE_PATH = re.compile(r"(^|[/_.-])(\\.env(?:\\.|$)|secrets?|credentials?|id_rsa|id_ed25519|keystore|\\.pem|\\.p12|\\.jks)([/_.-]|$)", re.I)
+SENSITIVE_PATH = re.compile(r"(^|[/_.-])(\.env(?:\.|$)|secrets?|credentials?|id_rsa|id_ed25519|keystore|\.pem|\.p12|\.jks)([/_.-]|$)", re.I)
 
 
 def _paths():
