@@ -39,7 +39,11 @@ class PantheonRuntimeGate {
         provenance: PonsProvenanceResult
     ): PantheonReview {
         if (provenance.state != PonsProvenanceState.VERIFIED ||
+            provenance.anchor != com.vanellye.eria.pons.PonsAnchorIdentity.CANONICAL ||
+            provenance.componentId.isBlank() ||
+            provenance.expectedSha256 == null ||
             provenance.actualSha256 == null ||
+            provenance.expectedSha256 != provenance.actualSha256 ||
             envelope.provenance.sourceDigest != provenance.actualSha256
         ) {
             return result(PantheonGateStatus.HOLD_PROVENANCE, envelope, requestedScope)
