@@ -47,6 +47,8 @@ class ERIAPantheonInterface:
             return self._aei_translate(command.strip()[len("aei.translate "):])
         if low.startswith("aei.inspect "):
             return self._aei_inspect(command.strip()[len("aei.inspect "):])
+        if low.startswith("ai.higher "):
+            return self._ai_higher(command.strip()[len("ai.higher "):])
         if low.startswith("ai.ask "):
             return self._ai_ask(command.strip()[len("ai.ask "):])
         if low.startswith("repository.ask "):
@@ -58,6 +60,7 @@ class ERIAPantheonInterface:
             "aei.translate <repo-relative-path> (Discovery -> Antithesis -> Verification -> Creation), "
             "aei.compile <repo-relative-path> (store derived copy), "
             "ai.ask <repo-relative-path> --question <text>, "
+            "ai.higher <repo-relative-path> --question <text> [--compare <other-path>], "
             "code.bypass <repo-relative-path> --reason <text>"
         )
 
@@ -101,6 +104,37 @@ class ERIAPantheonInterface:
         except (AeiError, OSError) as exc:
             return f"HOLD: Æị inspection failed: {exc}"
         return json.dumps(result.to_dict(), ensure_ascii=False, indent=2)
+
+    def _ai_higher(self, arguments: str) -> str:
+        try:
+            tokens = shlex.split(arguments)
+        except ValueError as exc:
+            return f"HOLD: invalid Âï Higher Faculty command: {exc}"
+        if not tokens or "--question" not in tokens:
+            return "HOLD: use ai.higher <repo-relative-path> --question <text> [--compare <other-path>]."
+        path = tokens[0]
+        question_index = tokens.index("--question")
+        if question_index != 1:
+            return "HOLD: source path must precede --question."
+        compare_path = None
+        question_tokens = tokens[question_index + 1:]
+        if "--compare" in question_tokens:
+            compare_index = question_tokens.index("--compare")
+            if compare_index + 1 >= len(question_tokens) or compare_index + 2 != len(question_tokens):
+                return "HOLD: --compare requires exactly one final repository-relative path."
+            compare_path = question_tokens[compare_index + 1]
+            question_tokens = question_tokens[:compare_index]
+        question = " ".join(question_tokens).strip()
+        if not question:
+            return "HOLD: enter a question after --question."
+        try:
+            result = self.bridge.resolve(AiiConversation).ask_higher_faculty(
+                path, question, comparison_path=compare_path
+            )
+        except (AeiError, OSError, ValueError) as exc:
+            return json.dumps({"translator": "Âï", "status": "HOLD", "error": str(exc)},
+                              ensure_ascii=False, indent=2)
+        return json.dumps(result, ensure_ascii=False, indent=2)
 
     def _ai_ask(self, arguments: str) -> str:
         try:
