@@ -3,153 +3,190 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b1020">
-<title>ERIA ÂÆị Conversation</title>
+<meta name="theme-color" content="#0b1220">
+<meta name="color-scheme" content="dark">
+<title>ERIA Mobile Console</title>
 <style>
-:root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:#0b1020;color:#e9eef7;--panel:#141d31;--panel2:#10182a;--line:#2a3852;--muted:#9aabc3;--accent:#83d6c2;--blue:#6e9eff}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#172744 0,#0b1020 55%);display:flex;justify-content:center}
-.app{width:min(100%,980px);min-height:100vh;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom)}
-header{padding:22px 4px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line)}
-.brand{display:flex;align-items:center;gap:12px}.mark{width:42px;height:42px;border-radius:13px;background:linear-gradient(145deg,#83d6c2,#6e9eff);display:grid;place-items:center;color:#071321;font-weight:900;font-size:19px}.brand h1{font-size:18px;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:12px}
-.status{font-size:11px;color:var(--accent);border:1px solid #31594f;border-radius:99px;padding:6px 9px;white-space:nowrap}.status.off{color:#ffb0a7;border-color:#70413c}
-main{flex:1;display:flex;flex-direction:column;min-height:0}.overview{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:14px 0}.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px}.stat b{font-size:16px;display:block}.stat span{font-size:10px;color:var(--muted)}
-.chat{flex:1;min-height:300px;overflow:auto;padding:12px 2px 18px;display:flex;flex-direction:column;gap:12px}
-.welcome{background:linear-gradient(135deg,#172943,#141d31);border:1px solid var(--line);border-radius:16px;padding:17px}.welcome h2{font-size:18px;margin:0 0 7px}.welcome p{font-size:13px;color:var(--muted);line-height:1.5;margin:0}
-.message{max-width:92%;padding:12px 14px;border-radius:15px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.55}.user{align-self:flex-end;background:#254466;border:1px solid #3c6086}.assistant{align-self:flex-start;background:var(--panel);border:1px solid var(--line)}.meta{font-size:10px;color:var(--muted);margin-bottom:5px}
-.composer{position:sticky;bottom:0;background:linear-gradient(transparent,#0b1020 20%);padding:12px 0 calc(12px + env(safe-area-inset-bottom))}
-form{display:flex;gap:8px;background:var(--panel);border:1px solid #3b4c68;border-radius:15px;padding:8px}
-textarea{flex:1;resize:none;min-height:42px;max-height:130px;background:transparent;color:inherit;border:0;outline:0;padding:10px;font:inherit;font-size:14px}
-button{border:0;border-radius:11px;background:var(--accent);color:#071b20;font-weight:750;padding:0 17px;min-width:68px}button:disabled{opacity:.5}
-.actions{display:flex;gap:8px;flex-wrap:wrap;padding-top:9px}.small{background:#18243a;color:#c8d7ed;border:1px solid var(--line);font-size:11px;padding:8px 11px;min-width:0}
-footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
-@media(min-width:700px){.app{padding-left:24px;padding-right:24px}.chat{padding:18px 8px}.message{max-width:80%}}
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:#eaf0fa;background:#0b1220;--panel:#141f32;--panel2:#101a2b;--line:#293b56;--muted:#9eafc7;--mint:#83d8c4;--blue:#8db5ff;--red:#ff9e9e;--amber:#ffd18a}
+*{box-sizing:border-box}html{min-height:100%;background:#0b1220}body{margin:0;min-height:100dvh;background:radial-gradient(ellipse at 50% -15%,#1b3150 0,#0b1220 55%);padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+button,input,select,textarea{font:inherit}button{min-height:46px;border:1px solid var(--line);border-radius:13px;padding:0 15px;background:#1a2940;color:#eaf0fa;font-weight:700;cursor:pointer;touch-action:manipulation}button:disabled{opacity:.5;cursor:wait}button.primary{background:var(--mint);color:#09201e;border-color:transparent}button.ghost{background:transparent}button.danger{color:var(--red)}
+.shell{width:min(100%,760px);min-height:100dvh;margin:auto;padding:0 15px 94px;display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 1px 15px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}.logo{width:43px;height:43px;flex:none;border-radius:14px;background:linear-gradient(140deg,var(--mint),var(--blue));display:grid;place-items:center;color:#091923;font-size:21px;font-weight:950}.brand h1{font-size:17px;line-height:1.15;margin:0}.brand p{font-size:11px;color:var(--muted);margin:4px 0 0}
+.pill{font-size:11px;padding:7px 10px;border:1px solid #315b50;border-radius:99px;color:var(--mint);white-space:nowrap}.pill.off{color:var(--red);border-color:#71434a}.pill.wait{color:var(--amber);border-color:#6e5a39}
+main{flex:1}.topline{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:17px 0 10px}.topline h2{font-size:19px;margin:0}.muted{color:var(--muted)}.tiny{font-size:11px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.metric{background:linear-gradient(150deg,#182740,#131e31);border:1px solid var(--line);border-radius:15px;padding:14px;min-width:0}.metric strong{display:block;font-size:23px;line-height:1.1;overflow-wrap:anywhere}.metric span{display:block;margin-top:6px;font-size:11px;color:var(--muted)}
+.card{margin-top:12px;background:rgba(20,31,50,.94);border:1px solid var(--line);border-radius:17px;padding:15px}.card h3{font-size:14px;margin:0 0 7px}.card p{font-size:12px;color:var(--muted);line-height:1.5;margin:0}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.row+.row{margin-top:12px}.path{font-size:11px;line-height:1.5;overflow-wrap:anywhere;color:#cbd8ec}
+.view{display:none}.view.active{display:block}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}.actions button{flex:1}
+label{display:block;font-size:12px;color:#c8d5e8;margin:12px 0 6px}
+input,select,textarea{width:100%;min-height:46px;background:#0c1728;border:1px solid #354966;border-radius:12px;color:#f1f5fb;padding:11px 12px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--mint);box-shadow:0 0 0 2px #83d8c422}
+textarea{min-height:110px;resize:vertical;line-height:1.5}
+.result{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#0a1423;white-space:pre-wrap;overflow-wrap:anywhere;font:11px/1.55 ui-monospace,SFMono-Regular,monospace;color:#d4e2f5;max-height:45vh;overflow:auto}
+.notice{border-left:3px solid var(--amber);padding:9px 11px;background:#332b1d55;border-radius:0 10px 10px 0;color:#e9d6b5;font-size:11px;line-height:1.5;margin-top:12px}
+nav{position:fixed;z-index:5;bottom:0;left:0;right:0;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:#0b1220ed;border-top:1px solid var(--line);backdrop-filter:blur(16px);display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+nav button{min-height:53px;padding:5px 2px;background:transparent;border-color:transparent;color:var(--muted);font-size:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+nav button .ico{font-size:17px;line-height:1}nav button.active{color:var(--mint);background:#1a3040;border-color:#31594f}
+footer{text-align:center;padding:17px 0 5px;color:#7f91aa;font-size:10px}
+@media(min-width:600px){.shell{padding-left:24px;padding-right:24px}.grid{grid-template-columns:repeat(4,minmax(0,1fr))}nav{left:50%;right:auto;transform:translateX(-50%);width:min(100%,760px);border-left:1px solid var(--line);border-right:1px solid var(--line);border-radius:16px 16px 0 0}}
 </style>
 </head>
-<body><div class="app">
-<header><div class="brand"><div class="mark">Æ</div><div><h1>ERIA ÂÆị Conversation</h1><p>Termux · Repository intelligence · Provenance-aware</p></div></div><div id="connection" class="status">Connecting…</div></header>
+<body>
+<div class="shell">
+<header>
+ <div class="brand"><div class="logo">Æ</div><div><h1>ERIA Mobile Console</h1><p>Local repository bridge · SQLite · Termux</p></div></div>
+ <div id="connection" class="pill wait" role="status">Checking API</div>
+</header>
 <main>
-<section class="overview">
-<div class="stat"><b id="fileCount">—</b><span>Indexed files</span></div>
-<div class="stat"><b id="dbState">—</b><span>Repository database</span></div>
-<div class="stat"><b id="engineState">—</b><span>Conversation engine</span></div>
+<section id="overview" class="view active">
+ <div class="topline"><h2>Runtime overview</h2><span class="tiny muted" id="lastCheck">Not checked</span></div>
+ <div class="grid">
+  <div class="metric"><strong id="scanCount">—</strong><span>Repository scans</span></div>
+  <div class="metric"><strong id="sourceCount">—</strong><span>Source-file records</span></div>
+  <div class="metric"><strong id="decoderCount">—</strong><span>Decoder jobs</span></div>
+  <div class="metric"><strong id="artifactCount">—</strong><span>Derived artifacts</span></div>
+ </div>
+ <div class="card"><div class="row"><h3>Database connection</h3><span class="tiny muted" id="dbBadge">Unknown</span></div><div class="path" id="dbPath">Waiting for API response…</div><div class="actions"><button class="primary" id="refreshStatus">Refresh status</button><button id="openScan">Repository scan</button></div></div>
+ <div class="card"><h3>Runtime boundaries</h3><p>This console uses only the existing status, scan, and decode routes. It does not modify Git history, delete source files, or claim that unsupported chat or artifact-import routes exist.</p></div>
 </section>
-<section id="chat" class="chat" aria-live="polite">
-<div class="welcome"><h2>Welcome to ERIA</h2><p>Ask questions about repository files, branches, commits, architecture, provenance, or the PONS bridge. Original source remains non-authoritative; translations are derived records, not replacements.</p></div>
+<section id="scan" class="view">
+ <div class="topline"><h2>Repository scan</h2><span class="tiny muted">POST /api/scan</span></div>
+ <div class="card"><h3>Run a repository scan</h3><p>The existing ERIA scanner hashes repository files and returns its scan ID, repository root, branch, and commit when available.</p><div class="notice">A scan writes scan/index metadata to the configured SQLite database. It does not merge branches or rewrite Git history.</div><div class="actions"><button class="primary" id="runScan">Run scan</button></div><pre class="result" id="scanResult" aria-live="polite">No scan run in this session.</pre></div>
 </section>
-<div class="composer">
-<form id="form"><textarea id="message" rows="1" placeholder="Ask ERIA about your repository…" aria-label="Message"></textarea><button id="send" type="submit">Send</button></form>
-<div class="actions">
-<button class="small" id="statusBtn" type="button">Integration status</button>
-<button class="small" id="filesBtn" type="button">Search indexed paths</button>
-<button class="small" id="refreshBtn" type="button">Refresh index</button>
-</div></div>
+<section id="decode" class="view">
+ <div class="topline"><h2>Inception decoder</h2><span class="tiny muted">POST /api/decode</span></div>
+ <div class="card"><h3>Decode a source value</h3><p>Calls the existing repository decoder. It does not invent a source record or overwrite the original bytes.</p>
+  <label for="sourceId">Source ID</label><input id="sourceId" type="number" min="1" step="1" inputmode="numeric" placeholder="Existing source_id">
+  <label for="decodeMode">Mode</label><select id="decodeMode"><option value="utf8">UTF-8</option><option value="hex">Hex</option><option value="base64">Base64</option></select>
+  <label for="decodeValue">Value</label><textarea id="decodeValue" placeholder="Paste the value to decode"></textarea>
+  <div class="actions"><button class="primary" id="runDecode">Decode</button><button id="clearDecode">Clear</button></div>
+  <pre class="result" id="decodeResult" aria-live="polite">No decode request submitted.</pre>
+ </div>
+</section>
+<section id="settings" class="view">
+ <div class="topline"><h2>Connection settings</h2><span class="tiny muted">Local only</span></div>
+ <div class="card"><h3>ERIA API address</h3><p>Use the same-origin address when this page is served by ERIA. The default fallback is the requested Termux loopback port 8778.</p>
+  <label for="apiBase">Base URL</label><input id="apiBase" type="url" inputmode="url" spellcheck="false">
+  <div class="actions"><button class="primary" id="saveApi">Save and reconnect</button><button id="useLocal">Use 127.0.0.1:8778</button></div>
+  <div class="notice">Open this interface from the ERIA server in your phone browser, preferably at http://127.0.0.1:8778/. Opening the HTML as a file may trigger browser cross-origin restrictions.</div>
+  <pre class="result" id="apiResult">API requests have not been tested.</pre>
+ </div>
+</section>
 </main>
-<footer>Local Termux session · SQLite stored under ~/.eria · No automatic Git mutation or remote transmission</footer>
+<footer>ERIA · Mobile-first interface · Human-authorized actions · No automatic Git mutation</footer>
 </div>
+<nav aria-label="Main navigation">
+ <button class="active" data-view="overview"><span class="ico">◫</span>Overview</button>
+ <button data-view="scan"><span class="ico">⌕</span>Scan</button>
+ <button data-view="decode"><span class="ico">⇄</span>Decode</button>
+ <button data-view="settings"><span class="ico">⚙</span>API</button>
+</nav>
 <script>
 (() => {
-  const $ = id => document.getElementById(id);
-  const session = (() => {
-    let value = sessionStorage.getItem("eria_session");
-    if (!value) {
-      value = "eria-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,9);
-      sessionStorage.setItem("eria_session", value);
-    }
-    return value;
-  })();
-  const chat = $("chat");
-  let busy = false;
-  function addMessage(role, content) {
-    const wrap = document.createElement("div");
-    wrap.className = "message " + role;
-    const meta = document.createElement("div");
-    meta.className = "meta";
-    meta.textContent = role === "user" ? "YOU" : "ERIA";
-    const body = document.createElement("div");
-    body.textContent = content;
-    wrap.append(meta, body);
-    chat.append(wrap);
-    chat.scrollTop = chat.scrollHeight;
-  }
-  async function api(path, options={}) {
-    const response = await fetch(path, {
-      ...options,
-      headers: {"Content-Type":"application/json","X-ERIA-Session":session,...(options.headers||{})}
-    });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "Request failed: " + response.status);
-    return data;
-  }
-  async function status() {
-    try {
-      const data = await api("/api/status");
-      $("connection").textContent = "Termux connected";
-      $("connection").classList.remove("off");
-      $("fileCount").textContent = data.index.files;
-      $("dbState").textContent = "Ready";
-      $("engineState").textContent = "Online";
-    } catch (error) {
-      $("connection").textContent = "Disconnected";
-      $("connection").classList.add("off");
-      $("dbState").textContent = "Offline";
-      $("engineState").textContent = "Offline";
-    }
-  }
-  async function history() {
-    try {
-      const data = await api("/api/history");
-      if (data.messages.length) {
-        chat.innerHTML = "";
-        data.messages.forEach(item => addMessage(item.role, item.content));
-      }
-    } catch (_) {}
-  }
-  async function send(text) {
-    if (busy || !text.trim()) return;
-    busy = true; $("send").disabled = true;
-    addMessage("user", text);
-    try {
-      const data = await api("/api/chat", {
-        method:"POST", body:JSON.stringify({message:text,session_id:session})
-      });
-      addMessage("assistant", data.answer);
-    } catch (error) {
-      addMessage("assistant", "HOLD: " + error.message);
-    } finally {
-      busy = false; $("send").disabled = false; $("message").focus();
-    }
-  }
-  $("form").addEventListener("submit", event => {
-    event.preventDefault();
-    const value = $("message").value;
-    $("message").value = "";
-    send(value);
-  });
-  $("message").addEventListener("keydown", event => {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault(); $("form").requestSubmit();
-    }
-  });
-  $("statusBtn").addEventListener("click", () => send("integration.status"));
-  $("filesBtn").addEventListener("click", async () => {
-    const query = prompt("Find repository paths containing:");
-    if (query === null || !query.trim()) return;
-    try {
-      const data = await api("/api/files?q=" + encodeURIComponent(query));
-      addMessage("assistant", data.files.length
-        ? "Indexed path matches:\n" + data.files.map(x => x.path + " (" + x.size_bytes + " bytes)").join("\n")
-        : "No indexed paths matched: " + query);
-    } catch (error) { addMessage("assistant", "HOLD: " + error.message); }
-  });
-  $("refreshBtn").addEventListener("click", async () => {
-    $("refreshBtn").disabled = true;
-    try {
-      const data = await api("/api/index", {method:"POST",body:"{}"});
-      $("fileCount").textContent = data.indexed;
-      addMessage("assistant", "Repository index refreshed. Files indexed: " + data.indexed);
-    } catch (error) { addMessage("assistant", "Index refresh failed: " + error.message); }
-    finally { $("refreshBtn").disabled = false; }
-  });
-  status(); history();
+ "use strict";
+ const $ = id => document.getElementById(id);
+ const saved = localStorage.getItem("eria_api_base");
+ const defaultBase = location.protocol === "http:" || location.protocol === "https:"
+   ? location.origin : "http://127.0.0.1:8778";
+ let apiBase = (saved || defaultBase).replace(/\/+$/, "");
+ $("apiBase").value = apiBase;
+ function showResult(id, value) {
+   $(id).textContent = typeof value === "string" ? value : JSON.stringify(value, null, 2);
+ }
+ async function request(path, options={}) {
+   const controller = new AbortController();
+   const timeout = setTimeout(() => controller.abort(), 20000);
+   try {
+     const response = await fetch(apiBase + path, {
+       ...options, signal: controller.signal,
+       headers: {"Content-Type":"application/json", ...(options.headers || {})}
+     });
+     const raw = await response.text();
+     let data;
+     try { data = raw ? JSON.parse(raw) : {}; }
+     catch (_) { data = {raw}; }
+     if (!response.ok) throw new Error((data && data.error) || ("HTTP " + response.status + ": " + raw.slice(0,300)));
+     return data;
+   } finally { clearTimeout(timeout); }
+ }
+ function connection(state, label) {
+   $("connection").className = "pill " + state;
+   $("connection").textContent = label;
+ }
+ function number(value) { return Number.isFinite(Number(value)) ? Number(value).toLocaleString() : "—"; }
+ async function refreshStatus() {
+   connection("wait", "Checking API");
+   try {
+     const data = await request("/api/platform/status");
+     $("scanCount").textContent = number(data.scans);
+     $("sourceCount").textContent = number(data.source_files);
+     $("decoderCount").textContent = number(data.decoder_jobs);
+     $("artifactCount").textContent = number(data.derived_artifacts);
+     $("dbPath").textContent = data.database || "Database path not reported";
+     $("dbBadge").textContent = data.database ? "Reported by API" : "Path unavailable";
+     $("lastCheck").textContent = "Checked " + new Date().toLocaleTimeString();
+     connection("","API connected");
+     showResult("apiResult", data);
+     return data;
+   } catch (error) {
+     connection("off","Disconnected");
+     $("dbBadge").textContent = "Unverified";
+     $("dbPath").textContent = "Could not retrieve database status.";
+     $("lastCheck").textContent = "Check failed";
+     showResult("apiResult", error.message);
+     throw error;
+   }
+ }
+ function navigate(view) {
+   document.querySelectorAll(".view").forEach(el => el.classList.toggle("active", el.id === view));
+   document.querySelectorAll("nav button").forEach(el => el.classList.toggle("active", el.dataset.view === view));
+   window.scrollTo({top:0,behavior:"smooth"});
+ }
+ document.querySelectorAll("nav button").forEach(btn => btn.addEventListener("click", () => navigate(btn.dataset.view)));
+ $("refreshStatus").addEventListener("click", () => refreshStatus().catch(()=>{}));
+ $("openScan").addEventListener("click", () => navigate("scan"));
+ $("runScan").addEventListener("click", async () => {
+   const button = $("runScan"); button.disabled = true; button.textContent = "Scanning…";
+   showResult("scanResult","Scan in progress…");
+   try {
+     const data = await request("/api/scan",{method:"POST",body:"{}"});
+     showResult("scanResult",data);
+     await refreshStatus();
+   } catch(error) { showResult("scanResult","Scan failed: " + error.message); }
+   finally { button.disabled = false; button.textContent = "Run scan"; }
+ });
+ $("runDecode").addEventListener("click", async () => {
+   const id = Number($("sourceId").value);
+   const value = $("decodeValue").value;
+   if (!Number.isSafeInteger(id) || id < 1) { showResult("decodeResult","Enter a valid existing source ID."); return; }
+   if (!value) { showResult("decodeResult","Enter a value to decode."); return; }
+   const button = $("runDecode"); button.disabled = true;
+   try {
+     const data = await request("/api/decode",{method:"POST",body:JSON.stringify({source_id:id,mode:$("decodeMode").value,value})});
+     showResult("decodeResult",data);
+     await refreshStatus();
+   } catch(error) { showResult("decodeResult","Decode failed: " + error.message); }
+   finally { button.disabled = false; }
+ });
+ $("clearDecode").addEventListener("click", () => {
+   $("sourceId").value = ""; $("decodeValue").value = "";
+   showResult("decodeResult","No decode request submitted.");
+ });
+ $("saveApi").addEventListener("click", async () => {
+   const value = $("apiBase").value.trim().replace(/\/+$/, "");
+   try { const parsed = new URL(value); if (!["http:","https:"].includes(parsed.protocol)) throw new Error("Use HTTP or HTTPS."); }
+   catch(error) { showResult("apiResult","Invalid API URL: " + error.message); return; }
+   apiBase = value; localStorage.setItem("eria_api_base",apiBase);
+   try { await refreshStatus(); } catch(_) {}
+ });
+ $("useLocal").addEventListener("click", () => {
+   $("apiBase").value = "http://127.0.0.1:8778";
+   $("saveApi").click();
+ });
+ refreshStatus().catch(()=>{});
 })();
-</script></body></html>
+</script>
+</body>
+</html>
