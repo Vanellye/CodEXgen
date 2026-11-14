@@ -55,3 +55,18 @@ outside the Git checkout by default.
   status in the PONS envelope.
 
 Python 3 standard library only; no pip installation is required.
+
+
+## Repository dashboard
+
+The same local server also serves the repository dashboard:
+
+- Browser UI: `http://127.0.0.1:8765/repository`
+- Status API: `GET /api/status`
+- PONS policy: `GET /api/pons/status`
+- Indexed paths: `GET /api/files?q=...`
+- Refresh metadata index: `POST /api/index` with an empty JSON object
+
+The Android app's native Jetpack Compose repository screen uses the same loopback API at `127.0.0.1:8765`. Start the Termux server first, then open ERIA on the same device.
+
+The dashboard is an inspection surface. PONS status is informational; this UI does not create or cryptographically verify grants and does not authorize protected execution. Keep the server bound to loopback. SQLite stores chat history and repository file metadata, not source-file contents.
