@@ -48,7 +48,8 @@ rejects missing records, ID mismatches, unsafe paths, symlinks, duplicate
 parents, cycles, unavailable ancestors, and altered objects. The collector
 runs validation before capture and again immediately before writing the child
 provenance record. Accepted child records include a `validated_parents`
-manifest containing each direct parent ID, digest, and byte length.
+manifest containing each direct parent ID, type, digest, byte length, source-relative
+path, and filename. Older manifests with only ID/digest/length remain readable.
 
 Multiple parents can be supplied with `parent_record_ids=[...]`; the older
 single-parent `parent_record_id=...` argument remains supported. Supplying
