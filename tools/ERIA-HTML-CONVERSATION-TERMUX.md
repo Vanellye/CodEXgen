@@ -57,16 +57,32 @@ outside the Git checkout by default.
 Python 3 standard library only; no pip installation is required.
 
 
-## Repository dashboard
+## Unified repository dashboard
 
-The same local server also serves the repository dashboard:
+The same local server serves the browser dashboard and the native Android Jetpack Compose dashboard:
 
 - Browser UI: `http://127.0.0.1:8765/repository`
-- Status API: `GET /api/status`
+- Status: `GET /api/status`
 - PONS policy: `GET /api/pons/status`
+- Authorization review queue: `GET /api/pons/requests`
+- Create a review proposal: `POST /api/pons/requests`
 - Indexed paths: `GET /api/files?q=...`
-- Refresh metadata index: `POST /api/index` with an empty JSON object
+- Safe text preview: `GET /api/files/detail?path=...`
+- Source provenance: `GET /api/provenance?q=...`
+- Local audit history: `GET /api/audit`
+- Refresh metadata and source hashes: `POST /api/index` with an empty JSON object
 
-The Android app's native Jetpack Compose repository screen uses the same loopback API at `127.0.0.1:8765`. Start the Termux server first, then open ERIA on the same device.
+The Android app and browser UI expose five matching areas: Overview, Files, Provenance, Audit, and PONS. The native app polls the local service while the dashboard is open. Start the Termux server first, then open ERIA on the same device.
 
-The dashboard is an inspection surface. PONS status is informational; this UI does not create or cryptographically verify grants and does not authorize protected execution. Keep the server bound to loopback. SQLite stores chat history and repository file metadata, not source-file contents.
+### Provenance and audit behavior
+
+- The index stores file paths, extensions, sizes, timestamps, and SHA-256 for eligible files up to 5 MiB. A blank hash means it was not computed.
+- Hashes describe bytes at the last index refresh; refresh after modifying source files.
+- The detail endpoint uses the repository engine's path containment checks, text/binary checks, size limit, and secret-value redaction. It returns a bounded preview, not an editable file.
+- SQLite audit events are append-only: database triggers reject update and delete operations.
+- Authorization review requests are durable proposals with status `HOLD`. Creating a request never creates a grant or enables a capability.
+- This service does not create derived content. Any future transform must preserve source identity and source hash and record a separate derived hash.
+
+### Boundaries
+
+The dashboard is an inspection and proposal surface. It does not create or cryptographically verify grants, approve protected execution, mutate Git, or transmit repository contents. PONS remains an application-level policy gate, not an OS sandbox or identity provider. Keep the server bound to loopback. SQLite stores metadata, audit events, authorization proposals, and chat history, not authoritative source-file contents.
