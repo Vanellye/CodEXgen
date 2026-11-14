@@ -2,6 +2,7 @@
 """ERIA Code Aura .glob discovery and PONS-gated new-file bootstrap."""
 from __future__ import annotations
 import fnmatch, hashlib, json, os, re, sqlite3, subprocess, uuid
+from eria_pantheon.pons import CapabilityGrant, Decision, Pons
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 
@@ -122,8 +123,11 @@ class GlobBootstrap:
         scope=json.loads(row["scope_json"])
         if self._provenance()!={k:scope[k] for k in ("repository","branch","head_commit")}: raise ValueError("Repository, branch, or HEAD changed; recreate request.")
         self._validate_files(json.loads(row["files_json"]))
+        capability=CapabilityGrant(self.CAPABILITY,digest,digest,rid,verified_by_adapter=True)
+        decision=Pons.authorize_source_write(capability,self.CAPABILITY,digest)
+        if decision is not Decision.REVIEW_READY: raise ValueError("PONS denied new-file bootstrap; request remains HOLD.")
         gid=str(uuid.uuid4())
-        with self.connect() as db: db.execute("INSERT INTO grants(grant_id,request_id,scope_sha256,decision,approved_at,confirmation) VALUES(?,?,?,?,?,?)",(gid,rid,digest,"REVIEW_READY",_now(),expected))
+        with self.connect() as db: db.execute("INSERT INTO grants(grant_id,request_id,scope_sha256,decision,approved_at,confirmation) VALUES(?,?,?,?,?,?)",(gid,rid,digest,decision.value,_now(),expected))
         return {"grant_id":gid,"decision":"REVIEW_READY","scope_sha256":digest,"source_modified":False,"execution_started":False}
     def apply(self,gid):
         with self.connect() as db:
