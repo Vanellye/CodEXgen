@@ -8,12 +8,27 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
 import threading
+from pathlib import Path
 import uuid
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Callable, Dict, Optional, Type
+
+
+CANONICAL_ANCHOR_SHA = "b549dea5af2e51402cf41234f3e2b3cdfb064032"
+COMPONENT_PATHS = (
+    "app/src/main/java/com/vanellye/eria/RepositoryDashboardScreen.kt",
+    "app/src/main/java/com/vanellye/eria/MainActivity.kt",
+    "tools/eria_repository_conversation.py",
+    "tools/eria_conversation_server.py",
+    "tools/eria_repository.html",
+    "tools/eria_pantheon/pons.py",
+    "tools/eria_pantheon/interface.py",
+    "tools/eria_ttt_bypass.py",
+)
 
 
 class CapabilityDenied(PermissionError):
@@ -149,6 +164,60 @@ class Pons:
             "git_mutation_enabled": False,
             "transmission_enabled": False,
             "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+
+    @staticmethod
+    def provenance_report(repository_root: Any) -> Dict[str, Any]:
+        """Compare live component bytes with the immutable canonical anchor.
+
+        This is a read-only integrity comparison, not a signature, authorship,
+        or trust assertion. Missing/unreadable Git objects fail closed.
+        """
+        root = Path(repository_root).resolve()
+        components = []
+        for relative in COMPONENT_PATHS:
+            current_path = (root / relative).resolve()
+            if root not in current_path.parents or not current_path.is_file():
+                components.append({
+                    "path": relative, "status": "MISSING",
+                    "current_sha256": "", "anchor_sha256": "",
+                })
+                continue
+            try:
+                current_bytes = current_path.read_bytes()
+                current_hash = hashlib.sha256(current_bytes).hexdigest()
+                anchored = subprocess.run(
+                    ["git", "-C", str(root), "show", f"{CANONICAL_ANCHOR_SHA}:{relative}"],
+                    capture_output=True, check=True,
+                ).stdout
+                anchor_hash = hashlib.sha256(anchored).hexdigest()
+                components.append({
+                    "path": relative,
+                    "status": "MATCH" if current_hash == anchor_hash else "CHANGED",
+                    "current_sha256": current_hash,
+                    "anchor_sha256": anchor_hash,
+                })
+            except (OSError, subprocess.CalledProcessError):
+                components.append({
+                    "path": relative, "status": "UNVERIFIABLE",
+                    "current_sha256": current_hash if "current_hash" in locals() else "",
+                    "anchor_sha256": "",
+                })
+        statuses = [item["status"] for item in components]
+        if any(value in {"MISSING", "CHANGED"} for value in statuses):
+            overall = "DRIFT_DETECTED"
+        elif any(value == "UNVERIFIABLE" for value in statuses):
+            overall = "UNVERIFIABLE"
+        else:
+            overall = "MATCH_TO_CANONICAL_ANCHOR"
+        return {
+            "canonical_anchor_sha": CANONICAL_ANCHOR_SHA,
+            "integrity": overall,
+            "components_checked": len(components),
+            "components_matching": sum(value == "MATCH" for value in statuses),
+            "components": components,
+            "authority": "NON_AUTHORITATIVE",
+            "note": "Byte comparison against the canonical commit; not a signature or trust proof.",
         }
 
     @staticmethod
