@@ -7,8 +7,6 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import com.vanellye.eria.pons.PonsComponentStatus
 import com.vanellye.eria.pons.requireReady
-import com.vanellye.eria.pons.PonsEffectiveState
-import com.vanellye.eria.pons.PonsAnchorIdentity
 
 /**
  * Converts a transmitted raw PCM16 payload into a standard RIFF/WAVE file.
