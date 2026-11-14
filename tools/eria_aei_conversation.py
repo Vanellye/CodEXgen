@@ -14,6 +14,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from eria_repository_conversation import Conversation, Repository, RepoError
 from eria_database_translator import canonical_envelope, read_bytes
+from eria_aei_platform_db import PlatformDatabase
 
 class ÆiConversation:
     def __init__(self, repository: str = "."):
@@ -73,6 +74,44 @@ class ÆiConversation:
                 "limits": ["No source mutation", "No code execution",
                            "No external model inference"]
             }
+        low = q.lower()
+        if any(term in low for term in ("database status", "platform database status", "sqlite status")):
+            try:
+                status = PlatformDatabase().status()
+                return {"status": "answered", "intent": "database_status",
+                        "answer": json.dumps(status, ensure_ascii=False, indent=2),
+                        "evidence": [{"database": status["database"],
+                                      "integrity": status["integrity"],
+                                      "classification": "OBSERVED"}],
+                        "limits": ["Database opened read-only", "No SQL writes exposed"]}
+            except Exception as exc:
+                return {"status": "unavailable", "intent": "database_status",
+                        "answer": str(exc), "evidence": [],
+                        "limits": ["No database changes were made"]}
+        if any(term in low for term in ("registered source urls", "source url list", "show source urls")):
+            try:
+                urls = PlatformDatabase().source_urls()
+                return {"status": "answered", "intent": "source_urls",
+                        "answer": json.dumps(urls, ensure_ascii=False, indent=2),
+                        "evidence": [{"record_count": len(urls),
+                                      "classification": "OBSERVED"}],
+                        "limits": ["Read-only query", "Results reflect current local database"]}
+            except Exception as exc:
+                return {"status": "unavailable", "intent": "source_urls",
+                        "answer": str(exc), "evidence": [],
+                        "limits": ["No database changes were made"]}
+        if any(term in low for term in ("translation artifacts", "artifact summary", "derived artifacts")):
+            try:
+                summary = PlatformDatabase().artifact_summary()
+                return {"status": "answered", "intent": "artifact_summary",
+                        "answer": json.dumps(summary, ensure_ascii=False, indent=2),
+                        "evidence": [{"record_count": summary["count"],
+                                      "classification": "OBSERVED"}],
+                        "limits": ["Read-only query", "No artifact records were modified"]}
+            except Exception as exc:
+                return {"status": "unavailable", "intent": "artifact_summary",
+                        "answer": str(exc), "evidence": [],
+                        "limits": ["No database changes were made"]}
         answer = self.repo_chat.ask(q)
         return {
             "status": "answered", "intent": intent, "answer": answer,
