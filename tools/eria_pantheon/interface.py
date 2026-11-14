@@ -11,6 +11,7 @@ from .higher_faculties import translate_file
 from .ai import AiiConversation
 from .pons import BridgeEnvelope, Pons
 from .storage import AeiStorage
+from .repository_engine import run_repository_review
 
 
 class ERIAPantheonInterface:
@@ -39,6 +40,8 @@ class ERIAPantheonInterface:
         low = command.strip().lower()
         if low in {"integration.status", "bridge.status", "pons.status"}:
             return self.status()
+        if low == "repository.review":
+            return self._repository_review()
         if low.startswith("code.bypass "):
             return self._code_bypass(command.strip()[len("code.bypass "):])
         if low.startswith("aei.compile "):
@@ -54,7 +57,7 @@ class ERIAPantheonInterface:
         if low.startswith("repository.ask "):
             return self.repository.ask(command.strip()[len("repository.ask "):])
         return (
-            "Supported commands: integration.status, bridge.status, "
+             "Supported commands: integration.status, bridge.status, repository.review (whole-repository acquisition/quality/synthesis), "
             "repository.ask <question>, "
             "aei.inspect <repo-relative-path>, "
             "aei.translate <repo-relative-path> (Discovery -> Antithesis -> Verification -> Creation), "
@@ -63,6 +66,15 @@ class ERIAPantheonInterface:
             "ai.higher <repo-relative-path> --question <text> [--compare <other-path>], "
             "code.bypass <repo-relative-path> --reason <text>"
         )
+
+    def _repository_review(self) -> str:
+        """Run bounded read-only acquisition, quality analysis, and synthesis."""
+        try:
+            result = run_repository_review(self.repository.root)
+        except (OSError, ValueError) as exc:
+            return json.dumps({"translator": "ERIA", "status": "HOLD",
+                               "error": str(exc)}, ensure_ascii=False, indent=2)
+        return json.dumps(result, ensure_ascii=False, indent=2)
 
     def _aei_compile(self, arguments: str) -> str:
         try:
