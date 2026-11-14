@@ -20,7 +20,7 @@ main{flex:1;display:flex;flex-direction:column;min-height:0}.overview{display:gr
 form{display:flex;gap:8px;background:var(--panel);border:1px solid #3b4c68;border-radius:15px;padding:8px}
 textarea{flex:1;resize:none;min-height:42px;max-height:130px;background:transparent;color:inherit;border:0;outline:0;padding:10px;font:inherit;font-size:14px}
 button{border:0;border-radius:11px;background:var(--accent);color:#071b20;font-weight:750;padding:0 17px;min-width:68px}button:disabled{opacity:.5}
-.actions{display:flex;gap:8px;flex-wrap:wrap;padding-top:9px}.small{background:#18243a;color:#c8d7ed;border:1px solid var(--line);font-size:11px;padding:8px 11px;min-width:0}
+.actions{display:flex;gap:8px;flex-wrap:wrap;padding-top:9px}.quality{background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:12px;margin:4px 0 10px}.quality h3{font-size:13px;margin:0 0 8px}.quality p{font-size:11px;color:var(--muted);margin:0 0 8px;overflow-wrap:anywhere}.quality-actions{display:flex;gap:7px;flex-wrap:wrap}.small{background:#18243a;color:#c8d7ed;border:1px solid var(--line);font-size:11px;padding:8px 11px;min-width:0}
 footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
 @media(min-width:700px){.app{padding-left:24px;padding-right:24px}.chat{padding:18px 8px}.message{max-width:80%}}
 </style>
@@ -33,6 +33,15 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
 <div class="stat"><b id="dbState">—</b><span>Repository database</span></div>
 <div class="stat"><b id="engineState">—</b><span>Conversation engine</span></div>
 </section>
+<section class="quality" aria-label="Qualitative assessment">
+<h3>Qualitative Storage · Æị Inspection · Âï Intelligence</h3>
+<p id="qualityState">No report loaded yet. Refresh to create a provenance-bound assessment.</p>
+<div class="quality-actions">
+<button class="small" id="qualityRefresh" type="button">Refresh Quality</button>
+<button class="small" id="qualityFindings" type="button">Explain Findings</button>
+<button class="small" id="qualityCandidates" type="button">Rank Synthesis</button>
+<button class="small" id="qualityProposals" type="button">Proposal History</button>
+</div></section>
 <section id="chat" class="chat" aria-live="polite">
 <div class="welcome"><h2>Welcome to ERIA</h2><p>Ask questions about repository files, branches, commits, architecture, provenance, or the PONS bridge. Original source remains non-authoritative; translations are derived records, not replacements.</p></div>
 </section>
@@ -80,6 +89,16 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Request failed: " + response.status);
     return data;
+  }
+  async function qualityStatus() {
+    try {
+      const data = await api("/api/quality/summary");
+      if (!data.ready) { $("qualityState").textContent = "Qualitative Storage ready at " + data.storage_root + " · " + data.message; return; }
+      $("qualityState").textContent = data.summary.files_assessed + " files · " +
+        data.summary.findings.high + " high / " + data.summary.findings.medium +
+        " medium findings · " + data.ranked_candidates + " synthesis candidates · " +
+        data.source_comparison_count + " local/GitHub divergences · report " + data.report_id;
+    } catch (error) { $("qualityState").textContent = "Quality bridge unavailable: " + error.message; }
   }
   async function status() {
     try {
@@ -160,6 +179,40 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
       addMessage("assistant", "File Pull failed: " + error.message);
     } finally { button.disabled = false; button.textContent = "Pull local + GitHub"; }
   });
-  status(); history();
+  $("qualityRefresh").addEventListener("click", async () => {
+    const button = $("qualityRefresh"); button.disabled = true; button.textContent = "Assessing…";
+    try {
+      const data = await api("/api/quality/refresh", {method:"POST",body:"{}"});
+      addMessage("assistant", "Qualitative report stored.\n" + JSON.stringify(data.summary, null, 2));
+      await qualityStatus();
+    } catch (error) { addMessage("assistant", "Quality refresh failed: " + error.message); }
+    finally { button.disabled = false; button.textContent = "Refresh Quality"; }
+  });
+  $("qualityFindings").addEventListener("click", async () => {
+    try {
+      const data = await api("/api/quality/findings");
+      addMessage("assistant", data.count ? "Æị quality findings:\n" + data.findings.map(f =>
+        "[" + f.severity.toUpperCase() + " " + f.rule + "] " + f.path + ":" + f.line + " — " + f.message).join("\n")
+        : "No findings in the latest report, or no report has been created.");
+    } catch (error) { addMessage("assistant", "Findings unavailable: " + error.message); }
+  });
+  $("qualityCandidates").addEventListener("click", async () => {
+    try {
+      const data = await api("/api/quality/candidates");
+      addMessage("assistant", data.candidates.length ? "Ranked synthesis candidates (heuristic triage, not correctness scores):\n" +
+        data.candidates.map((x,i) => (i+1) + ". " + x.symbol + " · " + x.rank_score +
+          "/100\n   " + x.candidate_paths.join(", ")).join("\n") :
+        "No shared-symbol synthesis candidates in the latest report.");
+    } catch (error) { addMessage("assistant", "Candidate ranking unavailable: " + error.message); }
+  });
+  $("qualityProposals").addEventListener("click", async () => {
+    try {
+      const data = await api("/api/quality/proposals");
+      addMessage("assistant", data.proposals.length ? "Approval-ready review packets (not applied):\n" +
+        data.proposals.map(x => x.proposal_id + " · " + x.symbol + " · " + x.status).join("\n") :
+        "No qualitative proposals prepared yet.");
+    } catch (error) { addMessage("assistant", "Proposal history unavailable: " + error.message); }
+  });
+  status(); history(); qualityStatus();
 })();
 </script></body></html>
