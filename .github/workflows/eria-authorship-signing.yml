@@ -113,7 +113,7 @@ jobs:
           try:
               with os.fdopen(fd, "w", encoding="utf-8") as stream:
                   json.dump(signed, stream, ensure_ascii=False, sort_keys=True, indent=2)
-                  stream.write("\\n")
+                  stream.write("\n")
                   stream.flush()
                   os.fsync(stream.fileno())
               os.replace(temporary, destination)
