@@ -30,6 +30,7 @@ from eria_repository_conversation import Conversation, Repository  # noqa: E402
 from eria_pantheon.pons import Pons  # noqa: E402
 from eria_file_pull import FilePullService, start_scheduler
 from eria_quality_bridge import QualityBridge
+from eria_pons_approval import PonsApprovalService
 
 DB_DEFAULT = Path.home() / ".eria" / "data" / "eria_conversation.sqlite3"
 MAX_BODY = 16_384
@@ -311,6 +312,9 @@ class Handler(BaseHTTPRequestHandler):
                 "note": "Requests are recorded as HOLD proposals; this service cannot approve grants.",
             })
             return
+        if route == "/api/pons/approvals":
+            self.send_json(200, self.app.pons_approvals.history())
+            return
         if route == "/api/audit":
             self.send_json(200, {"events": self.app.store.audit_history()})
             return
@@ -423,6 +427,34 @@ class Handler(BaseHTTPRequestHandler):
                     "proposal_id": proposal["proposal_id"], "symbol": symbol.strip()})
                 self.send_json(201, proposal)
                 return
+            if route == "/api/pons/approvals/request":
+                proposal_id = data.get("proposal_id")
+                request_record = self.app.pons_approvals.create_request(proposal_id)
+                self.app.store.add_audit("pons_exact_scope_requested", "HOLD", {
+                    "request_id": request_record["request_id"],
+                    "proposal_id": proposal_id,
+                    "scope_sha256": request_record["scope_sha256"],
+                })
+                self.send_json(201, request_record)
+                return
+            if route == "/api/pons/approvals/confirm":
+                request_id = data.get("request_id")
+                scope_sha256 = data.get("scope_sha256")
+                confirmation = data.get("confirmation")
+                if not all(isinstance(x, str) and x.strip()
+                           for x in (request_id, scope_sha256, confirmation)):
+                    raise ValueError("request_id, scope_sha256 and exact confirmation are required.")
+                result = self.app.pons_approvals.approve(
+                    request_id, scope_sha256, confirmation
+                )
+                self.app.store.add_audit("pons_exact_scope_approved", result["decision"], {
+                    "grant_id": result["grant_id"], "request_id": request_id,
+                    "proposal_id": result["proposal_id"],
+                    "scope_sha256": result["scope_sha256"],
+                    "source_modified": False,
+                })
+                self.send_json(200, result)
+                return
             if route == "/api/pull":
                 result = self.app.file_pull.sync_all()
                 quality_report = self.app.quality.refresh()
@@ -477,6 +509,7 @@ class App:
         self.store.index_repository(self.repository)
         self.file_pull = FilePullService(self.repository.root, self.store.path)
         self.quality = QualityBridge(self.repository.root, self.store.path)
+        self.pons_approvals = PonsApprovalService(self.quality, self.repository.root)
 
 
 def main():
