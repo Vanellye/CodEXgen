@@ -3,7 +3,9 @@
 import argparse, json, re, subprocess, sys
 from pathlib import Path
 
-VERSION = "1.1"
+from eria_oprozal import OprozalAdvisor
+
+VERSION = "1.2"
 MAX_BYTES = 1_000_000
 MAX_HITS = 30
 SKIP_DIRS = {".git", ".gradle", ".idea", "node_modules", "__pycache__", ".venv", "venv", "build", "dist"}
@@ -96,6 +98,8 @@ def fmt(path):
 class Conversation:
     def __init__(self, repo):
         self.r = repo
+        self.oprozal = OprozalAdvisor()
+        self.last_oprozal_advice = None
         # Optional adapter keeps older checkouts usable if integration files are absent.
         try:
             from eria_pantheon.interface import ERIAPantheonInterface
@@ -104,6 +108,20 @@ class Conversation:
             self.integration = None
 
     def ask(self, q):
+        """Answer through the existing router, then attach a deficiency reaction when warranted."""
+        self.last_oprozal_advice = None
+        answer = self._ask_without_oprozal(q)
+        try:
+            revision = self.r.git("rev-parse", "HEAD").strip() or "unknown"
+        except (RepoError, OSError):
+            revision = "unknown"
+        advice = self.oprozal.assess(q, source_revision=revision)
+        if advice is not None:
+            self.last_oprozal_advice = advice
+            answer += self.oprozal.render(advice)
+        return answer
+
+    def _ask_without_oprozal(self, q):
         low = q.lower().strip()
         out = [f"ERIA Repository Conversation Engine {VERSION}", f"Repository: {self.r.root}"]
         try:
