@@ -27,7 +27,7 @@ class QualityBridgeTests(unittest.TestCase):
             root = Path(tmp) / "repo"
             root.mkdir()
             source = root / "module.py"
-            source.write_text("def explainable():\\n    return 1\\n", encoding="utf-8")
+            source.write_text("def explainable():\n    return 1\n", encoding="utf-8")
             bridge = QualityBridge(root, Path(tmp) / "source.sqlite3", Path(tmp) / "qualitative")
             bridge.refresh()
             inspected = bridge.inspect("module.py")
@@ -35,7 +35,7 @@ class QualityBridgeTests(unittest.TestCase):
             self.assertEqual(inspected["path"], "module.py")
             answer = bridge.answer("Why does explainable function exist?")
             self.assertIn("Âï QUALITATIVE REVIEW", answer)
-            source.write_text("def explainable():\\n    return 2\\n", encoding="utf-8")
+            source.write_text("def explainable():\n    return 2\n", encoding="utf-8")
             self.assertFalse(bridge.inspect("module.py")["matches_report_snapshot"])
 
     def test_proposal_is_stored_without_repository_mutation(self):
