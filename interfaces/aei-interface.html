@@ -33,6 +33,11 @@ footer{color:var(--muted);font-size:.76rem;line-height:1.55;margin-top:18px}@med
 <div class="row"><button id="ai-ask">Ask Âï</button><span id="ai-status" class="status" role="status" aria-live="polite">Evidence-grounded mode · no generative model connected</span></div>
 <pre id="ai-answer" aria-live="polite">No question submitted yet.</pre>
 </section>
+<section class="panel"><h2>Automatic inbox accumulation</h2>
+<p class="sub">Monitor only storage/inbox/. Starting monitoring is an explicit local approval for this exact folder. New eligible UTF-8 CSV, JSON, and TXT files are recorded with source hashes; unsupported files are held. Source files are never moved or changed.</p>
+<div class="row"><button id="acq-start">Approve &amp; Resume monitoring</button><button id="acq-pause" type="button">Pause monitoring</button><span id="acq-status" class="status" role="status">Paused · approval required</span></div>
+<pre id="acq-details">Monitor has not been started.</pre>
+</section>
 <section class="panel"><h2>ERIA Resonance · Live local playback</h2>
 <p class="sub">Generate and play a short test tone locally. Playback starts only after pressing Play. Peak volume is hard-limited to 50%; no external hardware transmission is initiated.</p>
 <div class="metrics">
@@ -74,6 +79,32 @@ $("ai-ask").addEventListener("click",async()=>{
  }catch(e){$("ai-status").textContent="Conversation request failed · "+e.message;}
  finally{ask.disabled=false;}
 });
+async function refreshAcquisition(){
+ try{
+  const r=await fetch("/api/acquisition/status",{cache:"no-store"}),d=await r.json();
+  $("acq-status").textContent=d.state==="running"?"Monitoring storage/inbox/":"Paused · approval required";
+  $("acq-details").textContent=JSON.stringify(d,null,2);
+ }catch(e){$("acq-status").textContent="Monitor status unavailable · "+e.message;}
+}
+$("acq-start").addEventListener("click",async()=>{
+ const button=$("acq-start");button.disabled=true;$("acq-status").textContent="Submitting explicit local approval…";
+ try{
+  const reference="local-console-approval-"+Date.now();
+  const r=await fetch("/api/acquisition/start",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({approval_reference:reference})});
+  const d=await r.json();$("acq-details").textContent=JSON.stringify(d,null,2);
+  $("acq-status").textContent=r.ok?"Monitoring started · storage/inbox/ only":(d.error||"Start held");
+ }catch(e){$("acq-status").textContent="Start failed · "+e.message;}
+ finally{button.disabled=false;refreshAcquisition();}
+});
+$("acq-pause").addEventListener("click",async()=>{
+ const button=$("acq-pause");button.disabled=true;
+ try{
+  const r=await fetch("/api/acquisition/pause",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({})});
+  const d=await r.json();$("acq-details").textContent=JSON.stringify(d,null,2);
+  $("acq-status").textContent=r.ok?"Paused · no further inbox scans":"Pause request failed";
+ }catch(e){$("acq-status").textContent="Pause failed · "+e.message;}
+ finally{button.disabled=false;refreshAcquisition();}
+});
 let toneUrl=null;
 const audio=$("tone-audio");
 $("tone-play").addEventListener("click",async()=>{
@@ -92,5 +123,5 @@ $("tone-play").addEventListener("click",async()=>{
  finally{$("tone-play").disabled=false;}
 });
 $("tone-stop").addEventListener("click",()=>{audio.pause();audio.currentTime=0;$("tone-status").textContent="Stopped";});
-health();})();
+health();refreshAcquisition();})();
 </script></body></html>
