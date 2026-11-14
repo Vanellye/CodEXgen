@@ -12,12 +12,20 @@ def make_handler(repository: Path):
     root=repository.resolve(strict=True)
     class Handler(BaseHTTPRequestHandler):
         server_version="ERIA-AEI/0.1"
+        def _local_host(self):
+            allowed = {
+                f"127.0.0.1:{self.server.server_port}",
+                f"localhost:{self.server.server_port}",
+            }
+            return self.headers.get("Host", "").lower() in allowed
         def _json(self,status,payload):
             data=json.dumps(payload,ensure_ascii=False).encode("utf-8")
             self.send_response(status); self.send_header("Content-Type","application/json; charset=utf-8")
             self.send_header("Content-Length",str(len(data))); self.send_header("Cache-Control","no-store")
             self.end_headers(); self.wfile.write(data)
         def do_GET(self):
+            if not self._local_host():
+                self._json(403,{"status":"HOLD","error":"Host header is not a permitted loopback host"}); return
             route=urlparse(self.path).path
             if route=="/api/status":
                 self._json(200,{"service":"ERIA Æị","status":"ready","mode":"read-only","repository":str(root)}); return
@@ -30,6 +38,12 @@ def make_handler(repository: Path):
                 self.end_headers(); self.wfile.write(page); return
             self._json(404,{"status":"HOLD","error":"Not found"})
         def do_POST(self):
+            if not self._local_host():
+                self._json(403,{"status":"HOLD","error":"Host header is not a permitted loopback host"}); return
+            origin=self.headers.get("Origin")
+            allowed_origins={f"http://127.0.0.1:{self.server.server_port}",f"http://localhost:{self.server.server_port}"}
+            if origin and origin not in allowed_origins:
+                self._json(403,{"status":"HOLD","error":"Cross-origin requests are not permitted"}); return
             if urlparse(self.path).path!="/api/aei/inspect":
                 self._json(404,{"status":"HOLD","error":"Not found"}); return
             if self.headers.get("Content-Type","").split(";")[0].strip().lower()!="application/json":
