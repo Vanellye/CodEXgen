@@ -248,8 +248,8 @@ def validate_parent_chain(
     The proof list preserves caller-supplied parent order. Missing, malformed,
     ambiguous, cyclic, inaccessible, or hash-mismatched records fail closed.
     """
-    if child_record_type not in ALLOWED_PARENT_TYPES:
-        raise ParentValidationError("unknown child record type")
+    if child_record_type != "any" and not _valid_record_type(child_record_type):
+        raise ParentValidationError("unknown or invalid child record type")
     if isinstance(parent_record_ids, (str, bytes)):
         raise ParentValidationError("parent_record_ids must be a collection of UUIDs, not text")
     try:
