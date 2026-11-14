@@ -16,6 +16,7 @@ import re
 import sqlite3
 import sys
 import threading
+import uuid
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
