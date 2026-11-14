@@ -128,7 +128,7 @@ A revoked key cannot submit new evidence, and evidence from that key is no longe
 
 ## Install and test
 
-    python -m pip install -r python/requirements.txt
+    python -m pip install 'cryptography>=42.0.0'
     PYTHONPATH=tools python -m unittest discover -s tools/tests -p 'test_eria_avs.py' -v
 
 ## Security boundaries and limitations
