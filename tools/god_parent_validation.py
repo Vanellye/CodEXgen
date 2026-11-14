@@ -301,10 +301,12 @@ def validate_parent_chain(
         if record["record_type"] not in ALLOWED_PARENT_TYPES[expected_child_type]:
             raise ParentValidationError("parent/child record-type relationship is not permitted")
 
+        object_path = _safe_relative_object(
+            vault_path, record["object_relative_path"], record["sha256"]
+        )
         expected_store = "ORIGINAL_DATA" if record["record_type"] == "original" else "DERIVED_DATA"
         if PurePosixPath(record["object_relative_path"]).parts[0] != expected_store:
             raise ParentValidationError("object store does not match record type")
-        object_path = _safe_relative_object(vault_path, record["object_relative_path"], record["sha256"])
         actual_digest, actual_size = _hash_file(object_path)
         if actual_digest != record["sha256"] or actual_size != record["size_bytes"]:
             raise ParentValidationError(
