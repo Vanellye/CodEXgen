@@ -35,8 +35,15 @@ class PantheonRuntimeGate {
     fun prepareReview(
         envelope: DataEnvelope,
         requestedScope: String,
-        humanReviewConfirmed: Boolean
+        humanReviewConfirmed: Boolean,
+        provenance: PonsProvenanceResult
     ): PantheonReview {
+        if (provenance.state != PonsProvenanceState.VERIFIED ||
+            provenance.actualSha256 == null ||
+            envelope.provenance.sourceDigest != provenance.actualSha256
+        ) {
+            return result(PantheonGateStatus.HOLD_PROVENANCE, envelope, requestedScope)
+        }
         val errors = DataEnvelopeValidator.validate(envelope)
         if (errors.isNotEmpty()) {
             return result(PantheonGateStatus.HOLD_INVALID_ENVELOPE, envelope, requestedScope, errors)
@@ -56,22 +63,6 @@ class PantheonRuntimeGate {
         // REVIEW_READY is not permission to execute. It only permits presentation
         // of the validated proposal to a person for a separate decision.
         return result(PantheonGateStatus.REVIEW_READY, envelope, requestedScope)
-    }
-
-    /** PONS must independently verify the component bytes before review can proceed. */
-    fun prepareReviewWithPons(
-        envelope: DataEnvelope,
-        requestedScope: String,
-        humanReviewConfirmed: Boolean,
-        provenance: PonsProvenanceResult
-    ): PantheonReview {
-        if (provenance.state != PonsProvenanceState.VERIFIED ||
-            provenance.actualSha256 == null ||
-            envelope.provenance.sourceDigest != provenance.actualSha256
-        ) {
-            return result(PantheonGateStatus.HOLD_PROVENANCE, envelope, requestedScope)
-        }
-        return prepareReview(envelope, requestedScope, humanReviewConfirmed)
     }
 
     private fun result(
