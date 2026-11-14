@@ -30,6 +30,7 @@ sys.path.insert(0, str(TOOLS))
 from eria_repository_conversation import Conversation, Repository  # noqa: E402
 from eria_pantheon.pons import Pons  # noqa: E402
 from eria_pantheon.interface import ERIAPantheonInterface  # noqa: E402
+from eria_pantheon.github_actions_reader import inspect_validation, GitHubActionsReadError  # noqa: E402
 
 DB_DEFAULT = Path.home() / ".eria" / "data" / "eria_conversation.sqlite3"
 MAX_BODY = 16_384
@@ -347,6 +348,20 @@ class Handler(BaseHTTPRequestHandler):
                 })
             except Exception as exc:
                 self.send_json(400, {"error": "File inspection unavailable: " + type(exc).__name__})
+            return
+        if route == "/api/github/actions/validation":
+            try:
+                result = inspect_validation()
+                self.app.store.add_audit("github_actions_validation_read", "RECORDED", {
+                    "repository": result["repository"],
+                    "branch": result["branch"],
+                    "workflow": result["workflow"],
+                    "run_count": result["run_count"],
+                    "read_only": True,
+                })
+                self.send_json(200, result)
+            except GitHubActionsReadError as exc:
+                self.send_json(502, {"error": str(exc), "read_only": True})
             return
         if route == "/api/status":
             self.send_json(200, {
