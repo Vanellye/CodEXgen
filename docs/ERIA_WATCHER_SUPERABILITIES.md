@@ -74,3 +74,46 @@ Before enabling any watcher:
 Configuration committed; execution disabled. The local watcher is not a
 remote-fetch watcher. No fetch, automatic acquisition, merge, or deployment
 was started by this configuration change.
+
+
+## Preflight guardian and concurrent-creation protection
+
+The watcher is intended to act as a visible guard before changes are made, not
+merely report damage afterward.
+
+Before any proposed creation, ref update, fetch-side ref mutation, or vault
+write, the guardian should produce a preflight report showing:
+- the exact target ref and whether it is protected;
+- source and destination refs;
+- expected old object ID and proposed new object ID;
+- paths/objects to be created or changed;
+- concurrent operations targeting the same ref, manifest, or object;
+- conflicts, stale observations, and authorization scope.
+
+### Main protection
+
+Both `refs/heads/main` and `refs/remotes/origin/main` are protected targets.
+The watcher must show a clear blocked-target warning before the operation and
+deny the operation. There is no automatic fallback, retargeting, or retry
+against `main`. Work belongs on feature branches or isolated review refs.
+
+This is an application-level guard. It does not replace GitHub branch
+protection or server-side rulesets, which must be independently configured.
+
+### Concurrent creation
+
+- Competing ref updates use expected-old-SHA compare-and-swap semantics. If
+  the ref changes after preflight, abort and re-inspect; never force-update.
+- Manifest appends are serialized under the vault lock and revalidate the
+  chain head while holding the lock.
+- Content-addressed object creation must be exclusive and idempotent. If two
+  writers race for the same digest, verify the winner's bytes; mismatches
+  enter HOLD.
+- Duplicate commit/path records are idempotent. Conflicting provenance is
+  retained as a conflict, not silently overwritten.
+- Missing, stale, expired, or ambiguous PONS grants enter HOLD.
+
+The configuration describes required behavior; it is not proof that runtime
+interceptors or concurrency tests already exist. Remote fetching and automatic
+acquisition remain disabled until the vault is repaired and the guardian is
+implemented and tested.
