@@ -94,7 +94,7 @@ class AeiStorage:
             },
         }
         artifact_bytes = (
-            json.dumps(record, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
+            json.dumps(record, ensure_ascii=False, sort_keys=True, indent=2, default=str) + "\n"
         ).encode("utf-8")
         artifact_sha = hashlib.sha256(artifact_bytes).hexdigest()
         artifact_name = stem + ".json"
