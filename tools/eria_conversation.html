@@ -187,15 +187,15 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
       const inventory = result.inventory;
       const quality = result.quality;
       const plan = result.execution_plan;
-      addMessage("assistant", "ERIA whole-repository review — " + inventory.git.branch + " @ " + inventory.git.commit + "\\n" +
+      addMessage("assistant", "ERIA whole-repository review — " + inventory.git.branch + " @ " + inventory.git.commit + "\n" +
         "Files: " + inventory.summary.file_count + " · manifests: " + inventory.summary.manifest_count +
-        " · test candidates: " + inventory.summary.test_candidate_count + "\\n" +
-        "Worktree dirty: " + inventory.git.dirty + " · truncated: " + inventory.limits.truncated + "\\n\\n" +
-        "Quality findings: " + quality.findings.length + "\\n" + JSON.stringify(quality.findings, null, 2) +
-        "\\n\\nExecution: " + plan.execution_state + " (commands proposed: " + plan.commands.length + ")" +
-        "\\n" + JSON.stringify(plan.commands, null, 2) +
-        "\\n\\nSynthesis: " + result.synthesis.next_stage +
-        "\\nAuthority: " + result.synthesis.authority);
+        " · test candidates: " + inventory.summary.test_candidate_count + "\n" +
+        "Worktree dirty: " + inventory.git.dirty + " · truncated: " + inventory.limits.truncated + "\n\n" +
+        "Quality findings: " + quality.findings.length + "\n" + JSON.stringify(quality.findings, null, 2) +
+        "\n\nExecution: " + plan.execution_state + " (commands proposed: " + plan.commands.length + ")" +
+        "\n" + JSON.stringify(plan.commands, null, 2) +
+        "\n\nSynthesis: " + result.synthesis.next_stage +
+        "\nAuthority: " + result.synthesis.authority);
     } catch (error) { addMessage("assistant", "Repository review HOLD: " + error.message); }
     finally { $("repositoryReviewBtn").disabled = false; }
   });
