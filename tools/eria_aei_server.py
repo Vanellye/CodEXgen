@@ -6,6 +6,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
 from eria_pantheon.aei import AeiError, inspect_file
+from eria_pantheon.ai import AiiConversation
 MAX_BODY=4096
 UI_FILE=Path(__file__).resolve().parents[1]/"interfaces"/"aei-interface.html"
 def make_handler(repository: Path):
@@ -44,7 +45,8 @@ def make_handler(repository: Path):
             allowed_origins={f"http://127.0.0.1:{self.server.server_port}",f"http://localhost:{self.server.server_port}"}
             if origin and origin not in allowed_origins:
                 self._json(403,{"status":"HOLD","error":"Cross-origin requests are not permitted"}); return
-            if urlparse(self.path).path!="/api/aei/inspect":
+            route=urlparse(self.path).path
+            if route not in {"/api/aei/inspect","/api/ai/ask"}:
                 self._json(404,{"status":"HOLD","error":"Not found"}); return
             if self.headers.get("Content-Type","").split(";")[0].strip().lower()!="application/json":
                 self._json(415,{"status":"HOLD","error":"Content-Type must be application/json"}); return
@@ -57,10 +59,15 @@ def make_handler(repository: Path):
                 request=json.loads(self.rfile.read(length).decode("utf-8"))
                 relative=request.get("path") if isinstance(request,dict) else None
                 if not isinstance(relative,str) or not relative.strip(): raise ValueError("Provide a repository-relative path.")
-                result=inspect_file(root,relative.strip())
+                if route=="/api/ai/ask":
+                    question=request.get("question")
+                    if not isinstance(question,str): raise ValueError("Provide a question for Âï.")
+                    result=AiiConversation(root).ask(relative.strip(),question)
+                else:
+                    result=inspect_file(root,relative.strip()).to_dict()
             except (UnicodeDecodeError,json.JSONDecodeError,ValueError,AeiError,OSError) as exc:
-                self._json(400,{"translator":"Æị","status":"HOLD","error":str(exc)}); return
-            self._json(200,result.to_dict())
+                self._json(400,{"translator":"ERIA","status":"HOLD","error":str(exc)}); return
+            self._json(200,result.to_dict() if hasattr(result,"to_dict") else result)
         def log_message(self,_format,*_args): return
     return Handler
 def main(argv=None):
