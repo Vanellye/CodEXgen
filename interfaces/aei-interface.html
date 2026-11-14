@@ -24,6 +24,14 @@ footer{color:var(--muted);font-size:.76rem;line-height:1.55;margin-top:18px}@med
 <div class="metric"><small>Format</small><strong id="format">—</strong></div><div class="metric"><small>File size</small><strong id="size">—</strong></div>
 <div class="metric"><small>SHA-256</small><strong id="hash">—</strong></div><div class="metric"><small>Source authority</small><strong id="authority">—</strong></div>
 </div><h2>Interpretation result</h2><pre id="result" aria-live="polite">No file inspected yet.</pre></section>
+<section class="panel" aria-labelledby="ai-title">
+<h2 id="ai-title">Âï · Ask about this source</h2>
+<p class="sub">Ask a question about the file path above. Âï retrieves evidence from a fresh Æị inspection and returns source pointers and a SHA-256 reference.</p>
+<label for="ai-question">Your question</label>
+<input id="ai-question" autocomplete="off" placeholder="Summarize this file, or what is the source_records count?">
+<div class="row"><button id="ai-ask">Ask Âï</button><span id="ai-status" class="status" role="status" aria-live="polite">Evidence-grounded mode · no generative model connected</span></div>
+<pre id="ai-answer" aria-live="polite">No question submitted yet.</pre>
+</section>
 <footer>Local endpoint: 127.0.0.1 · No cloud endpoint · No background transmission · Source bytes remain unchanged.</footer>
 </main><script>
 (()=>{"use strict";const $=id=>document.getElementById(id),button=$("inspect");
@@ -34,5 +42,16 @@ const r=await fetch("/api/aei/inspect",{method:"POST",headers:{"Content-Type":"a
 $("result").textContent=JSON.stringify(d,null,2);if(!r.ok||d.status==="HOLD"){$("status").textContent="Inspection held · "+(d.error||"check result");["format","size","hash","authority"].forEach(id=>$(id).textContent="—");}
 else{$("status").textContent="Inspection complete · source not modified";$("format").textContent=d.format;$("size").textContent=Number(d.size_bytes).toLocaleString()+" bytes";$("hash").textContent=d.source_sha256;$("authority").textContent=d.source_authority;}
 }catch(e){$("status").textContent="Local request failed · "+e.message;}finally{button.disabled=false;}});
+$("ai-ask").addEventListener("click",async()=>{
+ const path=$("path").value.trim(),question=$("ai-question").value.trim();
+ if(!path||!question){$("ai-status").textContent="Enter a source path and a question.";return;}
+ const ask=$("ai-ask");ask.disabled=true;$("ai-status").textContent="Âï is retrieving source evidence…";
+ try{
+  const r=await fetch("/api/ai/ask",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({path,question})});
+  const data=await r.json();$("ai-answer").textContent=JSON.stringify(data,null,2);
+  $("ai-status").textContent=r.ok?("Âï · "+data.status+" · "+data.mode):(data.error||"Request held");
+ }catch(e){$("ai-status").textContent="Conversation request failed · "+e.message;}
+ finally{ask.disabled=false;}
+});
 health();})();
 </script></body></html>
