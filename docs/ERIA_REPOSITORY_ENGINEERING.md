@@ -5,7 +5,7 @@
 The `repository.review` command and `python -m tools.eria_pantheon.repository_engine <repo>` run a bounded repository-wide pass over the checked-out Git worktree:
 
 1. **Acquire:** enumerate eligible files, calculate SHA-256, capture exact branch/commit/dirty state, identify manifests and test candidates, and omit sensitive paths and oversized files.
-2. **Quality analysis:** report test/workflow coverage and evidence gaps. Findings are classified as facts or unknowns; the inventory is not a security verdict.
+2. **Quality analysis:** report test/workflow coverage, evidence gaps, and bounded static indicators for dynamic execution, shell execution, remote pipe-to-shell, unsafe deserialization, and SQL mutation. Pattern matches are HEURISTIC review prompts, not confirmed vulnerabilities.
 3. **Execution planning:** discover candidate test/build commands from repository metadata.
 4. **Synthesis:** combine the revision, inventory, findings, and proposed next steps without changing source authority.
 
