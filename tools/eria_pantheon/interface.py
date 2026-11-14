@@ -11,7 +11,10 @@ from .pons import BridgeEnvelope, Pons
 class ERIAPantheonInterface:
     def __init__(self, repository: Any) -> None:
         self.repository = repository
-        self.bridge = Pons()\n        self.avs = self.bridge.install_accuracy_service(\n            str(repository.root / ".eria" / "avs" / "evidence.jsonl")\n        )
+        self.bridge = Pons()
+        self.avs = self.bridge.install_accuracy_service(
+            str(repository.root / ".eria" / "avs" / "evidence.jsonl")
+        )
 
     def status(self) -> str:
         state = self.bridge.describe()
@@ -22,7 +25,9 @@ class ERIAPantheonInterface:
             state["code_bypass_module"] = "available"
         except ImportError:
             state["code_bypass_module"] = "missing"
-        return "ERIA/PANTHEON integration status\n" + "\n".join(
+        return "ERIA/PANTHEON integration status
+" + "
+".join(
             f"{key}: {value}" for key, value in state.items()
         )
 
@@ -33,6 +38,13 @@ class ERIAPantheonInterface:
         if low == "pons.avs.status":
             state = self.avs.ledger.verify()
             return "PONS AVS ledger status\n" + "\n".join(
+                f"{key}: {value}" for key, value in state.items()
+            )
+        if low == "pons.avs.status":
+            state = self.avs.ledger.verify()
+            return "PONS AVS ledger status
+" + "
+".join(
                 f"{key}: {value}" for key, value in state.items()
             )
         if low.startswith("code.bypass "):
@@ -90,9 +102,16 @@ class ERIAPantheonInterface:
             bypass_status=result.status, audit_path=result.audit_path,
         )
         return (
-            f"{result.status}\nsource: {source_name}\n"
-            f"source_sha256: {envelope.source_sha256}\n"
-            f"source_authority: {envelope.source_authority}\n"
-            "translator_invoked: false\ntransmitter_invoked: false\n"
-            f"audit: {result.audit_path}\nrepository_mutated: false"
+            f"{result.status}
+source: {source_name}
+"
+            f"source_sha256: {envelope.source_sha256}
+"
+            f"source_authority: {envelope.source_authority}
+"
+            "translator_invoked: false
+transmitter_invoked: false
+"
+            f"audit: {result.audit_path}
+repository_mutated: false"
         )
