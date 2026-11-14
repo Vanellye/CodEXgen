@@ -119,6 +119,22 @@ class GodParentValidationTests(unittest.TestCase):
                 self.capture(root, vault, "child.bin", b"descendant",
                              [parent["record_id"], parent["record_id"]])
 
+    def test_verify_record_rejects_unsafe_object_path_without_reading_outside_vault(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            vault = root / "GOD"
+            parent = self.capture(root, vault, "parent.bin", b"ancestor")
+            path, record = self.metadata(vault, parent["record_id"])
+            outside = root / "outside.txt"
+            outside.write_text("must not be read", encoding="utf-8")
+            record["object_relative_path"] = "../outside.txt"
+            self.save_metadata(path, record)
+
+            result = verify_record(vault, parent["record_id"])
+            self.assertFalse(result["valid"])
+            self.assertFalse(result["ancestry_valid"])
+            self.assertEqual(outside.read_text(encoding="utf-8"), "must not be read")
+
     def test_object_path_traversal_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
