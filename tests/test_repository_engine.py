@@ -28,6 +28,23 @@ class RepositoryEngineTests(unittest.TestCase):
             self.assertEqual(result["execution_plan"]["execution_state"], "HOLD")
             self.assertFalse(result["inventory"]["git"]["dirty"])
 
+    def test_static_quality_flags_are_heuristics(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "src").mkdir()
+            (root / "src" / "unsafe.py").write_text("def run(value):\\n    return eval(value)\\n", encoding="utf-8")
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            subprocess.run(["git", "-C", str(root), "config", "user.email", "test@example.invalid"], check=True)
+            subprocess.run(["git", "-C", str(root), "config", "user.name", "ERIA test"], check=True)
+            subprocess.run(["git", "-C", str(root), "add", "."], check=True)
+            subprocess.run(["git", "-C", str(root), "commit", "-qm", "fixture"], check=True)
+            result = run_repository_review(root)
+            matches = [item for item in result["quality"]["findings"] if item.get("rule") == "DYNAMIC-EVAL"]
+            self.assertEqual(len(matches), 1)
+            self.assertEqual(matches[0]["class"], "HEURISTIC")
+            self.assertEqual(matches[0]["path"], "src/unsafe.py")
+
+
     def test_sensitive_paths_are_not_acquired(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
