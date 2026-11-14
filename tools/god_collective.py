@@ -201,3 +201,43 @@ def verify_record(vault: str | Path, record_id: str) -> dict[str, Any]:
         "expected_size_bytes": metadata["size_bytes"],
         "actual_size_bytes": size,
     }
+
+
+def collect_directory(
+    source_root: str | Path,
+    vault: str | Path,
+    grant: CapabilityGrant,
+    *,
+    recursive: bool = True,
+    actor: str = "eria",
+) -> list[dict[str, Any]]:
+    """Ingest a snapshot of regular files from a user-selected directory.
+
+    Symlinks are skipped. The vault itself is excluded if it is nested under
+    the source directory. This is an explicit batch operation, not a watcher.
+    """
+    root = Path(source_root).expanduser()
+    if root.is_symlink() or not root.is_dir():
+        raise PreservationError("Source root must be a regular, non-symlink directory")
+    root = root.resolve(strict=True)
+    vault_path = Path(vault).expanduser().resolve()
+    if Pons.authorize(grant, CAPABILITY, str(vault_path)) is Decision.HOLD:
+        raise PermissionError("PONS denied GOD collection; missing or mismatched grant")
+
+    candidates = root.rglob("*") if recursive else root.iterdir()
+    files: list[Path] = []
+    for candidate in sorted(candidates):
+        if candidate.is_symlink() or not candidate.is_file():
+            continue
+        resolved = candidate.resolve(strict=True)
+        try:
+            resolved.relative_to(vault_path)
+            continue
+        except ValueError:
+            pass
+        files.append(resolved)
+
+    results = []
+    for path in files:
+        results.append(ingest_file(path, vault_path, grant, actor=actor))
+    return results
