@@ -170,7 +170,8 @@ def run_approved(repository, command_id, approval_id, timeout=MAX_SECONDS):
         try:
             proc = subprocess.run(
                 bwrap, capture_output=True, text=True, timeout=timeout,
-                env={"PATH": "/usr/bin:/bin", "LANG": "C.UTF-8"},\n                preexec_fn=_limits,
+                env={"PATH": "/usr/bin:/bin", "LANG": "C.UTF-8"},
+                preexec_fn=_limits,
             )
             status = "PASSED" if proc.returncode == 0 else "FAILED"
             exit_code = proc.returncode
