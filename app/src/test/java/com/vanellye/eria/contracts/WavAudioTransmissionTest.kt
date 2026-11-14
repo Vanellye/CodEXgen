@@ -49,7 +49,7 @@ class WavAudioTransmissionTest {
     fun transceiverReturnsWavPayloadWithoutStartingPlayback() {
         val pcm = ByteArray(320)
         val frame = TransmissionFrame.create("audio-2", "corr-2", "test-tone", pcm)
-        val receipt = InMemoryTransmissionTransceiver().transceive(
+        val receipt = InMemoryTransmissionTransceiver(ponsAudioStatus()).transceive(
             frame,
             WavAudioTransmissionEndpoint(8_000, 1)
         )
