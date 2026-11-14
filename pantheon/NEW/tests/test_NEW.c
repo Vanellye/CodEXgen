@@ -12,7 +12,7 @@ static int test_digest(const unsigned char *bytes, size_t length, char output[65
     return 1;
 }
 
-static PonsCProof verified_proof;
+static PonsCProof *verified_proof = NULL;
 
 static NewRecord sample_record(void) {
     NewRecord record = {
@@ -29,7 +29,7 @@ static NewRecord sample_record(void) {
         .data_class = NEW_DATA_PUBLIC,
         .evidence_status = NEW_EVIDENCE_SOURCE_REPORTED,
         .authorization_confirmed = 1,
-        .pons_proof = &verified_proof
+        .pons_proof = verified_proof
     };
     return record;
 }
@@ -49,7 +49,7 @@ int main(void) {
 
     record.pons_proof = NULL;
     assert(new_build_narrative(&record, output, sizeof(output)) == NEW_STATUS_PONS_HOLD);
-    record.pons_proof = &verified_proof;
+    record.pons_proof = verified_proof;
 
     assert(new_build_narrative(&record, output, sizeof(output)) == NEW_STATUS_OK);
     assert(strstr(output, "SOURCE-REPORTED") != NULL);
@@ -90,5 +90,6 @@ int main(void) {
     assert(new_build_narrative(&record, output, 8U) ==
            NEW_STATUS_OUTPUT_TOO_SMALL);
 
+    pons_c_proof_destroy(verified_proof);
     return 0;
 }
