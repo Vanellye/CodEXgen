@@ -251,6 +251,10 @@ class Pons:
                     signature_b64=record["reviewer_signature_ed25519"],
                 )
                 payload = record["signed_payload"]
+                challenge_record = challenges.get(payload.get("challenge_id"), {})
+                signed_time = datetime.fromisoformat(payload.get("signed_at"))
+                issued_time = datetime.fromisoformat(challenge_record.get("issued_at"))
+                expires_time = datetime.fromisoformat(challenge_record.get("expires_at"))
                 if (
                     reviewer.reviewer_id == record.get("verifier_id")
                     and payload.get("claim_id") == record.get("claim_id")
@@ -263,12 +267,14 @@ class Pons:
                     and reviewer.certificate_sha256 == record.get("reviewer_certificate_sha256")
                     and reviewer.public_key_sha256 == record.get("reviewer_public_key_sha256")
                     and record.get("identity_verified") is True
-                    and payload.get("challenge_id") in challenges
-                    and payload.get("nonce") == challenges[payload.get("challenge_id")].get("nonce")
-                    and reviewer.reviewer_id == challenges[payload.get("challenge_id")].get("reviewer_id")
-                    and reviewer.key_id == challenges[payload.get("challenge_id")].get("reviewer_key_id")
-                    and payload.get("signed_at") >= challenges[payload.get("challenge_id")].get("issued_at")
-                    and payload.get("signed_at") <= challenges[payload.get("challenge_id")].get("expires_at")
+                    and bool(challenge_record)
+                    and payload.get("nonce") == challenge_record.get("nonce")
+                    and reviewer.reviewer_id == challenge_record.get("reviewer_id")
+                    and reviewer.key_id == challenge_record.get("reviewer_key_id")
+                    and signed_time.tzinfo is not None
+                    and issued_time.tzinfo is not None
+                    and expires_time.tzinfo is not None
+                    and issued_time <= signed_time <= expires_time
                 ):
                     authenticated_ids.add(record["evidence_id"])
             except (KeyError, TypeError, ValueError, ReviewerAuthenticationError):
