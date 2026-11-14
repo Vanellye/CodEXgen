@@ -48,7 +48,7 @@ class RepositoryEngineTests(unittest.TestCase):
     def test_unsigned_execution_evidence_is_excluded(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            (root / "sample.py").write_text("print('evidence')\\n", encoding="utf-8")
+            (root / "sample.py").write_text("print('evidence')\n", encoding="utf-8")
             subprocess.run(["git", "init", "-q", str(root)], check=True)
             subprocess.run(["git", "-C", str(root), "config", "user.email", "test@example.invalid"], check=True)
             subprocess.run(["git", "-C", str(root), "config", "user.name", "ERIA test"], check=True)
