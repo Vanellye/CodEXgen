@@ -1,5 +1,6 @@
 import json
 import unittest
+import time
 from tools.eria_pantheon.approval import sign_grant
 from tools.eria_pantheon.relay import PonsRelayClient, RelayHold
 
@@ -17,8 +18,8 @@ class RelayTests(unittest.TestCase):
         self.key = "r" * 48
         payload = {
             "grant_id": "relay-grant-1", "capability": "eria.acquire",
-            "scope": "storage/inbox/", "issued_at": 1000,
-            "expires_at": 1500, "nonce": "relay-nonce-1",
+            "scope": "storage/inbox/", "issued_at": int(time.time()) - 1,
+            "expires_at": int(time.time()) + 300, "nonce": "relay-nonce-1",
         }
         self.grant = sign_grant(payload, self.key)
         self.calls = []
