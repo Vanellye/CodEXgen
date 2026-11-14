@@ -49,6 +49,7 @@ typedef struct {
     NewDataClass data_class;
     NewEvidenceStatus evidence_status;
     int authorization_confirmed;
+    const PonsCProof *pons_proof;
 } NewRecord;
 
 /* Builds a classified evidence summary for human review, never a verdict.
