@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from tools.eria_pantheon.pons import CapabilityGrant, Decision, Pons
+from tools.god_parent_validation import ParentValidationError, validate_parent_chain
 
 CAPABILITY = "god.ingest"
 SCHEMA = "eria.god.record/1"
@@ -80,6 +81,7 @@ def ingest_file(
     *,
     source_label: str | None = None,
     parent_record_id: str | None = None,
+    parent_record_ids: list[str] | None = None,
     actor: str = "eria",
 ) -> dict[str, Any]:
     """Preserve one regular file and create provenance/lineage references."""
@@ -102,13 +104,18 @@ def ingest_file(
     collaboration_path = vault_path / "COLLABORATION" / "records" / record_id / "source-reference.json"
     ledger_path = vault_path / "LINEAGE" / "events.jsonl"
 
-    if parent_record_id:
-        parent_path = vault_path / "SOURCE_PROVENANCE" / "records" / f"{parent_record_id}.json"
-        if not parent_path.is_file() or parent_path.is_symlink():
-            raise PreservationError("Parent record does not exist as a preserved record")
-        parent = json.loads(parent_path.read_text(encoding="utf-8"))
-        if parent.get("record_id") != parent_record_id:
-            raise PreservationError("Parent record identity mismatch")
+    if parent_record_id is not None and parent_record_ids is not None:
+        raise PreservationError("Use parent_record_id or parent_record_ids, not both")
+    requested_parent_ids = (
+        list(parent_record_ids) if parent_record_ids is not None
+        else ([parent_record_id] if parent_record_id is not None else [])
+    )
+    try:
+        initial_parent_proofs = validate_parent_chain(
+            vault_path, requested_parent_ids, child_record_type="original"
+        )
+    except ParentValidationError as exc:
+        raise PreservationError(f"Parent validation failed: {exc}") from exc
 
     raw = source_path.read_bytes()
     if hashlib.sha256(raw).hexdigest() != digest or len(raw) != size:
@@ -121,6 +128,17 @@ def ingest_file(
             raise PreservationError("Content-addressed object collision or corruption")
     else:
         _write_new(object_path, raw)
+
+    # Revalidate immediately before writing provenance. If an ancestor changed
+    # or became unavailable, do not accept the child record.
+    try:
+        current_parent_proofs = validate_parent_chain(
+            vault_path, requested_parent_ids, child_record_type="original"
+        )
+    except ParentValidationError as exc:
+        raise PreservationError(f"Commit-time parent validation failed: {exc}") from exc
+    if current_parent_proofs != initial_parent_proofs:
+        raise PreservationError("Parent lineage changed between initial and commit-time validation")
 
     captured_at = utc_now()
     metadata = {
@@ -137,7 +155,12 @@ def ingest_file(
             "mode": stat.S_IMODE(source_stat.st_mode),
         },
         "captured_at": captured_at,
-        "parent_record_ids": [parent_record_id] if parent_record_id else [],
+        "parent_record_ids": requested_parent_ids,
+        "validated_parents": [
+            {"record_id": item["record_id"], "sha256": item["sha256"],
+             "size_bytes": item["size_bytes"]}
+            for item in current_parent_proofs
+        ],
         "authority": "preserved-source-not-validated-as-fact",
         "object_relative_path": str(object_path.relative_to(vault_path)),
     }
@@ -193,9 +216,18 @@ def verify_record(vault: str | Path, record_id: str) -> dict[str, Any]:
         raise PreservationError("Record identity mismatch")
     object_path = vault_path / metadata["object_relative_path"]
     digest, size = sha256_file(object_path)
+    try:
+        validate_parent_chain(
+            vault_path, metadata.get("parent_record_ids", []),
+            child_record_type=metadata.get("record_type", "original")
+        )
+        ancestry_valid = True
+    except ParentValidationError:
+        ancestry_valid = False
     return {
         "record_id": record_id,
-        "valid": digest == metadata["sha256"] and size == metadata["size_bytes"],
+        "valid": digest == metadata["sha256"] and size == metadata["size_bytes"] and ancestry_valid,
+        "ancestry_valid": ancestry_valid,
         "expected_sha256": metadata["sha256"],
         "actual_sha256": digest,
         "expected_size_bytes": metadata["size_bytes"],
