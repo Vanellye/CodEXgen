@@ -22,7 +22,7 @@ tests. It removes the temporary build directory on exit.
 After building a shared library, set its path and the package path:
 
 ```bash
-export ERIA_PANTHEON_LIBRARY="$PWD/build/liberia_pantheon.so"
+export ERIA_PANTHEON_LIBRARY="$PWD/pantheon/NEW/build/liberia_pantheon.so"
 export PYTHONPATH="$PWD/pantheon/NEW/python:$PYTHONPATH"
 python -c "from eria_pantheon.interface import ERIAPantheonInterface; print('Pantheon bridge import OK')"
 ```
@@ -101,3 +101,29 @@ cryptographic proof. The C module labels its narrative unreviewed. Neither
 function edits source records or publishes anything. Database persistence,
 API routing, identity verification, and production deployment remain separate
 integration tasks requiring their own tests and authorization.
+
+## Canonical directory layout
+
+From the repository root, the bridge and native sources are organized as:
+
+```text
+pantheon/
+└── NEW/
+    ├── NEW.c
+    ├── NEW.h
+    ├── FaCADE/
+    │   ├── FaCADE.c
+    │   └── FaCADE.h
+    ├── build/                 # local generated shared library; not source-controlled
+    │   └── liberia_pantheon.so
+    └── python/
+        ├── eria_pantheon/
+        │   ├── __init__.py
+        │   └── interface.py
+        ├── tests/
+        └── test_bridge.sh
+```
+
+The package loader's default library path is relative to `pantheon/NEW`, so the
+persistent library belongs in `pantheon/NEW/build/`, not a repository-root
+`build/` directory. Keep generated binaries local and do not commit them.
