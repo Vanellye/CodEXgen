@@ -14,12 +14,23 @@ import androidx.activity.result.contract.ActivityResultContracts
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.vanellye.eria.pons.PonsProvenanceGate
+import com.vanellye.eria.pons.PonsStatusRegistry
+import com.vanellye.eria.pons.PonsOperationalState
+import com.vanellye.eria.pons.PonsEffectiveState
 
 @Composable
 fun GitBridgeScreen() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val bridge = remember { GitFreedomBridge(context) }
+    // Empty until a production signed manifest and verifier are provisioned.
+    // This deliberately keeps remote Git writes in UNKNOWN/HOLD.
+    val ponsGitWriteStatus = remember {
+        PonsStatusRegistry(PonsProvenanceGate(emptyMap()))
+            .inspect("git.bridge.write", PonsOperationalState.UNKNOWN, null)
+    }
+    val gitWritesReady = ponsGitWriteStatus.effectiveState == PonsEffectiveState.READY
 
     var token by remember { mutableStateOf("") }
     var author by remember { mutableStateOf("ERIA Contributor") }
@@ -69,6 +80,11 @@ fun GitBridgeScreen() {
         Text("GIT FREEDOM BRIDGE", style = MaterialTheme.typography.h6)
         Text("Review changes • Select files • Commit only selected paths",
             style = MaterialTheme.typography.caption)
+        Text(
+            if (gitWritesReady) "PONS: Git write authorization verified."
+            else "PONS HOLD: Git push, force-with-lease, and PR creation are disabled until a signed production manifest and source pin are configured.",
+            style = MaterialTheme.typography.caption
+        )
 
         OutlinedTextField(
             token, { token = it },
@@ -168,13 +184,13 @@ fun GitBridgeScreen() {
         OutlinedTextField(commitMessage, { commitMessage = it },
             label = { Text("Commit message") }, modifier = Modifier.fillMaxWidth())
         Button(
-            enabled = !busy && selected.isNotEmpty() && commitMessage.isNotBlank()
+            enabled = gitWritesReady && !busy && selected.isNotEmpty() && commitMessage.isNotBlank()
                 && email.contains("@"),
             onClick = {
                 val paths = selected.toList()
                 runTask {
                     when (val result = bridge.commitSelectedAndPush(
-                        config, paths, commitMessage
+                        config, paths, commitMessage, ponsGitWriteStatus
                     )) {
                         is GitBridgeResult.Success -> {
                             changes = bridge.reviewChanges(config)
@@ -194,10 +210,10 @@ fun GitBridgeScreen() {
         OutlinedTextField(prBody, { prBody = it },
             label = { Text("Pull request description") }, modifier = Modifier.fillMaxWidth())
         OutlinedButton(
-            enabled = !busy && prTitle.isNotBlank(),
+            enabled = gitWritesReady && !busy && prTitle.isNotBlank(),
             onClick = {
                 runTask {
-                    when (val result = bridge.createPullRequest(config, prTitle, prBody)) {
+                    when (val result = bridge.createPullRequest(config, prTitle, prBody, ponsGitWriteStatus)) {
                         is GitBridgeResult.Success -> result.status.message
                         is GitBridgeResult.Failure -> "${result.message}\n${result.recovery}"
                     }
@@ -207,10 +223,10 @@ fun GitBridgeScreen() {
         ) { Text("Open pull request (no auto-merge)") }
 
         OutlinedButton(
-            enabled = !busy,
+            enabled = gitWritesReady && !busy,
             onClick = {
                 runTask {
-                    when (val result = bridge.forceWithLeaseFeatureBranch(config)) {
+                    when (val result = bridge.forceWithLeaseFeatureBranch(config, ponsGitWriteStatus)) {
                         is GitBridgeResult.Success -> result.status.message
                         is GitBridgeResult.Failure -> "${result.message}\n${result.recovery}"
                     }

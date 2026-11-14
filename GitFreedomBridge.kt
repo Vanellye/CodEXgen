@@ -10,6 +10,8 @@ import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 import org.json.JSONObject
+import com.vanellye.eria.pons.PonsComponentStatus
+import com.vanellye.eria.pons.requireReady
 
 data class GitFileChange(
     val path: String,
@@ -151,8 +153,10 @@ class GitFreedomBridge(context: Context) {
     fun commitSelectedAndPush(
         config: GitBridgeConfig,
         selectedPaths: List<String>,
-        commitMessage: String
+        commitMessage: String,
+        ponsStatus: PonsComponentStatus
     ): GitBridgeResult = runCatching {
+        ponsStatus.requireReady("git.bridge.write")
         validate(config)
         require(commitMessage.isNotBlank()) { "Commit message is required." }
         require(selectedPaths.isNotEmpty()) { "Select at least one changed file." }
@@ -239,7 +243,11 @@ class GitFreedomBridge(context: Context) {
      * The receive-pack server accepts the update only if the remote ref still
      * has exactly that object ID at update time (atomic lease check).
      */
-    fun forceWithLeaseFeatureBranch(config: GitBridgeConfig): GitBridgeResult = runCatching {
+    fun forceWithLeaseFeatureBranch(
+        config: GitBridgeConfig,
+        ponsStatus: PonsComponentStatus
+    ): GitBridgeResult = runCatching {
+        ponsStatus.requireReady("git.bridge.write")
         validate(config)
         val token = vault.read() ?: error("No GitHub token is configured.")
         Git.open(repoDir).use { git ->
@@ -321,8 +329,10 @@ class GitFreedomBridge(context: Context) {
     fun createPullRequest(
         config: GitBridgeConfig,
         title: String,
-        body: String
+        body: String,
+        ponsStatus: PonsComponentStatus
     ): GitBridgeResult = runCatching {
+        ponsStatus.requireReady("git.bridge.write")
         validate(config)
         require(title.isNotBlank()) { "Pull request title is required." }
         val token = vault.read() ?: error("No GitHub token is configured.")

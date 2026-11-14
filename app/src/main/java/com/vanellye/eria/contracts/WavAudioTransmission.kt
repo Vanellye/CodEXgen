@@ -5,6 +5,8 @@ import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import com.vanellye.eria.pons.PonsComponentStatus
+import com.vanellye.eria.pons.requireReady
 
 /**
  * Converts a transmitted raw PCM16 payload into a standard RIFF/WAVE file.
@@ -14,10 +16,12 @@ import java.nio.ByteOrder
  */
 class WavAudioTransmissionEndpoint(
     private val sampleRateHz: Int = 44_100,
-    private val channels: Int = 1
+    private val channels: Int = 1,
+    private val ponsStatus: PonsComponentStatus
 ) : InternalTransmissionEndpoint {
 
     init {
+        ponsStatus.requireReady("audio.wav-transmission")
         require(sampleRateHz in 8_000..192_000) { "Unsupported sample rate" }
         require(channels == 1 || channels == 2) { "Only mono or stereo PCM is supported" }
     }

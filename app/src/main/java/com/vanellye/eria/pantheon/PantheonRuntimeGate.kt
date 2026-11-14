@@ -3,6 +3,8 @@ package com.vanellye.eria.pantheon
 import com.vanellye.eria.contracts.AuthorizationStatus
 import com.vanellye.eria.contracts.DataEnvelope
 import com.vanellye.eria.contracts.DataEnvelopeValidator
+import com.vanellye.eria.pons.PonsProvenanceResult
+import com.vanellye.eria.pons.PonsProvenanceState
 
 /**
  * Android runtime boundary for Pantheon.
@@ -16,6 +18,7 @@ enum class PantheonGateStatus {
     HOLD_NOT_AUTHORIZED,
     HOLD_SCOPE_MISMATCH,
     HOLD_REVIEW_NOT_CONFIRMED,
+    HOLD_PROVENANCE,
     REVIEW_READY
 }
 
@@ -32,8 +35,19 @@ class PantheonRuntimeGate {
     fun prepareReview(
         envelope: DataEnvelope,
         requestedScope: String,
-        humanReviewConfirmed: Boolean
+        humanReviewConfirmed: Boolean,
+        provenance: PonsProvenanceResult
     ): PantheonReview {
+        if (provenance.state != PonsProvenanceState.VERIFIED ||
+            provenance.anchor != com.vanellye.eria.pons.PonsAnchorIdentity.CANONICAL ||
+            provenance.componentId.isBlank() ||
+            provenance.expectedSha256 == null ||
+            provenance.actualSha256 == null ||
+            provenance.expectedSha256 != provenance.actualSha256 ||
+            envelope.provenance.sourceDigest != provenance.actualSha256
+        ) {
+            return result(PantheonGateStatus.HOLD_PROVENANCE, envelope, requestedScope)
+        }
         val errors = DataEnvelopeValidator.validate(envelope)
         if (errors.isNotEmpty()) {
             return result(PantheonGateStatus.HOLD_INVALID_ENVELOPE, envelope, requestedScope, errors)

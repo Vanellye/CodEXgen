@@ -1,5 +1,6 @@
 package com.vanellye.eria.contracts
 
+import com.vanellye.eria.pons.*
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -8,6 +9,18 @@ import org.junit.Test
 import java.nio.charset.StandardCharsets
 
 class SkribedAndTransmissionTest {
+
+    private fun ponsTransceiverStatus(): PonsComponentStatus {
+        val source = "pinned-in-memory-transceiver".toByteArray(StandardCharsets.UTF_8)
+        val componentId = "audio.internal-transceiver"
+        val pin = PonsComponentPin(
+            componentId, "test-ref",
+            "app/src/main/java/com/vanellye/eria/contracts/SkribedAndTransmission.kt",
+            PonsProvenanceGate.sha256(source)
+        )
+        return PonsStatusRegistry(PonsProvenanceGate(mapOf(componentId to pin)))
+            .inspect(componentId, PonsOperationalState.READY, source)
+    }
     @Test
     fun originalWritingPreservesUnicodeAndPunctuationExactly() {
         val source = "Öôŕîɣîñäl·l  e\u0301 Ĉ̣ — Ɓûîľð"
@@ -48,7 +61,8 @@ class SkribedAndTransmissionTest {
     fun transceiverReturnsCorrelatedInternalResponse() {
         val request = "sound-data".toByteArray(StandardCharsets.UTF_8)
         val frame = TransmissionFrame.create("tx-1", "corr-1", "audio.capture", request)
-        val transceiver = InMemoryTransmissionTransceiver()
+        val ledger = TransmissionEvidenceLedger()
+        val transceiver = InMemoryTransmissionTransceiver(ponsTransceiverStatus(), ledger)
 
         val receipt = transceiver.transceive(frame) { incoming ->
             incoming.payload() + "-returned".toByteArray(StandardCharsets.UTF_8)
@@ -62,6 +76,14 @@ class SkribedAndTransmissionTest {
             String(receipt.responsePayload, StandardCharsets.UTF_8)
         )
         assertTrue(receipt.responseSha256.matches(Regex("^[0-9a-f]{64}$")))
+        assertEquals(PonsAnchorIdentity.CANONICAL, receipt.anchor)
+        assertEquals(1, ledger.history("tx-1").size)
+        assertEquals(null, receipt.supersedesEvidenceId)
+
+        val newer = transceiver.transceive(frame) { incoming -> incoming.payload() }
+        assertEquals(receipt.evidenceId, newer.supersedesEvidenceId)
+        assertEquals(2, ledger.history("tx-1").size)
+        assertEquals(receipt.evidenceId, ledger.history("tx-1").first().evidenceId)
     }
 
     @Test
@@ -71,5 +93,6 @@ class SkribedAndTransmissionTest {
         input[0] = 99
 
         assertArrayEquals(byteArrayOf(1, 2, 3), frame.payload())
+        assertEquals(PonsAnchorIdentity.CANONICAL, frame.anchor)
     }
 }

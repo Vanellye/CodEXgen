@@ -3,6 +3,17 @@
 #include <assert.h>
 #include <string.h>
 
+static int test_digest(const unsigned char *bytes, size_t length, char output[65], void *context) {
+    size_t i;
+    const char *digest = (const char *)context;
+    if (bytes == NULL || length == 0U || digest == NULL) return 0;
+    for (i = 0; i < 64U; ++i) output[i] = digest[i];
+    output[64] = '\0';
+    return 1;
+}
+
+static PonsCProof *verified_proof = NULL;
+
 static NewRecord sample_record(void) {
     NewRecord record = {
         .source_id = "public-civic-dataset",
@@ -17,14 +28,28 @@ static NewRecord sample_record(void) {
         .proof_checked_at = NULL,
         .data_class = NEW_DATA_PUBLIC,
         .evidence_status = NEW_EVIDENCE_SOURCE_REPORTED,
-        .authorization_confirmed = 1
+        .authorization_confirmed = 1,
+        .pons_proof = verified_proof
     };
     return record;
 }
 
 int main(void) {
     char output[2048];
-    NewRecord record = sample_record();
+    NewRecord record;
+    static const unsigned char source[] = "fixture";
+    static const char digest[] = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    PonsCManifestPin pin = {
+        "pantheon.new", "reviewed-ref", "pantheon/NEW/NEW.c", digest,
+        PONS_CANONICAL_ANCHOR_ID, PONS_CANONICAL_ANCHOR_REF
+    };
+    assert(pons_c_verify(&pin, source, sizeof(source) - 1U,
+                         test_digest, (void *)digest, &verified_proof) == PONS_C_VERIFIED);
+    record = sample_record();
+
+    record.pons_proof = NULL;
+    assert(new_build_narrative(&record, output, sizeof(output)) == NEW_STATUS_PONS_HOLD);
+    record.pons_proof = verified_proof;
 
     assert(new_build_narrative(&record, output, sizeof(output)) == NEW_STATUS_OK);
     assert(strstr(output, "SOURCE-REPORTED") != NULL);
@@ -65,5 +90,6 @@ int main(void) {
     assert(new_build_narrative(&record, output, 8U) ==
            NEW_STATUS_OUTPUT_TOO_SMALL);
 
+    pons_c_proof_destroy(verified_proof);
     return 0;
 }
