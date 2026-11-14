@@ -31,6 +31,7 @@ from eria_pantheon.pons import Pons  # noqa: E402
 from eria_file_pull import FilePullService, start_scheduler
 from eria_quality_bridge import QualityBridge
 from eria_pons_approval import PonsApprovalService
+from eria_pact import PactRuntime
 
 DB_DEFAULT = Path.home() / ".eria" / "data" / "eria_conversation.sqlite3"
 MAX_BODY = 16_384
@@ -315,6 +316,14 @@ class Handler(BaseHTTPRequestHandler):
         if route == "/api/pons/approvals":
             self.send_json(200, self.app.pons_approvals.history())
             return
+        if route == "/api/pons/executor/status":
+            self.send_json(200, {
+                "language": "ERIA-PACT/1", "approval_gated": True,
+                "arbitrary_shell": False, "main_branch_writes": False,
+                "deployment_requires_allowlist": True,
+                "history": self.app.pact.history(),
+            })
+            return
         if route == "/api/audit":
             self.send_json(200, {"events": self.app.store.audit_history()})
             return
@@ -468,6 +477,39 @@ class Handler(BaseHTTPRequestHandler):
                 )
                 self.send_json(200, result)
                 return
+            if route == "/api/pons/executor/request":
+                program = data.get("program")
+                request_record = self.app.pact.create_request(program)
+                self.app.store.add_audit("pons_pact_requested", "HOLD", {
+                    "request_id": request_record["request_id"],
+                    "plan_sha256": request_record["plan_sha256"],
+                })
+                self.send_json(201, request_record)
+                return
+            if route == "/api/pons/executor/confirm":
+                request_id = data.get("request_id")
+                plan_sha256 = data.get("plan_sha256")
+                confirmation = data.get("confirmation")
+                if not all(isinstance(x, str) and x.strip()
+                           for x in (request_id, plan_sha256, confirmation)):
+                    raise ValueError("request_id, plan_sha256 and exact confirmation are required.")
+                result = self.app.pact.approve(request_id, plan_sha256, confirmation)
+                self.app.store.add_audit("pons_pact_authorized", result["decision"], {
+                    "grant_id": result["grant_id"], "plan_sha256": result["plan_sha256"],
+                    "capabilities": result["capabilities"], "executed": False,
+                })
+                self.send_json(200, result)
+                return
+            if route == "/api/pons/executor/execute":
+                grant_id = data.get("grant_id")
+                if not isinstance(grant_id, str) or not grant_id.strip():
+                    raise ValueError("grant_id is required.")
+                result = self.app.pact.execute(grant_id)
+                self.app.store.add_audit("pons_pact_execution", result["status"], {
+                    "grant_id": grant_id, "operations": result["results"],
+                })
+                self.send_json(200, result)
+                return
             if route == "/api/pons/approvals/confirm":
                 request_id = data.get("request_id")
                 scope_sha256 = data.get("scope_sha256")
@@ -541,6 +583,7 @@ class App:
         self.file_pull = FilePullService(self.repository.root, self.store.path)
         self.quality = QualityBridge(self.repository.root, self.store.path)
         self.pons_approvals = PonsApprovalService(self.quality, self.repository.root)
+        self.pact = PactRuntime(self.pons_approvals)
 
 
 def main():
