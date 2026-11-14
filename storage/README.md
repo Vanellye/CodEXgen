@@ -1,21 +1,22 @@
-# ERIA compiled storage
+# ERIA Resonance and acquisition storage
 
-This directory holds derived, compiled copies produced only when an operator
-explicitly invokes Æị's compile command or the local interface's
-"Compile copy to storage" action.
+- `inbox/`: operator-selected files eligible for acquisition scans.
+- `acquisitions/index.jsonl`: append-only acquisition records with source SHA-256, source path, capture time, approval reference, and transformation lineage.
+- `compiled/` and `manifests/`: Æị derived inspection snapshots and their manifests.
+- `settings.json`: Resonance Console policy.
 
-## Layout
+Resonance mode is `both` (scientific and musical translation). The requested
+777% value is metadata only; it is never an audio gain. Actual synthesized
+playback is capped at 50% peak amplitude. Tone synthesis creates a WAV payload;
+it does not itself play audio or select an output device. Playback must be
+initiated by an explicit local user action.
 
-- `compiled/`: JSON snapshots of Æị inspection results.
-- `manifests/`: provenance manifests with source and artifact SHA-256 digests.
+Automatic acquisition is requested but disabled by default. It is not a
+background watcher. A scan requires a verified exact-scope approval for
+`storage/inbox/`. Only UTF-8 CSV, JSON, and TXT files are currently eligible.
+Unsupported inputs are marked HOLD. SHA-256 identifies duplicates. Source
+files are never moved, rewritten, or deleted.
 
-A compiled snapshot is a structured interpretation, not a byte-for-byte source
-backup. The source file remains at its original path and is never modified,
-moved, or deleted by this feature. SQLite sources are inspected in read-only
-mode. Artifacts and derived interpretations remain NON_AUTHORITATIVE.
-
-Each compile creates a unique artifact; existing artifacts are never replaced.
-Credential-like paths are refused. Runtime artifact files are excluded from Git
-by the local .gitignore so private or changing data is not accidentally
-committed. Back up this directory separately if compiled records need durable
-retention.
+All acquired and derived data remains NON_AUTHORITATIVE. No medical or
+biological effect is implied by sonification. No external hardware or network
+transmission is enabled.
