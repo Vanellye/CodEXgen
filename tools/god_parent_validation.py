@@ -161,9 +161,13 @@ def _validate_record_shape(record: dict[str, Any], requested_id: str) -> None:
     if not isinstance(captured_at, str):
         raise ParentValidationError("parent captured_at must be an ISO-8601 timestamp")
     try:
-        datetime.fromisoformat(captured_at.replace("Z", "+00:00"))
+        captured = datetime.fromisoformat(captured_at.replace("Z", "+00:00"))
+        if captured.tzinfo is None or captured.utcoffset() is None:
+            raise ValueError("timezone is required")
     except ValueError as exc:
-        raise ParentValidationError("parent captured_at is not a valid ISO-8601 timestamp") from exc
+        raise ParentValidationError(
+            "parent captured_at must be an ISO-8601 timestamp with timezone"
+        ) from exc
     parent_ids = record.get("parent_record_ids")
     if not isinstance(parent_ids, list):
         raise ParentValidationError("parent_record_ids must be an array")
