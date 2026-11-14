@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Loopback-only HTTP bridge for the read-only Æị inspector."""
 from __future__ import annotations
-import argparse, json
+import argparse, json, shlex
+from types import SimpleNamespace
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
 from eria_pantheon.aei import AeiError, inspect_file
-from eria_pantheon.ai import AiiConversation
+from eria_pantheon.interface import ERIAPantheonInterface
 MAX_BODY=4096
 UI_FILE=Path(__file__).resolve().parents[1]/"interfaces"/"aei-interface.html"
 def make_handler(repository: Path):
@@ -62,7 +63,12 @@ def make_handler(repository: Path):
                 if route=="/api/ai/ask":
                     question=request.get("question")
                     if not isinstance(question,str): raise ValueError("Provide a question for Âï.")
-                    result=AiiConversation(root).ask(relative.strip(),question)
+                    adapter=ERIAPantheonInterface(SimpleNamespace(root=root))
+                    response=adapter.handle("ai.ask "+shlex.join([relative.strip(),"--question",question]))
+                    try:
+                        result=json.loads(response)
+                    except json.JSONDecodeError:
+                        raise ValueError("Pantheon returned a non-JSON Âï response.")
                 else:
                     result=inspect_file(root,relative.strip()).to_dict()
             except (UnicodeDecodeError,json.JSONDecodeError,ValueError,AeiError,OSError) as exc:
