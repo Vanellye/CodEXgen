@@ -361,6 +361,17 @@ class Handler(BaseHTTPRequestHandler):
         if route == "/api/quality/candidates":
             self.send_json(200, {"candidates": self.app.quality.candidates()})
             return
+        if route == "/api/quality/inspect":
+            params = parse_qs(urlparse(self.path).query)
+            rel = params.get("path", [""])[0]
+            try:
+                result = self.app.quality.inspect(rel)
+                self.app.store.add_audit("quality_source_inspected", "RECORDED", {
+                    "path": result["path"], "matches_report_snapshot": result["matches_report_snapshot"]})
+                self.send_json(200, result)
+            except (ValueError, OSError) as exc:
+                self.send_json(400, {"error": str(exc)})
+            return
         if route == "/api/quality/proposals":
             self.send_json(200, {"proposals": self.app.quality.proposal_history()})
             return
