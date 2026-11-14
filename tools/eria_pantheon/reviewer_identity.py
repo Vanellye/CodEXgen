@@ -149,6 +149,19 @@ class ReviewerIdentityAuthority:
             del self._challenges[challenge_id]
         return reviewer
 
+    def verify_stored_attestation(
+        self, *, certificate: dict[str, Any], signed_payload: dict[str, Any],
+        signature_b64: str,
+    ) -> VerifiedReviewer:
+        """Re-verify a persisted signed claim without reusing its consumed challenge."""
+        reviewer = self.verify_certificate(certificate)
+        public_key = Ed25519PublicKey.from_public_bytes(b64decode(certificate["public_key"]))
+        try:
+            public_key.verify(b64decode(signature_b64), canonical_json(signed_payload))
+        except InvalidSignature as exc:
+            raise ReviewerAuthenticationError("Persisted reviewer signature is invalid.") from exc
+        return reviewer
+
     def revoke_key(self, key_id: str) -> None:
         if not key_id:
             raise ReviewerAuthenticationError("key_id is required.")
