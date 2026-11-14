@@ -177,7 +177,10 @@ def _static_findings(root: Path, files: list[dict[str, Any]]) -> list[dict[str, 
             continue
         path = root / item["path"]
         try:
-            source = path.read_text(encoding="utf-8-sig")
+            resolved = path.resolve(strict=True)
+            if path.is_symlink() or (resolved != root and root not in resolved.parents):
+                continue
+            source = resolved.read_text(encoding="utf-8-sig")
         except (OSError, UnicodeError):
             continue
         scanned += 1
