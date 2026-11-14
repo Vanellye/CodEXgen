@@ -35,6 +35,11 @@ class DataVaultTests(unittest.TestCase):
             self.assertEqual(second["status"], "ALREADY_PRESENT")
             self.assertGreaterEqual(first["new_records"], 1)
             self.assertEqual(verify_vault(vault)["status"], "VERIFIED")
+            index = __import__("json").loads(
+                (vault / "wordplay" / (commit + ".json")).read_text(encoding="utf-8")
+            )
+            self.assertTrue(index["records"])
+            self.assertIn("top_terms", index["records"][0]["wordplay"])
             self.assertEqual(
                 subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip(),
                 commit,
@@ -50,6 +55,18 @@ class DataVaultTests(unittest.TestCase):
             manifest = (vault / "manifest.jsonl").read_text(encoding="utf-8")
             self.assertNotIn(".env", manifest)
             self.assertNotIn("must-not-be-acquired", manifest)
+
+    def test_manifest_tampering_is_detected(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "repo"
+            vault = Path(temporary) / "vault"
+            root.mkdir()
+            commit = self.make_repo(root)
+            acquire_commit(root, commit, vault)
+            manifest = vault / "manifest.jsonl"
+            manifest.write_text(manifest.read_text(encoding="utf-8").replace('"size_bytes":', '"size_bytes": 999, "original_size_bytes":'), encoding="utf-8")
+            with self.assertRaises(VaultError):
+                verify_vault(vault)
 
     def test_anchor_must_be_full_commit_sha(self):
         with tempfile.TemporaryDirectory() as temporary:
