@@ -50,7 +50,9 @@ class PONSRegistry:
         self.anchor = anchor
         self.ledger_path = Path(ledger_path) if ledger_path else None
         self._components: Dict[str, Component] = {}
-        self._observations: Dict[str, dict] = {}\n        self._provenance: Dict[str, dict] = {}
+        self._observations: Dict[str, dict] = {}
+        self._provenance: Dict[str, dict] = {}
+        self._provenance: Dict[str, dict] = {}
         self._lock = RLock()
         self._last_event_hash = "0" * 64
         if self.ledger_path and self.ledger_path.exists():
@@ -105,6 +107,7 @@ class PONSRegistry:
                           "actual_sha256": actual,
                           "expected_sha256": component.expected_sha256.lower(),
                           "reason": "digest match" if match else "digest mismatch"}
+            self._provenance[component_id] = result
             self._append("provenance_checked", {"component_id": component_id, **result})
             return result
 
@@ -115,7 +118,8 @@ class PONSRegistry:
             "component_id": component_id,
             "reported_state": obs["state"],
             "detail": obs.get("detail", ""),
-            "provenance_state": self._provenance.get(component_id, {"state": "NOT_CHECKED"})["state"],\n            "actual_sha256": self._provenance.get(component_id, {}).get("actual_sha256"),
+            "provenance_state": self._provenance.get(component_id, {"state": "NOT_CHECKED"})["state"],
+            "actual_sha256": self._provenance.get(component_id, {}).get("actual_sha256"),
             "source_ref": component.source_ref,
             "source_path": component.source_path,
             "expected_sha256": component.expected_sha256,
@@ -149,10 +153,12 @@ class PONSRegistry:
         if self.ledger_path:
             self.ledger_path.parent.mkdir(parents=True, exist_ok=True)
             with self.ledger_path.open("a", encoding="utf-8") as stream:
-                stream.write(json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n")
+                stream.write(json.dumps(record, sort_keys=True, separators=(",", ":")) + "
+")
                 stream.flush()
                 os.fsync(stream.fileno())
         self._last_event_hash = digest
+        self._sequence = event["sequence"]
 
     def _next_sequence(self) -> int:
         if not self.ledger_path or not self.ledger_path.exists():
