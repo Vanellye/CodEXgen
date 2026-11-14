@@ -163,7 +163,20 @@ class Pons:
     def issue_reviewer_challenge(self, certificate: Dict[str, Any]) -> Dict[str, str]:
         if self._reviewer_identity is None:
             raise PermissionError("PONS reviewer trust root is not configured; evidence intake is disabled.")
-        return self._reviewer_identity.issue_challenge(certificate)
+        if self._accuracy_service is None:
+            raise LookupError("PONS AVS service is not installed.")
+        challenge = self._reviewer_identity.issue_challenge(certificate)
+        self._accuracy_service.ledger.append({
+            "record_type": "reviewer_challenge_issued",
+            "challenge_id": challenge["challenge_id"],
+            "nonce": challenge["nonce"],
+            "reviewer_id": challenge["reviewer_id"],
+            "reviewer_key_id": challenge["key_id"],
+            "reviewer_certificate_sha256": challenge["certificate_sha256"],
+            "issued_at": challenge["issued_at"],
+            "expires_at": challenge["expires_at"],
+        })
+        return challenge
 
     def submit_accuracy_evidence(
         self, *, certificate: Dict[str, Any], challenge_id: str,
@@ -222,7 +235,13 @@ class Pons:
         if self._reviewer_identity is None:
             raise PermissionError("PONS reviewer trust root is not configured; accuracy scores are disabled.")
         authenticated_ids = set()
-        for record in self._accuracy_service.ledger.records():
+        ledger_records = self._accuracy_service.ledger.records()
+        challenges = {
+            item.get("challenge_id"): item
+            for item in ledger_records
+            if item.get("record_type") == "reviewer_challenge_issued"
+        }
+        for record in ledger_records:
             if record.get("record_type") != "avs_evidence":
                 continue
             try:
@@ -241,6 +260,15 @@ class Pons:
                     and payload.get("weight") == record.get("weight")
                     and payload.get("method") == record.get("method")
                     and reviewer.key_id == record.get("reviewer_key_id")
+                    and reviewer.certificate_sha256 == record.get("reviewer_certificate_sha256")
+                    and reviewer.public_key_sha256 == record.get("reviewer_public_key_sha256")
+                    and record.get("identity_verified") is True
+                    and payload.get("challenge_id") in challenges
+                    and payload.get("nonce") == challenges[payload.get("challenge_id")].get("nonce")
+                    and reviewer.reviewer_id == challenges[payload.get("challenge_id")].get("reviewer_id")
+                    and reviewer.key_id == challenges[payload.get("challenge_id")].get("reviewer_key_id")
+                    and payload.get("signed_at") >= challenges[payload.get("challenge_id")].get("issued_at")
+                    and payload.get("signed_at") <= challenges[payload.get("challenge_id")].get("expires_at")
                 ):
                     authenticated_ids.add(record["evidence_id"])
             except (KeyError, TypeError, ValueError, ReviewerAuthenticationError):
