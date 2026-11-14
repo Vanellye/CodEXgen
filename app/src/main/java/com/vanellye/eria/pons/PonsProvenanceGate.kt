@@ -29,7 +29,8 @@ data class PonsSignedManifest(
 fun interface PonsManifestSignatureVerifier {
     fun verify(canonicalPayload: ByteArray, keyId: String, signature: String): Boolean
 }
-\nenum class PonsProvenanceState { VERIFIED, HOLD, UNKNOWN }
+
+enum class PonsProvenanceState { VERIFIED, HOLD, UNKNOWN }
 enum class PonsOperationalState { READY, DEGRADED, HOLD, UNKNOWN }
 
 data class PonsComponentPin(
@@ -101,6 +102,40 @@ class PonsProvenanceGate(
     }
 
     companion object {
+        /** Build a production gate only after a host-provided signature verifier accepts the manifest. */
+        fun fromSignedManifest(
+            manifest: PonsSignedManifest,
+            verifier: PonsManifestSignatureVerifier
+        ): PonsProvenanceGate {
+            require(manifest.version.isNotBlank() && manifest.keyId.isNotBlank() && manifest.signature.isNotBlank()) {
+                "PONS manifest metadata is incomplete"
+            }
+            require(manifest.anchor == PonsAnchorIdentity.CANONICAL) {
+                "PONS manifest anchor mismatch"
+            }
+            val ordered = manifest.pins.sortedBy { it.componentId }
+            val canonical = buildString {
+                append("PONS-MANIFEST-V1")
+                fun field(value: String) { append(value.length).append(':').append(value) }
+                field(manifest.version)
+                field(manifest.anchor.anchorId)
+                field(manifest.anchor.branch)
+                field(manifest.anchor.refSha)
+                ordered.forEach { pin ->
+                    field(pin.componentId)
+                    field(pin.sourceRef)
+                    field(pin.sourcePath)
+                    field(pin.sha256)
+                }
+            }.toByteArray(Charsets.UTF_8)
+            require(verifier.verify(canonical, manifest.keyId, manifest.signature)) {
+                "PONS manifest signature rejected"
+            }
+            val map = ordered.associateBy { it.componentId }
+            require(map.size == ordered.size) { "duplicate PONS component pin" }
+            return PonsProvenanceGate(map, manifest.anchor)
+        }
+
         fun sha256(bytes: ByteArray): String =
             MessageDigest.getInstance("SHA-256").digest(bytes)
                 .joinToString("") { "%02x".format(it) }
