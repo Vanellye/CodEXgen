@@ -14,7 +14,7 @@ See [Collector contract](COLLECTOR.md), [record schema](RECORD.schema.json), and
 The initial engine is `tools/god_collective.py`: PONS-gated single-file ingestion, SHA-256 content addressing, provenance metadata, lineage events, collaboration references, and integrity verification. It is a library integration point, not yet an unattended directory watcher or connected ERIA runtime service.
 
 ## Collections
-ALL, EVERYTHING, NOTHING, ANYTHING, WHATEVER, IDontKnow, COULDA, SHOULDA, WOULDA, HERITAGE, ANCESTRY, LINEAGE, ORIGINAL_DATA, ROOT_WORD_INTELLECT, FREQUENCIES, SOURCE_PROVENANCE, and COLLABORATION.
+ALL, EVERYTHING, NOTHING, ANYTHING, WHATEVER, IDontKnow, COULDA, SHOULDA, WOULDA, HERITAGE, ANCESTRY, LINEAGE, ORIGINAL_DATA, SHOP, ROOT_WORD_INTELLECT, FREQUENCIES, SOURCE_PROVENANCE, and COLLABORATION.
 
 These are organizing categories, not a claim that all possible information has been captured. No deployment, merge to main, or background collection is authorized by this branch.
 
@@ -35,15 +35,13 @@ The parent-validation requirements remain specified in
 [SOW: Ethical Information and Parent-Record Validation](SOW/ETHICAL_INFORMATION_PARENT_RECORD_VALIDATION.md).
 
 
-## Derived descendants
+## SHOP typed descendants
 
-Translations, interpretations, and corrections are separate, append-only
-records created by `tools/god_derivatives.py`. Their bytes live in
-`DERIVED_DATA/objects/`; original bytes remain in
+Every non-original typed descendant is a separate, append-only record created
+by `tools/god_derivatives.py`. Its bytes live in `SHOP/objects/`; original bytes and their existing record format remain in
 `ORIGINAL_DATA/objects/`. Each descendant names its direct parent records,
 stores parent digest/size proofs, and records the exact source-relative path,
-filename, and source hash used for the derivation. Corrections are descendants,
-not edits to originals or prior descendants.
+filename, and source hash used for the derivation. A correction or any other descendant is never an edit to an original or prior descendant.
 
 The creation API requires a trusted PONS `god.derive` capability grant and
 revalidates ancestry immediately before writing the new provenance record.
