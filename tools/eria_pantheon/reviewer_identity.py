@@ -75,7 +75,7 @@ class ReviewerIdentityAuthority:
             raise ReviewerAuthenticationError("Reviewer certificate is missing required fields.")
         if body["role"] != "evidence_reviewer":
             raise ReviewerAuthenticationError("Certificate does not grant the evidence_reviewer role.")
-        if "avs:evidence:submit" not in body["permissions"]:
+        if not isinstance(body["permissions"], list) or "avs:evidence:submit" not in body["permissions"]:
             raise ReviewerAuthenticationError("Certificate lacks AVS evidence submission permission.")
         if body["key_id"] in self._revoked:
             raise ReviewerAuthenticationError("Reviewer key is revoked.")
@@ -110,9 +110,11 @@ class ReviewerIdentityAuthority:
         reviewer = self.verify_certificate(certificate)
         challenge_id = secrets.token_urlsafe(24)
         nonce = secrets.token_urlsafe(32)
-        expires = datetime.now(timezone.utc) + timedelta(seconds=ttl_seconds)
+        issued = datetime.now(timezone.utc)
+        expires = issued + timedelta(seconds=ttl_seconds)
         with self._lock:
             self._challenges[challenge_id] = {
+                "issued_at": issued,
                 "reviewer_id": reviewer.reviewer_id,
                 "key_id": reviewer.key_id,
                 "nonce": nonce,
@@ -140,6 +142,16 @@ class ReviewerIdentityAuthority:
             }
             if any(signed_payload.get(k) != v for k, v in expected.items()):
                 raise ReviewerAuthenticationError("Signed payload does not bind the issued challenge.")
+            try:
+                signed_at = datetime.fromisoformat(signed_payload.get("signed_at"))
+                if signed_at.tzinfo is None:
+                    raise ValueError("timezone required")
+            except (TypeError, ValueError) as exc:
+                raise ReviewerAuthenticationError("Signed evidence timestamp is invalid.") from exc
+            if signed_at < challenge["issued_at"] or signed_at > challenge["expires_at"]:
+                raise ReviewerAuthenticationError("Evidence signature timestamp falls outside its challenge window.")
+            if signed_at > datetime.now(timezone.utc) + timedelta(seconds=30):
+                raise ReviewerAuthenticationError("Evidence signature timestamp is in the future.")
             public_key = Ed25519PublicKey.from_public_bytes(b64decode(certificate["public_key"]))
             try:
                 public_key.verify(b64decode(signature_b64), canonical_json(signed_payload))
