@@ -153,7 +153,10 @@ class Pons:
         return {
             "bridge": "PONS",
             "version": "1.0",
-            "mode": "proposal-and-inspection",
+            "mode": "proposal-review-and-exact-scope-approval",
+            "human_exact_scope_approval": True,
+            "patch_application_enabled": False,
+            "patch_application_requires_second_patch_hash_approval": True,
             "source_authority": "NON_AUTHORITATIVE",
             "derived_authority": "NON_AUTHORITATIVE",
             "capability_policy": "exact-scope; missing-or-unverified-approval=HOLD",
