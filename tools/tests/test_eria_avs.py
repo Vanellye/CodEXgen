@@ -16,19 +16,19 @@ class AccuracyValidationTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.path = Path(self.tmp.name) / "avs" / "evidence.jsonl"
         self.pons = Pons()
-        self.avs = self.pons.install_accuracy_service(str(self.path))
+        self.pons.install_accuracy_service(str(self.path))
 
     def tearDown(self):
         self.tmp.cleanup()
 
     def test_no_evidence_is_not_evaluated(self):
-        result = self.avs.evaluate(["claim-1"])
+        result = self.pons.evaluate_accuracy(["claim-1"])
         self.assertEqual(result["status"], "INCOMPLETE")
         self.assertIsNone(result["accuracy_score"])
 
     def test_self_certification_is_rejected(self):
         with self.assertRaises(EvidenceRejected):
-            self.avs.submit_evidence(
+            self.pons.submit_accuracy_evidence(
                 claim_id="claim-1", subject_component="translator",
                 verifier_id="translator", evidence_ref="test:1", outcome=True,
             )
@@ -48,7 +48,7 @@ class AccuracyValidationTests(unittest.TestCase):
             claim_id="claim-1", subject_component="translator",
             verifier_id="reviewer-a", evidence_ref="test:1", outcome=True,
         )
-        result = self.avs.evaluate(["claim-1", "claim-2"])
+        result = self.pons.evaluate_accuracy(["claim-1", "claim-2"])
         self.assertEqual(result["status"], "INCOMPLETE")
         self.assertEqual(result["unverified_claims"], ["claim-2"])
 
@@ -59,7 +59,7 @@ class AccuracyValidationTests(unittest.TestCase):
         )
         self.path.write_text(self.path.read_text().replace('"outcome":true', '"outcome":false'))
         with self.assertRaises(LedgerIntegrityError):
-            self.avs.ledger.verify()
+            self.pons.accuracy_ledger_status()
 
 
 if __name__ == "__main__":
