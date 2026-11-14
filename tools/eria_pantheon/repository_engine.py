@@ -309,7 +309,8 @@ def synthesize(inventory: dict[str, Any], quality: dict[str, Any], plan: dict[st
             "state": plan["execution_state"], "candidate_count": len(plan["commands"]),
             "commands": plan["commands"],
         },
-        "ai_synthesis": ai_synthesis or {"status": "NOT_REQUESTED"},\n        "next_stage": "review execution evidence and source findings; authorize any repair separately",
+        "ai_synthesis": ai_synthesis or {"status": "NOT_REQUESTED"},
+        "next_stage": "review execution evidence and source findings; authorize any repair separately",
         "authority": "NON_AUTHORITATIVE",
         "synthesis_is_not_source_truth": True,
     }
