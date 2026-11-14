@@ -11,10 +11,15 @@ import csv
 import hashlib
 import io
 import json
-import os
 import sqlite3
 import sys
-import tomllib
+try:
+    import tomllib
+except ImportError:  # Python 3.10 compatibility
+    try:
+        import tomli as tomllib
+    except ImportError:
+        tomllib = None
 import xml.etree.ElementTree as ET
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -175,6 +180,10 @@ def _decode(raw: bytes, suffix: str, path: Path, row_limit: int) -> tuple[str, s
             raise AeiError(f"Invalid XML: {exc}") from exc
         return "XML", "decoded", _xml_value(root), ()
     if suffix == ".toml":
+        if tomllib is None:
+            return "TOML", "unsupported_dependency", {"text_preview": text[:4000]}, (
+                "Install tomli on Python 3.10 to decode TOML; source bytes remain unchanged.",
+            )
         try:
             value = tomllib.loads(text)
         except Exception as exc:
