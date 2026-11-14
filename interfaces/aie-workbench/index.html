@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<meta name="color-scheme" content="dark">
+<title>Æị · ERIA Workbench</title>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:#edf3fc;background:#0b1220;--bg:#0b1220;--panel:#142137;--panel2:#101b2e;--line:#2b3d59;--muted:#9eafc7;--mint:#83d8c4;--blue:#91b7ff;--amber:#ffd18a;--red:#ff9e9e;--r:17px}
+*{box-sizing:border-box}html{min-height:100%;background:var(--bg)}body{margin:0;min-height:100dvh;background:radial-gradient(ellipse at 50% -15%,#1d3554 0,var(--bg) 58%);padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+button,input,select,textarea{font:inherit}button{min-height:44px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:#1a2a43;color:#edf3fc;font-weight:700;touch-action:manipulation}button.primary{background:var(--mint);color:#09201e;border-color:transparent}button:disabled{opacity:.5}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+.app{width:min(100%,1100px);min-height:100dvh;margin:auto;padding:0 14px 88px;display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 2px;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:10px;min-width:0}.mark{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(140deg,var(--mint),var(--blue));color:#091923;font-weight:950;font-size:22px}.brand h1{font-size:17px;margin:0}.brand p{font-size:11px;color:var(--muted);margin:3px 0 0}.status{font-size:11px;border:1px solid #6e5a39;color:var(--amber);border-radius:99px;padding:7px 10px;white-space:nowrap}.status.ok{color:var(--mint);border-color:#315b50}.status.bad{color:var(--red);border-color:#71434a}
+.layout{display:grid;grid-template-columns:1fr;gap:14px;flex:1}.rail{display:none}.main{min-width:0}.heading{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:17px 1px 10px}.heading h2{font-size:20px;margin:0}.muted{color:var(--muted)}.small{font-size:11px}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.tile,.card{background:linear-gradient(150deg,#182840,#131f33);border:1px solid var(--line);border-radius:var(--r);padding:14px;min-width:0}.tile strong{display:block;font-size:23px;overflow-wrap:anywhere}.tile span{font-size:11px;color:var(--muted)}
+.card{margin-top:11px}.card h3{font-size:14px;margin:0 0 7px}.card p{font-size:12px;line-height:1.55;color:var(--muted);margin:0}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.row+.row{margin-top:12px}.path{font:11px/1.5 ui-monospace,monospace;overflow-wrap:anywhere;color:#cfddf0}
+.workspace{display:none}.workspace.active{display:block}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}.actions button{flex:1}
+label{display:block;font-size:12px;color:#c8d5e8;margin:12px 0 6px}input,select,textarea{width:100%;min-height:45px;background:#0c1728;border:1px solid #354966;border-radius:12px;color:#f1f5fb;padding:11px 12px}textarea{min-height:105px;resize:vertical;line-height:1.5}
+.output{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#091422;white-space:pre-wrap;overflow-wrap:anywhere;font:11px/1.55 ui-monospace,monospace;color:#d4e2f5;max-height:38vh;overflow:auto}
+.notice{margin-top:12px;padding:10px 11px;border-left:3px solid var(--amber);border-radius:0 10px 10px 0;background:#332b1d55;color:#e9d6b5;font-size:11px;line-height:1.5}
+nav.mobile{position:fixed;z-index:5;bottom:0;left:0;right:0;padding:7px 8px calc(7px + env(safe-area-inset-bottom));background:#0b1220ed;border-top:1px solid var(--line);backdrop-filter:blur(16px);display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+nav button{min-height:53px;padding:4px 1px;background:transparent;border-color:transparent;color:var(--muted);font-size:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}nav button.active{color:var(--mint);background:#1a3040;border-color:#31594f}nav .ico{font-size:17px}
+footer{text-align:center;color:#7f91aa;font-size:10px;padding:16px 0}
+@media(min-width:760px){.app{padding:0 22px 18px}.layout{grid-template-columns:190px minmax(0,1fr);gap:18px}.rail{display:flex;flex-direction:column;gap:7px;padding-top:16px}.rail button{text-align:left;justify-content:flex-start;background:transparent;color:var(--muted)}.rail button.active{background:#1a3040;color:var(--mint);border-color:#31594f}.tiles{grid-template-columns:repeat(4,minmax(0,1fr))}nav.mobile{display:none}}
+@media(min-width:900px){.layout{grid-template-columns:205px minmax(0,1fr)}.main{max-width:850px}.tile,.card{padding:16px}}
+@media(orientation:landscape) and (min-width:650px){.app{width:min(100%,1200px)}.layout{grid-template-columns:175px minmax(0,1fr)}.tiles{grid-template-columns:repeat(4,minmax(0,1fr))}.workspace-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.workspace-grid .card{margin-top:10px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="brand"><div class="mark">Æ</div><div><h1>Æị Workbench</h1><p>Hybrid workspace · ERIA · Pantheon · SQLite</p></div></div><div id="apiState" class="status">API unverified</div></header>
+<div class="layout">
+<aside class="rail" aria-label="Workspaces">
+<button class="active" data-view="home">⌂ &nbsp; Overview</button><button data-view="eria">◈ &nbsp; ERIA runtime</button><button data-view="pantheon">⌘ &nbsp; Pantheon</button><button data-view="data">▤ &nbsp; SQLite & provenance</button><button data-view="tools">⇄ &nbsp; Tools</button><button data-view="governance">⚖ &nbsp; Governance</button>
+</aside>
+<main class="main">
+<section id="home" class="workspace active">
+<div class="heading"><h2>Workspace overview</h2><span class="small muted" id="checkedAt">Not checked</span></div>
+<div class="tiles"><div class="tile"><strong id="scans">—</strong><span>Scans</span></div><div class="tile"><strong id="sources">—</strong><span>Source records</span></div><div class="tile"><strong id="decodes">—</strong><span>Decoder jobs</span></div><div class="tile"><strong id="artifacts">—</strong><span>Derived artifacts</span></div></div>
+<div class="workspace-grid"><div class="card"><div class="row"><h3>ERIA connection</h3><span class="small muted" id="dbState">Unknown</span></div><div class="path" id="dbPath">Waiting for status response</div><div class="actions"><button class="primary" id="refresh">Refresh status</button><button data-go="eria">Open runtime</button></div></div>
+<div class="card"><h3>Choose a workspace</h3><p>One adaptive shell with focused work areas. ERIA runtime tools share the same navigation; Pantheon and database governance are kept distinct so unverified capabilities are never presented as live.</p><div class="actions"><button data-go="pantheon">Pantheon</button><button data-go="data">Data integrity</button></div></div></div>
+<div class="notice">Connection status is based on a live response from the configured API. A visible interface alone is not proof that the local Termux engine or SQLite database is connected.</div>
+</section>
+<section id="eria" class="workspace">
+<div class="heading"><h2>ERIA runtime</h2><span class="small muted">Existing routes only</span></div>
+<div class="card"><h3>Runtime status</h3><p>Read the platform status endpoint and display only fields returned by the running server.</p><pre class="output" id="runtimeOutput">No runtime response yet.</pre><div class="actions"><button class="primary" id="runtimeRefresh">Verify runtime</button></div></div>
+<div class="card"><h3>Repository scan</h3><p>Submit a scan request to the existing route. This may add scan/index metadata to SQLite; it does not alter source files or Git history.</p><div class="actions"><button class="primary" id="scanButton">Run repository scan</button></div><pre class="output" id="scanOutput">No scan submitted.</pre></div>
+</section>
+<section id="pantheon" class="workspace">
+<div class="heading"><h2>Pantheon workspace</h2><span class="small muted">Integration boundary</span></div>
+<div class="card"><h3>Python bridge</h3><p>The repository has a Pantheon Python ctypes bridge in the integration lineage. This workspace is reserved for its narrative and correction functions; it will report availability only after a real adapter endpoint or local bridge handshake is implemented and verified.</p><pre class="output">Expected native functions:
+• new_build_narrative(...)
+• facade_build_correction(...)
+
+No live Pantheon API route is assumed by this interface.</pre></div>
+<div class="card"><h3>Safe integration sequence</h3><p>Keep native C sources and tests authoritative; call them through the Python bridge; add an explicit server adapter; then wire this workspace to that verified adapter. No silent writes to source files.</p></div>
+</section>
+<section id="data" class="workspace">
+<div class="heading"><h2>SQLite & provenance</h2><span class="small muted">Read-only view</span></div>
+<div class="card"><h3>Database identity</h3><p>The UI displays the database path reported by ERIA. It does not open SQLite directly, migrate tables, delete records, or reconcile counts by assumption.</p><pre class="output" id="databaseOutput">Database identity has not been returned by the API.</pre><div class="notice">Preservation policy: retain original source rows, hashes, timestamps, provenance, and audit records. Any future import, migration, or cleanup must be a separately reviewed, transactional operation with a backup and before/after counts.</div></div>
+<div class="card"><h3>Record integrity checklist</h3><p>Before any data mutation: identify the exact database file; create and verify a backup; record source and artifact counts; inspect schema and foreign keys; run integrity checks; use a transaction; verify post-operation counts and hashes. This interface currently performs none of those mutations.</p></div>
+</section>
+<section id="tools" class="workspace">
+<div class="heading"><h2>Decoder tools</h2><span class="small muted">POST /api/decode</span></div>
+<div class="card"><h3>Decode an existing source value</h3><p>Submit the source ID, mode, and value to the existing ERIA decoder route.</p><label for="sourceId">Source ID</label><input id="sourceId" type="number" min="1" step="1" inputmode="numeric" placeholder="Existing source ID"><label for="mode">Mode</label><select id="mode"><option value="utf8">UTF-8</option><option value="hex">Hex</option><option value="base64">Base64</option></select><label for="value">Value</label><textarea id="value" placeholder="Paste a value to decode"></textarea><div class="actions"><button class="primary" id="decodeButton">Decode</button><button id="clearButton">Clear</button></div><pre class="output" id="decodeOutput">No decode submitted.</pre></div>
+</section>
+<section id="governance" class="workspace">
+<div class="heading"><h2>Governance & authorization</h2><span class="small muted">Human control</span></div>
+<div class="card"><h3>Protected boundaries</h3><p>• Work on this integration branch only.<br>• Do not rewrite, force-push, or delete existing Git history.<br>• Do not modify ERIA or Pantheon source behavior without review.<br>• Treat SQLite source records as immutable evidence; append derived records with lineage.<br>• Require explicit human approval for imports, migrations, exports, and destructive operations.</p></div>
+<div class="card"><h3>Current capability claims</h3><p>Verified by this UI only after a successful API response: configured status, scan, and decode routes. Not claimed as live: Pantheon service endpoint, direct SQLite query console, artifact import endpoint, Git write operations, or history rewrite.</p></div>
+</section>
+</main>
+</div>
+<nav class="mobile" aria-label="Workspace navigation"><button class="active" data-view="home"><span class="ico">⌂</span>Home</button><button data-view="eria"><span class="ico">◈</span>ERIA</button><button data-view="pantheon"><span class="ico">⌘</span>Pantheon</button><button data-view="data"><span class="ico">▤</span>Data</button><button data-view="tools"><span class="ico">⇄</span>Tools</button></nav>
+<footer>Æị Workbench · Adaptive mobile-first layout · Human-authorized changes only</footer>
+</div>
+<script>
+(()=>{"use strict";
+const $=id=>document.getElementById(id);
+let base=localStorage.getItem("eria_api_base")||((location.protocol==="http:"||location.protocol==="https:")?location.origin:"http://127.0.0.1:8778");
+base=base.replace(/\/+$/,"");
+const show=(id,v)=>$(id).textContent=typeof v==="string"?v:JSON.stringify(v,null,2);
+function nav(view){document.querySelectorAll(".workspace").forEach(x=>x.classList.toggle("active",x.id===view));document.querySelectorAll("[data-view]").forEach(x=>x.classList.toggle("active",x.dataset.view===view));window.scrollTo({top:0,behavior:"smooth"});}
+document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>nav(b.dataset.view)));
+document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>nav(b.dataset.go)));
+async function call(path,opts={}){const c=new AbortController(),t=setTimeout(()=>c.abort(),20000);try{const r=await fetch(base+path,{...opts,signal:c.signal,headers:{"Content-Type":"application/json",...(opts.headers||{})}});const raw=await r.text();let d;try{d=raw?JSON.parse(raw):{};}catch(_){d={raw};}if(!r.ok)throw Error(d.error||("HTTP "+r.status+" "+raw.slice(0,240)));return d;}finally{clearTimeout(t);}}
+async function status(){ $("apiState").className="status";$("apiState").textContent="Checking API";try{const d=await call("/api/platform/status");const fmt=v=>v===undefined||v===null?"—":Number(v).toLocaleString();$("scans").textContent=fmt(d.scans);$("sources").textContent=fmt(d.source_files);$("decodes").textContent=fmt(d.decoder_jobs);$("artifacts").textContent=fmt(d.derived_artifacts);$("dbPath").textContent=d.database||"Path not reported";$("dbState").textContent=d.database?"Reported by API":"Not reported";$("checkedAt").textContent="Checked "+new Date().toLocaleTimeString();$("apiState").className="status ok";$("apiState").textContent="API connected";show("runtimeOutput",d);show("databaseOutput",{database:d.database??null,source_files:d.source_files??null,derived_artifacts:d.derived_artifacts??null});return d;}catch(e){$("apiState").className="status bad";$("apiState").textContent="Disconnected";$("dbState").textContent="Unverified";show("runtimeOutput","Status request failed: "+e.message);show("databaseOutput","No database identity received. "+e.message);throw e;}}
+$("refresh").addEventListener("click",()=>status().catch(()=>{}));$("runtimeRefresh").addEventListener("click",()=>status().catch(()=>{}));
+$("scanButton").addEventListener("click",async()=>{const b=$("scanButton");b.disabled=true;show("scanOutput","Scan running…");try{show("scanOutput",await call("/api/scan",{method:"POST",body:"{}"}));await status();}catch(e){show("scanOutput","Scan failed: "+e.message);}finally{b.disabled=false;}});
+$("decodeButton").addEventListener("click",async()=>{const id=Number($("sourceId").value),value=$("value").value;if(!Number.isSafeInteger(id)||id<1){show("decodeOutput","Enter a valid existing source ID.");return;}if(!value){show("decodeOutput","Enter a value to decode.");return;}const b=$("decodeButton");b.disabled=true;try{show("decodeOutput",await call("/api/decode",{method:"POST",body:JSON.stringify({source_id:id,mode:$("mode").value,value})}));await status();}catch(e){show("decodeOutput","Decode failed: "+e.message);}finally{b.disabled=false;}});
+$("clearButton").addEventListener("click",()=>{$("sourceId").value="";$("value").value="";show("decodeOutput","No decode submitted.");});
+status().catch(()=>{});
+})();
+</script>
+</body></html>
