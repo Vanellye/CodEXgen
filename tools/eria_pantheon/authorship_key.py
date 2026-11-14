@@ -47,7 +47,7 @@ def canonical_claim(claim: dict[str, Any]) -> bytes:
             raise AuthorshipKeyError("Contribution blob SHA must be a full Git SHA.")
     # Exclude the signature envelope: only the claim itself is signed.
     payload = {key: value for key, value in claim.items()
-               if key not in {"signature", "public_key", "verification"}}
+               if key not in {"signature", "public_key", "verification", "signature_algorithm", "key_fingerprint"}}
     return json.dumps(payload, ensure_ascii=False, sort_keys=True,
                       separators=(",", ":")).encode("utf-8")
 
