@@ -7,6 +7,7 @@ import shlex
 from typing import Any
 
 from .aei import AeiError, inspect_file
+from .higher_faculties import translate_file
 from .ai import AiiConversation
 from .pons import BridgeEnvelope, Pons
 from .storage import AeiStorage
@@ -40,9 +41,10 @@ class ERIAPantheonInterface:
             return self._code_bypass(command.strip()[len("code.bypass "):])
         if low.startswith("aei.compile "):
             return self._aei_compile(command.strip()[len("aei.compile "):])
-        if low.startswith(("aei.inspect ", "aei.translate ")):
-            prefix = "aei.inspect " if low.startswith("aei.inspect ") else "aei.translate "
-            return self._aei_inspect(command.strip()[len(prefix):])
+        if low.startswith("aei.translate "):
+            return self._aei_translate(command.strip()[len("aei.translate "):])
+        if low.startswith("aei.inspect "):
+            return self._aei_inspect(command.strip()[len("aei.inspect "):])
         if low.startswith("ai.ask "):
             return self._ai_ask(command.strip()[len("ai.ask "):])
         if low.startswith("repository.ask "):
@@ -51,7 +53,7 @@ class ERIAPantheonInterface:
             "Supported commands: integration.status, bridge.status, "
             "repository.ask <question>, "
             "aei.inspect <repo-relative-path>, "
-            "aei.translate <repo-relative-path> (read-only), "
+            "aei.translate <repo-relative-path> (Discovery -> Antithesis -> Verification -> Creation), "
             "aei.compile <repo-relative-path> (store derived copy), "
             "ai.ask <repo-relative-path> --question <text>, "
             "code.bypass <repo-relative-path> --reason <text>"
@@ -68,6 +70,20 @@ class ERIAPantheonInterface:
             result = self.bridge.resolve(AeiStorage).compile(tokens[0])
         except (AeiError, OSError, ValueError) as exc:
             return json.dumps({"translator": "Æị", "status": "HOLD", "error": str(exc)},
+                              ensure_ascii=False, indent=2)
+        return json.dumps(result, ensure_ascii=False, indent=2)
+
+    def _aei_translate(self, arguments: str) -> str:
+        try:
+            tokens = shlex.split(arguments)
+        except ValueError as exc:
+            return f"HOLD: invalid Æị translation command quoting: {exc}"
+        if len(tokens) != 1:
+            return "HOLD: provide exactly one repository-relative source path."
+        try:
+            result = translate_file(self.repository.root, tokens[0])
+        except (AeiError, OSError, ValueError) as exc:
+            return json.dumps({"translator": "Æị Higher Faculties", "status": "HOLD", "error": str(exc)},
                               ensure_ascii=False, indent=2)
         return json.dumps(result, ensure_ascii=False, indent=2)
 
