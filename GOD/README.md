@@ -17,3 +17,19 @@ The initial engine is `tools/god_collective.py`: PONS-gated single-file ingestio
 ALL, EVERYTHING, NOTHING, ANYTHING, WHATEVER, IDontKnow, COULDA, SHOULDA, WOULDA, HERITAGE, ANCESTRY, LINEAGE, ORIGINAL_DATA, ROOT_WORD_INTELLECT, FREQUENCIES, SOURCE_PROVENANCE, and COLLABORATION.
 
 These are organizing categories, not a claim that all possible information has been captured. No deployment, merge to main, or background collection is authorized by this branch.
+
+
+## Parent validation and repository forge
+
+Every new GOD ingestion with parents passes through
+`tools/god_parent_validation.py`, which verifies the complete parent chain,
+object digests, byte lengths, safe storage paths, and the direct-parent digest
+manifest before the child provenance is accepted.
+
+ERIA's on-demand repository representation tool is
+`tools/eria_repository_forge.py`. It creates a read-only structural inventory
+of the selected Git worktree; it does not execute scanned code or modify the
+repository. Its design is specified in
+[SOW: Autonomous Repository Interpretation and Representation Forge](SOW/AUTONOMOUS_REPOSITORY_INTERPRETATION_REPRESENTATION_FORGE.md).
+The parent-validation requirements remain specified in
+[SOW: Ethical Information and Parent-Record Validation](SOW/ETHICAL_INFORMATION_PARENT_RECORD_VALIDATION.md).
