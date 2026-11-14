@@ -4,28 +4,110 @@
   "title": "GOD preserved source record",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema", "record_id", "record_type", "sha256", "size_bytes", "media_type", "source", "captured_at", "parent_record_ids", "authority", "object_relative_path"],
+  "required": [
+    "schema",
+    "record_id",
+    "record_type",
+    "sha256",
+    "size_bytes",
+    "media_type",
+    "source",
+    "captured_at",
+    "parent_record_ids",
+    "authority",
+    "object_relative_path"
+  ],
   "properties": {
-    "schema": {"const": "eria.god.record/1"},
-    "record_id": {"type": "string", "format": "uuid"},
-    "record_type": {"const": "original"},
-    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
-    "size_bytes": {"type": "integer", "minimum": 0},
-    "media_type": {"type": "string", "minLength": 1},
+    "schema": {
+      "const": "eria.god.record/1"
+    },
+    "record_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "record_type": {
+      "const": "original"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "size_bytes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "media_type": {
+      "type": "string",
+      "minLength": 1
+    },
     "source": {
       "type": "object",
-      "required": ["label", "filename", "modified_time_ns", "mode"],
+      "required": [
+        "label",
+        "filename",
+        "modified_time_ns",
+        "mode"
+      ],
       "properties": {
-        "label": {"type": "string"},
-        "filename": {"type": "string"},
-        "modified_time_ns": {"type": "integer"},
-        "mode": {"type": "integer"}
+        "label": {
+          "type": "string"
+        },
+        "filename": {
+          "type": "string"
+        },
+        "modified_time_ns": {
+          "type": "integer"
+        },
+        "mode": {
+          "type": "integer"
+        }
       },
       "additionalProperties": false
     },
-    "captured_at": {"type": "string", "format": "date-time"},
-    "parent_record_ids": {"type": "array", "items": {"type": "string", "format": "uuid"}, "uniqueItems": true},
-    "authority": {"const": "preserved-source-not-validated-as-fact"},
-    "object_relative_path": {"type": "string"}
+    "captured_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "parent_record_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "uniqueItems": true
+    },
+    "authority": {
+      "const": "preserved-source-not-validated-as-fact"
+    },
+    "object_relative_path": {
+      "type": "string"
+    },
+    "validated_parents": {
+      "type": "array",
+      "description": "SHA-256 and byte-length proofs for each direct parent at the time the record was accepted.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "record_id",
+          "sha256",
+          "size_bytes"
+        ],
+        "properties": {
+          "record_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    }
   }
 }
