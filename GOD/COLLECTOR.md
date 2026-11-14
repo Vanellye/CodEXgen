@@ -37,3 +37,40 @@ Use verify_record(vault, record_id) for integrity checks.
 This module does not watch directories continuously or run in the background. Batch collection scans only when explicitly invoked. It does not access networks,
 modify Git, deploy code, or send email. Those integrations require separate
 review and explicit capabilities. A Git branch is not an independent backup.
+
+
+## Parent-validation engine
+
+`tools/god_parent_validation.py` validates each supplied parent by exact
+canonical UUID, strict provenance shape, content-addressed path, SHA-256,
+byte length, parent/child type policy, and complete recursive ancestry. It
+rejects missing records, ID mismatches, unsafe paths, symlinks, duplicate
+parents, cycles, unavailable ancestors, and altered objects. The collector
+runs validation before capture and again immediately before writing the child
+provenance record. Accepted child records include a `validated_parents`
+manifest containing each direct parent ID, digest, and byte length.
+
+Multiple parents can be supplied with `parent_record_ids=[...]`; the older
+single-parent `parent_record_id=...` argument remains supported. Supplying
+both is rejected. `verify_record` now includes ancestry validity in its
+overall `valid` result.
+
+## Repository interpretation and representation forge
+
+`tools/eria_repository_forge.py` creates an on-demand, read-only structural
+representation of a selected Git worktree. It inventories tracked and
+non-ignored untracked files, hashes eligible source bytes, classifies formats,
+extracts supported syntax/document structure, and reports resolvable local
+imports. It does not execute code, read sensitive-name files, follow symlinks,
+or write inside the scanned repository.
+
+Use:
+
+```bash
+python tools/eria_repository_forge.py . --output "$HOME/eria-repository-forge.json"
+```
+
+The output must be a new path outside the worktree. This is an explicit
+snapshot command, not a watcher or unattended device-wide crawler. See
+[Repository forge SOW](SOW/AUTONOMOUS_REPOSITORY_INTERPRETATION_REPRESENTATION_FORGE.md)
+for the complete contract and limitations.
