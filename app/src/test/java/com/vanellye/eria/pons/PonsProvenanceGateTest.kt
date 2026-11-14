@@ -52,4 +52,15 @@ class PonsProvenanceGateTest {
         assertEquals(PonsEffectiveState.UNKNOWN, status.effectiveState)
     }
 
+    @Test fun trustPinMapIsSnapshotted() {
+        val source = "stable-source".toByteArray()
+        val id = "stable.component"
+        val pin = PonsComponentPin(id, "ref-1", "src/Stable.kt", PonsProvenanceGate.sha256(source))
+        val mutablePins = mutableMapOf(id to pin)
+        val gate = PonsProvenanceGate(mutablePins)
+        mutablePins[id] = pin.copy(sha256 = "0".repeat(64))
+        assertEquals(PonsProvenanceState.VERIFIED, gate.verify(id, source).state)
+    }
+
+
 }
