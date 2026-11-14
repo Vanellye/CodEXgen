@@ -2,12 +2,17 @@ import csv
 import hashlib
 import json
 import sqlite3
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 
 from tools.eria_pantheon.aei import AeiError, inspect_file
 from tools.eria_pantheon.interface import ERIAPantheonInterface
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "tools"))
+from eria_repository_conversation import Conversation
 
 
 class AeiTranslatorTests(unittest.TestCase):
@@ -83,6 +88,15 @@ class AeiTranslatorTests(unittest.TestCase):
             response = json.loads(interface.handle(command))
             self.assertEqual(response["translator"], "Æị")
             self.assertEqual(response["data"]["value"]["answer"], 42)
+
+    def test_conversation_engine_routes_aei_commands(self):
+        class Repository:
+            def __init__(self, root):
+                self.root = root
+        (self.root / "routed.json").write_text('{"ok":true}', encoding="utf-8")
+        response = Conversation(Repository(self.root)).ask("aei.inspect routed.json")
+        self.assertIn('"translator": "Æị"', response)
+        self.assertIn('"ok": true', response)
 
     def test_binary_is_metadata_only(self):
         (self.root / "blob.bin").write_bytes(b"\x00\x01\x02")
