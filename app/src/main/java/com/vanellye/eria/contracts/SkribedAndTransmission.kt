@@ -2,6 +2,9 @@ package com.vanellye.eria.contracts
 
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
+import com.vanellye.eria.pons.PonsComponentStatus
+import com.vanellye.eria.pons.PonsEffectiveState
+import com.vanellye.eria.pons.PonsAnchorIdentity
 
 /**
  * SKRIBED writing contract.
@@ -136,7 +139,15 @@ interface TransmissionTransceiver {
  * In-process, closed-loop transceiver. No sockets, webhooks, media players, hardware
  * actuators, or external destinations are available through this implementation.
  */
-class InMemoryTransmissionTransceiver : TransmissionTransceiver {
+class InMemoryTransmissionTransceiver(
+    private val ponsStatus: PonsComponentStatus
+) : TransmissionTransceiver {
+    init {
+        require(ponsStatus.effectiveState == PonsEffectiveState.READY &&
+            ponsStatus.anchor == PonsAnchorIdentity.CANONICAL
+        ) { "PONS provenance/status gate did not authorize this transceiver" }
+    }
+
     override fun transceive(
         frame: TransmissionFrame,
         endpoint: InternalTransmissionEndpoint
