@@ -23,6 +23,7 @@ class SimulationEvidence internal constructor(
     val scenarioId: String,
     val engineRef: String,
     val engineVersion: String,
+    val engineSourceSha256: String,
     val seed: Long,
     val inputSha256: String,
     val configurationSha256: String,
@@ -30,11 +31,13 @@ class SimulationEvidence internal constructor(
     val secondOutputSha256: String,
     val state: SimulationIntegrityState,
     val anchor: PonsAnchorIdentity,
+    engineSourceBytes: ByteArray,
     inputBytes: ByteArray,
     configurationBytes: ByteArray,
     firstOutputBytes: ByteArray,
     secondOutputBytes: ByteArray
 ) {
+    private val engineSourceSnapshot = engineSourceBytes.copyOf()
     private val inputSnapshot = inputBytes.copyOf()
     private val configurationSnapshot = configurationBytes.copyOf()
     private val firstOutputSnapshot = firstOutputBytes.copyOf()
@@ -43,6 +46,7 @@ class SimulationEvidence internal constructor(
     val simulatedOnly: Boolean = true
     val hardwareObserved: Boolean = false
 
+    fun engineSource(): ByteArray = engineSourceSnapshot.copyOf()
     fun input(): ByteArray = inputSnapshot.copyOf()
     fun configuration(): ByteArray = configurationSnapshot.copyOf()
     fun firstOutput(): ByteArray = firstOutputSnapshot.copyOf()
@@ -56,6 +60,7 @@ object SimulationIntegrityRunner {
         scenarioId: String,
         engineRef: String,
         engineVersion: String,
+        engineSourceBytes: ByteArray,
         seed: Long,
         input: ByteArray,
         configuration: ByteArray,
@@ -68,6 +73,9 @@ object SimulationIntegrityRunner {
         require(engineVersion.isNotBlank()) { "engineVersion must not be blank" }
         require(anchor == PonsAnchorIdentity.CANONICAL) { "Simulation anchor mismatch" }
 
+        require(engineSourceBytes.isNotEmpty()) { "engine source bytes are required" }
+        val stableEngineSource = engineSourceBytes.copyOf()
+        val engineSourceHash = sha256(stableEngineSource)
         val stableInput = input.copyOf()
         val stableConfiguration = configuration.copyOf()
         val first = simulator.execute(stableInput.copyOf(), stableConfiguration.copyOf(), seed).copyOf()
@@ -82,7 +90,7 @@ object SimulationIntegrityRunner {
             SimulationIntegrityState.NONDETERMINISTIC
         }
         val evidenceId = sha256(canonicalBytes(listOf(
-            runId, scenarioId, engineRef, engineVersion, seed.toString(),
+            runId, scenarioId, engineRef, engineVersion, engineSourceHash, seed.toString(),
             inputHash, configurationHash, firstHash, secondHash,
             state.name, anchor.anchorId, anchor.branch, anchor.refSha,
             "simulated-only", "hardware-not-observed"
@@ -93,6 +101,7 @@ object SimulationIntegrityRunner {
             scenarioId = scenarioId,
             engineRef = engineRef,
             engineVersion = engineVersion,
+            engineSourceSha256 = engineSourceHash,
             seed = seed,
             inputSha256 = inputHash,
             configurationSha256 = configurationHash,
@@ -100,6 +109,7 @@ object SimulationIntegrityRunner {
             secondOutputSha256 = secondHash,
             state = state,
             anchor = anchor,
+            engineSourceBytes = stableEngineSource,
             inputBytes = stableInput,
             configurationBytes = stableConfiguration,
             firstOutputBytes = first,
