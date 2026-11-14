@@ -1,10 +1,10 @@
 # Statement of Work: Autonomous Repository Interpretation and Representation Forge
 
-**Project:** ERIA / GOD Collective  
-**Repository:** Vanellye/CodEXgen  
-**Target branch:** `god/heritage-lineage`  
-**Engine:** `tools/eria_repository_forge.py`  
-**Schema:** `eria.repository-forge/1`  
+**Project:** ERIA / GOD Collective
+**Repository:** Vanellye/CodEXgen
+**Target branch:** `god/heritage-lineage`
+**Engine:** `tools/eria_repository_forge.py`
+**Schema:** `eria.repository-forge/1`
 **Execution mode:** Explicitly invoked, read-only source inspection
 
 ## 1. Purpose
