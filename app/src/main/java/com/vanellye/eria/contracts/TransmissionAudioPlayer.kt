@@ -3,6 +3,7 @@ package com.vanellye.eria.contracts
 import android.media.MediaPlayer
 import java.io.File
 import com.vanellye.eria.pons.PonsComponentStatus
+import com.vanellye.eria.pons.requireReady
 import com.vanellye.eria.pons.PonsEffectiveState
 import com.vanellye.eria.pons.PonsAnchorIdentity
 
