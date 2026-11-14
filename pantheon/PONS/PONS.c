@@ -1,7 +1,16 @@
 #include "PONS.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+struct PonsCProof {
+    PonsCState state;
+    char component_id[128];
+    char expected_sha256[65];
+    char actual_sha256[65];
+    char reason[160];
+};
 
 static int present(const char *s) { return s != NULL && s[0] != '\0'; }
 
@@ -27,11 +36,15 @@ PonsCState pons_c_verify(const PonsCManifestPin *pin,
                          size_t source_length,
                          PonsCSha256Fn sha256_fn,
                          void *sha256_context,
-                         PonsCProof *proof) {
+                         PonsCProof **proof_out) {
     char actual[65] = {0};
+    PonsCProof *proof;
+    if (proof_out == NULL) return PONS_C_INVALID;
+    *proof_out = NULL;
+    proof = (PonsCProof *)calloc(1U, sizeof(*proof));
     if (proof == NULL) return PONS_C_INVALID;
-    memset(proof, 0, sizeof(*proof));
     proof->state = PONS_C_UNKNOWN;
+    *proof_out = proof;
 
     if (pin == NULL || !present(pin->component_id) ||
         !present(pin->source_ref) || !present(pin->source_path) ||
@@ -79,3 +92,5 @@ int pons_c_proof_is_valid(const PonsCProof *proof, const char *component_id) {
            is_hex_sha256(proof->actual_sha256) &&
            strcmp(proof->expected_sha256, proof->actual_sha256) == 0;
 }
+
+void pons_c_proof_destroy(PonsCProof *proof) { free(proof); }
