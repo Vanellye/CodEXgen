@@ -96,6 +96,17 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
 </div>
 <p id="pactState" aria-live="polite">PACT: HOLD. No source or Git operation is authorized.</p>
 </section>
+<section class="quality-panel" aria-label="Code Aura glob discovery">
+<h3>Code Aura · .glob Faculty</h3>
+<p>Read-only repository discovery. Bootstrap creation is separately PONS-gated: new files only, exact content hashes, one-time approval, no staging or commit.</p>
+<label for="globPatterns">Glob patterns (one per line)</label>
+<textarea id="globPatterns" rows="3" spellcheck="false" style="width:100%;margin:8px 0;padding:10px;border-radius:8px" placeholder="**/*.kt&#10;tools/**/*.py"></textarea>
+<label for="globExcludes">Additional excluded names (comma separated)</label>
+<input id="globExcludes" type="text" style="width:100%;margin:8px 0;padding:10px;border-radius:8px" placeholder="generated, vendor">
+<div class="quality-actions"><button class="small" id="globScan" type="button">Scan Repository</button><button class="small" id="globStatus" type="button">.glob Status</button></div>
+<pre id="globResults" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:320px;overflow:auto">No .glob scan yet.</pre>
+<p id="globState" aria-live="polite">Scanning is read-only. No files are changed.</p>
+</section>
 <section id="chat" class="chat" aria-live="polite">
 <div class="welcome"><h2>Welcome to ERIA</h2><p>Ask questions about repository files, branches, commits, architecture, provenance, or the PONS bridge. Original source remains non-authoritative; translations are derived records, not replacements.</p></div>
 </section>
@@ -203,6 +214,22 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault(); $("form").requestSubmit();
     }
+  });
+  $("globScan").addEventListener("click", async () => {
+    const patterns=$("globPatterns").value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+    if(!patterns.length){$("globState").textContent="HOLD: enter at least one relative pattern.";return;}
+    const excludes=$("globExcludes").value.split(",").map(x=>x.trim()).filter(Boolean);
+    const button=$("globScan");button.disabled=true;
+    try{
+      const result=await api("/api/glob/scan",{method:"POST",body:JSON.stringify({patterns,excludes,limit:500})});
+      $("globResults").textContent=JSON.stringify(result,null,2);
+      $("globState").textContent=result.count+" match(es) · "+(result.truncated?"truncated":"complete")+" · read-only";
+    }catch(error){$("globState").textContent="HOLD: "+error.message;}
+    finally{button.disabled=false;}
+  });
+  $("globStatus").addEventListener("click",async()=>{
+    try{const result=await api("/api/glob/status");$("globResults").textContent=JSON.stringify(result,null,2);$("globState").textContent="Status loaded; bootstrap remains approval-gated.";}
+    catch(error){$("globState").textContent="HOLD: "+error.message;}
   });
   $("statusBtn").addEventListener("click", () => send("integration.status"));
   $("filesBtn").addEventListener("click", async () => {

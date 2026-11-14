@@ -32,6 +32,7 @@ from eria_file_pull import FilePullService, start_scheduler
 from eria_quality_bridge import QualityBridge
 from eria_pons_approval import PonsApprovalService
 from eria_pact import PactRuntime
+from eria_glob import GlobEngine, GlobBootstrap
 
 DB_DEFAULT = Path.home() / ".eria" / "data" / "eria_conversation.sqlite3"
 MAX_BODY = 8_388_608
@@ -324,6 +325,9 @@ class Handler(BaseHTTPRequestHandler):
                 "history": self.app.pact.history(),
             })
             return
+        if route == "/api/glob/status":
+            self.send_json(200, {"engine":"ERIA Code Aura .glob/1","read_only_discovery":True,"bootstrap_create_only":True,"history":self.app.glob_bootstrap.history()})
+            return
         if route == "/api/audit":
             self.send_json(200, {"events": self.app.store.audit_history()})
             return
@@ -434,6 +438,24 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_json(403, {"error": "Cross-site local mutation request rejected."})
                 return
             data = self.read_json()
+            if route == "/api/glob/scan":
+                result=self.app.glob.scan(data.get("patterns"),excludes=data.get("excludes"),limit=data.get("limit",500))
+                self.app.store.add_audit("glob_scan","READ_ONLY",{"patterns":result["patterns"],"count":result["count"],"truncated":result["truncated"]})
+                self.send_json(200,result); return
+            if route == "/api/glob/bootstrap/request":
+                result=self.app.glob_bootstrap.create_request(data.get("files"),data.get("purpose"))
+                self.app.store.add_audit("glob_bootstrap_requested","HOLD",{"request_id":result["request_id"],"scope_sha256":result["scope_sha256"]})
+                self.send_json(201,result); return
+            if route == "/api/glob/bootstrap/confirm":
+                result=self.app.glob_bootstrap.approve(data.get("request_id"),data.get("scope_sha256"),data.get("confirmation"))
+                self.app.store.add_audit("glob_bootstrap_approved",result["decision"],{"grant_id":result["grant_id"],"scope_sha256":result["scope_sha256"],"source_modified":False})
+                self.send_json(200,result); return
+            if route == "/api/glob/bootstrap/apply":
+                grant_id=data.get("grant_id")
+                if not isinstance(grant_id,str) or not grant_id.strip(): raise ValueError("grant_id is required.")
+                result=self.app.glob_bootstrap.apply(grant_id)
+                self.app.store.add_audit("glob_bootstrap_applied",result["status"],{"grant_id":grant_id,"paths":result["paths"],"git_staged":False,"committed":False})
+                self.send_json(200,result); return
             if route == "/api/quality/refresh":
                 report = self.app.quality.refresh()
                 self.app.store.add_audit("quality_report_refreshed", "RECORDED", {
@@ -598,6 +620,8 @@ class App:
         self.quality = QualityBridge(self.repository.root, self.store.path)
         self.pons_approvals = PonsApprovalService(self.quality, self.repository.root)
         self.pact = PactRuntime(self.pons_approvals)
+        self.glob = GlobEngine(self.repository.root)
+        self.glob_bootstrap = GlobBootstrap(self.repository.root, self.quality.home / 'glob_bootstrap.sqlite3')
 
 
 def main():
