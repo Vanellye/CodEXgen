@@ -224,7 +224,8 @@
       },
       "then": {
         "required": [
-          "derivation"
+          "derivation",
+          "validated_parents"
         ],
         "properties": {
           "authority": {
