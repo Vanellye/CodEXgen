@@ -2,9 +2,11 @@
 """Conversation adapter for ERIA/PANTHEON; local inspection and audit only."""
 from __future__ import annotations
 
+import json
 import shlex
 from typing import Any
 
+from .aei import AeiError, inspect_file
 from .pons import BridgeEnvelope, Pons
 
 
@@ -32,13 +34,31 @@ class ERIAPantheonInterface:
             return self.status()
         if low.startswith("code.bypass "):
             return self._code_bypass(command.strip()[len("code.bypass "):])
+        if low.startswith(("aei.inspect ", "aei.translate ")):
+            prefix = "aei.inspect " if low.startswith("aei.inspect ") else "aei.translate "
+            return self._aei_inspect(command.strip()[len(prefix):])
         if low.startswith("repository.ask "):
             return self.repository.ask(command.strip()[len("repository.ask "):])
         return (
             "Supported commands: integration.status, bridge.status, "
             "repository.ask <question>, "
+            "aei.inspect <repo-relative-path>, "
+            "aei.translate <repo-relative-path> (read-only), "
             "code.bypass <repo-relative-path> --reason <text>"
         )
+
+    def _aei_inspect(self, arguments: str) -> str:
+        try:
+            tokens = shlex.split(arguments)
+        except ValueError as exc:
+            return f"HOLD: invalid Æị command quoting: {exc}"
+        if len(tokens) != 1:
+            return "HOLD: provide exactly one repository-relative file path."
+        try:
+            result = inspect_file(self.repository.root, tokens[0])
+        except (AeiError, OSError) as exc:
+            return f"HOLD: Æị inspection failed: {exc}"
+        return json.dumps(result.to_dict(), ensure_ascii=False, indent=2)
 
     def _code_bypass(self, arguments: str) -> str:
         try:
