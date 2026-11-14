@@ -32,7 +32,7 @@ class RepositoryEngineTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             (root / "src").mkdir()
-            (root / "src" / "unsafe.py").write_text("def run(value):\\n    return eval(value)\\n", encoding="utf-8")
+            (root / "src" / "unsafe.py").write_text("def run(value):\n    return eval(value)\n", encoding="utf-8")
             subprocess.run(["git", "init", "-q", str(root)], check=True)
             subprocess.run(["git", "-C", str(root), "config", "user.email", "test@example.invalid"], check=True)
             subprocess.run(["git", "-C", str(root), "config", "user.name", "ERIA test"], check=True)
