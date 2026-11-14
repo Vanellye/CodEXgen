@@ -50,7 +50,7 @@ Adapters must not receive implicit filesystem, network, process, Git-write, depl
 
 ## Evidence and corrections
 
-Preserve original bytes, source refs, timestamps, digest values, reviewer references, and prior observations. Corrections are new events referencing the superseded event; do not erase history. The current JSONL ledger is hash-chained and append-only through its API, but it is not tamper-proof storage or a trusted timestamp. Production deployments must add protected storage, authenticated appenders, signed checkpoints, backup/restore tests, and key rotation.
+Preserve original bytes, source refs, timestamps, digest values, reviewer references, and prior observations. Corrections are new events referencing the superseded event; do not erase history. Transmission frames and receipts carry the canonical PONS anchor identity (anchor ID, branch, and pinned commit). Each transmission evidence event records request/response digests and an optional superseded evidence ID; the in-memory ledger retains earlier events. This is an append-only process-local history, not durable storage. The Python JSONL ledger is hash-chained and append-only through its API, but it is not tamper-proof storage or a trusted timestamp. Production deployments must add protected storage, authenticated appenders, signed checkpoints, backup/restore tests, and key rotation.
 
 ## Progressive-growth slots
 
@@ -73,7 +73,7 @@ Implemented:
 - Signed-manifest loading interface in Python, with host-provided verifier.
 - Android PONS digest gate, immutable pin snapshot, signed-manifest factory interface, and effective-state registry.
 - Pantheon Android review path requires canonical PONS proof.
-- WAV endpoint, playback, and in-memory transceiver require component-specific PONS READY proof.
+- WAV endpoint, playback, and in-memory transceiver require component-specific PONS READY proof. Transmission frames/receipts are bound to the canonical anchor, and the in-memory evidence ledger appends superseding observations without deleting prior entries.
 - C99 PONS digest-verification adapter; Pantheon NEW C narrative entry point now requires a PONS proof.
 - Python, Kotlin, and C contract tests.
 
