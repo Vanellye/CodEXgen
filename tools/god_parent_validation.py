@@ -19,21 +19,17 @@ MAX_ANCESTRY_DEPTH = 256
 MAX_ANCESTRY_RECORDS = 10_000
 
 # Typed lineage policy. "any" is used only when verifying a record as a root.
-ALLOWED_PARENT_TYPES: dict[str, set[str]] = {
-    "any": {"original", "translation", "interpretation", "correction",
-            "frequency_observation", "collaboration_contribution"},
-    "original": {"original"},
-    "translation": {"original", "translation", "interpretation", "correction"},
-    "interpretation": {"original", "translation", "interpretation", "correction",
-                       "frequency_observation", "collaboration_contribution"},
-    "correction": {"original", "translation", "interpretation", "correction"},
-    "frequency_observation": {"original", "frequency_observation"},
-    "collaboration_contribution": {"original", "translation", "interpretation",
-                                   "correction", "frequency_observation",
-                                   "collaboration_contribution"},
-}
 DERIVED_TYPES = {"translation", "interpretation", "correction"}
-RECORD_TYPES = ALLOWED_PARENT_TYPES["any"]
+RECORD_TYPES = {"original"} | DERIVED_TYPES
+
+# Explicit allowed parent/child relationships for the supported GOD record types.
+ALLOWED_PARENT_TYPES: dict[str, set[str]] = {
+    "any": set(RECORD_TYPES),
+    "original": {"original"},
+    "translation": set(RECORD_TYPES),
+    "interpretation": set(RECORD_TYPES),
+    "correction": set(RECORD_TYPES),
+}
 
 
 class ParentValidationError(ValueError):
