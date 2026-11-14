@@ -356,7 +356,7 @@ class FilePullService:
         }
 
 
-def start_scheduler(service: FilePullService):
+def start_scheduler(service: FilePullService, after_sync=None):
     """Run startup sync and periodic sync without delaying HTTP server startup."""
     interval = int(os.environ.get("ERIA_PULL_INTERVAL_MINUTES", "60"))
     stop = threading.Event()
@@ -364,11 +364,21 @@ def start_scheduler(service: FilePullService):
     def worker():
         try:
             service.sync_all()
+            if after_sync:
+                try:
+                    after_sync()
+                except Exception as exc:
+                    service._audit("quality_refresh_failed", {"phase": "startup", "error_type": type(exc).__name__})
         except Exception as exc:
             service._audit("startup_pull_failed", {"error_type": type(exc).__name__})
         while interval > 0 and not stop.wait(interval * 60):
             try:
                 service.sync_all()
+                if after_sync:
+                    try:
+                        after_sync()
+                    except Exception as exc:
+                        service._audit("quality_refresh_failed", {"phase": "scheduled", "error_type": type(exc).__name__})
             except Exception as exc:
                 service._audit("scheduled_pull_failed", {"error_type": type(exc).__name__})
 
