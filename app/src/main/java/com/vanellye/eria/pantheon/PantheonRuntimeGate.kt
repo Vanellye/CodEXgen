@@ -3,6 +3,8 @@ package com.vanellye.eria.pantheon
 import com.vanellye.eria.contracts.AuthorizationStatus
 import com.vanellye.eria.contracts.DataEnvelope
 import com.vanellye.eria.contracts.DataEnvelopeValidator
+import com.vanellye.eria.pons.PonsProvenanceResult
+import com.vanellye.eria.pons.PonsProvenanceState
 
 /**
  * Android runtime boundary for Pantheon.
@@ -16,6 +18,7 @@ enum class PantheonGateStatus {
     HOLD_NOT_AUTHORIZED,
     HOLD_SCOPE_MISMATCH,
     HOLD_REVIEW_NOT_CONFIRMED,
+    HOLD_PROVENANCE,
     REVIEW_READY
 }
 
@@ -53,6 +56,22 @@ class PantheonRuntimeGate {
         // REVIEW_READY is not permission to execute. It only permits presentation
         // of the validated proposal to a person for a separate decision.
         return result(PantheonGateStatus.REVIEW_READY, envelope, requestedScope)
+    }
+
+    /** PONS must independently verify the component bytes before review can proceed. */
+    fun prepareReviewWithPons(
+        envelope: DataEnvelope,
+        requestedScope: String,
+        humanReviewConfirmed: Boolean,
+        provenance: PonsProvenanceResult
+    ): PantheonReview {
+        if (provenance.state != PonsProvenanceState.VERIFIED ||
+            provenance.actualSha256 == null ||
+            envelope.provenance.sourceDigest != provenance.actualSha256
+        ) {
+            return result(PantheonGateStatus.HOLD_PROVENANCE, envelope, requestedScope)
+        }
+        return prepareReview(envelope, requestedScope, humanReviewConfirmed)
     }
 
     private fun result(
