@@ -184,7 +184,12 @@ def run_approved(repository, command_id, approval_id, timeout=MAX_SECONDS):
         "source_mutations": False, "git_mutations": False,
         "authority": "EXECUTION_EVIDENCE_NOT_SOURCE_TRUTH",
     }
-    canonical = json.dumps(result, sort_keys=True, separators=(",", ":")).encode()\n    result["result_signature"] = hmac.new(_key(), canonical, hashlib.sha256).hexdigest()\n    return result\n\n\ndef verify_result_signature(result):
+    canonical = json.dumps(result, sort_keys=True, separators=(",", ":")).encode()
+    result["result_signature"] = hmac.new(_key(), canonical, hashlib.sha256).hexdigest()
+    return result
+
+
+def verify_result_signature(result):
     signature = result.get("result_signature", "")
     unsigned = dict(result)
     unsigned.pop("result_signature", None)
