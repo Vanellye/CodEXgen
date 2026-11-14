@@ -107,7 +107,7 @@ class Conversation:
         low = q.lower().strip()
         out = [f"ERIA Repository Conversation Engine {VERSION}", f"Repository: {self.r.root}"]
         try:
-            if low.startswith(("integration.", "bridge.", "pons.", "code.bypass ", "repository.ask ")):
+            if low.startswith(("integration.", "bridge.", "pons.", "code.bypass ", "repository.ask ", "aei.inspect ", "aei.translate ")):
                 if self.integration is None:
                     out.append("Integration unavailable: eria_pantheon package is missing.")
                 else:
