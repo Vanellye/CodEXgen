@@ -14,7 +14,7 @@ import os
 import re
 from pathlib import Path
 from threading import RLock
-from typing import Dict, Optional
+from typing import Callable, Dict, Optional
 
 CANONICAL_ANCHOR_ID = "7f7a43a973a96a06dd432bf94843213d09133323"
 ANCHOR_BRANCH = "zero-dissipation-anchor"
@@ -43,12 +43,16 @@ class PONSRegistry:
     """Central status registry with a hash-chained, append-only-by-API event ledger."""
 
     def __init__(self, ledger_path: Optional[str] = None,
-                 anchor: AnchorIdentity = AnchorIdentity()):
+                 anchor: AnchorIdentity = AnchorIdentity(),
+                 allow_untrusted_registration: bool = False):
         if anchor.anchor_id != CANONICAL_ANCHOR_ID:
             raise ValueError("Canonical anchor identity mismatch; refusing startup.")
         if anchor.branch != ANCHOR_BRANCH or anchor.ref_sha != ANCHOR_REF_SHA:
             raise ValueError("Canonical anchor reference mismatch; refusing startup.")
         self.anchor = anchor
+        # Direct registration is for isolated tests/bootstrap only. Production
+        # registries accept components only through a verified signed manifest.
+        self._allow_untrusted_registration = allow_untrusted_registration
         self.ledger_path = Path(ledger_path) if ledger_path else None
         self._components: Dict[str, Component] = {}
         self._observations: Dict[str, dict] = {}
@@ -63,6 +67,11 @@ class PONSRegistry:
         return hashlib.sha256(data).hexdigest()
 
     def register(self, component: Component) -> None:
+        if not self._allow_untrusted_registration:
+            raise PermissionError("direct registration disabled; load a signed reviewed manifest")
+        self._register(component)
+
+    def _register(self, component: Component) -> None:
         if not component.component_id or not component.source_ref or not component.source_path:
             raise ValueError("component_id, source_ref and source_path are required")
         if component.expected_sha256 and not re.fullmatch(r"[0-9a-fA-F]{64}", component.expected_sha256):
@@ -79,6 +88,49 @@ class PONSRegistry:
                 "expected_sha256": component.expected_sha256,
                 "manifest_id": component.manifest_id,
             })
+
+    def load_signed_manifest(self, manifest: dict,
+                             verify_signature: Callable[[bytes, str, str], bool]) -> dict:
+        """Load pins only after a caller-supplied trusted signature verifier accepts them.
+
+        verify_signature receives canonical payload bytes, key_id, signature.
+        The verifier/key policy is a trust root and must be supplied by the host
+        application; PONS does not invent or silently trust a signing key.
+        """
+        if not callable(verify_signature):
+            raise TypeError("a trusted signature verifier is required")
+        if not isinstance(manifest, dict):
+            raise ValueError("manifest must be an object")
+        signature = manifest.get("signature")
+        key_id = manifest.get("key_id")
+        payload = {k: v for k, v in manifest.items() if k not in {"signature", "key_id"}}
+        if payload.get("anchor_id") != self.anchor.anchor_id or payload.get("anchor_ref_sha") != self.anchor.ref_sha:
+            raise ValueError("manifest anchor does not match canonical PONS anchor")
+        if not isinstance(payload.get("manifest_version"), str) or not payload["manifest_version"]:
+            raise ValueError("manifest_version is required")
+        entries = payload.get("components")
+        if not isinstance(entries, list):
+            raise ValueError("components must be a list")
+        canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+        if not isinstance(signature, str) or not signature or not isinstance(key_id, str) or not key_id:
+            raise ValueError("manifest signature and key_id are required")
+        if verify_signature(canonical, key_id, signature) is not True:
+            raise PermissionError("manifest signature rejected")
+        loaded = []
+        for item in entries:
+            if not isinstance(item, dict):
+                raise ValueError("each component pin must be an object")
+            component = Component(
+                component_id=item["component_id"],
+                source_ref=item["source_ref"],
+                source_path=item["source_path"],
+                expected_sha256=item["sha256"],
+                manifest_id=payload["manifest_version"],
+            )
+            self._register(component)
+            loaded.append(component.component_id)
+        return {"accepted": True, "manifest_version": payload["manifest_version"],
+                "components": loaded, "anchor_id": self.anchor.anchor_id}
 
     def observe_status(self, component_id: str, state: str, detail: str = "") -> dict:
         state = state.upper()
