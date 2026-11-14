@@ -26,7 +26,7 @@ This matrix distinguishes code that is gated now from components that are only i
 - HOLD means a digest mismatch or explicit hold. UNKNOWN means a pin, source, or evidence is absent.
 - Component-reported operational state cannot override a provenance HOLD or UNKNOWN.
 - A PONS result is bound to the canonical anchor identity. Any alternate anchor causes initialization failure.
-- The Android Pantheon review path has no legacy three-argument bypass: a PONS provenance result is a required argument.
+- The Android Pantheon review path has no legacy three-argument bypass: a PONS provenance result is a required argument and its anchor/digest identity is checked. Android PONS pin maps are defensively snapshotted and can be created through the signed-manifest verifier interface.
 - WAV conversion and local playback constructors/actions require a PONS effective READY status.
 - The Python JSONL ledger is hash-chained, but is not a substitute for authenticated reviewer identity, signed checkpoints, protected storage, or a trusted manifest.
 
@@ -36,7 +36,7 @@ This branch is a staged integration, not a claim that every inventoried componen
 1. Generate and review a manifest with SHA-256 pins for each exact source ref.
 2. Wire Android startup to instantiate the PONS registry and pass fresh component statuses.
 3. Pin and verify the SKRIBED/transceiver adapter in the production manifest.
-4. Add and test a C99 PONS adapter for each Pantheon C public boundary.
-5. Register each Python service and generated module through the shared registry.
+4. Add production SHA-256 provider and signed manifest; extend the C99 PONS adapter to every Pantheon C public boundary.
+5. Register each Python service and generated module through the signed-manifest loader and `execute_guarded` boundary.
 6. Audit all call sites to ensure no bypass path remains.
 7. Run Android unit tests, C contract tests, Python tests, and branch CI at the final commit.
