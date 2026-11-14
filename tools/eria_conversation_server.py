@@ -411,6 +411,44 @@ class Handler(BaseHTTPRequestHandler):
                 })
                 self.send_json(200, result)
                 return
+            if route == "/api/ai/higher-faculty":
+                relative_path = data.get("path")
+                question = data.get("question")
+                comparison_path = data.get("comparison_path")
+                if not isinstance(relative_path, str) or not relative_path.strip():
+                    raise ValueError("path must be a repository-relative source path.")
+                if not isinstance(question, str) or not question.strip():
+                    raise ValueError("question must be non-empty text.")
+                if len(relative_path) > 500 or len(question) > 2000:
+                    raise ValueError("Path or question exceeds its length limit.")
+                if SAFE_NAME.search(Path(relative_path).name):
+                    raise ValueError("Credential-like paths are not eligible for Âï analysis.")
+                command = "ai.higher " + shlex.quote(relative_path.strip()) + " --question " + shlex.quote(question.strip())
+                if comparison_path is not None:
+                    if not isinstance(comparison_path, str) or not comparison_path.strip() or len(comparison_path) > 500:
+                        raise ValueError("comparison_path must be a valid repository-relative path.")
+                    if SAFE_NAME.search(Path(comparison_path).name):
+                        raise ValueError("Credential-like comparison paths are not eligible for analysis.")
+                    command += " --compare " + shlex.quote(comparison_path.strip())
+                raw_result = self.app.pantheon.handle(command)
+                try:
+                    result = json.loads(raw_result)
+                except json.JSONDecodeError:
+                    raise ValueError("Âï returned an invalid Higher Faculty response.")
+                if result.get("status") == "HOLD":
+                    self.send_json(400, result)
+                    return
+                analysis = result.get("analysis", {})
+                self.app.store.add_audit("ai_higher_faculty_analysis", "RECORDED", {
+                    "source_path": result.get("source", {}).get("path", relative_path),
+                    "source_sha256": result.get("source", {}).get("sha256", ""),
+                    "question_length": len(question),
+                    "analysis_dimensions": sorted(analysis.keys()),
+                    "comparison_requested": bool(comparison_path),
+                    "pons_state": result.get("pons", {}).get("service_state", "UNKNOWN"),
+                })
+                self.send_json(200, result)
+                return
             if route == "/api/index":
                 count = self.app.store.index_repository(self.app.repository)
                 self.send_json(200, {"indexed": count,
