@@ -208,3 +208,22 @@ Each branch should eventually carry a concise alignment record containing:
 This specification may be referenced by any branch. Adoption of code, data, tags, or operational behavior remains a separate reviewed decision.
 
 **True North is a reference, not a command to converge.** Preserve what deserves preservation, question what deserves examination, and transform only what can be improved with evidence, consent, and a recoverable path.
+
+
+## 14. Wantever — substance and propagation
+
+Wantever is ERIA's principle for transforming and composing compatible contributions into new, traceable outcomes. It changes the substance of a result through explicit operations; it is not a rename-only operation, blanket copy instruction, or permission to converge every branch.
+
+Apply the Wantever contract in [WANTEVER-SUBSTANCE-AND-PROPAGATION.md](WANTEVER-SUBSTANCE-AND-PROPAGATION.md). In every domain:
+
+- preserve source identity, ancestry, raw records, and provenance;
+- pin source and target SHAs before comparison or transformation;
+- inspect branch purpose, interfaces, dependencies, permissions, and tests;
+- classify evidence as compatible, incompatible, review-required, or unknown;
+- record named transformations, parameters, and derived artifact digests;
+- keep unknown, missing, conflicting, and stale evidence explicit;
+- require scoped human authorization for writes, adoption, deployment, export, or actuation;
+- validate the exact candidate and document recovery and irreversible effects.
+
+Propagation is a proposal and compatibility process, not automatic code convergence. Each branch must be inspected and updated through a reviewable change with focused tests. A shared contract does not prove implementation in every branch.
+

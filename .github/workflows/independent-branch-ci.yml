@@ -90,11 +90,9 @@ jobs:
           packages: 'platform-tools'
       - name: Install declared Android compile platform
         run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
-      - name: Run Android unit tests
-        run: |
-          chmod +x ./gradlew
-          ./gradlew --no-daemon --stacktrace :app:testDebugUnitTest
-      - name: Build debug APK
-        run: |
-          chmod +x ./gradlew
-          ./gradlew --no-daemon --stacktrace :app:assembleDebug
+      - name: Validate Cradle entry point
+        run: bash -n ./cradle.sh
+      - name: Run Android unit tests through Cradle
+        run: bash ./cradle.sh test
+      - name: Build debug APK through Cradle
+        run: bash ./cradle.sh assemble

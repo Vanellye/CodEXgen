@@ -1,0 +1,5 @@
+# ERIA FILLER manifest — tab-separated: target-path<TAB>template-path
+# Add only reviewed mappings. Paths are repository-relative.
+# FILLER never guesses a template, edits an existing target, or deletes source.
+# Example:
+# ERIA/modules/example/README.md<TAB>tools/filler/templates/example/README.md
