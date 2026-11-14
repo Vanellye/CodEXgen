@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>ERIA Æi Console</title>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color-scheme:dark;background:#101318;color:#edf1f7}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;flex-direction:column}
+header{padding:18px 20px;border-bottom:1px solid #303744;background:#171c24}
+h1{font-size:1.25rem;margin:0 0 5px}#status{font-size:.82rem;color:#aeb9c8}
+main{width:min(900px,100%);margin:0 auto;padding:18px;display:flex;flex:1;flex-direction:column;gap:14px}
+#messages{display:flex;flex-direction:column;gap:12px;flex:1}
+.msg{padding:13px 15px;border:1px solid #303744;border-radius:13px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}
+.user{background:#202b3a;align-self:flex-end;max-width:92%}.assistant{background:#171c24;align-self:stretch}
+.meta{font-size:.75rem;color:#9ba9ba;margin-bottom:6px}
+form{display:flex;gap:9px;position:sticky;bottom:0;background:#101318;padding:10px 0}
+textarea{flex:1;resize:vertical;min-height:54px;max-height:180px;padding:13px;border:1px solid #465264;border-radius:12px;background:#171c24;color:inherit;font:inherit}
+button{border:0;border-radius:12px;background:#d6e4ff;color:#142033;font-weight:700;padding:0 20px;font:inherit}
+button:disabled{opacity:.5}
+.tools{display:flex;gap:8px;flex-wrap:wrap}.tools button{background:#252f3d;color:#dce6f5;padding:8px 11px;font-size:.82rem}
+footer{font-size:.76rem;color:#9ba9ba;padding:0 0 14px}
+</style>
+</head>
+<body>
+<header><h1>ERIA Æi Conversational Console</h1><div id="status">Connecting to local engine…</div></header>
+<main>
+  <section class="tools" aria-label="Suggested questions">
+    <button type="button" data-q="Explain the ERIA architecture">Explain architecture</button>
+    <button type="button" data-q="Summarize the repository">Repository summary</button>
+    <button type="button" data-q="Show repository status">Repository status</button>
+    <button type="button" data-q="What evidence supports PONS authorization?">PONS evidence</button>
+  </section>
+  <section id="messages" aria-live="polite">
+    <div class="msg assistant"><div class="meta">Æi</div>Hello. Ask about the selected repository. Use <code>file:path/to/file</code> to inspect a specific file.</div>
+  </section>
+  <form id="chat"><textarea id="message" placeholder="Ask Æi about your repository…" aria-label="Message" required></textarea><button id="send" type="submit">Send</button></form>
+  <footer>Local loopback interface · Read-only repository inspection · No code execution or source-file modification</footer>
+</main>
+<script>
+const messages=document.getElementById('messages');
+const form=document.getElementById('chat');
+const input=document.getElementById('message');
+const send=document.getElementById('send');
+function addMessage(role,text,meta){
+  const box=document.createElement('div');box.className='msg '+role;
+  const label=document.createElement('div');label.className='meta';label.textContent=meta|| (role==='user'?'You':'Æi');
+  const body=document.createElement('div');body.textContent=text;
+  box.append(label,body);messages.appendChild(box);box.scrollIntoView({behavior:'smooth',block:'end'});
+}
+async function status(){
+  try{const r=await fetch('/api/status');const d=await r.json();
+    document.getElementById('status').textContent=(d.status==='ready'?'Connected · ':'Unavailable · ')+d.repository+' · '+d.mode;
+  }catch(e){document.getElementById('status').textContent='Cannot reach local engine. Check the Termux server.';}
+}
+async function ask(text){
+  addMessage('user',text,'You');send.disabled=true;
+  try{
+    const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text})});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error||'Request failed');
+    let answer=d.answer||d.message||JSON.stringify(d,null,2);
+    if(d.evidence&&d.evidence.length)answer+='\n\nEvidence:\n'+d.evidence.map(x=>x.path+' · '+x.classification+' · SHA-256 '+x.sha256).join('\n');
+    if(d.limits&&d.limits.length)answer+='\n\nLimits:\n• '+d.limits.join('\n• ');
+    addMessage('assistant',answer,'Æi · '+(d.intent||d.status||'response'));
+  }catch(e){addMessage('assistant','Error: '+e.message,'Æi · error');}
+  finally{send.disabled=false;input.focus();}
+}
+form.addEventListener('submit',e=>{e.preventDefault();const text=input.value.trim();if(!text)return;input.value='';ask(text);});
+document.querySelectorAll('[data-q]').forEach(b=>b.addEventListener('click',()=>ask(b.dataset.q)));
+status();
+</script>
+</body>
+</html>
