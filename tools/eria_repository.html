@@ -67,6 +67,12 @@ main{padding:8px 0 30px}.grid{display:grid;grid-template-columns:repeat(3,minmax
 <div class="kv"><span>Git mutation</span><span id="gitState" class="tag stop">Disabled</span></div>
 <div class="kv"><span>Transmission</span><span id="transmissionState" class="tag stop">Disabled</span></div>
 </div>
+<div class="card"><h2>Decision states</h2><div class="policy">
+<div><b>HOLD</b><span class="muted">Missing, unverified, expired, or out-of-scope approval. Default for new requests.</span></div>
+<div><b>PROPOSAL_ONLY</b><span class="muted">Eligible for human review; does not authorize execution.</span></div>
+<div><b>REVIEW_READY</b><span class="muted">Evidence package is ready for review; it is not a grant.</span></div>
+<div><b>Current authority</b><span class="muted">No approval authority is connected. New requests remain HOLD.</span></div>
+</div></div>
 <div class="card"><h2>Request human review</h2><p class="muted">A request is a proposal, not an approval. New requests are stored as HOLD and cannot authorize protected actions.</p>
 <form id="requestForm" class="formgrid">
 <input class="field" id="capability" maxlength="100" value="repository.read" aria-label="Capability" placeholder="Capability">
