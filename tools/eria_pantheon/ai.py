@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import ast
 import hashlib
+import os
 import re
 from pathlib import Path
 from typing import Any
@@ -190,37 +191,43 @@ def _repository_conflicts(root: Path, target: Path, symbol_names: set[str]) -> l
         return []
     matches = []
     scanned = 0
-    for path in root.rglob("*"):
+    for directory, dirnames, filenames in os.walk(root):
+        dirnames[:] = sorted(
+            name for name in dirnames
+            if name not in SKIP_DIRS and not name.startswith(".")
+        )
         if scanned >= MAX_SCAN_FILES or len(matches) >= 40:
             break
-        if not path.is_file() or path.suffix.lower() not in CODE_SUFFIXES:
-            continue
-        try:
-            relative = path.relative_to(root)
-        except ValueError:
-            continue
-        if any(part in SKIP_DIRS or part.startswith(".") for part in relative.parts):
-            continue
-        if SENSITIVE_PATH.search(relative.as_posix()) or path == target:
-            continue
-        try:
-            if path.stat().st_size > MAX_SOURCE_BYTES:
+        for filename in sorted(filenames):
+            if scanned >= MAX_SCAN_FILES or len(matches) >= 40:
+                break
+            path = Path(directory) / filename
+            if path.suffix.lower() not in CODE_SUFFIXES:
                 continue
-            text = path.read_text(encoding="utf-8-sig")
-        except (OSError, UnicodeError):
-            continue
-        scanned += 1
-        funcs, classes = _symbols(text, path.suffix.lower())
-        for kind, symbols in (("function", funcs), ("class", classes)):
-            for symbol in symbols:
-                if symbol["name"] in symbol_names:
-                    matches.append({
-                        "symbol": symbol["name"], "kind": kind,
-                        "path": relative.as_posix(), "line": symbol["line"],
-                        "relationship": "same-name candidate; semantic equivalence not established",
-                    })
-                    if len(matches) >= 40:
-                        break
+            try:
+                relative = path.relative_to(root)
+            except ValueError:
+                continue
+            if SENSITIVE_PATH.search(relative.as_posix()) or path.resolve() == target:
+                continue
+            try:
+                if path.is_symlink() or path.stat().st_size > MAX_SOURCE_BYTES:
+                    continue
+                text = path.read_text(encoding="utf-8-sig")
+            except (OSError, UnicodeError):
+                continue
+            scanned += 1
+            funcs, classes = _symbols(text, path.suffix.lower())
+            for kind, symbols in (("function", funcs), ("class", classes)):
+                for symbol in symbols:
+                    if symbol["name"] in symbol_names:
+                        matches.append({
+                            "symbol": symbol["name"], "kind": kind,
+                            "path": relative.as_posix(), "line": symbol["line"],
+                            "relationship": "same-name candidate; semantic equivalence not established",
+                        })
+                        if len(matches) >= 40:
+                            break
     return matches
 
 
