@@ -14,6 +14,7 @@ from typing import Any
 from .aei import AeiError, inspect_file
 
 VERSION = "higher-faculty-0.1.0"
+SENSITIVE_PATH = re.compile(r"(^|[/_.-])(.env|secrets?|credentials?|private[_-]?key|id_rsa)([/_.-]|$)", re.I)
 CODE_SUFFIXES = {
     ".py", ".sh", ".kt", ".kts", ".java", ".c", ".h", ".hpp", ".cpp",
     ".rs", ".go", ".js", ".ts", ".sql", ".gradle",
@@ -56,6 +57,8 @@ def translate_file(repository: str | Path, relative_path: str) -> dict[str, Any]
     root = Path(repository).expanduser().resolve(strict=True)
     if not relative_path or Path(relative_path).is_absolute():
         raise AeiError("A repository-relative source path is required.")
+    if SENSITIVE_PATH.search(relative_path):
+        raise AeiError("Credential-like source paths are not eligible for translation.")
     suffix = Path(relative_path).suffix.lower()
     if suffix not in CODE_SUFFIXES:
         raise AeiError("Higher Faculty translation accepts recognized source-code extensions only.")
