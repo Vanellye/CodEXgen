@@ -95,4 +95,22 @@ class PantheonRuntimeGateTest {
         assertFalse(result.actionTaken)
     }
 
+    @Test fun alternateAnchorProofIsRejected() {
+        val digest = "a".repeat(64)
+        val forged = PonsProvenanceResult(
+            componentId = "pantheon.runtime",
+            state = PonsProvenanceState.VERIFIED,
+            expectedSha256 = digest,
+            actualSha256 = digest,
+            reason = "alternate anchor",
+            anchor = PonsAnchorIdentity("other", "other", "0".repeat(40))
+        )
+        val record = envelope().copy(
+            provenance = envelope().provenance.copy(sourceDigest = digest)
+        )
+        val result = gate.prepareReview(record, "pantheon.review", true, forged)
+        assertEquals(PantheonGateStatus.HOLD_PROVENANCE, result.status)
+        assertFalse(result.actionTaken)
+    }
+
 }
