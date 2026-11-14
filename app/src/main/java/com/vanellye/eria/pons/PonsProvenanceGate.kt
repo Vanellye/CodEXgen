@@ -17,7 +17,19 @@ data class PonsAnchorIdentity(
     }
 }
 
-enum class PonsProvenanceState { VERIFIED, HOLD, UNKNOWN }
+
+data class PonsSignedManifest(
+    val version: String,
+    val keyId: String,
+    val signature: String,
+    val anchor: PonsAnchorIdentity,
+    val pins: List<PonsComponentPin>
+)
+
+fun interface PonsManifestSignatureVerifier {
+    fun verify(canonicalPayload: ByteArray, keyId: String, signature: String): Boolean
+}
+\nenum class PonsProvenanceState { VERIFIED, HOLD, UNKNOWN }
 enum class PonsOperationalState { READY, DEGRADED, HOLD, UNKNOWN }
 
 data class PonsComponentPin(
