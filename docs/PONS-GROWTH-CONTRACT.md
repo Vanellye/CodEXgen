@@ -52,6 +52,10 @@ Adapters must not receive implicit filesystem, network, process, Git-write, depl
 
 Preserve original bytes, source refs, timestamps, digest values, reviewer references, and prior observations. Corrections are new events referencing the superseded event; do not erase history. Transmission frames and receipts carry the canonical PONS anchor identity (anchor ID, branch, and pinned commit). Each transmission evidence event records request/response digests and an optional superseded evidence ID; the in-memory ledger retains earlier events. This is an append-only process-local history, not durable storage. The Python JSONL ledger is hash-chained and append-only through its API, but it is not tamper-proof storage or a trusted timestamp. Production deployments must add protected storage, authenticated appenders, signed checkpoints, backup/restore tests, and key rotation.
 
+## Simulation integrity
+
+Simulation evidence is a separate evidence class from hardware observation. A simulation record must bind the canonical anchor, scenario ID, exact engine reference/version, deterministic seed, input digest, configuration digest, and output digests. The integrity runner executes the same declared inputs twice and compares exact output bytes; differing results are marked NONDETERMINISTIC, not accepted as reproducible. Every result is explicitly marked simulated-only and hardware-not-observed. A reproducible simulation does not prove a physical device, sensor, actuator, audio path, or live runtime behaved the same way. Simulation records must never promote a component to hardware-observed READY. Tests must cover deterministic replay, deliberate nondeterminism, input/configuration changes, alternate-anchor rejection, and preservation of raw outputs/evidence.
+
 ## Progressive-growth slots
 
 Reserve component namespaces, not hard-coded assumptions:
@@ -75,7 +79,7 @@ Implemented:
 - Pantheon Android review path requires canonical PONS proof.
 - WAV endpoint, playback, and in-memory transceiver require component-specific PONS READY proof. Transmission frames/receipts are bound to the canonical anchor, and the in-memory evidence ledger appends superseding observations without deleting prior entries.
 - C99 PONS digest-verification adapter; Pantheon NEW C narrative entry point now requires a PONS proof.
-- Python, Kotlin, and C contract tests.
+- Python, Kotlin, and C contract tests, including deterministic-vs-nondeterministic simulation evidence checks and explicit simulation/hardware separation.
 
 Not yet production-complete:
 - No actual signing key, trusted signer policy, or production signature verifier is configured.
