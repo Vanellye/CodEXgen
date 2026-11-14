@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 
 DEFAULT_EXCLUDES={".git",".gradle",".idea",".venv","venv","__pycache__","node_modules","build","dist",".tox",".mypy_cache"}
-SENSITIVE=re.compile(r"(?:^|[._-])(secret|credential|token|password|private[_-]?key)(?:[._-]|$)|^\\.env(?:\\.|$)",re.I)
+SENSITIVE=re.compile(r"(?:^|[._-])(secret|credential|token|password|private[_-]?key)(?:[._-]|$)",re.I)
 MAX_FILE_BYTES=512*1024
 MAX_TOTAL_BYTES=2*1024*1024
 
@@ -55,7 +55,7 @@ class GlobEngine:
             dirs[:]=sorted(x for x in dirs if x not in excluded and not (base/x).is_symlink())
             for name in sorted(files):
                 candidate=base/name
-                if candidate.is_symlink() or SENSITIVE.search(name): continue
+                if candidate.is_symlink() or name == ".env" or name.startswith(".env.") or SENSITIVE.search(name): continue
                 try:
                     resolved=candidate.resolve(strict=True); rel=resolved.relative_to(self.root).as_posix()
                     stat=candidate.stat(follow_symlinks=False)
@@ -102,7 +102,7 @@ class GlobBootstrap:
             seen.add(rel); target=self.root/rel
             if self.root not in target.resolve(strict=False).parents: raise ValueError("Target escapes repository.")
             if target.exists() or target.is_symlink(): raise ValueError("Bootstrap may create new files only; target exists: "+rel)
-            if SENSITIVE.search(Path(rel).name): raise ValueError("Sensitive-looking filenames are not eligible.")
+            if Path(rel).name == ".env" or Path(rel).name.startswith(".env.") or SENSITIVE.search(Path(rel).name): raise ValueError("Sensitive-looking filenames are not eligible.")
             result.append({"path":rel,"content":content,"sha256":hashlib.sha256(raw).hexdigest()})
         return sorted(result,key=lambda x:x["path"])
     def create_request(self,files,purpose):
