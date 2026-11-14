@@ -42,3 +42,6 @@ adaptive_agent_telemetry.db
 __pycache__/
 *.py[cod]
 *.egg-info/
+
+# Local AVS evidence ledger (runtime-generated; do not commit by default)
+.eria/avs/
