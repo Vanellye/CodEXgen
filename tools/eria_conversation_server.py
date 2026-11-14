@@ -14,6 +14,7 @@ import json
 import mimetypes
 import re
 import sqlite3
+import shlex
 import sys
 import threading
 import uuid
