@@ -37,4 +37,19 @@ class PonsProvenanceGateTest {
     fun alteredCanonicalAnchorIsRejected() {
         PonsProvenanceGate(emptyMap(), PonsAnchorIdentity("x", "zero-dissipation-anchor", "0".repeat(40)))
     }
+    @Test fun effectiveStatusCannotOverrideProvenanceHold() {
+        val gate = PonsProvenanceGate(mapOf(pin.componentId to pin))
+        val status = PonsStatusRegistry(gate).inspect(
+            pin.componentId, PonsOperationalState.READY, "changed".toByteArray()
+        )
+        assertEquals(PonsEffectiveState.HOLD, status.effectiveState)
+    }
+
+    @Test fun unpinnedComponentRemainsUnknownEvenWhenReportedReady() {
+        val status = PonsStatusRegistry(PonsProvenanceGate(emptyMap())).inspect(
+            "music.engine", PonsOperationalState.READY, bytes
+        )
+        assertEquals(PonsEffectiveState.UNKNOWN, status.effectiveState)
+    }
+
 }
