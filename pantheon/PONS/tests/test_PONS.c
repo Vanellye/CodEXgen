@@ -20,22 +20,30 @@ int main(void) {
         "pantheon.new", "reviewed-ref", "pantheon/NEW/NEW.c", digest,
         PONS_CANONICAL_ANCHOR_ID, PONS_CANONICAL_ANCHOR_REF
     };
-    PonsCProof proof;
+    PonsCProof *proof = NULL;
 
     assert(pons_c_verify(&pin, source, sizeof(source) - 1U,
                          test_digest, (void *)digest, &proof) == PONS_C_VERIFIED);
-    assert(pons_c_proof_is_valid(&proof, "pantheon.new"));
+    assert(pons_c_proof_is_valid(proof, "pantheon.new"));
+    pons_c_proof_destroy(proof);
+    proof = NULL;
 
     assert(pons_c_verify(&pin, (const unsigned char *)"altered", 7U,
                          test_digest, (void *)"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
                          &proof) == PONS_C_HOLD);
+    assert(!pons_c_proof_is_valid(proof, "pantheon.new"));
+    pons_c_proof_destroy(proof);
+    proof = NULL;
 
     pin.anchor_id = "altered-anchor";
     assert(pons_c_verify(&pin, source, sizeof(source) - 1U,
                          test_digest, (void *)digest, &proof) == PONS_C_HOLD);
+    pons_c_proof_destroy(proof);
+    proof = NULL;
 
     pin.anchor_id = PONS_CANONICAL_ANCHOR_ID;
     assert(pons_c_verify(&pin, NULL, 0U, test_digest, (void *)digest, &proof) == PONS_C_UNKNOWN);
-    assert(!pons_c_proof_is_valid(&proof, "pantheon.new"));
+    assert(!pons_c_proof_is_valid(proof, "pantheon.new"));
+    pons_c_proof_destroy(proof);
     return 0;
 }
