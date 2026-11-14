@@ -27,45 +27,46 @@ SKIP_DIRS = {
 }
 MAX_SCAN_FILES = 600
 MAX_SOURCE_BYTES = 1_000_000
+SENSITIVE_NAME = SENSITIVE_PATH
 
 SECURITY_RULES = (
-    ("dynamic_execution", re.compile(r"\\b(?:eval|exec)\\s*\\("),
+    ("dynamic_execution", re.compile(r"\b(?:eval|exec)\s*\("),
      "HIGH", "Dynamic code execution can turn untrusted strings into executable instructions.",
      "Remove dynamic evaluation where possible; otherwise constrain inputs, isolate execution, and add explicit authorization."),
-    ("shell_execution", re.compile(r"\\b(?:os\\.system|subprocess\\.(?:run|Popen|call)|Runtime\\.getRuntime\\(\\)\\.exec)"),
+    ("shell_execution", re.compile(r"\b(?:os\.system|subprocess\.(?:run|Popen|call)|Runtime\.getRuntime\(\)\.exec)"),
      "HIGH", "Shell or process execution can expose command-injection and privilege-boundary risks.",
      "Prefer argument arrays without a shell, validate each argument, constrain executable paths, and enforce least privilege."),
-    ("network_access", re.compile(r"\\b(?:requests\\.(?:get|post|put|delete)|urlopen\\s*\\(|fetch\\s*\\(|Socket\\s*\\()"),
+    ("network_access", re.compile(r"\b(?:requests\.(?:get|post|put|delete)|urlopen\s*\(|fetch\s*\(|Socket\s*\()"),
      "MEDIUM", "Network access introduces destination, authentication, transport, and data-exfiltration concerns.",
      "Constrain destinations, validate TLS, apply timeouts, avoid sending secrets, and record permitted transfers."),
-    ("sql_mutation", re.compile(r"\\b(?:INSERT\\s+INTO|UPDATE\\s+\\w+|DELETE\\s+FROM|DROP\\s+TABLE)\\b", re.I),
+    ("sql_mutation", re.compile(r"\b(?:INSERT\s+INTO|UPDATE\s+\w+|DELETE\s+FROM|DROP\s+TABLE)\b", re.I),
      "MEDIUM", "Database mutation can alter or destroy records if authorization and transaction boundaries are weak.",
      "Use parameterized statements, least-privilege connections, explicit transactions, backups, and immutable audit events."),
-    ("embedded_secret_marker", re.compile(r"(?i)(?:api[_-]?key|password|secret|token)\\s*=\\s*['\"][^'\"]{8,}['\"]"),
+    ("embedded_secret_marker", re.compile(r"(?i)(?:api[_-]?key|password|secret|token)\s*=\s*['\"][^'\"]{8,}['\"]"),
      "HIGH", "A hard-coded credential-like assignment may expose a secret in source control.",
      "Move credentials to a managed secret provider, rotate exposed values, and prevent secret-bearing files from entering inspection artifacts."),
-    ("unsafe_deserialization", re.compile(r"\\b(?:pickle\\.loads|yaml\\.load\\s*\\(|ObjectInputStream)"),
+    ("unsafe_deserialization", re.compile(r"\b(?:pickle\.loads|yaml\.load\s*\(|ObjectInputStream)"),
      "HIGH", "Deserializing untrusted data can enable object construction or code-execution paths.",
      "Use safe, schema-constrained formats and safe loaders; authenticate data and validate its shape before use."),
 )
 
 DEPENDENCY_PATTERNS = (
-    re.compile(r"^\\s*import\\s+([\\w.]+)"),
-    re.compile(r"^\\s*from\\s+([\\w.]+)\\s+import\\s+"),
-    re.compile(r"^\\s*#include\\s*[<\"]([^>\"]+)[>\"]"),
-    re.compile(r"^\\s*using\\s+([\\w:]+)"),
-    re.compile(r"^\\s*require\\s*\\(?\\s*['\"]([^'\"]+)"),
+    re.compile(r"^\s*import\s+([\w.]+)"),
+    re.compile(r"^\s*from\s+([\w.]+)\s+import\s+"),
+    re.compile(r"^\s*#include\s*[<\"]([^>\"]+)[>\"]"),
+    re.compile(r"^\s*using\s+([\w:]+)"),
+    re.compile(r"^\s*require\s*\(?\s*['\"]([^'\"]+)"),
 )
 
 FUNCTION_PATTERNS = (
-    re.compile(r"^\\s*(?:async\\s+)?def\\s+(\\w+)\\s*\\("),
-    re.compile(r"^\\s*(?:fun|function)\\s+(\\w+)\\s*\\("),
-    re.compile(r"^\\s*(?:export\\s+)?(?:async\\s+)?function\\s+(\\w+)\\s*\\("),
-    re.compile(r"^\\s*(?:[\\w:<>&*]+\\s+)+(\\w+)\\s*\\([^;]*\\)\\s*(?:\\{|$)"),
+    re.compile(r"^\s*(?:async\s+)?def\s+(\w+)\s*\("),
+    re.compile(r"^\s*(?:fun|function)\s+(\w+)\s*\("),
+    re.compile(r"^\s*(?:export\s+)?(?:async\s+)?function\s+(\w+)\s*\("),
+    re.compile(r"^\s*(?:[\w:<>&*]+\s+)+(\w+)\s*\([^;]*\)\s*(?:\{|$)"),
 )
 CLASS_PATTERNS = (
-    re.compile(r"^\\s*class\\s+(\\w+)"),
-    re.compile(r"^\\s*(?:struct|interface)\\s+(\\w+)"),
+    re.compile(r"^\s*class\s+(\w+)"),
+    re.compile(r"^\s*(?:struct|interface)\s+(\w+)"),
 )
 
 
@@ -271,7 +272,7 @@ class AiiConversation:
             answer = _summary(result)
             evidence = [{"pointer": "$", "basis": "Æị inspection metadata and parsed structure"}]
         else:
-            terms = [token.casefold() for token in re.findall(r"[^\\W_]+", question, re.UNICODE)
+            terms = [token.casefold() for token in re.findall(r"[^\W_]+", question, re.UNICODE)
                      if len(token) > 1 and token.casefold() not in STOP_WORDS]
             matches = []
             for pointer, value in _walk(result.data):
