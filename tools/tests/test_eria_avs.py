@@ -7,7 +7,7 @@ TOOLS_ROOT = Path(__file__).resolve().parents[1]
 if str(TOOLS_ROOT) not in sys.path:
     sys.path.insert(0, str(TOOLS_ROOT))
 
-from eria_pantheon.accuracy import AccuracyValidationService, EvidenceRejected, LedgerIntegrityError
+from eria_pantheon.accuracy import EvidenceRejected, LedgerIntegrityError
 from eria_pantheon.pons import Pons
 
 
@@ -33,18 +33,23 @@ class AccuracyValidationTests(unittest.TestCase):
                 verifier_id="translator", evidence_ref="test:1", outcome=True,
             )
 
+    def test_direct_service_construction_is_rejected(self):
+        from eria_pantheon.accuracy import AccuracyValidationService
+        with self.assertRaises(PermissionError):
+            AccuracyValidationService(self.path)
+
     def test_independent_evidence_scores_and_ledger_verifies(self):
-        self.avs.submit_evidence(
+        self.pons.submit_accuracy_evidence(
             claim_id="claim-1", subject_component="translator",
             verifier_id="reviewer-a", evidence_ref="test:1", outcome=True,
         )
-        result = self.avs.evaluate(["claim-1"])
+        result = self.pons.evaluate_accuracy(["claim-1"])
         self.assertEqual(result["status"], "EVIDENCE_VALIDATED")
         self.assertEqual(result["accuracy_score"], 100.0)
         self.assertTrue(result["ledger"]["valid"])
 
     def test_partial_claim_coverage_never_looks_complete(self):
-        self.avs.submit_evidence(
+        self.pons.submit_accuracy_evidence(
             claim_id="claim-1", subject_component="translator",
             verifier_id="reviewer-a", evidence_ref="test:1", outcome=True,
         )
@@ -53,7 +58,7 @@ class AccuracyValidationTests(unittest.TestCase):
         self.assertEqual(result["unverified_claims"], ["claim-2"])
 
     def test_ledger_tampering_is_detected(self):
-        self.avs.submit_evidence(
+        self.pons.submit_accuracy_evidence(
             claim_id="claim-1", subject_component="translator",
             verifier_id="reviewer-a", evidence_ref="test:1", outcome=True,
         )
