@@ -49,7 +49,7 @@ def make_handler(repository: Path):
                 self._json(200,inbox_monitor.status()); return
             if route=="/api/status":
                 self._json(200,{"service":"ERIA Æị","status":"ready","mode":"source-read-only; derived-storage-enabled","conversation":"Âï via Pantheon/PONS","acquisition":inbox_monitor.status(),"endpoints":["/api/aei/inspect","/api/ai/ask","/api/aei/compile","/api/acquisition/start","/api/acquisition/pause","/api/acquisition/status","/api/resonance/tone"],"repository":str(root)}); return
-            if route in {"/portal","/resonance-portal"}:
+            if route in {"/","/portal","/resonance-portal"}:
                 portal_file=Path(__file__).resolve().parents[1]/"interfaces"/"eria-resonance-portal.html"
                 try: page=portal_file.read_bytes()
                 except OSError:
@@ -57,7 +57,7 @@ def make_handler(repository: Path):
                 self.send_response(200); self.send_header("Content-Type","text/html; charset=utf-8")
                 self.send_header("Content-Length",str(len(page))); self.send_header("Cache-Control","no-store")
                 self.end_headers(); self.wfile.write(page); return
-            if route in {"/","/aei-interface.html"}:
+            if route=="/aei-interface.html":
                 try: page=UI_FILE.read_bytes()
                 except OSError:
                     self._json(500,{"status":"HOLD","error":"Æị interface file unavailable"}); return
