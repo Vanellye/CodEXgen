@@ -18,12 +18,13 @@ footer{color:var(--muted);font-size:.76rem;line-height:1.55;margin-top:18px}@med
 </style></head><body><main><header><div class="eyebrow">ERIA · PANTHEON · READ-ONLY</div><h1>Æị Local Interface</h1>
 <p class="sub">Inspect repository files through the local Æị translator. Results include source identity, SHA-256, format, structural interpretation, and authority classification.</p></header>
 <section class="panel"><label for="path">Repository-relative file path</label><input id="path" autocomplete="off" spellcheck="false" placeholder="examples/sample.json">
-<div class="row"><button id="inspect">Inspect with Æị</button><span id="status" class="status" role="status" aria-live="polite">Checking local engine…</span></div>
-<div class="note">Æị is deterministic structural inspection, not an autonomous language model. It does not modify source files, execute code, transmit data externally, or authorize database writes. SQLite is opened read-only.</div></section>
+<div class="row"><button id="inspect">Inspect with Æị</button><button id="compile">Compile copy to storage</button><span id="status" class="status" role="status" aria-live="polite">Checking local engine…</span></div>
+<div class="note">Æị is deterministic structural inspection, not an autonomous language model. It never modifies source files or executes code. SQLite is opened read-only. Compiling explicitly saves a derived JSON snapshot and provenance manifest under storage/.</div></section>
 <section class="panel"><h2>Source identity</h2><div class="metrics">
 <div class="metric"><small>Format</small><strong id="format">—</strong></div><div class="metric"><small>File size</small><strong id="size">—</strong></div>
 <div class="metric"><small>SHA-256</small><strong id="hash">—</strong></div><div class="metric"><small>Source authority</small><strong id="authority">—</strong></div>
 </div><h2>Interpretation result</h2><pre id="result" aria-live="polite">No file inspected yet.</pre></section>
+<section class="panel"><h2>Compiled storage</h2><p class="sub">Save the current source interpretation as a separate compiled JSON copy with a SHA-256 manifest. Original source bytes are not copied, moved, or changed.</p><pre id="storage-result" aria-live="polite">No compiled copies created in this session.</pre></section>
 <section class="panel" aria-labelledby="ai-title">
 <h2 id="ai-title">Âï · Ask about this source</h2>
 <p class="sub">Ask a question about the file path above. Âï retrieves evidence from a fresh Æị inspection and returns source pointers and a SHA-256 reference.</p>
@@ -42,6 +43,17 @@ const r=await fetch("/api/aei/inspect",{method:"POST",headers:{"Content-Type":"a
 $("result").textContent=JSON.stringify(d,null,2);if(!r.ok||d.status==="HOLD"){$("status").textContent="Inspection held · "+(d.error||"check result");["format","size","hash","authority"].forEach(id=>$(id).textContent="—");}
 else{$("status").textContent="Inspection complete · source not modified";$("format").textContent=d.format;$("size").textContent=Number(d.size_bytes).toLocaleString()+" bytes";$("hash").textContent=d.source_sha256;$("authority").textContent=d.source_authority;}
 }catch(e){$("status").textContent="Local request failed · "+e.message;}finally{button.disabled=false;}});
+$("compile").addEventListener("click",async()=>{
+ const path=$("path").value.trim();
+ if(!path){$("status").textContent="Enter a repository-relative path first.";return;}
+ const button=$("compile");button.disabled=true;$("status").textContent="Æị is compiling a derived copy…";
+ try{
+  const r=await fetch("/api/aei/compile",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({path})});
+  const data=await r.json();$("storage-result").textContent=JSON.stringify(data,null,2);
+  $("status").textContent=r.ok&&data.status==="stored"?"Compiled copy and provenance manifest stored · source unchanged":(data.error||"Storage request held");
+ }catch(e){$("status").textContent="Storage request failed · "+e.message;}
+ finally{button.disabled=false;}
+});
 $("ai-ask").addEventListener("click",async()=>{
  const path=$("path").value.trim(),question=$("ai-question").value.trim();
  if(!path||!question){$("ai-status").textContent="Enter a source path and a question.";return;}
