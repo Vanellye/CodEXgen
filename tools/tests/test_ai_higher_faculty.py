@@ -22,16 +22,16 @@ class AiiHigherFacultyTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.source = self.root / "service.py"
         self.original = (
-            'import os\\n'
-            'import sqlite3\\n'
-            'def launch(command):\\n'
-            '    """Launch a local helper process."""\\n'
-            '    os.system(command)\\n'
-            '    return True\\n'
+            'import os\n'
+            'import sqlite3\n'
+            'def launch(command):\n'
+            '    """Launch a local helper process."""\n'
+            '    os.system(command)\n'
+            '    return True\n'
         )
         self.source.write_text(self.original, encoding="utf-8")
         (self.root / "legacy.py").write_text(
-            "def launch(command):\\n    return False\\n", encoding="utf-8"
+            "def launch(command):\n    return False\n", encoding="utf-8"
         )
         self.ai = AiiConversation(self.root)
 
