@@ -271,6 +271,7 @@ class Pons:
                     and payload.get("nonce") == challenge_record.get("nonce")
                     and reviewer.reviewer_id == challenge_record.get("reviewer_id")
                     and reviewer.key_id == challenge_record.get("reviewer_key_id")
+                    and reviewer.certificate_sha256 == challenge_record.get("reviewer_certificate_sha256")
                     and signed_time.tzinfo is not None
                     and issued_time.tzinfo is not None
                     and expires_time.tzinfo is not None
