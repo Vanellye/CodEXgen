@@ -34,6 +34,6 @@ The service should resolve a grant through its trusted PONS adapter, then call
 ingest_file(source, vault, grant, source_label=..., parent_record_id=...).
 Use verify_record(vault, record_id) for integrity checks.
 
-This module does not scan directories, run in the background, access networks,
+This module does not watch directories continuously or run in the background. Batch collection scans only when explicitly invoked. It does not access networks,
 modify Git, deploy code, or send email. Those integrations require separate
 review and explicit capabilities. A Git branch is not an independent backup.
