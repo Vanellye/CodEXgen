@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ERIA PLZ unmet-need fingerprint",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["plz_id", "created_at", "need", "status", "reason_code", "notification_state"],
+  "properties": {
+    "plz_id": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "format": "date-time"},
+    "need": {"type": "string", "minLength": 1},
+    "status": {"enum": ["unmet", "pending", "resolved", "waived_by_authorized_actor"]},
+    "reason_code": {"type": "string", "minLength": 1},
+    "diagnostic": {"type": "string"},
+    "affected_record_ids": {"type": "array", "items": {"type": "string"}},
+    "parent_ids": {"type": "array", "items": {"type": "string"}},
+    "input_sha256": {"type": "string", "pattern": "^[a-fA-F0-9]{64}$"},
+    "output_sha256": {"type": "string", "pattern": "^[a-fA-F0-9]{64}$"},
+    "authorization_ref": {"type": "string"},
+    "retry_count": {"type": "integer", "minimum": 0},
+    "next_retry_at": {"type": "string", "format": "date-time"},
+    "resolution_event_id": {"type": "string"},
+    "notification_state": {"enum": ["queued", "sent", "failed", "suppressed"]}
+  }
+}
