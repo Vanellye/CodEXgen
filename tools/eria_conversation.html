@@ -40,6 +40,8 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
 <button class="small" id="qualityRefresh" type="button">Refresh Quality</button>
 <button class="small" id="qualityFindings" type="button">Explain Findings</button>
 <button class="small" id="qualityCandidates" type="button">Rank Synthesis</button>
+<button class="small" id="qualityInspect" type="button">Inspect Source</button>
+<button class="small" id="qualityPrepare" type="button">Prepare Proposal</button>
 <button class="small" id="qualityProposals" type="button">Proposal History</button>
 </div></section>
 <section id="chat" class="chat" aria-live="polite">
@@ -204,6 +206,27 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
           "/100\n   " + x.candidate_paths.join(", ")).join("\n") :
         "No shared-symbol synthesis candidates in the latest report.");
     } catch (error) { addMessage("assistant", "Candidate ranking unavailable: " + error.message); }
+  });
+  $("qualityInspect").addEventListener("click", async () => {
+    const path = prompt("Repository-relative source path to inspect:");
+    if (!path || !path.trim()) return;
+    try {
+      const data = await api("/api/quality/inspect?path=" + encodeURIComponent(path.trim()));
+      addMessage("assistant", "Æị source inspection · " + data.path + "\\nSnapshot match: " +
+        data.matches_report_snapshot + "\\nCurrent SHA-256: " + data.current_sha256 +
+        "\\nReport SHA-256: " + data.report_sha256 + "\\nFindings: " +
+        JSON.stringify(data.findings, null, 2) + "\\n\\n" + data.content_preview);
+    } catch (error) { addMessage("assistant", "Source inspection unavailable: " + error.message); }
+  });
+  $("qualityPrepare").addEventListener("click", async () => {
+    const symbol = prompt("Exact candidate symbol from Rank Synthesis:");
+    if (!symbol || !symbol.trim()) return;
+    try {
+      const data = await api("/api/quality/proposals", {method:"POST",body:JSON.stringify({symbol:symbol.trim()})});
+      addMessage("assistant", "Approval-ready proposal stored · " + data.proposal_id +
+        "\\nStatus: " + data.status + "\\nPacket: " + data.evidence.approval_boundary +
+        "\\nPaths: " + data.paths.join(", "));
+    } catch (error) { addMessage("assistant", "Proposal preparation failed: " + error.message); }
   });
   $("qualityProposals").addEventListener("click", async () => {
     try {
