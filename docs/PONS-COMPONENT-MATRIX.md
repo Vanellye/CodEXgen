@@ -12,7 +12,7 @@ This matrix distinguishes code that is gated now from components that are only i
 | Pantheon Android gate | app/src/main/java/com/vanellye/eria/pantheon/PantheonRuntimeGate.kt | PONS proof is mandatory for prepareReview; mismatch/missing proof returns HOLD | Add manifest-backed app bootstrap and caller wiring |
 | WAV transmission | app/src/main/java/com/vanellye/eria/contracts/WavAudioTransmission.kt | Constructor requires PONS effective READY and canonical anchor | Supply production manifest pin at app startup |
 | Audio playback | app/src/main/java/com/vanellye/eria/contracts/TransmissionAudioPlayer.kt | Playback requires PONS effective READY and canonical anchor | Supply production manifest pin at app startup |
-| SKRIBED / transmission frame | app/src/main/java/com/vanellye/eria/contracts/SkribedAndTransmission.kt | Existing immutable-original and frame-digest controls remain; no direct PONS call yet | Add a PONS-gated adapter at the transceiver boundary |
+| SKRIBED / transmission frame | app/src/main/java/com/vanellye/eria/contracts/SkribedAndTransmission.kt | InMemoryTransmissionTransceiver requires PONS effective READY and canonical anchor; immutable-original and frame-digest controls remain | Pin the transceiver source in the production manifest |
 | Android UI / ViewModel | app/src/main/java/com/vanellye/eria/ | Inventoried, not directly PONS-gated | Add lifecycle status publisher and manifest pins |
 | Git Freedom bridge | GitFreedomBridge.kt | Inventoried; existing authorization boundary remains separate | Add PONS preflight for read/write request provenance without granting Git authority |
 | Python services | python/ | Inventoried; shared Python PONS registry exists, no service adapters registered | Register each exact module/ref from reviewed manifest |
@@ -35,7 +35,7 @@ This matrix distinguishes code that is gated now from components that are only i
 This branch is a staged integration, not a claim that every inventoried component is fully wired. Before calling the repository-wide rollout complete:
 1. Generate and review a manifest with SHA-256 pins for each exact source ref.
 2. Wire Android startup to instantiate the PONS registry and pass fresh component statuses.
-3. Add the SKRIBED/transceiver adapter.
+3. Pin and verify the SKRIBED/transceiver adapter in the production manifest.
 4. Add and test a C99 PONS adapter for each Pantheon C public boundary.
 5. Register each Python service and generated module through the shared registry.
 6. Audit all call sites to ensure no bypass path remains.
