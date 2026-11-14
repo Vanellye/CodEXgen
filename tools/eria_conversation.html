@@ -12,7 +12,7 @@
 header{padding:22px 4px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:12px}.mark{width:42px;height:42px;border-radius:13px;background:linear-gradient(145deg,#83d6c2,#6e9eff);display:grid;place-items:center;color:#071321;font-weight:900;font-size:19px}.brand h1{font-size:18px;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:12px}
 .status{font-size:11px;color:var(--accent);border:1px solid #31594f;border-radius:99px;padding:6px 9px;white-space:nowrap}.status.off{color:#ffb0a7;border-color:#70413c}
-main{flex:1;display:flex;flex-direction:column;min-height:0}.overview{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:14px 0}.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px}.stat b{font-size:16px;display:block}.stat span{font-size:10px;color:var(--muted)}
+main{flex:1;display:flex;flex-direction:column;min-height:0}.overview{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;padding:14px 0}.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px}.stat b{font-size:16px;display:block}.stat span{font-size:10px;color:var(--muted)}
 .chat{flex:1;min-height:300px;overflow:auto;padding:12px 2px 18px;display:flex;flex-direction:column;gap:12px}
 .welcome{background:linear-gradient(135deg,#172943,#141d31);border:1px solid var(--line);border-radius:16px;padding:17px}.welcome h2{font-size:18px;margin:0 0 7px}.welcome p{font-size:13px;color:var(--muted);line-height:1.5;margin:0}
 .message{max-width:92%;padding:12px 14px;border-radius:15px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.55}.user{align-self:flex-end;background:#254466;border:1px solid #3c6086}.assistant{align-self:flex-start;background:var(--panel);border:1px solid var(--line)}.meta{font-size:10px;color:var(--muted);margin-bottom:5px}
@@ -32,6 +32,7 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
 <div class="stat"><b id="fileCount">—</b><span>Indexed files</span></div>
 <div class="stat"><b id="dbState">—</b><span>Repository database</span></div>
 <div class="stat"><b id="engineState">—</b><span>Conversation engine</span></div>
+<div class="stat"><b id="ponsState">—</b><span>PONS bridge</span></div>
 </section>
 <section id="chat" class="chat" aria-live="polite">
 <div class="welcome"><h2>Welcome to ERIA</h2><p>Ask questions about repository files, branches, commits, architecture, provenance, or the PONS bridge. Original source remains non-authoritative; translations are derived records, not replacements.</p></div>
@@ -42,6 +43,7 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
 <button class="small" id="statusBtn" type="button">Integration status</button>
 <button class="small" id="filesBtn" type="button">Search indexed paths</button>
 <button class="small" id="refreshBtn" type="button">Refresh index</button>
+<button class="small" id="translateBtn" type="button">Translate source</button>
 </div></div>
 </main>
 <footer>Local Termux session · SQLite stored under ~/.eria · No automatic Git mutation or remote transmission</footer>
@@ -82,17 +84,19 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
   }
   async function status() {
     try {
-      const data = await api("/api/status");
+      const [data, pons] = await Promise.all([api("/api/status"), api("/api/pons/status")]);
       $("connection").textContent = "Termux connected";
       $("connection").classList.remove("off");
       $("fileCount").textContent = data.index.files;
       $("dbState").textContent = "Ready";
       $("engineState").textContent = "Online";
+      $("ponsState").textContent = pons.service_state || "ON";
     } catch (error) {
       $("connection").textContent = "Disconnected";
       $("connection").classList.add("off");
       $("dbState").textContent = "Offline";
       $("engineState").textContent = "Offline";
+      $("ponsState").textContent = "Unknown";
     }
   }
   async function history() {
@@ -140,6 +144,20 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
         ? "Indexed path matches:\n" + data.files.map(x => x.path + " (" + x.size_bytes + " bytes)").join("\n")
         : "No indexed paths matched: " + query);
     } catch (error) { addMessage("assistant", "HOLD: " + error.message); }
+  });
+  $("translateBtn").addEventListener("click", async () => {
+    const path = prompt("Repository-relative source-code path to translate:");
+    if (path === null || !path.trim()) return;
+    $("translateBtn").disabled = true;
+    try {
+      const result = await api("/api/translate", {method:"POST",body:JSON.stringify({path:path.trim()})});
+      const stages = result.pipeline.map(stage => stage.stage + ": " + stage.status).join("\n");
+      addMessage("assistant", "Higher Faculty translation — " + result.status + "\n" +
+        "Source: " + result.source.path + "\nSHA-256: " + result.source.sha256 + "\n" +
+        "Findings: " + result.translation.finding_count + " · Antithesis flags: " + result.antithesis.flag_count + "\n\n" +
+        stages + "\n\n" + JSON.stringify(result.translation.findings, null, 2) + "\n\nPONS: " + result.pons.service_state + " · execution enabled: " + result.pons.execution_enabled);
+    } catch (error) { addMessage("assistant", "Translation HOLD: " + error.message); }
+    finally { $("translateBtn").disabled = false; }
   });
   $("refreshBtn").addEventListener("click", async () => {
     $("refreshBtn").disabled = true;
