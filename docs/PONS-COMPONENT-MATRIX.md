@@ -12,6 +12,7 @@ This matrix distinguishes code that is gated now from components that are only i
 | Pantheon Android gate | app/src/main/java/com/vanellye/eria/pantheon/PantheonRuntimeGate.kt | PONS proof is mandatory for prepareReview; mismatch/missing proof returns HOLD | Add manifest-backed app bootstrap and caller wiring |
 | WAV transmission | app/src/main/java/com/vanellye/eria/contracts/WavAudioTransmission.kt | Constructor requires PONS effective READY and canonical anchor | Supply production manifest pin at app startup |
 | Audio playback | app/src/main/java/com/vanellye/eria/contracts/TransmissionAudioPlayer.kt | Playback requires PONS effective READY and canonical anchor | Supply production manifest pin at app startup |
+| Simulation integrity runner | app/src/main/java/com/vanellye/eria/contracts/SimulationIntegrity.kt | Executes identical seeded scenario twice, records input/config/output digests, marks nondeterministic output, and explicitly labels evidence simulated-only / hardware-not-observed | Add durable append-only simulation evidence storage and compare against independently captured device measurements; never promote simulation to hardware READY |
 | SKRIBED / transmission frame | app/src/main/java/com/vanellye/eria/contracts/SkribedAndTransmission.kt | InMemoryTransmissionTransceiver requires PONS effective READY and canonical anchor; immutable-original and frame-digest controls remain | Pin the transceiver source in the production manifest |
 | Android UI / ViewModel | app/src/main/java/com/vanellye/eria/ | Inventoried, not directly PONS-gated | Add lifecycle status publisher and manifest pins |
 | Git Freedom bridge | GitFreedomBridge.kt | Inventoried; existing authorization boundary remains separate | Add PONS preflight for read/write request provenance without granting Git authority |
@@ -26,6 +27,7 @@ This matrix distinguishes code that is gated now from components that are only i
 - HOLD means a digest mismatch or explicit hold. UNKNOWN means a pin, source, or evidence is absent.
 - Component-reported operational state cannot override a provenance HOLD or UNKNOWN.
 - A PONS result is bound to the canonical anchor identity. Any alternate anchor causes initialization failure.
+- Simulation reproducibility is not hardware verification: simulation evidence is explicitly marked simulated-only and cannot prove sensor, actuator, audio, or device behavior.
 - The Android Pantheon review path has no legacy three-argument bypass: a PONS provenance result is a required argument and its anchor/digest identity is checked. Android PONS pin maps are defensively snapshotted and can be created through the signed-manifest verifier interface.
 - WAV conversion and local playback constructors/actions require a PONS effective READY status.
 - The Python JSONL ledger is hash-chained, but is not a substitute for authenticated reviewer identity, signed checkpoints, protected storage, or a trusted manifest.
