@@ -1,0 +1,39 @@
+name: Build Æị Android APK
+on:
+  push:
+    branches: [feature/aie-standalone-and-apk]
+    paths:
+      - "aie-android/**"
+      - "aie-standalone/**"
+      - ".github/workflows/aie-android.yml"
+  pull_request:
+    branches: [feature/aie-standalone-and-apk]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Install Android SDK components
+        run: |
+          yes | "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" --licenses || true
+          "${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager" --install \
+            "platform-tools" \
+            "platforms;android-35" \
+            "build-tools;35.0.0"
+      - name: Build debug APK
+        run: ./gradlew -p aie-android assembleDebug --no-daemon --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aie-debug-apk
+          path: aie-android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
