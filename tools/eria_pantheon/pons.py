@@ -101,7 +101,8 @@ class Pons:
     def __init__(self) -> None:
         self._factories: Dict[Type[Any], tuple[Callable[[], Any], Lifetime]] = {}
         self._singletons: Dict[Type[Any], Any] = {}
-        self._lock = threading.RLock()\n        self._accuracy_service = None
+        self._lock = threading.RLock()
+        self._accuracy_service = None
 
     def register(self, key: Type[Any], factory: Callable[[], Any], *,
                  lifetime: Lifetime = Lifetime.TRANSIENT) -> None:
