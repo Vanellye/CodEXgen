@@ -19,18 +19,18 @@ class PONSTests(unittest.TestCase):
     def test_provenance_match_and_mismatch(self):
         source = b"ERIA component source"
         expected = hashlib.sha256(source).hexdigest()
-        registry = PONSRegistry()
+        registry = PONSRegistry(allow_untrusted_registration=True)
         registry.register(Component("conversation", "commit-a", "tools/agent.py", expected, "manifest-v1"))
         self.assertEqual(registry.verify_provenance("conversation", source)["state"], "VERIFIED")
         self.assertEqual(registry.verify_provenance("conversation", b"changed")["state"], "HOLD")
 
     def test_missing_digest_is_unknown(self):
-        registry = PONSRegistry()
+        registry = PONSRegistry(allow_untrusted_registration=True)
         registry.register(Component("music", "commit-b", "music/engine.py"))
         self.assertEqual(registry.verify_provenance("music", b"audio")["state"], "UNKNOWN")
 
     def test_accuracy_cannot_be_self_declared(self):
-        registry = PONSRegistry()
+        registry = PONSRegistry(allow_untrusted_registration=True)
         registry.register(Component("stride", "commit-c", "stride.py"))
         with self.assertRaises(ValueError):
             registry.observe_status("stride", "ACCURATE")
@@ -38,17 +38,17 @@ class PONSTests(unittest.TestCase):
     def test_ledger_chain_and_tamper_detection(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "events.jsonl"
-            registry = PONSRegistry(str(path))
+            registry = PONSRegistry(str(path), allow_untrusted_registration=True)
             registry.register(Component("pantheon", "commit-d", "pantheon.py"))
             registry.observe_status("pantheon", "READY", "process responsive")
             self.assertTrue(registry.verify_ledger()["valid"])
             rows = path.read_text().splitlines()
             path.write_text(rows[0] + "\n" + rows[1].replace("READY", "HOLD") + "\n")
             with self.assertRaises(ValueError):
-                PONSRegistry(str(path))
+                PONSRegistry(str(path), allow_untrusted_registration=True)
 
     def test_status_report_keeps_anchor_identity(self):
-        registry = PONSRegistry()
+        registry = PONSRegistry(allow_untrusted_registration=True)
         registry.register(Component("filesystem", "commit-e", "filesystem.py"))
         report = registry.report()
         self.assertEqual(report["anchor"]["anchor_id"], "7f7a43a973a96a06dd432bf94843213d09133323")
@@ -57,7 +57,7 @@ class PONSTests(unittest.TestCase):
     def test_guarded_operation_runs_only_with_matching_provenance(self):
         source = b"trusted source"
         digest = hashlib.sha256(source).hexdigest()
-        registry = PONSRegistry()
+        registry = PONSRegistry(allow_untrusted_registration=True)
         registry.register(Component("guarded", "ref-1", "module.py", digest, "reviewed-v1"))
         called = []
         denied = registry.execute_guarded("guarded", b"altered", lambda: called.append("bad"))
@@ -73,15 +73,46 @@ class PONSTests(unittest.TestCase):
         digest = hashlib.sha256(source).hexdigest()
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "events.jsonl"
-            registry = PONSRegistry(str(path))
+            registry = PONSRegistry(str(path), allow_untrusted_registration=True)
             registry.register(Component("replayed", "ref-2", "replayed.py", digest, "manifest-2"))
             registry.observe_status("replayed", "READY", "unit test")
             registry.verify_provenance("replayed", source)
-            restored = PONSRegistry(str(path))
+            restored = PONSRegistry(str(path), allow_untrusted_registration=True)
             status = restored.component_status("replayed")
             self.assertEqual(status["reported_state"], "READY")
             self.assertEqual(status["provenance_state"], "VERIFIED")
             self.assertEqual(status["effective_state"], "READY")
+
+    def test_production_registry_rejects_direct_self_registration(self):
+        registry = PONSRegistry()
+        with self.assertRaises(PermissionError):
+            registry.register(Component("self-asserted", "ref", "module.py", "a" * 64))
+
+    def test_signed_manifest_requires_host_trust_verifier(self):
+        source = b"manifest source"
+        payload = {
+            "anchor_id": "7f7a43a973a96a06dd432bf94843213d09133323",
+            "anchor_ref_sha": "df5ead3b55cfabd0ba40e902b4080946cba794dc",
+            "manifest_version": "reviewed-2026-01",
+            "components": [{
+                "component_id": "manifest.component",
+                "source_ref": "commit-123",
+                "source_path": "module.py",
+                "sha256": hashlib.sha256(source).hexdigest(),
+            }],
+            "key_id": "review-key-1",
+            "signature": "signature-bytes",
+        }
+        registry = PONSRegistry()
+        with self.assertRaises(PermissionError):
+            registry.load_signed_manifest(payload, lambda *_: False)
+        accepted = registry.load_signed_manifest(payload, lambda data, key, sig: (
+            bool(data) and key == "review-key-1" and sig == "signature-bytes"
+        ))
+        self.assertTrue(accepted["accepted"])
+        self.assertEqual(accepted["components"], ["manifest.component"])
+        proof = registry.verify_provenance("manifest.component", source)
+        self.assertEqual(proof["state"], "VERIFIED")
 
 
 if __name__ == "__main__":
