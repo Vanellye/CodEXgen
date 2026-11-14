@@ -1,17 +1,30 @@
 package com.vanellye.eria.contracts
 
 import org.junit.Assert.assertEquals
+import com.vanellye.eria.pons.*
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
 
 class WavAudioTransmissionTest {
+
+    private fun ponsAudioStatus(): PonsComponentStatus {
+        val source = "pinned-audio-transmission-component".toByteArray()
+        val componentId = "audio.wav-transmission"
+        val pin = PonsComponentPin(
+            componentId, "test-ref",
+            "app/src/main/java/com/vanellye/eria/contracts/WavAudioTransmission.kt",
+            PonsProvenanceGate.sha256(source)
+        )
+        return PonsStatusRegistry(PonsProvenanceGate(mapOf(componentId to pin)))
+            .inspect(componentId, PonsOperationalState.READY, source)
+    }
     @Test
     fun transmittedPcmBecomesValidWavFile() {
         // 10 ms of silence at 8 kHz, mono, signed PCM16.
         val pcm = ByteArray(160)
         val frame = TransmissionFrame.create("audio-1", "corr-1", "test-tone", pcm)
-        val endpoint = WavAudioTransmissionEndpoint(8_000, 1)
+        val endpoint = WavAudioTransmissionEndpoint(8_000, 1, ponsAudioStatus())
         val file = File.createTempFile("eria-transmission-", ".wav")
         try {
             endpoint.writeWavFile(frame, file)
