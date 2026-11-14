@@ -111,8 +111,13 @@ def create_derived_record(
         )
     except ParentValidationError as exc:
         raise DerivationError(f"Parent validation failed: {exc}") from exc
-    if not any(item["sha256"] == source_context["source_sha256"] for item in initial_proofs):
-        raise DerivationError("source_context hash must identify one of the direct parents")
+    if not any(
+        item["sha256"] == source_context["source_sha256"]
+        and item["source_relative_path"] == source_context["relative_path"]
+        and item["source_filename"] == source_context["filename"]
+        for item in initial_proofs
+    ):
+        raise DerivationError("source_context must exactly match one direct parent's hash and relative identity")
 
     digest = hashlib.sha256(raw).hexdigest()
     record_id = str(uuid.uuid4())
@@ -136,7 +141,12 @@ def create_derived_record(
         raise DerivationError(f"Commit-time parent validation failed: {exc}") from exc
     if current_proofs != initial_proofs:
         raise DerivationError("Parent lineage changed before child-record creation")
-    if not any(item["sha256"] == source_context["source_sha256"] for item in current_proofs):
+    if not any(
+        item["sha256"] == source_context["source_sha256"]
+        and item["source_relative_path"] == source_context["relative_path"]
+        and item["source_filename"] == source_context["filename"]
+        for item in current_proofs
+    ):
         raise DerivationError("Source context no longer matches a direct parent")
 
     captured_at = datetime.now(timezone.utc).isoformat()
