@@ -61,7 +61,8 @@ class SkribedAndTransmissionTest {
     fun transceiverReturnsCorrelatedInternalResponse() {
         val request = "sound-data".toByteArray(StandardCharsets.UTF_8)
         val frame = TransmissionFrame.create("tx-1", "corr-1", "audio.capture", request)
-        val transceiver = InMemoryTransmissionTransceiver(ponsTransceiverStatus())
+        val ledger = TransmissionEvidenceLedger()
+        val transceiver = InMemoryTransmissionTransceiver(ponsTransceiverStatus(), ledger)
 
         val receipt = transceiver.transceive(frame) { incoming ->
             incoming.payload() + "-returned".toByteArray(StandardCharsets.UTF_8)
@@ -75,6 +76,14 @@ class SkribedAndTransmissionTest {
             String(receipt.responsePayload, StandardCharsets.UTF_8)
         )
         assertTrue(receipt.responseSha256.matches(Regex("^[0-9a-f]{64}$")))
+        assertEquals(PonsAnchorIdentity.CANONICAL, receipt.anchor)
+        assertEquals(1, ledger.history("tx-1").size)
+        assertEquals(null, receipt.supersedesEvidenceId)
+
+        val newer = transceiver.transceive(frame) { incoming -> incoming.payload() }
+        assertEquals(receipt.evidenceId, newer.supersedesEvidenceId)
+        assertEquals(2, ledger.history("tx-1").size)
+        assertEquals(receipt.evidenceId, ledger.history("tx-1").first().evidenceId)
     }
 
     @Test
@@ -84,5 +93,6 @@ class SkribedAndTransmissionTest {
         input[0] = 99
 
         assertArrayEquals(byteArrayOf(1, 2, 3), frame.payload())
+        assertEquals(PonsAnchorIdentity.CANONICAL, frame.anchor)
     }
 }
