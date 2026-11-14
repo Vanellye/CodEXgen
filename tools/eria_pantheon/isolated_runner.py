@@ -22,7 +22,7 @@ import time
 from pathlib import Path, PurePosixPath
 
 COMMANDS = {
-    "python-tests": ["python", "-m", "pytest", "-q"],
+    "python-tests": ["python3", "-m", "pytest", "-q"],
     "android-debug-build": ["./gradlew", "assembleDebug"],
     "make-check-review": ["make", "check"],
 }
