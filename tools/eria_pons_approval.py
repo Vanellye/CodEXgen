@@ -214,8 +214,10 @@ class PonsApprovalService:
     def history(self, limit=100):
         with self.connect() as db:
             requests = db.execute(
-                "SELECT request_id,proposal_id,capability,scope_sha256,status,created_at "
-                "FROM approval_requests ORDER BY created_at DESC LIMIT ?",
+                "SELECT r.request_id,r.proposal_id,r.capability,r.scope_sha256,r.status,r.created_at, "
+                "CASE WHEN EXISTS(SELECT 1 FROM approval_grants g WHERE g.request_id=r.request_id) "
+                "THEN 'REVIEW_READY' ELSE r.status END AS effective_status "
+                "FROM approval_requests r ORDER BY r.created_at DESC LIMIT ?",
                 (max(1, min(int(limit), 200)),),
             ).fetchall()
             grants = db.execute(
