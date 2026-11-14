@@ -60,3 +60,28 @@ The API reports `RUNNING` only when the local monitor object reports
 `state=running`. This is an in-process thread and stops when the Termux
 server exits or Android terminates it. A response from the verifier alone is
 not proof that an inbox scan succeeded.
+
+
+## Phone-initiated relay transport (client adapter)
+
+The optional client adapter is `tools/eria_pantheon/relay.py`. It initiates
+outbound HTTPS requests from the phone; it does not open an inbound port.
+It accepts only HTTPS base URLs, uses bearer authentication, bounds response
+size and timeout, verifies the signed grant locally, and acknowledges the
+outcome after the local handler returns. Polling is opt-in and requires all
+three environment variables:
+
+- `ERIA_PONS_RELAY_URL`
+- `ERIA_PONS_RELAY_TOKEN`
+- `ERIA_PONS_APPROVAL_KEY`
+
+The relay service must implement:
+- `GET /v1/requests/next` -> `{"status":"empty"}` or
+  `{"request_id":"...","grant":{...signed PONS grant...}}`
+- `POST /v1/requests/ack` with request_id, status and outcome.
+
+The remote relay service is not hosted or deployed by this repository change,
+and the adapter is not yet wired into the Termux server lifecycle. Until a
+separately deployed relay service and reviewed server integration exist,
+remote polling is a tested transport component only; the local portal workflow
+continues to operate independently. Never expose the HMAC key to browser code.
