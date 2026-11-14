@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "eria.god.record/1",
-  "title": "GOD preserved or derived record",
+  "title": "GOD original or typed descendant record",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -26,12 +26,8 @@
       "format": "uuid"
     },
     "record_type": {
-      "enum": [
-        "original",
-        "translation",
-        "interpretation",
-        "correction"
-      ]
+      "type": "string",
+      "pattern": "^(original|[a-z][a-z0-9_-]{0,63})$"
     },
     "sha256": {
       "type": "string",
@@ -125,12 +121,8 @@
             "minimum": 0
           },
           "record_type": {
-            "enum": [
-              "original",
-              "translation",
-              "interpretation",
-              "correction"
-            ]
+            "type": "string",
+            "pattern": "^(original|[a-z][a-z0-9_-]{0,63})$"
           },
           "source_relative_path": {
             "type": "string",
@@ -223,11 +215,7 @@
       "if": {
         "properties": {
           "record_type": {
-            "enum": [
-              "translation",
-              "interpretation",
-              "correction"
-            ]
+            "not": { "const": "original" }
           }
         },
         "required": [
@@ -243,7 +231,7 @@
             "const": "derived-not-validated-as-fact"
           },
           "object_relative_path": {
-            "pattern": "^DERIVED_DATA/objects/[a-f0-9]{2}/[a-f0-9]{64}$"
+            "pattern": "^SHOP/objects/[a-f0-9]{2}/[a-f0-9]{64}$"
           },
           "parent_record_ids": {
             "minItems": 1
