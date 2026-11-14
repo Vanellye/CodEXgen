@@ -7,6 +7,7 @@ import shlex
 from typing import Any
 
 from .aei import AeiError, inspect_file
+from .ai import AiiConversation
 from .pons import BridgeEnvelope, Pons
 
 
@@ -14,6 +15,7 @@ class ERIAPantheonInterface:
     def __init__(self, repository: Any) -> None:
         self.repository = repository
         self.bridge = Pons()
+        self.bridge.register(AiiConversation, lambda: AiiConversation(self.repository.root))
 
     def status(self) -> str:
         state = self.bridge.describe()
@@ -37,6 +39,8 @@ class ERIAPantheonInterface:
         if low.startswith(("aei.inspect ", "aei.translate ")):
             prefix = "aei.inspect " if low.startswith("aei.inspect ") else "aei.translate "
             return self._aei_inspect(command.strip()[len(prefix):])
+        if low.startswith("ai.ask "):
+            return self._ai_ask(command.strip()[len("ai.ask "):])
         if low.startswith("repository.ask "):
             return self.repository.ask(command.strip()[len("repository.ask "):])
         return (
@@ -44,6 +48,7 @@ class ERIAPantheonInterface:
             "repository.ask <question>, "
             "aei.inspect <repo-relative-path>, "
             "aei.translate <repo-relative-path> (read-only), "
+            "ai.ask <repo-relative-path> --question <text>, "
             "code.bypass <repo-relative-path> --reason <text>"
         )
 
@@ -59,6 +64,25 @@ class ERIAPantheonInterface:
         except (AeiError, OSError) as exc:
             return f"HOLD: Æị inspection failed: {exc}"
         return json.dumps(result.to_dict(), ensure_ascii=False, indent=2)
+
+    def _ai_ask(self, arguments: str) -> str:
+        try:
+            tokens = shlex.split(arguments)
+        except ValueError as exc:
+            return f"HOLD: invalid Âï command quoting: {exc}"
+        if "--question" not in tokens:
+            return "HOLD: ai.ask requires --question <text>."
+        index = tokens.index("--question")
+        if index != 1 or len(tokens) <= index + 1:
+            return "HOLD: use ai.ask <repo-relative-path> --question <text>."
+        path = tokens[0]
+        question = " ".join(tokens[index + 1:])
+        try:
+            result = self.bridge.resolve(AiiConversation).ask(path, question)
+        except (AeiError, OSError, ValueError) as exc:
+            return json.dumps({"translator": "Âï", "status": "HOLD", "error": str(exc)},
+                              ensure_ascii=False, indent=2)
+        return json.dumps(result, ensure_ascii=False, indent=2)
 
     def _code_bypass(self, arguments: str) -> str:
         try:
