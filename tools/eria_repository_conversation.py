@@ -119,6 +119,7 @@ class Conversation:
         if advice is not None:
             self.last_oprozal_advice = advice
             answer += self.oprozal.render(advice)
+            answer += f"\n- **Source revision:** {revision} (NON_AUTHORITATIVE provenance reference)"
         return answer
 
     def _ask_without_oprozal(self, q):
