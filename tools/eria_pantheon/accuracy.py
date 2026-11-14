@@ -12,7 +12,10 @@ from pathlib import Path
 from typing import Any, Iterable
 
 
-_PONS_AUTHORITY = object()\n\n\nclass LedgerIntegrityError(RuntimeError):
+_PONS_AUTHORITY = object()
+
+
+class LedgerIntegrityError(RuntimeError):
     pass
 
 
@@ -168,5 +171,6 @@ class AccuracyValidationService:
             "evidence_records": sum(len(by_claim.get(c, [])) for c in verified),
             "ledger": self.ledger.verify(),
             "issued_by": "PONS/AccuracyValidationService",
-            "self_certification_allowed": False,\n            "verifier_identity": "UNAUTHENTICATED_LABEL",
+            "self_certification_allowed": False,
+            "verifier_identity": "UNAUTHENTICATED_LABEL",
         }
