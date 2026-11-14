@@ -77,10 +77,11 @@ class OprozalTests(unittest.TestCase):
         for text, expected in cases.items():
             self.assertEqual(classify(text), expected, text)
 
-    def test_conversation_ask_attaches_oprozal_reaction(self):
+    def test_conversation_ask_attaches_oprozal_reaction_and_revision(self):
         conversation = Conversation(FakeRepository())
         answer = conversation.ask("The runtime is lagging.")
         self.assertIn("Oprozal advisory", answer)
+        self.assertIn("Source revision: abc123", answer)
         self.assertEqual(conversation.last_oprozal_advice["source_revision"], "abc123")
         self.assertEqual(conversation.last_oprozal_advice["pons"]["status"], "HOLD")
 
