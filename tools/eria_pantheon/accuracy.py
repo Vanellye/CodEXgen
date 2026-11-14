@@ -105,12 +105,14 @@ class AccuracyValidationService:
         self._lock = threading.RLock()
 
     def submit_evidence(
-        self, *, claim_id: str, subject_component: str, verifier_id: str,
-        evidence_ref: str, outcome: bool, weight: float = 1.0,
-        method: str = "independent_review", _authority: object = None,
+        self, *, claim_id: str, subject_component: str, evidence_ref: str,
+        outcome: bool, weight: float, method: str, verified_reviewer: dict[str, Any],
+        certificate: dict[str, Any], signed_payload: dict[str, Any], signature_b64: str,
+        _authority: object = None,
     ) -> dict[str, Any]:
         if _authority is not _PONS_AUTHORITY:
             raise PermissionError("Evidence intake is restricted to the PONS facade.")
+        verifier_id = verified_reviewer.get("reviewer_id", "")
         fields = (claim_id, subject_component, verifier_id, evidence_ref, method)
         if not all(isinstance(x, str) and x.strip() for x in fields):
             raise EvidenceRejected("All evidence identity and reference fields are required.")
@@ -131,6 +133,15 @@ class AccuracyValidationService:
             "outcome": outcome,
             "weight": float(weight),
             "method": method.strip(),
+            "identity_verified": True,
+            "reviewer_key_id": verified_reviewer["key_id"],
+            "reviewer_role": verified_reviewer["role"],
+            "reviewer_issuer": verified_reviewer["issuer"],
+            "reviewer_certificate_sha256": verified_reviewer["certificate_sha256"],
+            "reviewer_public_key_sha256": verified_reviewer["public_key_sha256"],
+            "reviewer_certificate": certificate,
+            "signed_payload": signed_payload,
+            "reviewer_signature_ed25519": signature_b64,
         }
         with self._lock:
             existing = self.ledger.records()
@@ -139,14 +150,14 @@ class AccuracyValidationService:
                 raise EvidenceRejected("This verifier has already submitted evidence for this claim.")
             return self.ledger.append(record)
 
-    def evaluate(self, required_claims: Iterable[str], *, _authority: object = None) -> dict[str, Any]:
+    def evaluate(self, required_claims: Iterable[str], *, authenticated_evidence_ids: set[str], _authority: object = None) -> dict[str, Any]:
         if _authority is not _PONS_AUTHORITY:
             raise PermissionError("AVS score issuance is restricted to the PONS facade.")
         claims = list(dict.fromkeys(str(x).strip() for x in required_claims if str(x).strip()))
         if not claims:
             return {"status": "NOT_EVALUATED", "accuracy_score": None,
                     "verified_claims": 0, "required_claims": 0, "unverified_claims": []}
-        records = [x for x in self.ledger.records() if x.get("record_type") == "avs_evidence"]
+        records = [x for x in self.ledger.records() if x.get("record_type") == "avs_evidence" and x.get("evidence_id") in authenticated_evidence_ids]
         by_claim: dict[str, list[dict[str, Any]]] = {}
         for item in records:
             by_claim.setdefault(item["claim_id"], []).append(item)
@@ -172,5 +183,5 @@ class AccuracyValidationService:
             "ledger": self.ledger.verify(),
             "issued_by": "PONS/AccuracyValidationService",
             "self_certification_allowed": False,
-            "verifier_identity": "UNAUTHENTICATED_LABEL",
+            "verifier_identity": "ED25519_CERTIFICATE_AND_SIGNATURE_VERIFIED",
         }
