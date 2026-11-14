@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import sqlite3
 import sys
 import tempfile
@@ -63,7 +64,7 @@ class TranslatorTests(unittest.TestCase):
         manifest = translate(source, output, "json")
 
         self.assertEqual(source.read_bytes(), original)
-        self.assertEqual(manifest["source_sha256"], manifest["source_sha256"])
+        self.assertEqual(manifest["source_sha256"], hashlib.sha256(original).hexdigest())
         self.assertTrue(output.is_file())
         self.assertTrue(Path(str(output) + ".manifest.json").is_file())
         decoded = json.loads(output.read_text(encoding="utf-8"))
