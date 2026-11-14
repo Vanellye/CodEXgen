@@ -34,8 +34,10 @@ must not be committed to this repository or embedded in workflow source.
 
 ## 3. Termux local installation path
 
-The workflow packages the repository's `tools/`, `termux/`, `pantheon/`,
-`shared/`, `GOD/`, and `docs/` trees into `eria-termux-source.tar.gz`.
+The workflow packages the runtime `tools/`, `termux/`, `pantheon/`, `shared/`,
+and `docs/` trees plus selected GOD schemas and documentation into
+`eria-termux-source.tar.gz`. It deliberately excludes authoritative GOD object
+stores, original records, provenance records, and Python bytecode caches.
 
 The documented local start command remains:
 
