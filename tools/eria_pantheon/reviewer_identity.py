@@ -120,7 +120,15 @@ class ReviewerIdentityAuthority:
                 "nonce": nonce,
                 "expires_at": expires,
             }
-        return {"challenge_id": challenge_id, "nonce": nonce, "expires_at": expires.isoformat()}
+        return {
+            "challenge_id": challenge_id,
+            "nonce": nonce,
+            "reviewer_id": reviewer.reviewer_id,
+            "key_id": reviewer.key_id,
+            "certificate_sha256": reviewer.certificate_sha256,
+            "issued_at": issued.isoformat(),
+            "expires_at": expires.isoformat(),
+        }
 
     def authenticate_evidence(
         self, *, certificate: dict[str, Any], challenge_id: str,
