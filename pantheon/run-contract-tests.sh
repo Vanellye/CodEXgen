@@ -13,6 +13,12 @@ run_pair() {
   "$BUILD_DIR/$name"
 }
 
+echo "== PONS C99 provenance adapter =="
+"$CC" "${COMMON[@]}" -I"$ROOT/pantheon/PONS" \
+  "$ROOT/pantheon/PONS/PONS.c" "$ROOT/pantheon/PONS/tests/test_PONS.c" \
+  -o "$BUILD_DIR/pons"
+"$BUILD_DIR/pons"
+
 echo "== DO authorization self-test =="
 "$CC" "${COMMON[@]}" -DDO_C_SELF_TEST "$ROOT/pantheon/DO.c" -o "$BUILD_DIR/do-self-test"
 "$BUILD_DIR/do-self-test"
