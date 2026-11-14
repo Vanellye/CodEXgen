@@ -308,8 +308,8 @@ class Handler(BaseHTTPRequestHandler):
         if route == "/api/pons/requests":
             self.send_json(200, {
                 "requests": self.app.store.pons_requests(),
-                "approval_supported": False,
-                "note": "Requests are recorded as HOLD proposals; this service cannot approve grants.",
+                "approval_supported": True,
+                "note": "The Termux PONS screen can record exact-scope human approval for patch preparation. Patch application and source writes remain disabled.",
             })
             return
         if route == "/api/pons/approvals":
