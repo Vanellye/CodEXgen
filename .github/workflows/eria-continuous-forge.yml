@@ -40,6 +40,12 @@ jobs:
         env:
           PYTHONPATH: tools
         run: python -m unittest discover -s tests -p 'test_eria_oprozal*.py' -v
+      - name: Run Linux sandbox readiness tests (no candidate execution)
+        env:
+          PYTHONPATH: tools
+        run: python -m unittest discover -s tests -p 'test_eria_sandbox_readiness.py' -v
+      - name: Report Linux sandbox host prerequisites
+        run: python tools/eria_sandbox_readiness.py
       - name: Run isolated storage-boundary tests
         env:
           PYTHONPATH: security/red-write-only
