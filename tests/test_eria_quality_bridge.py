@@ -21,6 +21,23 @@ class QualityBridgeTests(unittest.TestCase):
             self.assertEqual(bridge.candidates()[0]["symbol"], "shared")
             self.assertTrue(bridge.summary()["ready"])
 
+
+    def test_inspection_verifies_report_fingerprint_and_answer_uses_evidence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "repo"
+            root.mkdir()
+            source = root / "module.py"
+            source.write_text("def explainable():\\n    return 1\\n", encoding="utf-8")
+            bridge = QualityBridge(root, Path(tmp) / "source.sqlite3", Path(tmp) / "qualitative")
+            bridge.refresh()
+            inspected = bridge.inspect("module.py")
+            self.assertTrue(inspected["matches_report_snapshot"])
+            self.assertEqual(inspected["path"], "module.py")
+            answer = bridge.answer("Why does explainable function exist?")
+            self.assertIn("Âï QUALITATIVE REVIEW", answer)
+            source.write_text("def explainable():\\n    return 2\\n", encoding="utf-8")
+            self.assertFalse(bridge.inspect("module.py")["matches_report_snapshot"])
+
     def test_proposal_is_stored_without_repository_mutation(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "repo"
