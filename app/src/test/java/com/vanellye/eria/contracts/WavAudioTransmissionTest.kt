@@ -51,7 +51,7 @@ class WavAudioTransmissionTest {
         val frame = TransmissionFrame.create("audio-2", "corr-2", "test-tone", pcm)
         val receipt = InMemoryTransmissionTransceiver(ponsAudioStatus()).transceive(
             frame,
-            WavAudioTransmissionEndpoint(8_000, 1)
+            WavAudioTransmissionEndpoint(8_000, 1, ponsAudioStatus())
         )
         assertTrue(receipt.responsePayload.size > pcm.size)
         assertEquals("RIFF", String(receipt.responsePayload.copyOfRange(0, 4), Charsets.US_ASCII))
