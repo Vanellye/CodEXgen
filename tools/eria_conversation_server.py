@@ -131,12 +131,12 @@ class Store:
                 "indexed_at": meta.get("indexed_at")}
 
     def search_files(self, query: str, limit: int = 40):
-        term = "%" + query.replace("%", "\\%").replace("_", "\\_") + "%"
+        # instr() avoids wildcard interpretation and keeps the query parameterized.
         with DB_LOCK, self.connect() as db:
             rows = db.execute(
                 "SELECT path,extension,size_bytes FROM repository_files "
-                "WHERE path LIKE ? ESCAPE '\\\\' ORDER BY path LIMIT ?",
-                (term, limit),
+                "WHERE instr(lower(path), lower(?)) > 0 ORDER BY path LIMIT ?",
+                (query, limit),
             ).fetchall()
         return [dict(row) for row in rows]
 
