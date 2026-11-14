@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import shlex
+import os
 from typing import Any
 
 from .pons import BridgeEnvelope, Pons
@@ -11,7 +12,7 @@ from .pons import BridgeEnvelope, Pons
 class ERIAPantheonInterface:
     def __init__(self, repository: Any) -> None:
         self.repository = repository
-        self.bridge = Pons()
+        self.bridge = Pons(reviewer_root_public_key_b64=os.environ.get("ERIA_PONS_REVIEWER_ROOT_PUBKEY"))
         self.bridge.install_accuracy_service(
             str(repository.root / ".eria" / "avs" / "evidence.jsonl")
         )
