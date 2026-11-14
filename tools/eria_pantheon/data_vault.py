@@ -15,6 +15,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import time
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
@@ -283,16 +284,40 @@ def main(argv: list[str] | None = None) -> int:
     capture.add_argument("repository")
     capture.add_argument("--anchor", required=True)
     capture.add_argument("--vault", default=str(DEFAULT_VAULT))
+    watch = sub.add_parser("watch", help="Poll Git HEAD and acquire each newly observed commit")
+    watch.add_argument("repository")
+    watch.add_argument("--interval", type=int, default=300, help="Polling seconds (minimum 30)")
+    watch.add_argument("--vault", default=str(DEFAULT_VAULT))
     verify = sub.add_parser("verify", help="Verify manifest chain and stored objects")
     verify.add_argument("--vault", default=str(DEFAULT_VAULT))
     args = parser.parse_args(argv)
     try:
-        result = acquire_commit(args.repository, args.anchor, args.vault) if args.command == "capture" else verify_vault(args.vault)
+        if args.command == "capture":
+            result = acquire_commit(args.repository, args.anchor, args.vault)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0
+        if args.command == "verify":
+            print(json.dumps(verify_vault(args.vault), ensure_ascii=False, indent=2))
+            return 0
+        if args.interval < 30:
+            raise VaultError("Watch interval must be at least 30 seconds.")
+        repository = Path(args.repository).expanduser().resolve(strict=True)
+        last_seen = None
+        print(json.dumps({"status": "WATCHING", "repository": str(repository),
+                          "interval_seconds": args.interval, "vault": args.vault}), flush=True)
+        while True:
+            commit = _git(repository, "rev-parse", "HEAD").decode("ascii").strip()
+            if commit != last_seen:
+                result = acquire_commit(repository, commit, args.vault)
+                print(json.dumps(result, ensure_ascii=False), flush=True)
+                last_seen = commit
+            time.sleep(args.interval)
+    except KeyboardInterrupt:
+        print(json.dumps({"status": "STOPPED", "reason": "operator interrupt"}))
+        return 0
     except (VaultError, OSError) as exc:
         print(json.dumps({"status": "HOLD", "reason": str(exc)}))
         return 2
-    print(json.dumps(result, ensure_ascii=False, indent=2))
-    return 0
 
 
 if __name__ == "__main__":
