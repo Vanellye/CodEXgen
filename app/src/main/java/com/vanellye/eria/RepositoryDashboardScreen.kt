@@ -92,7 +92,7 @@ private data class AuthorizationRequest(
 )
 
 @Composable
-fun RepositoryDashboardScreen() {
+fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -319,7 +319,7 @@ fun RepositoryDashboardScreen() {
     }
 
     MaterialTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = ERIA_BACKGROUND) {
+        Surface(modifier = modifier.fillMaxSize(), color = ERIA_BACKGROUND) {
             Column(
                 modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
