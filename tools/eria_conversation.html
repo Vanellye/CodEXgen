@@ -20,7 +20,7 @@ main{flex:1;display:flex;flex-direction:column;min-height:0}.overview{display:gr
 form{display:flex;gap:8px;background:var(--panel);border:1px solid #3b4c68;border-radius:15px;padding:8px}
 textarea{flex:1;resize:none;min-height:42px;max-height:130px;background:transparent;color:inherit;border:0;outline:0;padding:10px;font:inherit;font-size:14px}
 button{border:0;border-radius:11px;background:var(--accent);color:#071b20;font-weight:750;padding:0 17px;min-width:68px}button:disabled{opacity:.5}
-.actions{display:flex;gap:8px;flex-wrap:wrap;padding-top:9px}.small{background:#18243a;color:#c8d7ed;border:1px solid var(--line);font-size:11px;padding:8px 11px;min-width:0}
+.actions{display:flex;gap:8px;flex-wrap:wrap;padding-top:9px}.quality{background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:12px;margin:4px 0 10px}.quality h3{font-size:13px;margin:0 0 8px}.quality p{font-size:11px;color:var(--muted);margin:0 0 8px;overflow-wrap:anywhere}.quality-actions{display:flex;gap:7px;flex-wrap:wrap}.small{background:#18243a;color:#c8d7ed;border:1px solid var(--line);font-size:11px;padding:8px 11px;min-width:0}
 footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
 @media(min-width:700px){.app{padding-left:24px;padding-right:24px}.chat{padding:18px 8px}.message{max-width:80%}}
 </style>
@@ -33,6 +33,89 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
 <div class="stat"><b id="dbState">—</b><span>Repository database</span></div>
 <div class="stat"><b id="engineState">—</b><span>Conversation engine</span></div>
 </section>
+<section class="quality" aria-label="Qualitative assessment">
+<h3>Qualitative Storage · Æị Inspection · Âï Intelligence</h3>
+<p id="qualityState">No report loaded yet. Refresh to create a provenance-bound assessment.</p>
+<div class="quality-actions">
+<button class="small" id="qualityRefresh" type="button">Refresh Quality</button>
+<button class="small" id="qualityFindings" type="button">Explain Findings</button>
+<button class="small" id="qualityCandidates" type="button">Rank Synthesis</button>
+<button class="small" id="qualityInspect" type="button">Inspect Source</button>
+<button class="small" id="qualityPrepare" type="button">Prepare Proposal</button>
+<button class="small" id="qualityProposals" type="button">Proposal History</button>
+</div></section>
+<section class="quality" aria-label="PONS exact-scope approval">
+<h3>PONS · Human Authorization</h3>
+<p>Approval is bound to one proposal, branch, commit, and exact source fingerprints. A mismatch leaves the request on HOLD. Approval records authorization only; it does not apply a patch.</p>
+<div class="quality-actions">
+<select id="ponsProposal" aria-label="Select proposal"><option value="">Load a proposal…</option></select>
+<button class="small" id="ponsLoad" type="button">Load Proposals</button>
+<button class="small" id="ponsRequest" type="button">Create Exact-Scope Request</button>
+</div>
+<pre id="ponsScope" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:260px;overflow:auto">No approval request loaded.</pre>
+<label for="ponsConfirmation">Type the exact confirmation phrase shown in the request:</label>
+<input id="ponsConfirmation" type="text" autocomplete="off" spellcheck="false" style="width:100%;margin:8px 0;padding:10px;border-radius:8px">
+<div class="quality-actions">
+<button class="small" id="ponsApprove" type="button">Confirm Exact-Scope Approval</button>
+<button class="small" id="ponsHistory" type="button">Approval History</button>
+</div>
+<p id="ponsState" aria-live="polite">PONS approval state: HOLD until exact human confirmation and live fingerprint verification.</p>
+</section>
+<section class="quality-panel" aria-label="PONS patch hash authorization">
+<h3>PONS · Exact Patch Authorization</h3>
+<p>Provide the parent patch-preparation grant and the complete unified diff. PONS binds the exact patch bytes to the original approved file scope. A second human confirmation is required.</p>
+<label for="patchParentGrant">Parent PONS grant ID</label>
+<input id="patchParentGrant" type="text" autocomplete="off" spellcheck="false" style="width:100%;margin:8px 0;padding:10px;border-radius:8px">
+<label for="patchSource">Complete unified diff</label>
+<textarea id="patchSource" rows="8" spellcheck="false" style="width:100%;margin:8px 0;padding:10px;border-radius:8px" placeholder="Paste the complete reviewed unified diff here"></textarea>
+<div class="quality-actions">
+<button class="small" id="patchRequest" type="button">Create Patch Hash Request</button>
+<button class="small" id="patchHistory" type="button">Patch Approval History</button>
+</div>
+<pre id="patchScope" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:280px;overflow:auto">No patch request loaded.</pre>
+<label for="patchConfirmation">Type the exact patch confirmation phrase:</label>
+<input id="patchConfirmation" type="text" autocomplete="off" spellcheck="false" style="width:100%;margin:8px 0;padding:10px;border-radius:8px">
+<button class="small" id="patchApprove" type="button" disabled>Authorize Exact Patch Hash</button>
+<p id="patchState" aria-live="polite">Patch authorization: HOLD.</p>
+</section>
+<section class="quality-panel" aria-label="PONS ERIA-PACT executor">
+<h3>PONS · ERIA-PACT Transaction Executor</h3>
+<p>Declarative, allowlisted operations only. Review the complete program and exact execution plan before authorizing. Main/master writes are prohibited. Deployment remains disabled until its workflow is explicitly allowlisted.</p>
+<label for="pactProgram">ERIA-PACT/1 program</label>
+<textarea id="pactProgram" rows="6" spellcheck="false" style="width:100%;margin:8px 0;padding:10px;border-radius:8px" placeholder="APPLY PATCH &lt;approved-patch-grant-id&gt;&#10;COMMIT MESSAGE &quot;Describe the change&quot;"></textarea>
+<div class="quality-actions">
+<button class="small" id="pactRequest" type="button">Build Execution Plan</button>
+<button class="small" id="pactHistory" type="button">Execution History</button>
+</div>
+<pre id="pactPlan" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:320px;overflow:auto">No PACT plan loaded.</pre>
+<label for="pactConfirmation">Type the exact PACT execution confirmation phrase:</label>
+<input id="pactConfirmation" type="text" autocomplete="off" spellcheck="false" style="width:100%;margin:8px 0;padding:10px;border-radius:8px">
+<div class="quality-actions">
+<button class="small" id="pactApprove" type="button" disabled>Authorize Exact Transaction</button>
+<button class="small" id="pactExecute" type="button" disabled>Execute Approved Transaction</button>
+</div>
+<p id="pactState" aria-live="polite">PACT: HOLD. No source or Git operation is authorized.</p>
+</section>
+<section class="quality-panel" aria-label="Code Aura glob discovery">
+<h3>Code Aura · .glob Faculty</h3>
+<p>Read-only repository discovery. Bootstrap creation is separately PONS-gated: new files only, exact content hashes, one-time approval, no staging or commit.</p>
+<label for="globPatterns">Glob patterns (one per line)</label>
+<textarea id="globPatterns" rows="3" spellcheck="false" style="width:100%;margin:8px 0;padding:10px;border-radius:8px" placeholder="**/*.kt&#10;tools/**/*.py"></textarea>
+<label for="globExcludes">Additional excluded names (comma separated)</label>
+<input id="globExcludes" type="text" style="width:100%;margin:8px 0;padding:10px;border-radius:8px" placeholder="generated, vendor">
+<div class="quality-actions"><button class="small" id="globScan" type="button">Scan Repository</button><button class="small" id="globStatus" type="button">.glob Status</button></div>
+<pre id="globResults" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:320px;overflow:auto">No .glob scan yet.</pre>
+<p id="globState" aria-live="polite">Scanning is read-only. No files are changed.</p>
+<hr>
+<h4>PONS · New-file bootstrap</h4>
+<p>Submit a JSON array of path/content objects. Review the exact path and SHA-256 manifest, confirm the phrase, then apply the one-time create-only grant.</p>
+<textarea id="globBootstrapManifest" rows="5" spellcheck="false" style="width:100%;margin:8px 0;padding:10px;border-radius:8px" placeholder='[{"path":"tools/new_faculty.py","content":"# reviewed"}]'></textarea>
+<input id="globBootstrapPurpose" type="text" style="width:100%;margin:8px 0;padding:10px;border-radius:8px" placeholder="Purpose for this new-file request">
+<div class="quality-actions"><button class="small" id="globBootstrapRequest" type="button">Request New-file Approval</button><button class="small" id="globBootstrapApprove" type="button" disabled>Approve Exact Scope</button><button class="small" id="globBootstrapApply" type="button" disabled>Create Approved Files</button></div>
+<pre id="globBootstrapScope" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:260px;overflow:auto">No bootstrap request.</pre>
+<input id="globBootstrapConfirmation" type="text" autocomplete="off" spellcheck="false" style="width:100%;margin:8px 0;padding:10px;border-radius:8px" placeholder="Exact phrase from scope manifest">
+<p id="globBootstrapState" aria-live="polite">Bootstrap: HOLD. No new files may be created without exact approval.</p>
+</section>
 <section id="chat" class="chat" aria-live="polite">
 <div class="welcome"><h2>Welcome to ERIA</h2><p>Ask questions about repository files, branches, commits, architecture, provenance, or the PONS bridge. Original source remains non-authoritative; translations are derived records, not replacements.</p></div>
 </section>
@@ -42,9 +125,10 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
 <button class="small" id="statusBtn" type="button">Integration status</button>
 <button class="small" id="filesBtn" type="button">Search indexed paths</button>
 <button class="small" id="refreshBtn" type="button">Refresh index</button>
+<button class="small" id="pullBtn" type="button">Pull local + GitHub</button>
 </div></div>
 </main>
-<footer>Local Termux session · SQLite stored under ~/.eria · No automatic Git mutation or remote transmission</footer>
+<footer>Local Termux session · PONS-gated source changes only · Unapproved Git mutation is disabled</footer>
 </div>
 <script>
 (() => {
@@ -79,6 +163,16 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Request failed: " + response.status);
     return data;
+  }
+  async function qualityStatus() {
+    try {
+      const data = await api("/api/quality/summary");
+      if (!data.ready) { $("qualityState").textContent = "Qualitative Storage ready at " + data.storage_root + " · " + data.message; return; }
+      $("qualityState").textContent = data.summary.files_assessed + " files · " +
+        data.summary.findings.high + " high / " + data.summary.findings.medium +
+        " medium findings · " + data.ranked_candidates + " synthesis candidates · " +
+        data.source_comparison_count + " local/GitHub divergences · report " + data.report_id;
+    } catch (error) { $("qualityState").textContent = "Quality bridge unavailable: " + error.message; }
   }
   async function status() {
     try {
@@ -130,6 +224,60 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
       event.preventDefault(); $("form").requestSubmit();
     }
   });
+  let globBootstrapRequest=null, globBootstrapGrant=null;
+  $("globBootstrapRequest").addEventListener("click",async()=>{
+    try{
+      const files=JSON.parse($("globBootstrapManifest").value);
+      const purpose=$("globBootstrapPurpose").value.trim();
+      globBootstrapGrant=null; $("globBootstrapApprove").disabled=true; $("globBootstrapApply").disabled=true;
+      globBootstrapRequest=await api("/api/glob/bootstrap/request",{method:"POST",body:JSON.stringify({files,purpose})});
+      $("globBootstrapScope").textContent=JSON.stringify(globBootstrapRequest,null,2);
+      $("globBootstrapConfirmation").value="";
+      $("globBootstrapApprove").disabled=false;
+      $("globBootstrapState").textContent="HOLD · Verify every path, content hash, branch and HEAD before confirming.";
+    }catch(error){$("globBootstrapState").textContent="HOLD: "+error.message;}
+  });
+  $("globBootstrapApprove").addEventListener("click",async()=>{
+    if(!globBootstrapRequest){$("globBootstrapState").textContent="HOLD: create a request first.";return;}
+    try{
+      const result=await api("/api/glob/bootstrap/confirm",{method:"POST",body:JSON.stringify({
+        request_id:globBootstrapRequest.request_id,scope_sha256:globBootstrapRequest.scope_sha256,
+        confirmation:$("globBootstrapConfirmation").value
+      })});
+      globBootstrapGrant=result; $("globBootstrapApply").disabled=false;
+      $("globBootstrapConfirmation").value="";
+      $("globBootstrapState").textContent=result.decision+" · Grant "+result.grant_id+" · No files created yet.";
+      $("globBootstrapScope").textContent+="\\n\\nPONS GRANT\\n"+JSON.stringify(result,null,2);
+    }catch(error){$("globBootstrapState").textContent="HOLD: "+error.message;}
+  });
+  $("globBootstrapApply").addEventListener("click",async()=>{
+    if(!globBootstrapGrant)return;
+    if(!confirm("Create only the exact new files in this approved PONS manifest?"))return;
+    const button=$("globBootstrapApply");button.disabled=true;
+    try{
+      const result=await api("/api/glob/bootstrap/apply",{method:"POST",body:JSON.stringify({grant_id:globBootstrapGrant.grant_id})});
+      $("globBootstrapState").textContent=result.status+" · "+result.paths.join(", ")+" · not staged or committed";
+      $("globBootstrapScope").textContent+="\\n\\nCREATE RESULT\\n"+JSON.stringify(result,null,2);
+      globBootstrapGrant=null;
+    }catch(error){$("globBootstrapState").textContent="HOLD: "+error.message;}
+    finally{button.disabled=true;}
+  });
+  $("globScan").addEventListener("click", async () => {
+    const patterns=$("globPatterns").value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+    if(!patterns.length){$("globState").textContent="HOLD: enter at least one relative pattern.";return;}
+    const excludes=$("globExcludes").value.split(",").map(x=>x.trim()).filter(Boolean);
+    const button=$("globScan");button.disabled=true;
+    try{
+      const result=await api("/api/glob/scan",{method:"POST",body:JSON.stringify({patterns,excludes,limit:500})});
+      $("globResults").textContent=JSON.stringify(result,null,2);
+      $("globState").textContent=result.count+" match(es) · "+(result.truncated?"truncated":"complete")+" · read-only";
+    }catch(error){$("globState").textContent="HOLD: "+error.message;}
+    finally{button.disabled=false;}
+  });
+  $("globStatus").addEventListener("click",async()=>{
+    try{const result=await api("/api/glob/status");$("globResults").textContent=JSON.stringify(result,null,2);$("globState").textContent="Status loaded; bootstrap remains approval-gated.";}
+    catch(error){$("globState").textContent="HOLD: "+error.message;}
+  });
   $("statusBtn").addEventListener("click", () => send("integration.status"));
   $("filesBtn").addEventListener("click", async () => {
     const query = prompt("Find repository paths containing:");
@@ -150,6 +298,206 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
     } catch (error) { addMessage("assistant", "Index refresh failed: " + error.message); }
     finally { $("refreshBtn").disabled = false; }
   });
-  status(); history();
+  $("pullBtn").addEventListener("click", async () => {
+    const button = $("pullBtn"); button.disabled = true; button.textContent = "Pulling…";
+    try {
+      const result = await api("/api/pull", {method:"POST", body:"{}"});
+      addMessage("assistant", "File Pull results:\\n" + JSON.stringify(result.results, null, 2));
+    } catch (error) {
+      addMessage("assistant", "File Pull failed: " + error.message);
+    } finally { button.disabled = false; button.textContent = "Pull local + GitHub"; }
+  });
+  $("qualityRefresh").addEventListener("click", async () => {
+    const button = $("qualityRefresh"); button.disabled = true; button.textContent = "Assessing…";
+    try {
+      const data = await api("/api/quality/refresh", {method:"POST",body:"{}"});
+      addMessage("assistant", "Qualitative report stored.\n" + JSON.stringify(data.summary, null, 2));
+      await qualityStatus();
+    } catch (error) { addMessage("assistant", "Quality refresh failed: " + error.message); }
+    finally { button.disabled = false; button.textContent = "Refresh Quality"; }
+  });
+  $("qualityFindings").addEventListener("click", async () => {
+    try {
+      const data = await api("/api/quality/findings");
+      addMessage("assistant", data.count ? "Æị quality findings:\n" + data.findings.map(f =>
+        "[" + f.severity.toUpperCase() + " " + f.rule + "] " + f.path + ":" + f.line + " — " + f.message).join("\n")
+        : "No findings in the latest report, or no report has been created.");
+    } catch (error) { addMessage("assistant", "Findings unavailable: " + error.message); }
+  });
+  $("qualityCandidates").addEventListener("click", async () => {
+    try {
+      const data = await api("/api/quality/candidates");
+      addMessage("assistant", data.candidates.length ? "Ranked synthesis candidates (heuristic triage, not correctness scores):\n" +
+        data.candidates.map((x,i) => (i+1) + ". " + x.symbol + " · " + x.rank_score +
+          "/100\n   " + x.candidate_paths.join(", ")).join("\n") :
+        "No shared-symbol synthesis candidates in the latest report.");
+    } catch (error) { addMessage("assistant", "Candidate ranking unavailable: " + error.message); }
+  });
+  $("qualityInspect").addEventListener("click", async () => {
+    const path = prompt("Repository-relative source path to inspect:");
+    if (!path || !path.trim()) return;
+    try {
+      const data = await api("/api/quality/inspect?path=" + encodeURIComponent(path.trim()));
+      addMessage("assistant", "Æị source inspection · " + data.path + "\\nSnapshot match: " +
+        data.matches_report_snapshot + "\\nCurrent SHA-256: " + data.current_sha256 +
+        "\\nReport SHA-256: " + data.report_sha256 + "\\nFindings: " +
+        JSON.stringify(data.findings, null, 2) + "\\n\\n" + data.content_preview);
+    } catch (error) { addMessage("assistant", "Source inspection unavailable: " + error.message); }
+  });
+  $("qualityPrepare").addEventListener("click", async () => {
+    const symbol = prompt("Exact candidate symbol from Rank Synthesis:");
+    if (!symbol || !symbol.trim()) return;
+    try {
+      const data = await api("/api/quality/proposals", {method:"POST",body:JSON.stringify({symbol:symbol.trim()})});
+      addMessage("assistant", "Approval-ready proposal stored · " + data.proposal_id +
+        "\\nStatus: " + data.status + "\\nPacket: " + data.evidence.approval_boundary +
+        "\\nPaths: " + data.paths.join(", "));
+    } catch (error) { addMessage("assistant", "Proposal preparation failed: " + error.message); }
+  });
+  $("qualityProposals").addEventListener("click", async () => {
+    try {
+      const data = await api("/api/quality/proposals");
+      addMessage("assistant", data.proposals.length ? "Approval-ready review packets (not applied):\n" +
+        data.proposals.map(x => x.proposal_id + " · " + x.symbol + " · " + x.status).join("\n") :
+        "No qualitative proposals prepared yet.");
+    } catch (error) { addMessage("assistant", "Proposal history unavailable: " + error.message); }
+  });
+  let ponsRequest = null;
+  $("ponsLoad").addEventListener("click", async () => {
+    try {
+      const data = await api("/api/quality/proposals");
+      const select = $("ponsProposal");
+      select.innerHTML = '<option value="">Select a proposal…</option>';
+      data.proposals.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item.proposal_id;
+        option.textContent = item.symbol + " · " + item.status + " · " + item.proposal_id.slice(0,8);
+        select.append(option);
+      });
+      $("ponsState").textContent = "Loaded " + data.proposals.length + " proposal(s). Select one to request exact-scope authorization.";
+    } catch (error) { $("ponsState").textContent = "HOLD: " + error.message; }
+  });
+  $("ponsRequest").addEventListener("click", async () => {
+    const proposalId = $("ponsProposal").value;
+    if (!proposalId) { $("ponsState").textContent = "HOLD: select a proposal first."; return; }
+    try {
+      ponsRequest = await api("/api/pons/approvals/request", {
+        method:"POST", body:JSON.stringify({proposal_id:proposalId})
+      });
+      $("ponsScope").textContent = JSON.stringify({
+        proposal_id: ponsRequest.proposal_id, capability: ponsRequest.capability,
+        exact_scope: ponsRequest.scope, scope_sha256: ponsRequest.scope_sha256,
+        required_confirmation: ponsRequest.confirmation_phrase, state: ponsRequest.status
+      }, null, 2);
+      $("ponsConfirmation").value = "";
+      $("ponsState").textContent = "HOLD · Review every listed path, fingerprint, branch and commit. Type the exact phrase to authorize this scope.";
+    } catch (error) { $("ponsState").textContent = "HOLD: " + error.message; }
+  });
+  $("ponsApprove").addEventListener("click", async () => {
+    if (!ponsRequest) { $("ponsState").textContent = "HOLD: create an exact-scope request first."; return; }
+    const confirmation = $("ponsConfirmation").value;
+    if (!confirmation.trim()) { $("ponsState").textContent = "HOLD: exact confirmation phrase required."; return; }
+    const button = $("ponsApprove"); button.disabled = true;
+    try {
+      const result = await api("/api/pons/approvals/confirm", {
+        method:"POST", body:JSON.stringify({
+          request_id:ponsRequest.request_id, scope_sha256:ponsRequest.scope_sha256, confirmation
+        })
+      });
+      $("ponsState").textContent = result.decision + " · Grant " + result.grant_id +
+        " · Source modified: " + result.source_modified +
+        ". A separate reviewed patch executor is still required.";
+      $("ponsConfirmation").value = "";
+      ponsRequest = null;
+    } catch (error) { $("ponsState").textContent = "HOLD: " + error.message; }
+    finally { button.disabled = false; }
+  });
+  let patchRequest = null, patchGrant = null;
+  $("patchRequest").addEventListener("click", async () => {
+    const parent_grant_id = $("patchParentGrant").value.trim();
+    const patch_text = $("patchSource").value;
+    if (!parent_grant_id || !patch_text.trim()) { $("patchState").textContent = "HOLD: parent grant and complete diff are required."; return; }
+    try {
+      patchGrant = null; $("patchApprove").disabled = true;
+      patchRequest = await api("/api/pons/patches/request", {method:"POST",body:JSON.stringify({parent_grant_id,patch_text})});
+      $("patchScope").textContent = JSON.stringify(patchRequest,null,2);
+      $("patchConfirmation").value = ""; $("patchApprove").disabled = false;
+      $("patchState").textContent = "HOLD · Review the exact patch hash and every target path.";
+    } catch (error) { $("patchState").textContent = "HOLD: " + error.message; }
+  });
+  $("patchApprove").addEventListener("click", async () => {
+    if (!patchRequest) { $("patchState").textContent = "HOLD: create a patch request first."; return; }
+    try {
+      const result = await api("/api/pons/patches/confirm", {method:"POST",body:JSON.stringify({
+        patch_request_id:patchRequest.patch_request_id,patch_sha256:patchRequest.patch_sha256,
+        confirmation:$("patchConfirmation").value
+      })});
+      patchGrant = result; $("patchConfirmation").value = "";
+      $("patchState").textContent = result.decision + " · Patch grant " + result.patch_grant_id + " · Source modified: " + result.source_modified;
+      $("pactProgram").value = "APPLY PATCH " + result.patch_grant_id + "\nCOMMIT MESSAGE \"Approved ERIA patch\"";
+      $("patchScope").textContent += "\n\nPATCH GRANT\n" + JSON.stringify(result,null,2);
+    } catch (error) { $("patchState").textContent = "HOLD: " + error.message; }
+  });
+  $("patchHistory").addEventListener("click", async () => {
+    try { const data=await api("/api/pons/approvals"); addMessage("assistant","PONS patch history:\n"+JSON.stringify({patch_requests:data.patch_requests,patch_grants:data.patch_grants},null,2)); }
+    catch(error) { addMessage("assistant","Patch history unavailable: "+error.message); }
+  });
+  let pactRequest = null, pactGrant = null;
+  $("pactRequest").addEventListener("click", async () => {
+    const program = $("pactProgram").value;
+    if (!program.trim()) { $("pactState").textContent = "HOLD: enter an ERIA-PACT program."; return; }
+    try {
+      pactGrant = null;
+      $("pactApprove").disabled = true; $("pactExecute").disabled = true;
+      pactRequest = await api("/api/pons/executor/request", {
+        method:"POST", body:JSON.stringify({program})
+      });
+      $("pactPlan").textContent = JSON.stringify({
+        plan:pactRequest.plan, plan_sha256:pactRequest.plan_sha256,
+        required_confirmation:pactRequest.confirmation_phrase, status:pactRequest.status
+      }, null, 2);
+      $("pactConfirmation").value = "";
+      $("pactApprove").disabled = false;
+      $("pactState").textContent = "HOLD · Inspect every operation, path, branch, commit, PR and deployment workflow before authorization.";
+    } catch (error) { $("pactState").textContent = "HOLD: " + error.message; }
+  });
+  $("pactApprove").addEventListener("click", async () => {
+    if (!pactRequest) { $("pactState").textContent = "HOLD: build a plan first."; return; }
+    try {
+      const result = await api("/api/pons/executor/confirm", {method:"POST",body:JSON.stringify({
+        request_id:pactRequest.request_id, plan_sha256:pactRequest.plan_sha256,
+        confirmation:$("pactConfirmation").value
+      })});
+      pactGrant = result;
+      $("pactExecute").disabled = false;
+      $("pactConfirmation").value = "";
+      $("pactState").textContent = result.decision + " · Exact transaction authorized. Grant " + result.grant_id + ". Execution has NOT started.";
+      $("pactPlan").textContent += "\\n\\nPONS GRANT\\n" + JSON.stringify(result,null,2);
+    } catch (error) { $("pactState").textContent = "HOLD: " + error.message; }
+  });
+  $("pactExecute").addEventListener("click", async () => {
+    if (!pactGrant) { $("pactState").textContent = "HOLD: no approved PACT grant."; return; }
+    if (!confirm("Execute this one-time, human-approved PACT transaction?")) return;
+    const button = $("pactExecute"); button.disabled = true;
+    try {
+      const result = await api("/api/pons/executor/execute", {method:"POST",body:JSON.stringify({grant_id:pactGrant.grant_id})});
+      $("pactState").textContent = result.status + " · " + result.results.map(x => x.operation + ": " + x.status).join(" · ");
+      $("pactPlan").textContent += "\\n\\nEXECUTION RESULT\\n" + JSON.stringify(result,null,2);
+      pactGrant = null;
+    } catch (error) { $("pactState").textContent = "Execution refused: " + error.message; }
+  });
+  $("pactHistory").addEventListener("click", async () => {
+    try {
+      const data = await api("/api/pons/executor/status");
+      addMessage("assistant", "ERIA-PACT history:\\n" + JSON.stringify(data.history,null,2));
+    } catch (error) { addMessage("assistant", "PACT history unavailable: " + error.message); }
+  });
+  $("ponsHistory").addEventListener("click", async () => {
+    try {
+      const data = await api("/api/pons/approvals");
+      addMessage("assistant", "PONS exact-scope requests:\\n" + JSON.stringify(data, null, 2));
+    } catch (error) { addMessage("assistant", "PONS history unavailable: " + error.message); }
+  });
+  status(); history(); qualityStatus();
 })();
 </script></body></html>

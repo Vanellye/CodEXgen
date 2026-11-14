@@ -137,11 +137,33 @@ class Pons:
         return Decision.PROPOSAL_ONLY
 
     @staticmethod
+    def authorize_source_write(grant: Optional[CapabilityGrant], capability: str,
+                               scope_sha256: str) -> Decision:
+        """Authorize one exact source-change scope after the local human adapter confirms it.
+
+        This decision records authorization only; it does not execute a patch.
+        """
+        if (grant is None or len(scope_sha256) != 64
+                or not grant.permits(capability, scope_sha256)):
+            return Decision.HOLD
+        return Decision.REVIEW_READY
+
+    @staticmethod
     def describe() -> Dict[str, Any]:
         return {
             "bridge": "PONS",
             "version": "1.0",
-            "mode": "proposal-and-inspection",
+            "mode": "proposal-review-and-exact-scope-approval",
+            "human_exact_scope_approval": True,
+            "patch_application_enabled": False,
+            "patch_application_requires_second_patch_hash_approval": True,
+            "scoped_executor_language": "ERIA-PACT/1",
+            "executor_available_only_after_transaction_approval": True,
+            "arbitrary_shell_execution": False,
+            "main_master_writes": False,
+            "deployment_allowlist_required": True,
+            "scoped_source_executor": "ERIA-PACT/1",
+            "per_transaction_human_approval": True,
             "source_authority": "NON_AUTHORITATIVE",
             "derived_authority": "NON_AUTHORITATIVE",
             "capability_policy": "exact-scope; missing-or-unverified-approval=HOLD",

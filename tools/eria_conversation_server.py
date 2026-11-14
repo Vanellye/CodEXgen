@@ -28,9 +28,14 @@ UI_FILE = HERE / "eria_conversation.html"
 sys.path.insert(0, str(TOOLS))
 from eria_repository_conversation import Conversation, Repository  # noqa: E402
 from eria_pantheon.pons import Pons  # noqa: E402
+from eria_file_pull import FilePullService, start_scheduler
+from eria_quality_bridge import QualityBridge
+from eria_pons_approval import PonsApprovalService
+from eria_pact import PactRuntime
+from eria_glob import GlobEngine, GlobBootstrap
 
 DB_DEFAULT = Path.home() / ".eria" / "data" / "eria_conversation.sqlite3"
-MAX_BODY = 16_384
+MAX_BODY = 8_388_608
 SAFE_NAME = re.compile(r"(secret|credential|token|password|private[_-]?key|\.env)", re.I)
 SKIP_PARTS = {".git", ".gradle", ".idea", "node_modules", "__pycache__", ".venv", "venv", "build", "dist"}
 DB_LOCK = threading.RLock()
@@ -305,9 +310,23 @@ class Handler(BaseHTTPRequestHandler):
         if route == "/api/pons/requests":
             self.send_json(200, {
                 "requests": self.app.store.pons_requests(),
-                "approval_supported": False,
-                "note": "Requests are recorded as HOLD proposals; this service cannot approve grants.",
+                "approval_supported": True,
+                "note": "The Termux PONS screen can record exact-scope human approval for patch preparation. Patch application and source writes remain disabled.",
             })
+            return
+        if route == "/api/pons/approvals":
+            self.send_json(200, self.app.pons_approvals.history())
+            return
+        if route == "/api/pons/executor/status":
+            self.send_json(200, {
+                "language": "ERIA-PACT/1", "approval_gated": True,
+                "arbitrary_shell": False, "main_branch_writes": False,
+                "deployment_requires_allowlist": True,
+                "history": self.app.pact.history(),
+            })
+            return
+        if route == "/api/glob/status":
+            self.send_json(200, {"engine":"ERIA Code Aura .glob/1","read_only_discovery":True,"bootstrap_create_only":True,"history":self.app.glob_bootstrap.history()})
             return
         if route == "/api/audit":
             self.send_json(200, {"events": self.app.store.audit_history()})
@@ -343,6 +362,39 @@ class Handler(BaseHTTPRequestHandler):
             except Exception as exc:
                 self.send_json(400, {"error": "File inspection unavailable: " + type(exc).__name__})
             return
+        if route == "/api/quality/summary":
+            self.send_json(200, self.app.quality.summary())
+            return
+        if route == "/api/quality/findings":
+            params = parse_qs(urlparse(self.path).query)
+            try:
+                records = self.app.quality.findings(
+                    params.get("severity", [""])[0][:10],
+                    params.get("path", [""])[0][:300])
+                self.send_json(200, {"findings": records, "count": len(records)})
+            except ValueError as exc:
+                self.send_json(400, {"error": str(exc)})
+            return
+        if route == "/api/quality/candidates":
+            self.send_json(200, {"candidates": self.app.quality.candidates()})
+            return
+        if route == "/api/quality/inspect":
+            params = parse_qs(urlparse(self.path).query)
+            rel = params.get("path", [""])[0]
+            try:
+                result = self.app.quality.inspect(rel)
+                self.app.store.add_audit("quality_source_inspected", "RECORDED", {
+                    "path": result["path"], "matches_report_snapshot": result["matches_report_snapshot"]})
+                self.send_json(200, result)
+            except (ValueError, OSError) as exc:
+                self.send_json(400, {"error": str(exc)})
+            return
+        if route == "/api/quality/proposals":
+            self.send_json(200, {"proposals": self.app.quality.proposal_history()})
+            return
+        if route == "/api/pull/status":
+            self.send_json(200, self.app.file_pull.status())
+            return
         if route == "/api/status":
             self.send_json(200, {
                 "ok": True, "repository": str(self.app.repository.root),
@@ -371,7 +423,153 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         route = urlparse(self.path).path
         try:
+            origin = self.headers.get("Origin")
+            if origin:
+                port = self.server.server_port
+                allowed_origins = {
+                    "http://127.0.0.1:" + str(port),
+                    "http://localhost:" + str(port),
+                    "http://[::1]:" + str(port),
+                }
+                if origin not in allowed_origins:
+                    self.send_json(403, {"error": "Cross-origin local mutation request rejected."})
+                    return
+            if self.headers.get("Sec-Fetch-Site", "").lower() in {"cross-site", "same-site"}:
+                self.send_json(403, {"error": "Cross-site local mutation request rejected."})
+                return
             data = self.read_json()
+            if route == "/api/glob/scan":
+                result=self.app.glob.scan(data.get("patterns"),excludes=data.get("excludes"),limit=data.get("limit",500))
+                self.app.store.add_audit("glob_scan","READ_ONLY",{"patterns":result["patterns"],"count":result["count"],"truncated":result["truncated"]})
+                self.send_json(200,result); return
+            if route == "/api/glob/bootstrap/request":
+                result=self.app.glob_bootstrap.create_request(data.get("files"),data.get("purpose"))
+                self.app.store.add_audit("glob_bootstrap_requested","HOLD",{"request_id":result["request_id"],"scope_sha256":result["scope_sha256"]})
+                self.send_json(201,result); return
+            if route == "/api/glob/bootstrap/confirm":
+                result=self.app.glob_bootstrap.approve(data.get("request_id"),data.get("scope_sha256"),data.get("confirmation"))
+                self.app.store.add_audit("glob_bootstrap_approved",result["decision"],{"grant_id":result["grant_id"],"scope_sha256":result["scope_sha256"],"source_modified":False})
+                self.send_json(200,result); return
+            if route == "/api/glob/bootstrap/apply":
+                grant_id=data.get("grant_id")
+                if not isinstance(grant_id,str) or not grant_id.strip(): raise ValueError("grant_id is required.")
+                result=self.app.glob_bootstrap.apply(grant_id)
+                self.app.store.add_audit("glob_bootstrap_applied",result["status"],{"grant_id":grant_id,"paths":result["paths"],"git_staged":False,"committed":False})
+                self.send_json(200,result); return
+            if route == "/api/quality/refresh":
+                report = self.app.quality.refresh()
+                self.app.store.add_audit("quality_report_refreshed", "RECORDED", {
+                    "report_id": report["report_id"], "report_sha256": report["report_sha256"],
+                    "files_assessed": report.get("summary", {}).get("files_assessed", 0)})
+                self.send_json(200, {"summary": self.app.quality.summary()})
+                return
+            if route == "/api/quality/proposals":
+                symbol = data.get("symbol")
+                if not isinstance(symbol, str) or not symbol.strip() or len(symbol) > 200:
+                    raise ValueError("A candidate symbol is required.")
+                proposal = self.app.quality.prepare_proposal(symbol.strip())
+                self.app.store.add_audit("quality_proposal_prepared", "REVIEW_REQUIRED", {
+                    "proposal_id": proposal["proposal_id"], "symbol": symbol.strip()})
+                self.send_json(201, proposal)
+                return
+            if route == "/api/pons/approvals/request":
+                proposal_id = data.get("proposal_id")
+                request_record = self.app.pons_approvals.create_request(proposal_id)
+                self.app.store.add_audit("pons_exact_scope_requested", "HOLD", {
+                    "request_id": request_record["request_id"],
+                    "proposal_id": proposal_id,
+                    "scope_sha256": request_record["scope_sha256"],
+                })
+                self.send_json(201, request_record)
+                return
+            if route == "/api/pons/patches/request":
+                parent_grant_id = data.get("parent_grant_id")
+                patch_text = data.get("patch_text")
+                request_record = self.app.pons_approvals.create_patch_request(parent_grant_id, patch_text)
+                self.app.store.add_audit("pons_patch_hash_requested", "HOLD", {
+                    "patch_request_id": request_record["patch_request_id"],
+                    "parent_grant_id": parent_grant_id,
+                    "patch_sha256": request_record["patch_sha256"],
+                })
+                self.send_json(201, request_record)
+                return
+            if route == "/api/pons/patches/confirm":
+                request_id = data.get("patch_request_id")
+                patch_sha256 = data.get("patch_sha256")
+                confirmation = data.get("confirmation")
+                if not all(isinstance(x, str) and x.strip() for x in (request_id, patch_sha256, confirmation)):
+                    raise ValueError("patch_request_id, patch_sha256 and exact confirmation are required.")
+                result = self.app.pons_approvals.approve_patch(request_id, patch_sha256, confirmation)
+                self.app.store.add_audit("pons_patch_hash_approved", result["decision"], {
+                    "patch_grant_id": result["patch_grant_id"],
+                    "patch_request_id": request_id, "patch_sha256": result["patch_sha256"],
+                    "source_modified": False,
+                })
+                self.send_json(200, result)
+                return
+            if route == "/api/pons/patches/verify":
+                result = self.app.pons_approvals.verify_patch_grant(
+                    data.get("patch_grant_id"), data.get("patch_text")
+                )
+                self.send_json(200, result)
+                return
+            if route == "/api/pons/executor/request":
+                program = data.get("program")
+                request_record = self.app.pact.create_request(program)
+                self.app.store.add_audit("pons_pact_requested", "HOLD", {
+                    "request_id": request_record["request_id"],
+                    "plan_sha256": request_record["plan_sha256"],
+                })
+                self.send_json(201, request_record)
+                return
+            if route == "/api/pons/executor/confirm":
+                request_id = data.get("request_id")
+                plan_sha256 = data.get("plan_sha256")
+                confirmation = data.get("confirmation")
+                if not all(isinstance(x, str) and x.strip()
+                           for x in (request_id, plan_sha256, confirmation)):
+                    raise ValueError("request_id, plan_sha256 and exact confirmation are required.")
+                result = self.app.pact.approve(request_id, plan_sha256, confirmation)
+                self.app.store.add_audit("pons_pact_authorized", result["decision"], {
+                    "grant_id": result["grant_id"], "plan_sha256": result["plan_sha256"],
+                    "capabilities": result["capabilities"], "executed": False,
+                })
+                self.send_json(200, result)
+                return
+            if route == "/api/pons/executor/execute":
+                grant_id = data.get("grant_id")
+                if not isinstance(grant_id, str) or not grant_id.strip():
+                    raise ValueError("grant_id is required.")
+                result = self.app.pact.execute(grant_id)
+                self.app.store.add_audit("pons_pact_execution", result["status"], {
+                    "grant_id": grant_id, "operations": result["results"],
+                })
+                self.send_json(200, result)
+                return
+            if route == "/api/pons/approvals/confirm":
+                request_id = data.get("request_id")
+                scope_sha256 = data.get("scope_sha256")
+                confirmation = data.get("confirmation")
+                if not all(isinstance(x, str) and x.strip()
+                           for x in (request_id, scope_sha256, confirmation)):
+                    raise ValueError("request_id, scope_sha256 and exact confirmation are required.")
+                result = self.app.pons_approvals.approve(
+                    request_id, scope_sha256, confirmation
+                )
+                self.app.store.add_audit("pons_exact_scope_approved", result["decision"], {
+                    "grant_id": result["grant_id"], "request_id": request_id,
+                    "proposal_id": result["proposal_id"],
+                    "scope_sha256": result["scope_sha256"],
+                    "source_modified": False,
+                })
+                self.send_json(200, result)
+                return
+            if route == "/api/pull":
+                result = self.app.file_pull.sync_all()
+                quality_report = self.app.quality.refresh()
+                result["quality_report_id"] = quality_report["report_id"]
+                self.send_json(200 if result.get("ok") else 502, result)
+                return
             if route == "/api/chat":
                 question = data.get("message")
                 session = str(data.get("session_id", "default"))[:80]
@@ -380,6 +578,9 @@ class Handler(BaseHTTPRequestHandler):
                 question = question.strip()[:8000]
                 self.app.store.add_message(session, "user", question)
                 answer = self.app.conversation.ask(question)
+                quality_answer = self.app.quality.answer(question)
+                if quality_answer:
+                    answer += "\n\n" + quality_answer
                 self.app.store.add_message(session, "assistant", answer)
                 self.send_json(200, {"answer": answer})
                 return
@@ -415,6 +616,12 @@ class App:
         self.conversation = Conversation(self.repository)
         self.store = Store(database)
         self.store.index_repository(self.repository)
+        self.file_pull = FilePullService(self.repository.root, self.store.path)
+        self.quality = QualityBridge(self.repository.root, self.store.path)
+        self.pons_approvals = PonsApprovalService(self.quality, self.repository.root)
+        self.pact = PactRuntime(self.pons_approvals)
+        self.glob = GlobEngine(self.repository.root)
+        self.glob_bootstrap = GlobBootstrap(self.repository.root, self.quality.home / 'glob_bootstrap.sqlite3')
 
 
 def main():
@@ -428,6 +635,7 @@ def main():
     if args.host not in {"127.0.0.1", "localhost", "::1"}:
         parser.error("ERIA server only binds to loopback.")
     app = App(Path(args.repository), args.database)
+    start_scheduler(app.file_pull, app.quality.refresh)
     server = ThreadingHTTPServer((args.host, args.port), Handler)
     server.app = app
     print("ERIA HTML Conversation")

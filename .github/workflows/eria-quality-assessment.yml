@@ -1,0 +1,53 @@
+name: ERIA Repository Quality and Synthesis Assessment
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "17 */6 * * *"
+  push:
+    branches:
+      - "feature/eria-automated-file-pull-2026-11-14"
+    paths:
+      - "**"
+      - ".github/workflows/eria-quality-assessment.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eria-quality-assessment-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  assess:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Assess repository without executing acquired source
+        run: python tools/eria_quality_mixer.py assess . --output .eria/quality/latest.json
+      - name: Validate assessor tests
+        env:
+          PYTHONPATH: .
+        run: |
+          python -m unittest discover -s tests -p "test_eria_quality_*.py" -v
+          python -m unittest discover -s tests -p "test_eria_pons_approval.py" -v
+          python -m unittest discover -s tests -p "test_eria_pact.py" -v
+          python -m unittest discover -s tests -p "test_eria_glob.py" -v
+      - name: Validate Python syntax (compile only)
+        run: |
+          find tools tests -type f -name '*.py' -print0 | xargs -0 -r python -m py_compile
+      - name: Upload assessment report
+        uses: actions/upload-artifact@v4
+        with:
+          name: eria-quality-report-${{ github.sha }}
+          path: .eria/quality/latest.json
+          if-no-files-found: error
+          retention-days: 30
