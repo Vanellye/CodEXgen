@@ -164,7 +164,9 @@ class Pons:
             "capability_policy": "exact-scope; missing-or-unverified-approval=HOLD",
             "execution_enabled": False,
             "git_mutation_enabled": False,
-            "transmission_enabled": False,\n            "accuracy_authority": "PONS_ONLY",\n            "self_certification_allowed": False,
+            "transmission_enabled": False,
+            "accuracy_authority": "PONS_ONLY",
+            "self_certification_allowed": False,
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
