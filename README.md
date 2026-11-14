@@ -4,6 +4,12 @@ ERIA is the canonical project identity for this codebase. The GitHub repository 
 `Vanellye/CodEXgen` during this migration so existing clone URLs, issues, pull requests,
 and provenance links continue to resolve.
 
+## FOCUS — start here
+
+[Open the FOCUS English Repository Guide](FOCUS/README.md) for a plain-English map of the
+repository, organized by necessity: safety and approval boundaries first, then preservation,
+source translation, execution boundaries, interfaces, and build/test material.
+
 ## Android identity
 
 - Gradle root project: `ERIA`
