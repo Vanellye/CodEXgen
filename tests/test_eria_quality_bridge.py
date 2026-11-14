@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from eria_quality_bridge import QualityBridge
+from tools.eria_quality_bridge import QualityBridge
 
 
 class QualityBridgeTests(unittest.TestCase):
