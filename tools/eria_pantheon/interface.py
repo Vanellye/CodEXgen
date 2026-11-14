@@ -12,7 +12,11 @@ from .pons import BridgeEnvelope, Pons
 class ERIAPantheonInterface:
     def __init__(self, repository: Any) -> None:
         self.repository = repository
-        self.bridge = Pons(reviewer_root_public_key_b64=os.environ.get("ERIA_PONS_REVIEWER_ROOT_PUBKEY"))
+        revoked = {x.strip() for x in os.environ.get("ERIA_PONS_REVOKED_REVIEWER_KEYS", "").split(",") if x.strip()}
+        self.bridge = Pons(
+            reviewer_root_public_key_b64=os.environ.get("ERIA_PONS_REVIEWER_ROOT_PUBKEY"),
+            revoked_reviewer_key_ids=revoked,
+        )
         self.bridge.install_accuracy_service(
             str(repository.root / ".eria" / "avs" / "evidence.jsonl")
         )
@@ -21,6 +25,9 @@ class ERIAPantheonInterface:
         state = self.bridge.describe()
         state["repository"] = str(self.repository.root)
         state["conversation_engine"] = "connected"
+        state["reviewer_identity"] = (
+            "configured" if self.bridge.reviewer_identity_configured() else "NOT_CONFIGURED_FAIL_CLOSED"
+        )
         try:
             import eria_ttt_bypass  # noqa: F401
             state["code_bypass_module"] = "available"
