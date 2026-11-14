@@ -1,0 +1,29 @@
+{
+  "schema": "eria.resonance-console/1.0",
+  "mode": "both",
+  "requested_volume_percent": 777,
+  "maximum_playback_volume_percent": 50,
+  "automatic_capture": {
+    "preference": "requested",
+    "approval_required": true,
+    "enabled": false,
+    "scope": "storage/inbox/",
+    "recursive": true,
+    "poll_interval_seconds": 10,
+    "duplicate_detection": "sha256",
+    "unsupported_input": "HOLD"
+  },
+  "playback": {
+    "enabled": false,
+    "requires_user_gesture": true,
+    "local_output_only": true,
+    "external_hardware_transmission": false,
+    "hard_peak_limit": 0.5
+  },
+  "provenance": {
+    "preserve_source_bytes": true,
+    "record_source_sha256": true,
+    "record_transformations": true,
+    "derived_authority": "NON_AUTHORITATIVE"
+  }
+}
