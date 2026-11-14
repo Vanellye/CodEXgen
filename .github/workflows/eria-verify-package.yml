@@ -82,7 +82,10 @@ jobs:
           mkdir -p dist
           cp app/build/outputs/apk/debug/app-debug.apk dist/eria-debug-unsigned.apk
           tar -czf dist/eria-termux-source.tar.gz \
-            tools termux pantheon shared GOD docs README.md README-ANDROID-ERIA.md
+            --exclude='__pycache__' --exclude='*.pyc' \
+            tools termux pantheon shared docs README.md README-ANDROID-ERIA.md \
+            GOD/RECORD.schema.json GOD/PLZ/plz-event.schema.json \
+            GOD/SHOP/README.md GOD/README.md GOD/COLLECTOR.md
           python - <<'PY'
           import hashlib, json, os
           paths = ["dist/eria-debug-unsigned.apk", "dist/eria-termux-source.tar.gz"]
