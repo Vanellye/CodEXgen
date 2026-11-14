@@ -45,6 +45,26 @@ class RelayLifecycle:
     def _handle_grant(self, grant: dict[str,Any]):
         # relay.poll_once has already cryptographically verified exact scope.
         grant_id=grant["grant_id"]
+        # Share the durable consumed-grant ledger with direct PONS approvals.
+        import json, fcntl
+        approval_dir=self.root/"storage"/"approvals"
+        if approval_dir.is_symlink(): raise RelayHold("Approval ledger directory cannot be a symlink.")
+        approval_dir.mkdir(parents=True,exist_ok=True)
+        ledger=approval_dir/"consumed-grants.jsonl"
+        with open(ledger,"a+",encoding="utf-8") as stream:
+            fcntl.flock(stream.fileno(),fcntl.LOCK_EX)
+            stream.seek(0)
+            for line in stream:
+                try: prior=json.loads(line)
+                except json.JSONDecodeError as exc: raise RelayHold("Consumed-grant ledger malformed; held.") from exc
+                if prior.get("grant_id")==grant_id or prior.get("nonce")==grant.get("nonce"):
+                    raise RelayHold("Relay grant or nonce already consumed.")
+            stream.seek(0,os.SEEK_END)
+            record={"grant_id":grant_id,"nonce":grant.get("nonce"),"capability":grant.get("capability"),
+                "scope":grant.get("scope"),"consumed_at":__import__("datetime").datetime.now(
+                __import__("datetime").timezone.utc).isoformat(),"status":"verified"}
+            stream.write(json.dumps(record)+chr(10)); stream.flush(); os.fsync(stream.fileno())
+            fcntl.flock(stream.fileno(),fcntl.LOCK_UN)
         config=load_config(self.root)
         config["automatic_capture"]["enabled"]=True
         config["automatic_capture"]["approval_reference"]="pons:"+grant_id
