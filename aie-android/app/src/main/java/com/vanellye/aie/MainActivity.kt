@@ -36,7 +36,7 @@ class MainActivity : Activity() {
             gravity = Gravity.CENTER_VERTICAL
         }
         apiInput = EditText(this).apply {
-            singleLine = true
+            setSingleLine(true)
             textSize = 13f
             hint = "ERIA API origin (e.g. http://127.0.0.1:8778)"
             setText(prefs.getString("api_origin", "http://127.0.0.1:8778"))
