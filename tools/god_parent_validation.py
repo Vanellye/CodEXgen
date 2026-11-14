@@ -18,9 +18,10 @@ SCHEMA = "eria.god.record/1"
 MAX_ANCESTRY_DEPTH = 256
 MAX_ANCESTRY_RECORDS = 10_000
 
-# Explicit policy. The initial collector emits original source records;
-# other child types are reserved for later derivative-record APIs.
+# Typed lineage policy. "any" is used only when verifying a record as a root.
 ALLOWED_PARENT_TYPES: dict[str, set[str]] = {
+    "any": {"original", "translation", "interpretation", "correction",
+            "frequency_observation", "collaboration_contribution"},
     "original": {"original"},
     "translation": {"original", "translation", "interpretation", "correction"},
     "interpretation": {"original", "translation", "interpretation", "correction",
@@ -31,6 +32,8 @@ ALLOWED_PARENT_TYPES: dict[str, set[str]] = {
                                    "correction", "frequency_observation",
                                    "collaboration_contribution"},
 }
+DERIVED_TYPES = {"translation", "interpretation", "correction"}
+RECORD_TYPES = ALLOWED_PARENT_TYPES["any"]
 
 
 class ParentValidationError(ValueError):
@@ -71,7 +74,13 @@ def _safe_relative_object(vault: Path, value: Any, expected_digest: str) -> Path
     rel = PurePosixPath(value)
     if rel.is_absolute() or any(part in {"", ".", ".."} for part in rel.parts):
         raise ParentValidationError("object_relative_path contains traversal or absolute path")
-    expected = PurePosixPath("ORIGINAL_DATA/objects") / expected_digest[:2] / expected_digest
+    if rel.parts[0:2] == ("ORIGINAL_DATA", "objects"):
+        expected_root = "ORIGINAL_DATA"
+    elif rel.parts[0:2] == ("DERIVED_DATA", "objects"):
+        expected_root = "DERIVED_DATA"
+    else:
+        raise ParentValidationError("object_relative_path uses an unsupported object store")
+    expected = PurePosixPath(expected_root) / "objects" / expected_digest[:2] / expected_digest
     if rel != expected:
         raise ParentValidationError("object_relative_path does not match the content-addressed digest")
 
@@ -111,7 +120,7 @@ def _validate_record_shape(record: dict[str, Any], requested_id: str) -> None:
     allowed = {
         "schema", "record_id", "record_type", "sha256", "size_bytes", "media_type",
         "source", "captured_at", "parent_record_ids", "authority", "object_relative_path",
-        "validated_parents",
+        "validated_parents", "derivation",
     }
     if set(record) - allowed:
         raise ParentValidationError("parent record contains fields outside the approved schema")
@@ -129,10 +138,9 @@ def _validate_record_shape(record: dict[str, Any], requested_id: str) -> None:
     embedded_id = _canonical_uuid(record.get("record_id"), "embedded record_id")
     if embedded_id != requested_id:
         raise ParentValidationError("parent record identity mismatch")
-    if record.get("record_type") != "original":
-        raise ParentValidationError(
-            "parent record type is not yet supported by the GOD source-record schema"
-        )
+    record_type = record.get("record_type")
+    if record_type not in RECORD_TYPES:
+        raise ParentValidationError("parent record type is unsupported")
     digest = record.get("sha256")
     if not isinstance(digest, str) or len(digest) != 64 or any(
         char not in "0123456789abcdef" for char in digest
@@ -145,18 +153,52 @@ def _validate_record_shape(record: dict[str, Any], requested_id: str) -> None:
     if not isinstance(media, str) or not media.strip():
         raise ParentValidationError("parent media_type must be non-empty text")
     source = record.get("source")
-    if not isinstance(source, dict) or set(source) != {
-        "label", "filename", "modified_time_ns", "mode"
-    }:
-        raise ParentValidationError("parent source metadata does not match the source-record schema")
+    source_allowed = {"label", "filename", "modified_time_ns", "mode",
+                      "relative_path", "root_label"}
+    if not isinstance(source, dict) or set(source) - source_allowed:
+        raise ParentValidationError("parent source metadata contains unsupported fields")
+    if not {"label", "filename", "modified_time_ns", "mode"}.issubset(source):
+        raise ParentValidationError("parent source metadata is incomplete")
     if not all(isinstance(source.get(key), str) and source[key]
                for key in ("label", "filename")):
         raise ParentValidationError("parent source label and filename must be non-empty text")
     for key in ("modified_time_ns", "mode"):
         if isinstance(source.get(key), bool) or not isinstance(source.get(key), int):
             raise ParentValidationError(f"parent source {key} must be an integer")
-    if record.get("authority") != "preserved-source-not-validated-as-fact":
-        raise ParentValidationError("parent authority marker is invalid")
+    for key in ("relative_path", "root_label"):
+        if key in source and (not isinstance(source[key], str) or not source[key]):
+            raise ParentValidationError(f"parent source {key} must be non-empty text")
+    if record_type == "original":
+        if record.get("authority") != "preserved-source-not-validated-as-fact":
+            raise ParentValidationError("original authority marker is invalid")
+        if "derivation" in record:
+            raise ParentValidationError("original records cannot contain a derivation manifest")
+    else:
+        if record.get("authority") != "derived-not-validated-as-fact":
+            raise ParentValidationError("derived authority marker is invalid")
+        derivation = record.get("derivation")
+        if not isinstance(derivation, dict) or set(derivation) != {
+            "operation", "method", "source_context", "created_by"
+        }:
+            raise ParentValidationError("derived record requires a complete derivation manifest")
+        if not isinstance(derivation.get("operation"), str) or not derivation["operation"].strip():
+            raise ParentValidationError("derivation operation must be non-empty text")
+        if not isinstance(derivation.get("method"), str) or not derivation["method"].strip():
+            raise ParentValidationError("derivation method must be non-empty text")
+        if not isinstance(derivation.get("created_by"), str) or not derivation["created_by"].strip():
+            raise ParentValidationError("derivation created_by must be non-empty text")
+        context = derivation.get("source_context")
+        if not isinstance(context, dict) or set(context) != {
+            "relative_path", "filename", "source_sha256"
+        }:
+            raise ParentValidationError("derivation source_context is incomplete")
+        if not all(isinstance(context.get(k), str) and context[k]
+                   for k in ("relative_path", "filename", "source_sha256")):
+            raise ParentValidationError("derivation source_context fields must be non-empty text")
+        if len(context["source_sha256"]) != 64 or any(
+            c not in "0123456789abcdef" for c in context["source_sha256"]
+        ):
+            raise ParentValidationError("derivation source_context hash is invalid")
     captured_at = record.get("captured_at")
     if not isinstance(captured_at, str):
         raise ParentValidationError("parent captured_at must be an ISO-8601 timestamp")
@@ -176,8 +218,8 @@ def _validate_record_shape(record: dict[str, Any], requested_id: str) -> None:
         raise ParentValidationError("duplicate parent IDs are not permitted")
     if requested_id in normalized:
         raise ParentValidationError("a record cannot be its own parent")
-    if not parent_ids and record.get("record_type") != "original":
-        raise ParentValidationError("only a verified original may be an ancestry root")
+    if not parent_ids and record_type != "original":
+        raise ParentValidationError("derived records must have at least one parent")
     if "validated_parents" in record and not isinstance(record["validated_parents"], list):
         raise ParentValidationError("validated_parents must be an array")
 
@@ -250,6 +292,9 @@ def validate_parent_chain(
         if record["record_type"] not in ALLOWED_PARENT_TYPES[expected_child_type]:
             raise ParentValidationError("parent/child record-type relationship is not permitted")
 
+        expected_store = "ORIGINAL_DATA" if record["record_type"] == "original" else "DERIVED_DATA"
+        if PurePosixPath(record["object_relative_path"]).parts[0] != expected_store:
+            raise ParentValidationError("object store does not match record type")
         object_path = _safe_relative_object(vault_path, record["object_relative_path"], record["sha256"])
         actual_digest, actual_size = _hash_file(object_path)
         if actual_digest != record["sha256"] or actual_size != record["size_bytes"]:
