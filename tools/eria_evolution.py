@@ -7,14 +7,18 @@ from eria_os_sandbox import SandboxError, run as sandbox_run
 
 class EvolutionHold(RuntimeError): pass
 
-def git(root: Path, *args: str, check=True):
+def git(root: Path, *args: str, check=True, text=True):
     p = subprocess.run(["git", "-C", str(root), *args], capture_output=True,
-                       text=True, stdin=subprocess.DEVNULL)
-    if check and p.returncode: raise EvolutionHold((p.stderr or p.stdout).strip())
+                       text=text, stdin=subprocess.DEVNULL)
+    if check and p.returncode:
+        detail = (p.stderr or p.stdout)
+        if isinstance(detail, bytes):
+            detail = detail.decode("utf-8", "replace")
+        raise EvolutionHold(str(detail).strip())
     return p
 
 def snapshot(repo: Path, dest: Path):
-    archive = git(repo, "archive", "--format=tar", "HEAD").stdout.encode("latin1")
+    archive = git(repo, "archive", "--format=tar", "HEAD", text=False).stdout
     with tarfile.open(fileobj=io.BytesIO(archive), mode="r:") as tar:
         for m in tar.getmembers():
             name = Path(m.name)
@@ -30,10 +34,10 @@ def apply_patch(dest: Path, patch_file: Path):
         p = subprocess.run(["git", "-C", str(dest), *args], input=raw, capture_output=True)
         if p.returncode: raise EvolutionHold((p.stderr or p.stdout).decode("utf-8", "replace"))
 
-def export_patch(original: Path, candidate: Path, output: Path):
-    p = subprocess.run(["git", "diff", "--no-index", "--binary", "--",
-                        str(original), str(candidate)], capture_output=True)
-    if p.returncode not in (0, 1): raise EvolutionHold(p.stderr.decode("utf-8", "replace"))
+def export_patch(candidate: Path, output: Path):
+    p = git(candidate, "diff", "--binary", "HEAD", check=False, text=False)
+    if p.returncode not in (0, 1):
+        raise EvolutionHold(p.stderr.decode("utf-8", "replace"))
     if not p.stdout: raise EvolutionHold("No code progression was produced.")
     output.parent.mkdir(parents=True, exist_ok=True)
     fd = os.open(output, os.O_WRONLY|os.O_CREAT|os.O_EXCL, 0o600)
@@ -49,11 +53,15 @@ def progress(repo: Path, patch: Path, output: Path, timeout: int):
     with tempfile.TemporaryDirectory(prefix="eria-evolution-") as td:
         work = Path(td)/"workspace"; work.mkdir()
         snapshot(repo, work)
+        git(work, "init", "-q")
+        git(work, "add", "-A")
+        git(work, "-c", "user.name=ERIA Sandbox", "-c",
+            "user.email=eria-sandbox@localhost", "commit", "-q", "-m", "sandbox baseline")
         apply_patch(work, patch)
         code = sandbox_run(work, [sys.executable, "-m", "unittest",
                                   "discover", "-s", "tests", "-v"], timeout)
         if code: raise EvolutionHold(f"Sandbox tests failed: exit {code}")
-        export_patch(repo, work, output)
+        export_patch(work, output)
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
