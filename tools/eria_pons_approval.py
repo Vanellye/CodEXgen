@@ -14,7 +14,10 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-from eria_pantheon.pons import CapabilityGrant, Decision, Pons
+try:
+    from .eria_pantheon.pons import CapabilityGrant, Decision, Pons
+except ImportError:  # Termux script execution with tools/ on sys.path
+    from eria_pantheon.pons import CapabilityGrant, Decision, Pons
 
 
 def _now():
@@ -26,7 +29,7 @@ def _canonical(value):
 
 
 class PonsApprovalService:
-    CAPABILITY = "repository.source.modify"
+    CAPABILITY = "repository.patch.prepare"
 
     def __init__(self, quality, repository_root: Path):
         self.quality = quality
@@ -47,7 +50,7 @@ class PonsApprovalService:
                 decision TEXT NOT NULL, approved_at TEXT NOT NULL,
                 confirmation TEXT NOT NULL
               );
-              CREATE TRIGGER IF NOT EXISTS approval_requests_no_update
+              CREATE UNIQUE INDEX IF NOT EXISTS approval_grants_one_per_request ON approval_grants(request_id);\n              CREATE TRIGGER IF NOT EXISTS approval_requests_no_update
                 BEFORE UPDATE ON approval_requests BEGIN
                   SELECT RAISE(ABORT,'PONS approval request history is append-only');
                 END;
@@ -106,12 +109,12 @@ class PonsApprovalService:
             "report_sha256": evidence.get("report_sha256", ""),
             "branch": provenance.get("branch", ""),
             "head_commit": provenance.get("head_commit", ""),
-            "operation": "modify only the listed files under a separately reviewed patch",
+            "operation": "authorize preparation of a proposed patch for review; applying any patch requires a second approval bound to the exact patch hash",
             "files": [{"path": p, "sha256": fingerprints[p]} for p in sorted(paths)],
             "limitations": [
                 "No other files or paths are authorized",
                 "No commit, push, merge, deployment, or database source-record mutation",
-                "This grant authorizes preparation/application of only a separately reviewed patch",
+                "This grant authorizes patch preparation only; it does not authorize applying or writing any patch",
             ],
         }
         if not scope["branch"] or not scope["head_commit"] or not scope["report_sha256"]:
