@@ -419,6 +419,20 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         route = urlparse(self.path).path
         try:
+            origin = self.headers.get("Origin")
+            if origin:
+                port = self.server.server_port
+                allowed_origins = {
+                    "http://127.0.0.1:" + str(port),
+                    "http://localhost:" + str(port),
+                    "http://[::1]:" + str(port),
+                }
+                if origin not in allowed_origins:
+                    self.send_json(403, {"error": "Cross-origin local mutation request rejected."})
+                    return
+            if self.headers.get("Sec-Fetch-Site", "").lower() in {"cross-site", "same-site"}:
+                self.send_json(403, {"error": "Cross-site local mutation request rejected."})
+                return
             data = self.read_json()
             if route == "/api/quality/refresh":
                 report = self.app.quality.refresh()
