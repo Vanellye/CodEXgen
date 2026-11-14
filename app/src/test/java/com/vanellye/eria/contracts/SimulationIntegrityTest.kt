@@ -32,6 +32,12 @@ class SimulationIntegrityTest {
         assertFalse(evidence.hardwareObserved)
         assertEquals(evidence.firstOutputSha256, evidence.secondOutputSha256)
         assertTrue(evidence.evidenceId.matches(Regex("^[0-9a-f]{64}$")))
+        assertTrue(evidence.input().contentEquals(input))
+        assertTrue(evidence.configuration().contentEquals(config))
+        assertTrue(evidence.firstOutput().contentEquals(evidence.secondOutput()))
+        val exposedCopy = evidence.firstOutput()
+        exposedCopy[0] = (exposedCopy[0].toInt() xor 0xff).toByte()
+        assertTrue(evidence.firstOutput().contentEquals(evidence.secondOutput()))
     }
 
     @Test
