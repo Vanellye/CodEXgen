@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from tools.eria_pantheon.pons import CapabilityGrant
-from tools.god_collective import PreservationError, ingest_file, verify_record
+from tools.god_collective import PreservationError, collect_directory, ingest_file, verify_record
 
 
 class GodCollectiveTests(unittest.TestCase):
@@ -73,6 +73,23 @@ class GodCollectiveTests(unittest.TestCase):
             self.assertEqual(child_meta["parent_record_ids"], [ancestor["record_id"]])
             self.assertEqual(ancestor_object.read_bytes(), before)
             self.assertTrue(verify_record(vault, ancestor["record_id"])["valid"])
+
+    def test_directory_collection_ingests_snapshot_and_skips_symlinks(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source_root = root / "incoming"
+            source_root.mkdir()
+            (source_root / "a.txt").write_text("alpha")
+            nested = source_root / "nested"
+            nested.mkdir()
+            (nested / "b.bin").write_bytes(b"beta")
+            vault = root / "GOD"
+
+            results = collect_directory(source_root, vault, self.grant(vault))
+            self.assertEqual(len(results), 2)
+            self.assertTrue(all(verify_record(vault, item["record_id"])["valid"] for item in results))
+            self.assertEqual((source_root / "a.txt").read_text(), "alpha")
+            self.assertEqual((nested / "b.bin").read_bytes(), b"beta")
 
     def test_invalid_parent_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
