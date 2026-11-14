@@ -83,10 +83,10 @@ class MainActivity : Activity() {
     }
 
     private fun validOrigin(value: String): Boolean = try {
-        val u = URL(value)
-        (u.protocol == "http" || u.protocol == "https") &&
+        val u = java.net.URI(value)
+        (u.scheme == "http" || u.scheme == "https") &&
             !u.host.isNullOrBlank() && u.userInfo == null &&
-            u.path.isNullOrEmpty() && u.query == null && u.ref == null
+            u.path.isNullOrEmpty() && u.query == null && u.fragment == null
     } catch (_: Exception) { false }
 
     private fun apiOrigin(): String =
