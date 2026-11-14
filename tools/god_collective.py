@@ -82,6 +82,8 @@ def ingest_file(
     source_label: str | None = None,
     parent_record_id: str | None = None,
     parent_record_ids: list[str] | None = None,
+    source_relative_path: str | None = None,
+    source_root_label: str | None = None,
     actor: str = "eria",
 ) -> dict[str, Any]:
     """Preserve one regular file and create provenance/lineage references."""
@@ -153,6 +155,8 @@ def ingest_file(
             "filename": source_path.name,
             "modified_time_ns": source_stat.st_mtime_ns,
             "mode": stat.S_IMODE(source_stat.st_mode),
+            **({"relative_path": source_relative_path} if source_relative_path else {}),
+            **({"root_label": source_root_label} if source_root_label else {}),
         },
         "captured_at": captured_at,
         "parent_record_ids": requested_parent_ids,
@@ -210,7 +214,7 @@ def verify_record(vault: str | Path, record_id: str) -> dict[str, Any]:
     vault_path = Path(vault).expanduser().resolve()
     try:
         proof = validate_parent_chain(
-            vault_path, [record_id], child_record_type="original"
+            vault_path, [record_id], child_record_type="any"
         )[0]
     except ParentValidationError as exc:
         return {
@@ -266,5 +270,11 @@ def collect_directory(
 
     results = []
     for path in files:
-        results.append(ingest_file(path, vault_path, grant, actor=actor))
+        relative = path.relative_to(root).as_posix()
+        results.append(ingest_file(
+            path, vault_path, grant,
+            source_relative_path=relative,
+            source_root_label=root.name,
+            actor=actor,
+        ))
     return results
