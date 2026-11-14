@@ -30,7 +30,7 @@ def make_handler(repository: Path):
                 self._json(403,{"status":"HOLD","error":"Host header is not a permitted loopback host"}); return
             route=urlparse(self.path).path
             if route=="/api/status":
-                self._json(200,{"service":"ERIA Æị","status":"ready","mode":"read-only","conversation":"Âï via Pantheon/PONS","endpoints":["/api/aei/inspect","/api/ai/ask"],"repository":str(root)}); return
+                self._json(200,{"service":"ERIA Æị","status":"ready","mode":"read-only","conversation":"Âï via Pantheon/PONS","endpoints":["/api/aei/inspect","/api/ai/ask","/api/aei/compile"],"repository":str(root)}); return
             if route in {"/","/aei-interface.html"}:
                 try: page=UI_FILE.read_bytes()
                 except OSError:
@@ -60,11 +60,15 @@ def make_handler(repository: Path):
                 request=json.loads(self.rfile.read(length).decode("utf-8"))
                 relative=request.get("path") if isinstance(request,dict) else None
                 if not isinstance(relative,str) or not relative.strip(): raise ValueError("Provide a repository-relative path.")
-                if route=="/api/ai/ask":
-                    question=request.get("question")
-                    if not isinstance(question,str): raise ValueError("Provide a question for Âï.")
+                if route in {"/api/ai/ask","/api/aei/compile"}:
                     adapter=ERIAPantheonInterface(SimpleNamespace(root=root))
-                    response=adapter.handle("ai.ask "+shlex.join([relative.strip(),"--question",question]))
+                    if route=="/api/ai/ask":
+                        question=request.get("question")
+                        if not isinstance(question,str): raise ValueError("Provide a question for Âï.")
+                        command="ai.ask "+shlex.join([relative.strip(),"--question",question])
+                    else:
+                        command="aei.compile "+shlex.quote(relative.strip())
+                    response=adapter.handle(command)
                     try:
                         result=json.loads(response)
                     except json.JSONDecodeError:
