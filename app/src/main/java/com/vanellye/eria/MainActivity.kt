@@ -75,7 +75,7 @@ class MainActivity : ComponentActivity() {
                         }
 
                         if (showRepositoryDashboard) {
-                            RepositoryDashboardScreen()
+                            RepositoryDashboardScreen(modifier = Modifier.weight(1f))
                         } else {
                             key(reloadKey) {
                                 AndroidView(
