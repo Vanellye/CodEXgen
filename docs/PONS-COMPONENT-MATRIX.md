@@ -12,7 +12,8 @@ This matrix distinguishes code that is gated now from components that are only i
 | Pantheon Android gate | app/src/main/java/com/vanellye/eria/pantheon/PantheonRuntimeGate.kt | PONS proof is mandatory for prepareReview; mismatch/missing proof returns HOLD | Add manifest-backed app bootstrap and caller wiring |
 | WAV transmission | app/src/main/java/com/vanellye/eria/contracts/WavAudioTransmission.kt | Constructor requires PONS effective READY and canonical anchor | Supply production manifest pin at app startup |
 | Audio playback | app/src/main/java/com/vanellye/eria/contracts/TransmissionAudioPlayer.kt | Playback requires PONS effective READY and canonical anchor | Supply production manifest pin at app startup |
-| Simulation integrity runner | app/src/main/java/com/vanellye/eria/contracts/SimulationIntegrity.kt | Executes identical seeded scenario twice, records input/config/output digests, marks nondeterministic output, and explicitly labels evidence simulated-only / hardware-not-observed | Add durable append-only simulation evidence storage and compare against independently captured device measurements; never promote simulation to hardware READY |
+| Simulation integrity runner | app/src/main/java/com/vanellye/eria/contracts/SimulationIntegrity.kt | Executes identical seeded scenario twice, records input/config/output digests, marks nondeterministic output, and explicitly labels evidence simulated-only / hardware-not-observed | Add durable append-only simulation evidence storage and independent device comparison |
+| Hardware observation evidence | app/src/main/java/com/vanellye/eria/contracts/HardwareObservationEvidence.kt | Separate evidence type records raw acquisition bytes, device/instrument identifiers, timestamp, method, calibration reference, uncertainty, and optional simulation link; structural gate rechecks raw-data digest | Add authenticated acquisition identity, trusted calibration records, signed append-only storage, and independent review; never treat metadata alone as proof of physical truth |
 | SKRIBED / transmission frame | app/src/main/java/com/vanellye/eria/contracts/SkribedAndTransmission.kt | InMemoryTransmissionTransceiver requires PONS effective READY and canonical anchor; immutable-original and frame-digest controls remain | Pin the transceiver source in the production manifest |
 | Android UI / ViewModel | app/src/main/java/com/vanellye/eria/ | Inventoried, not directly PONS-gated | Add lifecycle status publisher and manifest pins |
 | Git Freedom bridge | GitFreedomBridge.kt | Inventoried; existing authorization boundary remains separate | Add PONS preflight for read/write request provenance without granting Git authority |
@@ -28,6 +29,10 @@ This matrix distinguishes code that is gated now from components that are only i
 - Component-reported operational state cannot override a provenance HOLD or UNKNOWN.
 - A PONS result is bound to the canonical anchor identity. Any alternate anchor causes initialization failure.
 - Simulation reproducibility is not hardware verification: simulation evidence is explicitly marked simulated-only and cannot prove sensor, actuator, audio, or device behavior.
+- There is no simulation-to-hardware promotion API. The hardware observation recorder accepts raw acquisition bytes and physical-acquisition metadata; the hardware observation gate accepts only the distinct HardwareObservationEvidence type, not SimulationEvidence.
+- A hardware observation may reference a simulation evidence ID for comparison, but that reference does not change either evidence class or establish agreement.
+- HardwareObservationGate validates record structure and raw-byte digest only. It does not authenticate the device/operator, prove calibration, or establish physical truth; production verification still requires trusted acquisition identity, calibration, protected storage, and independent review.
+- Neither a reproducible simulation nor a structurally valid observation automatically grants PONS READY.
 - The Android Pantheon review path has no legacy three-argument bypass: a PONS provenance result is a required argument and its anchor/digest identity is checked. Android PONS pin maps are defensively snapshotted and can be created through the signed-manifest verifier interface.
 - WAV conversion and local playback constructors/actions require a PONS effective READY status.
 - The Python JSONL ledger is hash-chained, but is not a substitute for authenticated reviewer identity, signed checkpoints, protected storage, or a trusted manifest.
@@ -40,5 +45,6 @@ This branch is a staged integration, not a claim that every inventoried componen
 3. Pin and verify the SKRIBED/transceiver adapter in the production manifest.
 4. Add production SHA-256 provider and signed manifest; extend the C99 PONS adapter to every Pantheon C public boundary.
 5. Register each Python service and generated module through the signed-manifest loader and `execute_guarded` boundary.
-6. Audit all call sites to ensure no bypass path remains.
-7. Run Android unit tests, C contract tests, Python tests, and branch CI at the final commit.
+6. Add authenticated hardware acquisition, calibration provenance, durable append-only storage, signed checkpoints, and independent review.
+7. Audit all call sites to ensure no bypass path remains.
+8. Run Android unit tests, C contract tests, Python tests, and branch CI at the final commit.
