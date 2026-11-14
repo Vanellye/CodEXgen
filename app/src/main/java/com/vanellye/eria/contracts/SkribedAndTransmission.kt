@@ -143,9 +143,7 @@ class InMemoryTransmissionTransceiver(
     private val ponsStatus: PonsComponentStatus
 ) : TransmissionTransceiver {
     init {
-        require(ponsStatus.effectiveState == PonsEffectiveState.READY &&
-            ponsStatus.anchor == PonsAnchorIdentity.CANONICAL
-        ) { "PONS provenance/status gate did not authorize this transceiver" }
+        ponsStatus.requireReady("audio.internal-transceiver")
     }
 
     override fun transceive(
