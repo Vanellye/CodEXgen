@@ -30,7 +30,7 @@ def make_handler(repository: Path):
                 self._json(403,{"status":"HOLD","error":"Host header is not a permitted loopback host"}); return
             route=urlparse(self.path).path
             if route=="/api/status":
-                self._json(200,{"service":"ERIA Æị","status":"ready","mode":"read-only","conversation":"Âï via Pantheon/PONS","endpoints":["/api/aei/inspect","/api/ai/ask","/api/aei/compile"],"repository":str(root)}); return
+                self._json(200,{"service":"ERIA Æị","status":"ready","mode":"source-read-only; derived-storage-enabled","conversation":"Âï via Pantheon/PONS","endpoints":["/api/aei/inspect","/api/ai/ask","/api/aei/compile"],"repository":str(root)}); return
             if route in {"/","/aei-interface.html"}:
                 try: page=UI_FILE.read_bytes()
                 except OSError:
@@ -47,7 +47,7 @@ def make_handler(repository: Path):
             if origin and origin not in allowed_origins:
                 self._json(403,{"status":"HOLD","error":"Cross-origin requests are not permitted"}); return
             route=urlparse(self.path).path
-            if route not in {"/api/aei/inspect","/api/ai/ask"}:
+            if route not in {"/api/aei/inspect","/api/ai/ask","/api/aei/compile"}:
                 self._json(404,{"status":"HOLD","error":"Not found"}); return
             if self.headers.get("Content-Type","").split(";")[0].strip().lower()!="application/json":
                 self._json(415,{"status":"HOLD","error":"Content-Type must be application/json"}); return
@@ -72,7 +72,7 @@ def make_handler(repository: Path):
                     try:
                         result=json.loads(response)
                     except json.JSONDecodeError:
-                        raise ValueError("Pantheon returned a non-JSON Âï response.")
+                        raise ValueError("Pantheon returned a non-JSON response.")
                 else:
                     result=inspect_file(root,relative.strip()).to_dict()
             except (UnicodeDecodeError,json.JSONDecodeError,ValueError,AeiError,OSError) as exc:
