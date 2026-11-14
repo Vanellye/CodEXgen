@@ -12,6 +12,7 @@ import hmac
 import json
 import os
 import re
+import resource
 import secrets
 import shutil
 import subprocess
@@ -26,7 +27,7 @@ COMMANDS = {
     "make-check-review": ["make", "check"],
 }
 MAX_SECONDS = 900
-MAX_OUTPUT = 2_000_000
+MAX_OUTPUT = 3_000
 SENSITIVE_PATH = re.compile(r"(^|[/_.-])(\.env(?:\.|$)|secrets?|credentials?|id_rsa|id_ed25519|keystore|\.pem|\.p12|\.jks)([/_.-]|$)", re.I)
 
 
@@ -126,6 +127,14 @@ def _extract_archive(root, commit, destination):
         bundle.extractall(destination)
 
 
+def _limits():
+    resource.setrlimit(resource.RLIMIT_CPU, (MAX_SECONDS, MAX_SECONDS + 5))
+    resource.setrlimit(resource.RLIMIT_AS, (2 * 1024**3, 2 * 1024**3))
+    resource.setrlimit(resource.RLIMIT_FSIZE, (512 * 1024**2, 512 * 1024**2))
+    resource.setrlimit(resource.RLIMIT_NOFILE, (256, 256))
+    resource.setrlimit(resource.RLIMIT_NPROC, (64, 64))
+
+
 def run_approved(repository, command_id, approval_id, timeout=MAX_SECONDS):
     root = Path(repository).resolve(strict=True)
     if command_id not in COMMANDS:
@@ -161,7 +170,7 @@ def run_approved(repository, command_id, approval_id, timeout=MAX_SECONDS):
         try:
             proc = subprocess.run(
                 bwrap, capture_output=True, text=True, timeout=timeout,
-                env={"PATH": "/usr/bin:/bin", "LANG": "C.UTF-8"},
+                env={"PATH": "/usr/bin:/bin", "LANG": "C.UTF-8"},\n                preexec_fn=_limits,
             )
             status = "PASSED" if proc.returncode == 0 else "FAILED"
             exit_code = proc.returncode
