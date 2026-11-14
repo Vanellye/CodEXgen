@@ -160,6 +160,42 @@ def _counts(values):
     return [{"value": key, "count": counts[key]} for key in sorted(counts)]
 
 
+STATIC_RULES = (
+    ("DYNAMIC-EVAL", re.compile(r"\\b(?:eval|exec)\\s*\\("), "Dynamic execution candidate; inspect input provenance and authorization."),
+    ("SHELL-EXECUTION", re.compile(r"\\b(?:os\\.system|subprocess\\.(?:run|Popen|call)|Runtime\\.getRuntime\\(\\)\\.exec)"), "Process execution candidate; review argument handling and privilege boundaries."),
+    ("REMOTE-PIPE-TO-SHELL", re.compile(r"curl\\b[^\\n]*[|]\\s*(?:sh|bash)\\b"), "Remote content may be piped directly to a shell."),
+    ("UNSAFE-DESERIALIZATION", re.compile(r"\\b(?:pickle\\.loads|yaml\\.load\\s*\\(|ObjectInputStream)"), "Unsafe deserialization candidate; establish whether input is trusted."),
+    ("SQL-MUTATION", re.compile(r"\\b(?:INSERT\\s+INTO|UPDATE\\s+\\w+|DELETE\\s+FROM|DROP\\s+TABLE)\\b", re.I), "Database mutation candidate; review parameterization and authorization."),
+)
+
+
+def _static_findings(root: Path, files: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    findings = []
+    scanned = 0
+    for item in files:
+        if item.get("kind") != "text":
+            continue
+        path = root / item["path"]
+        try:
+            source = path.read_text(encoding="utf-8-sig")
+        except (OSError, UnicodeError):
+            continue
+        scanned += 1
+        for line_number, line in enumerate(source.splitlines(), 1):
+            for rule, pattern, rationale in STATIC_RULES:
+                if pattern.search(line):
+                    # Do not persist matched credential-like values or full source lines.
+                    excerpt = "[redacted]" if SECRET_VALUE.search(line) else line.strip()[:180]
+                    findings.append({
+                        "class": "HEURISTIC", "severity": "REVIEW",
+                        "rule": rule, "path": item["path"], "line": line_number,
+                        "evidence_excerpt": excerpt, "rationale": rationale,
+                    })
+                    if len(findings) >= 500:
+                        return findings
+    return findings
+
+
 def quality_analysis(inventory: dict[str, Any]) -> dict[str, Any]:
     """Produce repository-wide quality coverage and missing-evidence findings."""
     files = inventory["files"]
@@ -167,7 +203,7 @@ def quality_analysis(inventory: dict[str, Any]) -> dict[str, Any]:
     manifests = [item["path"] for item in files if item["manifest"]]
     tests = [item["path"] for item in files if item["test_candidate"]]
     workflows = sorted(path for path in paths if path.startswith(".github/workflows/"))
-    findings = []
+    findings = _static_findings(Path(inventory["repository"]), files)
     if not tests:
         findings.append({"class": "UNKNOWN", "severity": "HIGH",
                          "finding": "No test candidates were discovered in the bounded inventory."})
@@ -190,7 +226,7 @@ def quality_analysis(inventory: dict[str, Any]) -> dict[str, Any]:
         "limitations": [
             "This pass inventories paths and metadata; it does not prove tests pass.",
             "Dependencies are identified from manifest presence, not installed or resolved.",
-            "Security review requires source-specific analyzers and human triage.",
+            "Static pattern matches are heuristics, not confirmed vulnerabilities; human triage is required.",
         ],
     }
 
