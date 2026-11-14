@@ -437,6 +437,37 @@ class Handler(BaseHTTPRequestHandler):
                 })
                 self.send_json(201, request_record)
                 return
+            if route == "/api/pons/patches/request":
+                parent_grant_id = data.get("parent_grant_id")
+                patch_text = data.get("patch_text")
+                request_record = self.app.pons_approvals.create_patch_request(parent_grant_id, patch_text)
+                self.app.store.add_audit("pons_patch_hash_requested", "HOLD", {
+                    "patch_request_id": request_record["patch_request_id"],
+                    "parent_grant_id": parent_grant_id,
+                    "patch_sha256": request_record["patch_sha256"],
+                })
+                self.send_json(201, request_record)
+                return
+            if route == "/api/pons/patches/confirm":
+                request_id = data.get("patch_request_id")
+                patch_sha256 = data.get("patch_sha256")
+                confirmation = data.get("confirmation")
+                if not all(isinstance(x, str) and x.strip() for x in (request_id, patch_sha256, confirmation)):
+                    raise ValueError("patch_request_id, patch_sha256 and exact confirmation are required.")
+                result = self.app.pons_approvals.approve_patch(request_id, patch_sha256, confirmation)
+                self.app.store.add_audit("pons_patch_hash_approved", result["decision"], {
+                    "patch_grant_id": result["patch_grant_id"],
+                    "patch_request_id": request_id, "patch_sha256": result["patch_sha256"],
+                    "source_modified": False,
+                })
+                self.send_json(200, result)
+                return
+            if route == "/api/pons/patches/verify":
+                result = self.app.pons_approvals.verify_patch_grant(
+                    data.get("patch_grant_id"), data.get("patch_text")
+                )
+                self.send_json(200, result)
+                return
             if route == "/api/pons/approvals/confirm":
                 request_id = data.get("request_id")
                 scope_sha256 = data.get("scope_sha256")

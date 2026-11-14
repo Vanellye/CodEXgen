@@ -16,15 +16,11 @@ SQLite triggers that reject update/delete operations. Existing ERIA source/chat
 SQLite data and the qualitative report/finding history are not migrated or replaced.
 
 ## Authorization semantics
-The PONS capability is `repository.source.modify`. A successful human confirmation
-returns `REVIEW_READY` for that exact scope only. The grant is not a blanket repository
-permission. A changed branch, commit, or target fingerprint invalidates the request;
-prepare a new proposal and request instead of expanding the old grant.
+The first grant is `repository.patch.prepare`: it permits patch preparation only. A second human confirmation grants `repository.source.modify` for the SHA-256 of the complete unified diff, bound to the parent grant, exact target paths, branch, HEAD, and original source fingerprints. The required phrase is `AUTHORIZE PATCH <12 hex characters>`. Patch requests and grants are append-only. Any changed patch byte, out-of-scope path, changed branch/HEAD, or changed source fingerprint fails closed.
 
 ## Hard boundary
 This milestone records authorization only. It does not implement a patch executor,
 write repository source files, create commits, push, merge, deploy, or mutate source
-database records. A later executor must consume and revalidate the exact grant and
-must remain restricted to the listed paths and separately reviewed patch. The local
+database records. A future executor must call `verify_patch_grant` with the exact approved patch bytes immediately before any write, revalidate source state, and remain restricted to the approved paths. No executor is enabled in this milestone. The local
 Termux screen is a human-confirmation interface, not an OS identity provider or
 cryptographic signature service.

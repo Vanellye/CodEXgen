@@ -50,7 +50,15 @@ class PonsApprovalService:
                 decision TEXT NOT NULL, approved_at TEXT NOT NULL,
                 confirmation TEXT NOT NULL
               );
-              CREATE UNIQUE INDEX IF NOT EXISTS approval_grants_one_per_request ON approval_grants(request_id);\n              CREATE TRIGGER IF NOT EXISTS approval_requests_no_update
+              CREATE UNIQUE INDEX IF NOT EXISTS approval_grants_one_per_request ON approval_grants(request_id);
+              CREATE TABLE IF NOT EXISTS patch_approval_requests(patch_request_id TEXT PRIMARY KEY,parent_grant_id TEXT NOT NULL,patch_sha256 TEXT NOT NULL,patch_text TEXT NOT NULL,scope_json TEXT NOT NULL,created_at TEXT NOT NULL);
+              CREATE TABLE IF NOT EXISTS patch_approval_grants(patch_grant_id TEXT PRIMARY KEY,patch_request_id TEXT NOT NULL,parent_grant_id TEXT NOT NULL,capability TEXT NOT NULL,patch_sha256 TEXT NOT NULL,scope_sha256 TEXT NOT NULL,scope_json TEXT NOT NULL,decision TEXT NOT NULL,approved_at TEXT NOT NULL,confirmation TEXT NOT NULL);
+              CREATE UNIQUE INDEX IF NOT EXISTS patch_grants_one_per_request ON patch_approval_grants(patch_request_id);
+              CREATE TRIGGER IF NOT EXISTS patch_requests_no_update BEFORE UPDATE ON patch_approval_requests BEGIN SELECT RAISE(ABORT,'PONS patch requests are append-only'); END;
+              CREATE TRIGGER IF NOT EXISTS patch_requests_no_delete BEFORE DELETE ON patch_approval_requests BEGIN SELECT RAISE(ABORT,'PONS patch requests are append-only'); END;
+              CREATE TRIGGER IF NOT EXISTS patch_grants_no_update BEFORE UPDATE ON patch_approval_grants BEGIN SELECT RAISE(ABORT,'PONS patch grants are append-only'); END;
+              CREATE TRIGGER IF NOT EXISTS patch_grants_no_delete BEFORE DELETE ON patch_approval_grants BEGIN SELECT RAISE(ABORT,'PONS patch grants are append-only'); END;
+              CREATE TRIGGER IF NOT EXISTS approval_requests_no_update
                 BEFORE UPDATE ON approval_requests BEGIN
                   SELECT RAISE(ABORT,'PONS approval request history is append-only');
                 END;
@@ -210,6 +218,126 @@ class PonsApprovalService:
             "source_modified": False,
             "note": "Exact-scope authorization recorded. No source file was modified or patch executed.",
         }
+
+    PATCH_CAPABILITY = "repository.source.modify"
+
+    def _approved_parent(self, grant_id):
+        with self.connect() as db:
+            row = db.execute("SELECT * FROM approval_grants WHERE grant_id=? AND decision='REVIEW_READY'", (grant_id,)).fetchone()
+        if not row:
+            raise ValueError("A valid parent PONS patch-preparation grant is required.")
+        scope = json.loads(row["scope_json"])
+        if row["capability"] != self.CAPABILITY or scope.get("capability") != self.CAPABILITY:
+            raise ValueError("Parent grant does not authorize patch preparation.")
+        return row, scope
+
+    @staticmethod
+    def _patch_paths(patch_text):
+        if not isinstance(patch_text, str) or not patch_text.strip():
+            raise ValueError("A non-empty unified diff is required.")
+        if len(patch_text.encode("utf-8")) > 2 * 1024 * 1024:
+            raise ValueError("Patch exceeds the 2 MiB approval limit.")
+        if "GIT binary patch" in patch_text or "Binary files " in patch_text:
+            raise ValueError("Binary patches are not eligible for this review gate.")
+        paths = set()
+        for line in patch_text.splitlines():
+            if line.startswith(("--- ", "+++ ")):
+                raw = line[4:].split("\t", 1)[0].strip()
+                if raw == "/dev/null":
+                    continue
+                if raw.startswith(("a/", "b/")):
+                    raw = raw[2:]
+                candidate = Path(raw)
+                if not raw or candidate.is_absolute() or ".." in candidate.parts or chr(92) in raw:
+                    raise ValueError("Patch contains an unsafe target path.")
+                paths.add(candidate.as_posix())
+        if not paths:
+            raise ValueError("Patch contains no verifiable unified-diff file headers.")
+        return sorted(paths)
+
+    def create_patch_request(self, parent_grant_id, patch_text):
+        parent, parent_scope = self._approved_parent(parent_grant_id)
+        paths = self._patch_paths(patch_text)
+        allowed = {item["path"]: item["sha256"] for item in parent_scope["files"]}
+        if not set(paths).issubset(allowed):
+            raise ValueError("Patch expands beyond the parent grant's exact file scope.")
+        self._verify_live_sources(parent_scope)
+        patch_digest = hashlib.sha256(patch_text.encode("utf-8")).hexdigest()
+        patch_scope = {
+            "capability": self.PATCH_CAPABILITY, "parent_grant_id": parent_grant_id,
+            "parent_scope_sha256": parent["scope_sha256"], "repository": str(self.root),
+            "branch": parent_scope["branch"], "head_commit": parent_scope["head_commit"],
+            "patch_sha256": patch_digest, "patch_paths": paths,
+            "source_fingerprints": [{"path": path, "sha256": allowed[path]} for path in paths],
+            "operation": "authorize only this exact patch hash; no executor or write is enabled",
+            "limitations": ["Patch bytes are immutable after request creation",
+                "No paths outside the parent grant are authorized",
+                "No commit, push, merge, deployment, or source database mutation",
+                "A source-writing executor remains disabled"],
+        }
+        encoded = _canonical(patch_scope)
+        scope_digest = hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+        request_id, created = str(uuid.uuid4()), _now()
+        with self.connect() as db:
+            db.execute("INSERT INTO patch_approval_requests VALUES(?,?,?,?,?,?)",
+                       (request_id, parent_grant_id, patch_digest, patch_text, encoded, created))
+        return {"patch_request_id": request_id, "parent_grant_id": parent_grant_id,
+            "patch_sha256": patch_digest, "patch_paths": paths, "scope": patch_scope,
+            "scope_sha256": scope_digest,
+            "confirmation_phrase": "AUTHORIZE PATCH " + patch_digest[:12], "status": "HOLD"}
+
+    def approve_patch(self, patch_request_id, patch_sha256, confirmation):
+        with self.connect() as db:
+            row = db.execute("SELECT * FROM patch_approval_requests WHERE patch_request_id=?", (patch_request_id,)).fetchone()
+            prior = db.execute("SELECT patch_grant_id FROM patch_approval_grants WHERE patch_request_id=?", (patch_request_id,)).fetchone()
+        if not row:
+            raise ValueError("PONS patch request not found.")
+        if prior:
+            raise ValueError("This exact patch request already has a grant.")
+        actual = hashlib.sha256(row["patch_text"].encode("utf-8")).hexdigest()
+        if actual != row["patch_sha256"] or patch_sha256 != actual:
+            raise ValueError("Patch hash mismatch; PONS remains HOLD.")
+        expected = "AUTHORIZE PATCH " + actual[:12]
+        if not isinstance(confirmation, str) or confirmation.strip() != expected:
+            raise ValueError("Exact patch-hash confirmation phrase does not match.")
+        parent, parent_scope = self._approved_parent(row["parent_grant_id"])
+        patch_scope = json.loads(row["scope_json"])
+        if patch_scope.get("patch_sha256") != actual or patch_scope.get("parent_scope_sha256") != parent["scope_sha256"]:
+            raise ValueError("Patch or parent grant scope mismatch; PONS remains HOLD.")
+        self._verify_live_sources(parent_scope)
+        scope_digest = hashlib.sha256(_canonical(patch_scope).encode("utf-8")).hexdigest()
+        grant = CapabilityGrant(self.PATCH_CAPABILITY, scope_digest, scope_digest,
+                                patch_request_id, verified_by_adapter=True)
+        decision = Pons.authorize_source_write(grant, self.PATCH_CAPABILITY, scope_digest)
+        if decision is not Decision.REVIEW_READY:
+            raise ValueError("PONS denied patch authorization; request remains HOLD.")
+        patch_grant_id, approved_at = str(uuid.uuid4()), _now()
+        with self.connect() as db:
+            db.execute("INSERT INTO patch_approval_grants VALUES(?,?,?,?,?,?,?,?,?,?)",
+                (patch_grant_id, patch_request_id, row["parent_grant_id"], self.PATCH_CAPABILITY,
+                 actual, scope_digest, row["scope_json"], decision.value, approved_at, expected))
+        return {"patch_grant_id": patch_grant_id, "patch_request_id": patch_request_id,
+            "parent_grant_id": row["parent_grant_id"], "decision": decision.value,
+            "patch_sha256": actual, "scope_sha256": scope_digest,
+            "source_modified": False, "executor_enabled": False}
+
+    def verify_patch_grant(self, patch_grant_id, patch_text):
+        with self.connect() as db:
+            row = db.execute("SELECT * FROM patch_approval_grants WHERE patch_grant_id=?", (patch_grant_id,)).fetchone()
+        if not row or row["decision"] != "REVIEW_READY":
+            raise ValueError("No approved PONS patch grant; source write must HOLD.")
+        actual = hashlib.sha256(patch_text.encode("utf-8")).hexdigest()
+        if actual != row["patch_sha256"]:
+            raise ValueError("Patch bytes differ from the human-approved hash; source write must HOLD.")
+        parent, parent_scope = self._approved_parent(row["parent_grant_id"])
+        self._verify_live_sources(parent_scope)
+        patch_scope = json.loads(row["scope_json"])
+        digest = hashlib.sha256(_canonical(patch_scope).encode("utf-8")).hexdigest()
+        if digest != row["scope_sha256"] or patch_scope.get("patch_sha256") != actual:
+            raise ValueError("Patch authorization scope verification failed; source write must HOLD.")
+        return {"authorized": True, "patch_sha256": actual, "scope_sha256": digest,
+            "paths": patch_scope["patch_paths"], "executor_enabled": False,
+            "note": "Gate verified only. No patch was applied and no source file was written."}
 
     def history(self, limit=100):
         with self.connect() as db:
