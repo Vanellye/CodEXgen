@@ -295,6 +295,7 @@ fun RepositoryDashboardScreen() {
                             MetricCard("Transmission", if (transmissionEnabled) "Enabled" else "Disabled", Modifier.weight(1f))
                         }
                         InfoCard("Human oversight", "No implicit consent. Requests begin on HOLD. This dashboard cannot approve grants or execute protected actions.")
+                        InfoCard("Decision states", "HOLD: missing, unverified, or out-of-scope approval. PROPOSAL_ONLY: eligible for human review, not execution. REVIEW_READY: evidence package is ready for review, not a grant. Current request submissions remain HOLD.")
                         InfoCard("Authorization request", "Create a review request. This records a proposal only; it does not grant permission.")
                         OutlinedTextField(value = capability, onValueChange = { capability = it }, modifier = Modifier.fillMaxWidth(), label = { Text("Capability") }, singleLine = true)
                         OutlinedTextField(value = scope, onValueChange = { scope = it }, modifier = Modifier.fillMaxWidth(), label = { Text("Exact scope") }, singleLine = true)
