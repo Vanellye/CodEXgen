@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 from threading import RLock
 from typing import Dict, Optional
@@ -64,7 +65,7 @@ class PONSRegistry:
     def register(self, component: Component) -> None:
         if not component.component_id or not component.source_ref or not component.source_path:
             raise ValueError("component_id, source_ref and source_path are required")
-        if component.expected_sha256 and len(component.expected_sha256) != 64:
+        if component.expected_sha256 and not re.fullmatch(r"[0-9a-fA-F]{64}", component.expected_sha256):
             raise ValueError("expected_sha256 must be a 64-character SHA-256 hex digest")
         with self._lock:
             old = self._components.get(component.component_id)
@@ -118,6 +119,11 @@ class PONSRegistry:
             "reported_state": obs["state"],
             "detail": obs.get("detail", ""),
             "provenance_state": self._provenance.get(component_id, {"state": "NOT_CHECKED"})["state"],
+            "effective_state": (
+                "HOLD" if self._provenance.get(component_id, {}).get("state") == "HOLD"
+                else (obs["state"] if self._provenance.get(component_id, {}).get("state") == "VERIFIED"
+                      else ("HOLD" if obs["state"] == "HOLD" else "UNKNOWN"))
+            ),
             "actual_sha256": self._provenance.get(component_id, {}).get("actual_sha256"),
             "source_ref": component.source_ref,
             "source_path": component.source_path,
@@ -166,6 +172,9 @@ class PONSRegistry:
     def verify_ledger(self) -> dict:
         previous = "0" * 64
         sequence = 0
+        components: Dict[str, Component] = {}
+        observations: Dict[str, dict] = {}
+        provenance: Dict[str, dict] = {}
         if self.ledger_path and self.ledger_path.exists():
             for line_number, line in enumerate(self.ledger_path.read_text(encoding="utf-8").splitlines(), 1):
                 record = json.loads(line)
@@ -178,9 +187,33 @@ class PONSRegistry:
                     raise ValueError(f"ledger hash mismatch at line {line_number}")
                 if event["anchor_id"] != self.anchor.anchor_id:
                     raise ValueError(f"anchor identity mismatch at line {line_number}")
+                payload = event["payload"]
+                component_id = payload.get("component_id")
+                if event["event_type"] == "component_registered":
+                    components[component_id] = Component(
+                        component_id=component_id,
+                        source_ref=payload["source_ref"],
+                        source_path=payload["source_path"],
+                        expected_sha256=payload.get("expected_sha256"),
+                        manifest_id=payload.get("manifest_id"),
+                    )
+                elif event["event_type"] == "status_observed":
+                    observations[component_id] = {
+                        "state": payload["state"],
+                        "detail": payload.get("detail", ""),
+                        "observed_at": payload["observed_at"],
+                    }
+                elif event["event_type"] == "provenance_checked":
+                    provenance[component_id] = {
+                        key: value for key, value in payload.items() if key != "component_id"
+                    }
                 sequence += 1
                 previous = digest
+        self._components = components
+        self._observations = observations
+        self._provenance = provenance
         self._sequence = sequence
         self._last_event_hash = previous
         return {"valid": True, "events": sequence, "head": previous,
+                "registered_components": sorted(components),
                 "note": "hash-chain integrity only; not an external signature or tamper-proof storage"}
