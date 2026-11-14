@@ -18,6 +18,7 @@ class SimulationIntegrityTest {
             scenarioId = "audio-resonance-baseline",
             engineRef = "test-engine-ref",
             engineVersion = "0.1.0",
+            engineSourceBytes = "simulation-engine-source".toByteArray(StandardCharsets.UTF_8),
             seed = 1111L,
             input = input,
             configuration = config,
@@ -32,6 +33,8 @@ class SimulationIntegrityTest {
         assertFalse(evidence.hardwareObserved)
         assertEquals(evidence.firstOutputSha256, evidence.secondOutputSha256)
         assertTrue(evidence.evidenceId.matches(Regex("^[0-9a-f]{64}$")))
+        assertTrue(evidence.engineSourceSha256.matches(Regex("^[0-9a-f]{64}$")))
+        assertTrue(evidence.engineSource().contentEquals("simulation-engine-source".toByteArray(StandardCharsets.UTF_8)))
         assertTrue(evidence.input().contentEquals(input))
         assertTrue(evidence.configuration().contentEquals(config))
         assertTrue(evidence.firstOutput().contentEquals(evidence.secondOutput()))
@@ -48,6 +51,7 @@ class SimulationIntegrityTest {
             scenarioId = "unstable-model",
             engineRef = "test-engine-ref",
             engineVersion = "0.1.0",
+            engineSourceBytes = "simulation-engine-source".toByteArray(StandardCharsets.UTF_8),
             seed = 7L,
             input = byteArrayOf(1),
             configuration = byteArrayOf(2),
@@ -70,6 +74,7 @@ class SimulationIntegrityTest {
             scenarioId = "alternate-anchor",
             engineRef = "test-engine-ref",
             engineVersion = "0.1.0",
+            engineSourceBytes = "simulation-engine-source".toByteArray(StandardCharsets.UTF_8),
             seed = 1L,
             input = byteArrayOf(1),
             configuration = byteArrayOf(2),
