@@ -181,9 +181,15 @@ class InboxMonitor:
         if not isinstance(approval_reference, str) or not approval_reference.strip():
             raise ResonanceHold("An explicit approval reference is required.")
         with self._lock:
-            if self._thread and self._thread.is_alive():
+            previous = self._thread
+            if previous and previous.is_alive() and not self._stop.is_set():
                 self._state = "running"
                 return self.status()
+        if previous and previous.is_alive():
+            previous.join(timeout=2.0)
+            if previous.is_alive():
+                raise ResonanceHold("Previous monitor is still stopping; retry resume.")
+        with self._lock:
             self._approval_reference = approval_reference.strip()
             self._stop.clear()
             self._state = "running"
