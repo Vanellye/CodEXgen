@@ -9,6 +9,7 @@ from typing import Any
 from .aei import AeiError, inspect_file
 from .ai import AiiConversation
 from .pons import BridgeEnvelope, Pons
+from .storage import AeiStorage
 
 
 class ERIAPantheonInterface:
@@ -16,6 +17,7 @@ class ERIAPantheonInterface:
         self.repository = repository
         self.bridge = Pons()
         self.bridge.register(AiiConversation, lambda: AiiConversation(self.repository.root))
+        self.bridge.register(AeiStorage, lambda: AeiStorage(self.repository.root))
 
     def status(self) -> str:
         state = self.bridge.describe()
@@ -36,6 +38,8 @@ class ERIAPantheonInterface:
             return self.status()
         if low.startswith("code.bypass "):
             return self._code_bypass(command.strip()[len("code.bypass "):])
+        if low.startswith("aei.compile "):
+            return self._aei_compile(command.strip()[len("aei.compile "):])
         if low.startswith(("aei.inspect ", "aei.translate ")):
             prefix = "aei.inspect " if low.startswith("aei.inspect ") else "aei.translate "
             return self._aei_inspect(command.strip()[len(prefix):])
@@ -51,6 +55,20 @@ class ERIAPantheonInterface:
             "ai.ask <repo-relative-path> --question <text>, "
             "code.bypass <repo-relative-path> --reason <text>"
         )
+
+    def _aei_compile(self, arguments: str) -> str:
+        try:
+            tokens = shlex.split(arguments)
+        except ValueError as exc:
+            return f"HOLD: invalid Æị compile command quoting: {exc}"
+        if len(tokens) != 1:
+            return "HOLD: provide exactly one repository-relative source path."
+        try:
+            result = self.bridge.resolve(AeiStorage).compile(tokens[0])
+        except (AeiError, OSError, ValueError) as exc:
+            return json.dumps({"translator": "Æị", "status": "HOLD", "error": str(exc)},
+                              ensure_ascii=False, indent=2)
+        return json.dumps(result, ensure_ascii=False, indent=2)
 
     def _aei_inspect(self, arguments: str) -> str:
         try:
