@@ -123,6 +123,21 @@ class AuthenticatedAVSTests(unittest.TestCase):
         with self.assertRaises(PermissionError):
             unconfigured.evaluate_accuracy(["claim-1"])
 
+    def test_revoked_reviewer_evidence_is_excluded_from_future_scores(self):
+        challenge, payload, signature = self.signed_submission()
+        self.pons.submit_accuracy_evidence(
+            certificate=self.certificate, challenge_id=challenge["challenge_id"],
+            signed_payload=payload, signature_b64=signature,
+        )
+        revoked = Pons(
+            reviewer_root_public_key_b64=b64(raw_public(self.root_key)),
+            revoked_reviewer_key_ids={"key:alice:01"},
+        )
+        revoked.install_accuracy_service(str(self.path))
+        result = revoked.evaluate_accuracy(["claim-1"])
+        self.assertEqual(result["status"], "INCOMPLETE")
+        self.assertEqual(result["accuracy_score"], None)
+
     def test_operator_revoked_key_cannot_start_a_challenge(self):
         revoked = Pons(
             reviewer_root_public_key_b64=b64(raw_public(self.root_key)),
