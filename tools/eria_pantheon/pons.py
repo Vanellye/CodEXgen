@@ -101,7 +101,7 @@ class Pons:
     def __init__(self) -> None:
         self._factories: Dict[Type[Any], tuple[Callable[[], Any], Lifetime]] = {}
         self._singletons: Dict[Type[Any], Any] = {}
-        self._lock = threading.RLock()
+        self._lock = threading.RLock()\n        self._accuracy_service = None
 
     def register(self, key: Type[Any], factory: Callable[[], Any], *,
                  lifetime: Lifetime = Lifetime.TRANSIENT) -> None:
@@ -138,20 +138,33 @@ class Pons:
 
     def install_accuracy_service(self, ledger_path: str) -> Any:
         """Install the sole AVS authority as a PONS-owned singleton."""
-        from .accuracy import AccuracyValidationService
+        from .accuracy import AccuracyValidationService, _PONS_AUTHORITY
         with self._lock:
             if AccuracyValidationService not in self._factories:
                 self.register(
                     AccuracyValidationService,
-                    lambda: AccuracyValidationService(ledger_path),
+                    lambda: AccuracyValidationService(ledger_path, authority=_PONS_AUTHORITY),
                     lifetime=Lifetime.SINGLETON,
                 )
-        return self.resolve(AccuracyValidationService)
+        self._accuracy_service = self.resolve(AccuracyValidationService)
+        return {"installed": True, "authority": "PONS_ONLY"}
 
-    def accuracy_service(self) -> Any:
-        """Resolve AVS only after explicit PONS installation."""
-        from .accuracy import AccuracyValidationService
-        return self.resolve(AccuracyValidationService)
+    def submit_accuracy_evidence(self, **evidence: Any) -> Dict[str, Any]:
+        from .accuracy import _PONS_AUTHORITY
+        if self._accuracy_service is None:
+            raise LookupError("PONS AVS service is not installed.")
+        return self._accuracy_service.submit_evidence(**evidence, _authority=_PONS_AUTHORITY)
+
+    def evaluate_accuracy(self, required_claims: Any) -> Dict[str, Any]:
+        from .accuracy import _PONS_AUTHORITY
+        if self._accuracy_service is None:
+            raise LookupError("PONS AVS service is not installed.")
+        return self._accuracy_service.evaluate(required_claims, _authority=_PONS_AUTHORITY)
+
+    def accuracy_ledger_status(self) -> Dict[str, Any]:
+        if self._accuracy_service is None:
+            raise LookupError("PONS AVS service is not installed.")
+        return self._accuracy_service.ledger.verify()
 
     @staticmethod
     def describe() -> Dict[str, Any]:
