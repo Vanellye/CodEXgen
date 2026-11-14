@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.weight
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
@@ -53,7 +54,7 @@ class MainActivity : ComponentActivity() {
 
                         key(reloadKey) {
                             AndroidView(
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = Modifier.fillMaxWidth().weight(1f),
                                 factory = { context ->
                                     WebView(context).apply {
                                         settings.javaScriptEnabled = true
