@@ -50,4 +50,4 @@ __pycache__/
 *.ed25519
 *reviewer-private*.pem
 *trust-root-private*.pem
- .eria/trust/
+.eria/trust/
