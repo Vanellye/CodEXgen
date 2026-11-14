@@ -141,13 +141,10 @@ class Pons:
         """Install the sole AVS authority as a PONS-owned singleton."""
         from .accuracy import AccuracyValidationService, _PONS_AUTHORITY
         with self._lock:
-            if AccuracyValidationService not in self._factories:
-                self.register(
-                    AccuracyValidationService,
-                    lambda: AccuracyValidationService(ledger_path, authority=_PONS_AUTHORITY),
-                    lifetime=Lifetime.SINGLETON,
+            if self._accuracy_service is None:
+                self._accuracy_service = AccuracyValidationService(
+                    ledger_path, authority=_PONS_AUTHORITY
                 )
-        self._accuracy_service = self.resolve(AccuracyValidationService)
         return {"installed": True, "authority": "PONS_ONLY"}
 
     def submit_accuracy_evidence(self, **evidence: Any) -> Dict[str, Any]:
