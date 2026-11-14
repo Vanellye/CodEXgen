@@ -17,7 +17,7 @@ fun interface DeterministicSimulation {
     fun execute(input: ByteArray, configuration: ByteArray, seed: Long): ByteArray
 }
 
-data class SimulationEvidence(
+class SimulationEvidence internal constructor(
     val evidenceId: String,
     val runId: String,
     val scenarioId: String,
@@ -30,9 +30,24 @@ data class SimulationEvidence(
     val secondOutputSha256: String,
     val state: SimulationIntegrityState,
     val anchor: PonsAnchorIdentity,
-    val simulatedOnly: Boolean = true,
+    inputBytes: ByteArray,
+    configurationBytes: ByteArray,
+    firstOutputBytes: ByteArray,
+    secondOutputBytes: ByteArray
+) {
+    private val inputSnapshot = inputBytes.copyOf()
+    private val configurationSnapshot = configurationBytes.copyOf()
+    private val firstOutputSnapshot = firstOutputBytes.copyOf()
+    private val secondOutputSnapshot = secondOutputBytes.copyOf()
+
+    val simulatedOnly: Boolean = true
     val hardwareObserved: Boolean = false
-)
+
+    fun input(): ByteArray = inputSnapshot.copyOf()
+    fun configuration(): ByteArray = configurationSnapshot.copyOf()
+    fun firstOutput(): ByteArray = firstOutputSnapshot.copyOf()
+    fun secondOutput(): ByteArray = secondOutputSnapshot.copyOf()
+}
 
 /** Reproducibility check with explicit simulation-vs-hardware separation. */
 object SimulationIntegrityRunner {
@@ -84,7 +99,11 @@ object SimulationIntegrityRunner {
             firstOutputSha256 = firstHash,
             secondOutputSha256 = secondHash,
             state = state,
-            anchor = anchor
+            anchor = anchor,
+            inputBytes = stableInput,
+            configurationBytes = stableConfiguration,
+            firstOutputBytes = first,
+            secondOutputBytes = second
         )
     }
 
