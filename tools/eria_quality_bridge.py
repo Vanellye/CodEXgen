@@ -279,6 +279,62 @@ class QualityBridge:
         ]
         return "\n".join(lines)
 
+
+    def answer(self, question: str):
+        """Deterministic evidence explanation for quality-related Âï questions."""
+        if not re.search(r"quality|finding|risk|duplicate|conflict|implement|synth|compare|assessment|security|score|candidate|why .*function|dependencies", question, re.I):
+            return None
+        report = self.latest()
+        if report is None:
+            return "Qualitative assessment is not stored yet. Use Refresh Quality to create the first report."
+        ranked = self._rank(report)
+        lines = [
+            "Âï QUALITATIVE REVIEW (evidence-backed; heuristic, not a certification)",
+            "Report " + report["report_id"] + " · " + report["report_sha256"],
+            "Repository: " + report.get("provenance", {}).get("branch", "unknown") +
+            " @ " + report.get("provenance", {}).get("head_commit", "unknown"),
+            "Assessed " + str(report.get("summary", {}).get("files_assessed", 0)) +
+            " files; findings: " + json.dumps(report.get("summary", {}).get("findings", {})),
+        ]
+        tokens = [x for x in re.findall(r"[A-Za-z_][A-Za-z0-9_]{2,}", question.lower())
+                  if x not in {"why", "this", "function", "does", "exist", "what", "which",
+                               "dependencies", "require", "identify", "conflicting",
+                               "implementations", "explain", "security", "implications",
+                               "propose", "improved", "implementation", "compare",
+                               "original", "source", "with", "translation"}]
+        matches = [x for x in ranked if any(t in x["symbol"].lower() for t in tokens)]
+        if not matches:
+            matches = ranked[:5]
+        if re.search(r"compare|conflict|duplicate|implementation|synth", question, re.I):
+            lines.append("Ranked shared-symbol candidates:")
+            for item in matches[:8]:
+                lines.append("- " + item["symbol"] + " · heuristic rank " +
+                             str(item["rank_score"]) + "/100 · " +
+                             ", ".join(item["candidate_paths"]))
+        if re.search(r"why|purpose|exist|function|dependencies", question, re.I):
+            lines.append("Function-purpose/dependency evidence:")
+            for item in matches[:6]:
+                lines.append("- " + item["symbol"] + " is declared in " +
+                             ", ".join(item["candidate_paths"]) +
+                             ". Static assessment establishes overlap, not intended purpose, call graph, or runtime dependencies; Æị must inspect declarations, imports, call sites and tests.")
+        findings = report.get("findings", [])
+        relevant = [f for f in findings if not tokens or
+                    any(t in (f.get("path", "") + " " + f.get("message", "")).lower() for t in tokens)]
+        if not relevant:
+            relevant = sorted(findings, key=lambda f: {"high": 0, "medium": 1, "low": 2}.get(f.get("severity"), 3))[:10]
+        if re.search(r"finding|risk|security|assessment|quality", question, re.I):
+            lines.append("Relevant static findings:")
+            for f in relevant[:12]:
+                lines.append("- [" + f.get("severity", "unknown").upper() + " " +
+                             f.get("rule", "") + "] " + f.get("path", "") + ":" +
+                             str(f.get("line", 0)) + " — " + f.get("message", ""))
+        if report.get("source_comparisons"):
+            lines.append("Local/GitHub source divergences: " +
+                         str(len(report["source_comparisons"])) +
+                         " paths have different SHA-256 snapshots; inspect each provenance pair before choosing a source.")
+        lines.append("Next controlled step: create a REVIEW_REQUIRED proposal for a ranked symbol. No source write, Git mutation, or approval is implied.")
+        return "\\n".join(lines)
+
     def proposal_history(self, limit: int = 50):
         with self.connect() as db:
             rows = db.execute("SELECT proposal_id,title,symbol,status,created_at,proposal_path "
