@@ -449,6 +449,27 @@ class Handler(BaseHTTPRequestHandler):
                 })
                 self.send_json(200, result)
                 return
+            if route == "/api/repository/review":
+                raw_result = self.app.pantheon.handle("repository.review")
+                try:
+                    result = json.loads(raw_result)
+                except json.JSONDecodeError:
+                    raise ValueError("Repository engineering engine returned invalid JSON.")
+                if result.get("status") == "HOLD":
+                    self.send_json(400, result)
+                    return
+                inventory = result.get("inventory", {})
+                summary = inventory.get("summary", {})
+                self.app.store.add_audit("repository_wide_engineering_review", "RECORDED", {
+                    "commit": inventory.get("git", {}).get("commit", ""),
+                    "branch": inventory.get("git", {}).get("branch", ""),
+                    "file_count": summary.get("file_count", 0),
+                    "test_candidate_count": summary.get("test_candidate_count", 0),
+                    "execution_state": result.get("execution_plan", {}).get("execution_state", "UNKNOWN"),
+                    "source_mutations": False,
+                })
+                self.send_json(200, result)
+                return
             if route == "/api/index":
                 count = self.app.store.index_repository(self.app.repository)
                 self.send_json(200, {"indexed": count,
