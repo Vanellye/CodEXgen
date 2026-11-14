@@ -13,7 +13,7 @@ import os
 import stat
 import uuid
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 from tools.eria_pantheon.pons import CapabilityGrant, Decision, Pons
@@ -88,6 +88,16 @@ def ingest_file(
 ) -> dict[str, Any]:
     """Preserve one regular file and create provenance/lineage references."""
     source_path = Path(source).expanduser()
+    if source_relative_path is not None:
+        rel_source = PurePosixPath(source_relative_path)
+        if (not source_relative_path or "\\" in source_relative_path
+                or rel_source.is_absolute()
+                or any(part in {"", ".", ".."} for part in rel_source.parts)):
+            raise PreservationError("source_relative_path must be a normalized safe POSIX path")
+    if source_root_label is not None and (
+        not isinstance(source_root_label, str) or not source_root_label.strip()
+    ):
+        raise PreservationError("source_root_label must be non-empty text")
     vault_path = Path(vault).expanduser().resolve()
     if source_path.is_symlink() or not source_path.is_file():
         raise PreservationError("Source must be a regular, non-symlink file")
