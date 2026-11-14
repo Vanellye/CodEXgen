@@ -1,5 +1,6 @@
 package com.vanellye.eria.contracts
 
+import com.vanellye.eria.pons.*
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -8,6 +9,18 @@ import org.junit.Test
 import java.nio.charset.StandardCharsets
 
 class SkribedAndTransmissionTest {
+
+    private fun ponsTransceiverStatus(): PonsComponentStatus {
+        val source = "pinned-in-memory-transceiver".toByteArray(StandardCharsets.UTF_8)
+        val componentId = "audio.internal-transceiver"
+        val pin = PonsComponentPin(
+            componentId, "test-ref",
+            "app/src/main/java/com/vanellye/eria/contracts/SkribedAndTransmission.kt",
+            PonsProvenanceGate.sha256(source)
+        )
+        return PonsStatusRegistry(PonsProvenanceGate(mapOf(componentId to pin)))
+            .inspect(componentId, PonsOperationalState.READY, source)
+    }
     @Test
     fun originalWritingPreservesUnicodeAndPunctuationExactly() {
         val source = "Öôŕîɣîñäl·l  e\u0301 Ĉ̣ — Ɓûîľð"
@@ -48,7 +61,7 @@ class SkribedAndTransmissionTest {
     fun transceiverReturnsCorrelatedInternalResponse() {
         val request = "sound-data".toByteArray(StandardCharsets.UTF_8)
         val frame = TransmissionFrame.create("tx-1", "corr-1", "audio.capture", request)
-        val transceiver = InMemoryTransmissionTransceiver()
+        val transceiver = InMemoryTransmissionTransceiver(ponsTransceiverStatus())
 
         val receipt = transceiver.transceive(frame) { incoming ->
             incoming.payload() + "-returned".toByteArray(StandardCharsets.UTF_8)
