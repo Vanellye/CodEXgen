@@ -334,6 +334,7 @@ def validate_parent_chain(
             "record_type": record["record_type"],
             "sha256": record["sha256"],
             "size_bytes": record["size_bytes"],
+            "parent_record_ids": list(record["parent_record_ids"]),
             "source_relative_path": record["source"].get(
                 "relative_path", record["source"]["filename"]
             ),
