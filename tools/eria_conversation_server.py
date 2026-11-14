@@ -25,6 +25,7 @@ TOOLS = HERE
 UI_FILE = HERE / "eria_conversation.html"
 sys.path.insert(0, str(TOOLS))
 from eria_repository_conversation import Conversation, Repository  # noqa: E402
+from eria_pantheon.pons import Pons  # noqa: E402
 
 DB_DEFAULT = Path.home() / ".eria" / "data" / "eria_conversation.sqlite3"
 MAX_BODY = 16_384
@@ -186,6 +187,23 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("X-Content-Type-Options", "nosniff")
             self.end_headers()
             self.wfile.write(raw)
+            return
+        if route == "/repository":
+            try:
+                raw = (HERE / "eria_repository.html").read_bytes()
+            except OSError:
+                self.send_error(404, "Repository UI file not found")
+                return
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(raw)))
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.end_headers()
+            self.wfile.write(raw)
+            return
+        if route == "/api/pons/status":
+            self.send_json(200, Pons.describe())
             return
         if route == "/api/status":
             self.send_json(200, {
