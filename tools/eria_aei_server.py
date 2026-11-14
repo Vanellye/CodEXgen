@@ -130,7 +130,7 @@ def make_handler(repository: Path):
 def main(argv=None):
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root",default=".",help="repository root to inspect")
-    parser.add_argument("--port",type=int,default=8765); args=parser.parse_args(argv)
+    parser.add_argument("--port",type=int,default=8970); args=parser.parse_args(argv)
     if not 1024<=args.port<=65535: parser.error("--port must be between 1024 and 65535")
     root=Path(args.root).expanduser().resolve(strict=True)
     if not root.is_dir(): parser.error("--root must be a directory")
