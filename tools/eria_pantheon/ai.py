@@ -10,6 +10,7 @@ import ast
 import hashlib
 import os
 import re
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -418,6 +419,57 @@ class AiiConversation:
                 "Improvement proposals are not applied to source.",
                 "Compilation, tests, and runtime behavior are not verified by this analysis.",
             ],
+        }
+
+
+    def synthesize_execution_evidence(self, relative_path: str,
+                                      execution_result: dict[str, Any]) -> dict[str, Any]:
+        """Join Æị source evidence with a signed, same-revision isolated run."""
+        from .isolated_runner import verify_result_signature
+
+        if not verify_result_signature(execution_result):
+            raise AeiError("Execution evidence signature is invalid or runner key is unavailable.")
+        path, raw, source_text, digest = _read_source(self.root, relative_path)
+        commit = subprocess.run(
+            ["git", "-C", str(self.root), "rev-parse", "HEAD"],
+            check=True, capture_output=True, text=True, timeout=8,
+        ).stdout.strip()
+        if execution_result.get("commit") != commit:
+            raise AeiError("Execution evidence belongs to a different Git commit.")
+        if execution_result.get("repository") != str(self.root):
+            raise AeiError("Execution evidence repository identity mismatch.")
+        if execution_result.get("status") not in {"PASSED", "FAILED", "TIMEOUT"}:
+            raise AeiError("Execution result status is not recognized.")
+        source_analysis = self.ask_higher_faculty(
+            relative_path, "Provide the complete source purpose, dependencies, security, and improvement evidence."
+        )
+        run = {
+            key: execution_result.get(key) for key in (
+                "runner", "status", "command_id", "argv", "commit", "approval_id",
+                "exit_code", "duration_seconds", "stdout_sha256", "stderr_sha256",
+                "network_namespace", "workspace", "host_checkout_writable",
+                "host_home_mounted", "source_mutations", "git_mutations",
+            )
+        }
+        passed = execution_result["status"] == "PASSED" and execution_result.get("exit_code") == 0
+        return {
+            "translator": "Âï", "mode": "source_and_execution_evidence_synthesis",
+            "status": "VERIFIED_RUN_PASSED" if passed else "REVIEW_REQUIRED",
+            "source": {"path": relative_path, "sha256": digest, "authority": "NON_AUTHORITATIVE"},
+            "source_evidence": source_analysis["analysis"],
+            "higher_faculty": source_analysis["higher_faculty"],
+            "execution_evidence": run,
+            "interpretation": (
+                "The approved command exited successfully in the isolated runner for this exact commit."
+                if passed else "The isolated command did not pass; inspect captured output and source evidence."
+            ),
+            "limitations": [
+                "A passing command verifies only that command and revision, not overall correctness or security.",
+                "Execution evidence does not authorize source changes, Git operations, deployment, or transmission.",
+                "Âï synthesis is deterministic evidence aggregation, not a generative LLM or proof of semantic correctness.",
+            ],
+            "pons": {"service_state": "ON", "authorization": "UNCHANGED",
+                     "execution_enabled": False, "write_enabled": False},
         }
 
 
