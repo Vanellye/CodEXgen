@@ -44,7 +44,28 @@ The environment variable must be set for the process that starts the ERIA conver
 
 Generate each reviewer key pair separately. The reviewer's private key remains with that reviewer and must never be stored in the repository or shared with the component under review.
 
-The root operator signs a certificate body with these fields:
+A reviewer can generate a private/public key pair locally and retain the private key:
+
+    import base64
+    from pathlib import Path
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    key = Ed25519PrivateKey.generate()
+    private = key.private_bytes(
+        serialization.Encoding.Raw,
+        serialization.PrivateFormat.Raw,
+        serialization.NoEncryption(),
+    )
+    public = key.public_key().public_bytes(
+        serialization.Encoding.Raw,
+        serialization.PublicFormat.Raw,
+    )
+    Path("reviewer-private.ed25519").write_text(base64.b64encode(private).decode())
+    Path("reviewer-public.b64").write_text(base64.b64encode(public).decode())
+    Path("reviewer-private.ed25519").chmod(0o600)
+
+Transfer only the public key file to the offline root operator. The root operator signs a certificate body with these fields:
 
 - reviewer_id: stable unique reviewer identity
 - key_id: unique key identifier
@@ -54,7 +75,17 @@ The root operator signs a certificate body with these fields:
 - not_before, expires_at: timezone-aware ISO-8601 timestamps
 - permissions: includes avs:evidence:submit
 
-The certificate is the body plus root_signature, which is the base64 Ed25519 signature of the canonical JSON body (sorted keys, compact separators, UTF-8). See reviewer_identity.py for the canonicalization function.
+The offline issuer utility creates the certificate:
+
+    PYTHONPATH=tools python tools/issue_eria_reviewer_certificate.py \
+      --root-private-b64 /offline/trust-root-private.b64 \
+      --reviewer-public-b64 reviewer-public.b64 \
+      --reviewer-id reviewer:alice \
+      --key-id key:alice:01 \
+      --issuer ERIA-Trust-Root \
+      --output reviewer-certificate.json
+
+The certificate is the body plus root_signature, which is the base64 Ed25519 signature of the canonical JSON body (sorted keys, compact separators, UTF-8). See reviewer_identity.py for the canonicalization function. Keep reviewer-private.ed25519 with the reviewer; keep the root private key offline.
 
 ## Reviewer evidence protocol
 
