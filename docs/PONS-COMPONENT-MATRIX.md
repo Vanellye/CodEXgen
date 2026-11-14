@@ -34,7 +34,7 @@ This matrix distinguishes code that is gated now from components that are only i
 
 This branch is a staged integration, not a claim that every inventoried component is fully wired. Before calling the repository-wide rollout complete:
 1. Generate and review a manifest with SHA-256 pins for each exact source ref.
-2. Wire Android startup to instantiate the PONS registry and pass fresh component statuses.
+2. Wire Android startup to load a signed production manifest through a vetted verifier and pass fresh component statuses.
 3. Pin and verify the SKRIBED/transceiver adapter in the production manifest.
 4. Add production SHA-256 provider and signed manifest; extend the C99 PONS adapter to every Pantheon C public boundary.
 5. Register each Python service and generated module through the signed-manifest loader and `execute_guarded` boundary.
