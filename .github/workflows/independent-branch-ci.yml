@@ -46,7 +46,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install AVS cryptographic dependency
-        run: python -m pip install -r python/requirements.txt
+        run: python -m pip install 'cryptography>=42.0.0'
       - name: Verify quarantined source remains byte-for-byte unchanged
         shell: bash
         run: |
