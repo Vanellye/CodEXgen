@@ -1,6 +1,6 @@
 import unittest
 
-from pons11_grants import (
+from tools.pons11_grants import (
     CommandSpec, MAX_GRANT_SECONDS, PONS11Grant, audit_decision, validate_grant,
 )
 
