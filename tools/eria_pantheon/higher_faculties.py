@@ -116,7 +116,8 @@ def translate_file(repository: str | Path, relative_path: str) -> dict[str, Any]
          "detail": "Created line-anchored English interpretations; original source remains untouched."},
     ]
     return {
-        "translator": "Æị Higher Faculties",
+        "translator": "Æị",
+        "subsystem": "Higher Faculties",
         "version": VERSION,
         "status": "REVIEW_REQUIRED" if verified else "HOLD",
         "pipeline": pipeline,
