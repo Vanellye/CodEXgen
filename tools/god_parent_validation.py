@@ -180,6 +180,9 @@ def _validate_record_shape(record: dict[str, Any], requested_id: str) -> None:
         if "derivation" in record:
             raise ParentValidationError("original records cannot contain a derivation manifest")
     else:
+        manifest = record.get("validated_parents")
+        if not isinstance(manifest, list) or not manifest:
+            raise ParentValidationError("every SHOP descendant requires a non-empty validated_parents manifest")
         if record.get("authority") != "derived-not-validated-as-fact":
             raise ParentValidationError("derived authority marker is invalid")
         derivation = record.get("derivation")
