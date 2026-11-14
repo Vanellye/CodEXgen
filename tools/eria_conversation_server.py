@@ -9,6 +9,7 @@ filesystem-write endpoint is exposed.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import mimetypes
 import re
@@ -18,7 +19,7 @@ import threading
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 HERE = Path(__file__).resolve().parent
 TOOLS = HERE
@@ -64,7 +65,34 @@ class Store:
                     key TEXT PRIMARY KEY,
                     value TEXT NOT NULL
                 );
+                CREATE TABLE IF NOT EXISTS audit_events (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    event TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    detail_json TEXT NOT NULL,
+                    created_at TEXT NOT NULL
+                );
+                CREATE TABLE IF NOT EXISTS pons_requests (
+                    request_id TEXT PRIMARY KEY,
+                    capability TEXT NOT NULL,
+                    scope TEXT NOT NULL,
+                    reason TEXT NOT NULL,
+                    status TEXT NOT NULL CHECK(status IN ('HOLD','PROPOSAL_ONLY','REVIEW_READY')),
+                    created_at TEXT NOT NULL
+                );
+                CREATE TRIGGER IF NOT EXISTS audit_events_no_update
+                BEFORE UPDATE ON audit_events BEGIN
+                    SELECT RAISE(ABORT, 'audit_events is append-only');
+                END;
+                CREATE TRIGGER IF NOT EXISTS audit_events_no_delete
+                BEFORE DELETE ON audit_events BEGIN
+                    SELECT RAISE(ABORT, 'audit_events is append-only');
+                END;
             """)
+        with self.connect() as db:
+            columns = {row[1] for row in db.execute("PRAGMA table_info(repository_files)")}
+            if "source_sha256" not in columns:
+                db.execute("ALTER TABLE repository_files ADD COLUMN source_sha256 TEXT NOT NULL DEFAULT ''")
 
     def connect(self):
         db = sqlite3.connect(str(self.path), timeout=10)
@@ -98,8 +126,16 @@ class Store:
                 if not full.is_file():
                     continue
                 stat = full.stat()
+                digest = ""
+                if stat.st_size <= 5 * 1024 * 1024:
+                    hasher = hashlib.sha256()
+                    with full.open("rb") as source:
+                        for chunk in iter(lambda: source.read(65536), b""):
+                            hasher.update(chunk)
+                    digest = hasher.hexdigest()
                 records.append((
-                    rel, path.suffix.lower(), stat.st_size, stat.st_mtime, utc_now()
+                    rel, path.suffix.lower(), stat.st_size, stat.st_mtime,
+                    utc_now(), digest
                 ))
             except OSError:
                 continue
@@ -107,7 +143,7 @@ class Store:
             db.execute("DELETE FROM repository_files")
             db.executemany(
                 "INSERT OR REPLACE INTO repository_files"
-                "(path,extension,size_bytes,modified_at,indexed_at) VALUES(?,?,?,?,?)",
+                "(path,extension,size_bytes,modified_at,indexed_at,source_sha256) VALUES(?,?,?,?,?,?)",
                 records,
             )
             db.execute(
@@ -118,7 +154,67 @@ class Store:
                 "INSERT OR REPLACE INTO metadata(key,value) VALUES('repository_root',?)",
                 (str(repository.root),),
             )
+        self.add_audit("repository_indexed", "REVIEW_READY", {
+            "files_indexed": len(records), "repository_root": str(repository.root),
+            "source_hashes": "SHA-256 for eligible files up to 5 MiB",
+        })
         return len(records)
+
+    def add_audit(self, event: str, status: str, detail: dict):
+        with DB_LOCK, self.connect() as db:
+            db.execute(
+                "INSERT INTO audit_events(event,status,detail_json,created_at) VALUES(?,?,?,?)",
+                (event, status, json.dumps(detail, ensure_ascii=False, sort_keys=True), utc_now()),
+            )
+
+    def audit_history(self, limit: int = 100):
+        with DB_LOCK, self.connect() as db:
+            rows = db.execute(
+                "SELECT id,event,status,detail_json,created_at FROM audit_events "
+                "ORDER BY id DESC LIMIT ?", (limit,)
+            ).fetchall()
+        result = []
+        for row in rows:
+            item = dict(row)
+            try:
+                item["detail"] = json.loads(item.pop("detail_json"))
+            except (TypeError, json.JSONDecodeError):
+                item["detail"] = {}
+            result.append(item)
+        return result
+
+    def provenance(self, query: str = "", limit: int = 100):
+        with DB_LOCK, self.connect() as db:
+            rows = db.execute(
+                "SELECT path,extension,size_bytes,modified_at,indexed_at,source_sha256 "
+                "FROM repository_files WHERE instr(lower(path),lower(?))>0 "
+                "ORDER BY path LIMIT ?", (query, limit)
+            ).fetchall()
+        return [dict(row) for row in rows]
+
+    def create_pons_request(self, capability: str, scope: str, reason: str):
+        request_id = str(uuid.uuid4())
+        created = utc_now()
+        with DB_LOCK, self.connect() as db:
+            db.execute(
+                "INSERT INTO pons_requests(request_id,capability,scope,reason,status,created_at) "
+                "VALUES(?,?,?,?,?,?)",
+                (request_id, capability, scope, reason, "HOLD", created),
+            )
+        self.add_audit("pons_authorization_requested", "HOLD", {
+            "request_id": request_id, "capability": capability, "scope": scope,
+        })
+        return {"request_id": request_id, "capability": capability,
+                "scope": scope, "reason": reason, "status": "HOLD",
+                "created_at": created, "approval_created": False}
+
+    def pons_requests(self, limit: int = 100):
+        with DB_LOCK, self.connect() as db:
+            rows = db.execute(
+                "SELECT request_id,capability,scope,reason,status,created_at "
+                "FROM pons_requests ORDER BY created_at DESC LIMIT ?", (limit,)
+            ).fetchall()
+        return [dict(row) for row in rows]
 
     def index_summary(self):
         with DB_LOCK, self.connect() as db:
@@ -205,6 +301,43 @@ class Handler(BaseHTTPRequestHandler):
         if route == "/api/pons/status":
             self.send_json(200, Pons.describe())
             return
+        if route == "/api/pons/requests":
+            self.send_json(200, {
+                "requests": self.app.store.pons_requests(),
+                "approval_supported": False,
+                "note": "Requests are recorded as HOLD proposals; this service cannot approve grants.",
+            })
+            return
+        if route == "/api/audit":
+            self.send_json(200, {"events": self.app.store.audit_history()})
+            return
+        if route == "/api/provenance":
+            params = parse_qs(urlparse(self.path).query)
+            term = params.get("q", [""])[0][:200]
+            self.send_json(200, {
+                "records": self.app.store.provenance(term),
+                "source_authority": "NON_AUTHORITATIVE",
+                "derived_records": "not generated by this dashboard service",
+                "hash_note": "SHA-256 is populated for eligible files up to 5 MiB; empty means not computed.",
+            })
+            return
+        if route == "/api/files/detail":
+            params = parse_qs(urlparse(self.path).query)
+            rel = params.get("path", [""])[0][:500]
+            if not rel or SAFE_NAME.search(Path(rel).name):
+                self.send_json(400, {"error": "A non-sensitive repository-relative path is required."})
+                return
+            try:
+                content = self.app.repository.show(rel)
+                record = next((x for x in self.app.store.provenance(rel) if x["path"] == rel), None)
+                self.send_json(200, {
+                    "path": rel, "content_preview": content[:12000],
+                    "truncated": len(content) > 12000, "provenance": record,
+                    "source_authority": "NON_AUTHORITATIVE",
+                })
+            except Exception as exc:
+                self.send_json(400, {"error": "File inspection unavailable: " + type(exc).__name__})
+            return
         if route == "/api/status":
             self.send_json(200, {
                 "ok": True, "repository": str(self.app.repository.root),
@@ -245,6 +378,19 @@ class Handler(BaseHTTPRequestHandler):
                 count = self.app.store.index_repository(self.app.repository)
                 self.send_json(200, {"indexed": count,
                                      "summary": self.app.store.index_summary()})
+                return
+            if route == "/api/pons/requests":
+                capability = data.get("capability")
+                scope = data.get("scope")
+                reason = data.get("reason")
+                if not all(isinstance(x, str) and x.strip() for x in (capability, scope, reason)):
+                    raise ValueError("capability, scope, and reason are required text fields.")
+                if len(capability) > 100 or len(scope) > 500 or len(reason) > 2000:
+                    raise ValueError("Authorization request field exceeds its length limit.")
+                request_record = self.app.store.create_pons_request(
+                    capability.strip(), scope.strip(), reason.strip()
+                )
+                self.send_json(201, request_record)
                 return
             self.send_error(404)
         except (ValueError, UnicodeDecodeError, json.JSONDecodeError) as exc:
