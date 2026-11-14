@@ -7,9 +7,11 @@ import shlex
 from typing import Any
 
 from .aei import AeiError, inspect_file
+from .higher_faculties import translate_file
 from .ai import AiiConversation
 from .pons import BridgeEnvelope, Pons
 from .storage import AeiStorage
+from .repository_engine import run_repository_review
 
 
 class ERIAPantheonInterface:
@@ -23,6 +25,8 @@ class ERIAPantheonInterface:
         state = self.bridge.describe()
         state["repository"] = str(self.repository.root)
         state["conversation_engine"] = "connected"
+        state["service_state"] = "ON"
+        state["higher_faculty_pipeline"] = "Discovery -> Antithesis -> Verification -> Creation"
         try:
             import eria_ttt_bypass  # noqa: F401
             state["code_bypass_module"] = "available"
@@ -36,26 +40,41 @@ class ERIAPantheonInterface:
         low = command.strip().lower()
         if low in {"integration.status", "bridge.status", "pons.status"}:
             return self.status()
+        if low == "repository.review":
+            return self._repository_review()
         if low.startswith("code.bypass "):
             return self._code_bypass(command.strip()[len("code.bypass "):])
         if low.startswith("aei.compile "):
             return self._aei_compile(command.strip()[len("aei.compile "):])
-        if low.startswith(("aei.inspect ", "aei.translate ")):
-            prefix = "aei.inspect " if low.startswith("aei.inspect ") else "aei.translate "
-            return self._aei_inspect(command.strip()[len(prefix):])
+        if low.startswith("aei.translate "):
+            return self._aei_translate(command.strip()[len("aei.translate "):])
+        if low.startswith("aei.inspect "):
+            return self._aei_inspect(command.strip()[len("aei.inspect "):])
+        if low.startswith("ai.higher "):
+            return self._ai_higher(command.strip()[len("ai.higher "):])
         if low.startswith("ai.ask "):
             return self._ai_ask(command.strip()[len("ai.ask "):])
         if low.startswith("repository.ask "):
             return self.repository.ask(command.strip()[len("repository.ask "):])
         return (
-            "Supported commands: integration.status, bridge.status, "
+             "Supported commands: integration.status, bridge.status, repository.review (whole-repository acquisition/quality/synthesis), "
             "repository.ask <question>, "
             "aei.inspect <repo-relative-path>, "
-            "aei.translate <repo-relative-path> (read-only), "
+            "aei.translate <repo-relative-path> (Discovery -> Antithesis -> Verification -> Creation), "
             "aei.compile <repo-relative-path> (store derived copy), "
             "ai.ask <repo-relative-path> --question <text>, "
+            "ai.higher <repo-relative-path> --question <text> [--compare <other-path>], "
             "code.bypass <repo-relative-path> --reason <text>"
         )
+
+    def _repository_review(self) -> str:
+        """Run bounded read-only acquisition, quality analysis, and synthesis."""
+        try:
+            result = run_repository_review(self.repository.root)
+        except (OSError, ValueError) as exc:
+            return json.dumps({"translator": "ERIA", "status": "HOLD",
+                               "error": str(exc)}, ensure_ascii=False, indent=2)
+        return json.dumps(result, ensure_ascii=False, indent=2)
 
     def _aei_compile(self, arguments: str) -> str:
         try:
@@ -71,6 +90,20 @@ class ERIAPantheonInterface:
                               ensure_ascii=False, indent=2)
         return json.dumps(result, ensure_ascii=False, indent=2)
 
+    def _aei_translate(self, arguments: str) -> str:
+        try:
+            tokens = shlex.split(arguments)
+        except ValueError as exc:
+            return f"HOLD: invalid Æị translation command quoting: {exc}"
+        if len(tokens) != 1:
+            return "HOLD: provide exactly one repository-relative source path."
+        try:
+            result = translate_file(self.repository.root, tokens[0])
+        except (AeiError, OSError, ValueError) as exc:
+            return json.dumps({"translator": "Æị Higher Faculties", "status": "HOLD", "error": str(exc)},
+                              ensure_ascii=False, indent=2)
+        return json.dumps(result, ensure_ascii=False, indent=2)
+
     def _aei_inspect(self, arguments: str) -> str:
         try:
             tokens = shlex.split(arguments)
@@ -83,6 +116,37 @@ class ERIAPantheonInterface:
         except (AeiError, OSError) as exc:
             return f"HOLD: Æị inspection failed: {exc}"
         return json.dumps(result.to_dict(), ensure_ascii=False, indent=2)
+
+    def _ai_higher(self, arguments: str) -> str:
+        try:
+            tokens = shlex.split(arguments)
+        except ValueError as exc:
+            return f"HOLD: invalid Âï Higher Faculty command: {exc}"
+        if not tokens or "--question" not in tokens:
+            return "HOLD: use ai.higher <repo-relative-path> --question <text> [--compare <other-path>]."
+        path = tokens[0]
+        question_index = tokens.index("--question")
+        if question_index != 1:
+            return "HOLD: source path must precede --question."
+        compare_path = None
+        question_tokens = tokens[question_index + 1:]
+        if "--compare" in question_tokens:
+            compare_index = question_tokens.index("--compare")
+            if compare_index + 1 >= len(question_tokens) or compare_index + 2 != len(question_tokens):
+                return "HOLD: --compare requires exactly one final repository-relative path."
+            compare_path = question_tokens[compare_index + 1]
+            question_tokens = question_tokens[:compare_index]
+        question = " ".join(question_tokens).strip()
+        if not question:
+            return "HOLD: enter a question after --question."
+        try:
+            result = self.bridge.resolve(AiiConversation).ask_higher_faculty(
+                path, question, comparison_path=compare_path
+            )
+        except (AeiError, OSError, ValueError) as exc:
+            return json.dumps({"translator": "Âï", "status": "HOLD", "error": str(exc)},
+                              ensure_ascii=False, indent=2)
+        return json.dumps(result, ensure_ascii=False, indent=2)
 
     def _ai_ask(self, arguments: str) -> str:
         try:

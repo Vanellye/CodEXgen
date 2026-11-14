@@ -12,7 +12,7 @@
 header{padding:22px 4px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:12px}.mark{width:42px;height:42px;border-radius:13px;background:linear-gradient(145deg,#83d6c2,#6e9eff);display:grid;place-items:center;color:#071321;font-weight:900;font-size:19px}.brand h1{font-size:18px;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:12px}
 .status{font-size:11px;color:var(--accent);border:1px solid #31594f;border-radius:99px;padding:6px 9px;white-space:nowrap}.status.off{color:#ffb0a7;border-color:#70413c}
-main{flex:1;display:flex;flex-direction:column;min-height:0}.overview{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:14px 0}.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px}.stat b{font-size:16px;display:block}.stat span{font-size:10px;color:var(--muted)}
+main{flex:1;display:flex;flex-direction:column;min-height:0}.overview{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;padding:14px 0}.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px}.stat b{font-size:16px;display:block}.stat span{font-size:10px;color:var(--muted)}
 .chat{flex:1;min-height:300px;overflow:auto;padding:12px 2px 18px;display:flex;flex-direction:column;gap:12px}
 .welcome{background:linear-gradient(135deg,#172943,#141d31);border:1px solid var(--line);border-radius:16px;padding:17px}.welcome h2{font-size:18px;margin:0 0 7px}.welcome p{font-size:13px;color:var(--muted);line-height:1.5;margin:0}
 .message{max-width:92%;padding:12px 14px;border-radius:15px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.55}.user{align-self:flex-end;background:#254466;border:1px solid #3c6086}.assistant{align-self:flex-start;background:var(--panel);border:1px solid var(--line)}.meta{font-size:10px;color:var(--muted);margin-bottom:5px}
@@ -32,6 +32,7 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
 <div class="stat"><b id="fileCount">—</b><span>Indexed files</span></div>
 <div class="stat"><b id="dbState">—</b><span>Repository database</span></div>
 <div class="stat"><b id="engineState">—</b><span>Conversation engine</span></div>
+<div class="stat"><b id="ponsState">—</b><span>PONS bridge</span></div>
 </section>
 <section id="chat" class="chat" aria-live="polite">
 <div class="welcome"><h2>Welcome to ERIA</h2><p>Ask questions about repository files, branches, commits, architecture, provenance, or the PONS bridge. Original source remains non-authoritative; translations are derived records, not replacements.</p></div>
@@ -42,6 +43,10 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
 <button class="small" id="statusBtn" type="button">Integration status</button>
 <button class="small" id="filesBtn" type="button">Search indexed paths</button>
 <button class="small" id="refreshBtn" type="button">Refresh index</button>
+<button class="small" id="translateBtn" type="button">Translate source</button>
+<button class="small" id="higherAiBtn" type="button">Ask Âï</button>\n<button class="small" id="repositoryReviewBtn" type="button">Whole-repository review</button>
+<button class="small" id="runApprovedBtn" type="button">Run approved check</button>
+ <button class="small" id="githubValidationBtn" type="button">GitHub validation evidence</button>
 </div></div>
 </main>
 <footer>Local Termux session · SQLite stored under ~/.eria · No automatic Git mutation or remote transmission</footer>
@@ -82,17 +87,19 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
   }
   async function status() {
     try {
-      const data = await api("/api/status");
+      const [data, pons] = await Promise.all([api("/api/status"), api("/api/pons/status")]);
       $("connection").textContent = "Termux connected";
       $("connection").classList.remove("off");
       $("fileCount").textContent = data.index.files;
       $("dbState").textContent = "Ready";
       $("engineState").textContent = "Online";
+      $("ponsState").textContent = pons.service_state || "ON";
     } catch (error) {
       $("connection").textContent = "Disconnected";
       $("connection").classList.add("off");
       $("dbState").textContent = "Offline";
       $("engineState").textContent = "Offline";
+      $("ponsState").textContent = "Unknown";
     }
   }
   async function history() {
@@ -140,6 +147,100 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
         ? "Indexed path matches:\n" + data.files.map(x => x.path + " (" + x.size_bytes + " bytes)").join("\n")
         : "No indexed paths matched: " + query);
     } catch (error) { addMessage("assistant", "HOLD: " + error.message); }
+  });
+  $("higherAiBtn").addEventListener("click", async () => {
+    const path = prompt("Repository-relative source-code path:");
+    if (path === null || !path.trim()) return;
+    const question = prompt("Ask Âï about purpose, dependencies, conflicts, security, improvements, or translation comparison:");
+    if (question === null || !question.trim()) return;
+    const comparisonPath = prompt("Optional comparison source path (leave blank to skip):") || "";
+    $("higherAiBtn").disabled = true;
+    try {
+      const payload = {path:path.trim(), question:question.trim()};
+      if (comparisonPath.trim()) payload.comparison_path = comparisonPath.trim();
+      const result = await api("/api/ai/higher-faculty", {method:"POST",body:JSON.stringify(payload)});
+      addMessage("assistant", "Âï Higher Faculty Analysis — " + result.status + "\n" +
+        "Source: " + result.source.path + "\nSHA-256: " + result.source.sha256 + "\n\n" +
+        result.answer + "\n\n" + JSON.stringify(result.analysis, null, 2) +
+        (result.comparison ? "\n\nComparison: " + JSON.stringify(result.comparison, null, 2) : "") +
+        "\n\nPONS: " + result.pons.service_state + " · execution: " + result.pons.execution_enabled +
+        "\n\nLimits: " + result.limitations.join(" "));
+    } catch (error) { addMessage("assistant", "Âï analysis HOLD: " + error.message); }
+    finally { $("higherAiBtn").disabled = false; }
+  });
+  $("translateBtn").addEventListener("click", async () => {
+    const path = prompt("Repository-relative source-code path to translate:");
+    if (path === null || !path.trim()) return;
+    $("translateBtn").disabled = true;
+    try {
+      const result = await api("/api/translate", {method:"POST",body:JSON.stringify({path:path.trim()})});
+      const stages = result.pipeline.map(stage => stage.stage + ": " + stage.status).join("\n");
+      addMessage("assistant", "Higher Faculty translation — " + result.status + "\n" +
+        "Source: " + result.source.path + "\nSHA-256: " + result.source.sha256 + "\n" +
+        "Findings: " + result.translation.finding_count + " · Antithesis flags: " + result.antithesis.flag_count + "\n\n" +
+        stages + "\n\n" + JSON.stringify(result.translation.findings, null, 2) + "\n\nPONS: " + result.pons.service_state + " · execution enabled: " + result.pons.execution_enabled);
+    } catch (error) { addMessage("assistant", "Translation HOLD: " + error.message); }
+    finally { $("translateBtn").disabled = false; }
+  });
+  $("repositoryReviewBtn").addEventListener("click", async () => {
+    $("repositoryReviewBtn").disabled = true;
+    try {
+      const result = await api("/api/repository/review", {method:"POST",body:"{}"});
+      const inventory = result.inventory;
+      const quality = result.quality;
+      const plan = result.execution_plan;
+      addMessage("assistant", "ERIA whole-repository review — " + inventory.git.branch + " @ " + inventory.git.commit + "\n" +
+        "Files: " + inventory.summary.file_count + " · manifests: " + inventory.summary.manifest_count +
+        " · test candidates: " + inventory.summary.test_candidate_count + "\n" +
+        "Worktree dirty: " + inventory.git.dirty + " · truncated: " + inventory.limits.truncated + "\n\n" +
+        "Quality findings: " + quality.findings.length + "\n" + JSON.stringify(quality.findings, null, 2) +
+        "\n\nExecution: " + plan.execution_state + " (commands proposed: " + plan.commands.length + ")" +
+        "\n" + JSON.stringify(plan.commands, null, 2) +
+        "\n\nSynthesis: " + result.synthesis.next_stage +
+        "\nAuthority: " + result.synthesis.authority);
+    } catch (error) { addMessage("assistant", "Repository review HOLD: " + error.message); }
+    finally { $("repositoryReviewBtn").disabled = false; }
+  });
+  $("runApprovedBtn").addEventListener("click", async () => {
+    const commandId = prompt("Approved fixed command ID: python-tests, android-debug-build, or make-check-review");
+    if (!commandId) return;
+    const approvalId = prompt("One-use approval ID issued by the Termux CLI:");
+    if (!approvalId) return;
+    const sourcePath = prompt("Source file path for Âï evidence synthesis (optional):") || "";
+    $("runApprovedBtn").disabled = true;
+    try {
+      const result = await api("/api/runner/run", {method:"POST",body:JSON.stringify({command_id:commandId.trim(),approval_id:approvalId.trim()})});
+      addMessage("assistant", "Isolated run: " + result.status + "\nCommit: " + result.commit +
+        "\nCommand: " + result.argv.join(" ") + "\nExit: " + result.exit_code +
+        "\nDuration: " + result.duration_seconds + "s\nOutput hashes: " +
+        result.stdout_sha256 + " / " + result.stderr_sha256);
+      if (sourcePath.trim()) {
+        const synthesis = await api("/api/ai/execution-synthesis", {method:"POST",body:JSON.stringify({path:sourcePath.trim(),execution_result:result})});
+        addMessage("assistant", "Âï source + execution synthesis: " + synthesis.status +
+          "\n" + synthesis.interpretation + "\n" + JSON.stringify(synthesis.source_evidence, null, 2));
+      }
+    } catch (error) { addMessage("assistant", "Isolated execution HOLD: " + error.message); }
+    finally { $("runApprovedBtn").disabled = false; }
+  });
+  $("githubValidationBtn").addEventListener("click", async () => {
+    $("githubValidationBtn").disabled = true;
+    try {
+      const result = await api("/api/github/actions/validation");
+      if (!result.runs.length) {
+        addMessage("assistant", "GitHub Actions validation: no runs found for " + result.workflow + " on " + result.branch + ". The manual workflow must be launched in GitHub Actions first.\n" + result.workflow_url);
+      } else {
+        result.runs.forEach(run => {
+          const artifacts = run.artifacts.length
+            ? run.artifacts.map(a => a.name + " · " + a.size_in_bytes + " bytes · expired: " + a.expired).join("\n")
+            : "No artifacts listed";
+          addMessage("assistant", "GitHub isolated validation #" + run.run_number + " — " + run.status + " / " + (run.conclusion || "pending") +
+            "\nCommit: " + run.head_sha + "\nUpdated: " + run.updated_at + "\n" +
+            "Run: " + run.html_url + "\nArtifacts:\n" + artifacts);
+        });
+      }
+      addMessage("assistant", "Read-only inspection only. No workflow was started and no artifact was downloaded. " + result.signature_note);
+    } catch (error) { addMessage("assistant", "GitHub evidence HOLD: " + error.message); }
+    finally { $("githubValidationBtn").disabled = false; }
   });
   $("refreshBtn").addEventListener("click", async () => {
     $("refreshBtn").disabled = true;

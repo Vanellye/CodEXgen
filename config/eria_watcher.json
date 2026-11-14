@@ -1,0 +1,90 @@
+{
+  "schema": "eria-watcher-config-v1",
+  "remote": "origin",
+  "fetch_scope": "all",
+  "include_branches": true,
+  "include_tags": true,
+  "include_notes": false,
+  "include_other_refs": false,
+  "local_head_watch": true,
+  "remote_fetch_enabled": false,
+  "automatic_acquisition_enabled": false,
+  "vault_integrity_required": true,
+  "pons": {
+    "required_for_fetch": true,
+    "required_for_ref_updates": true,
+    "required_for_vault_writes": true,
+    "default": "deny",
+    "authorization": "explicit scoped grant"
+  },
+  "preservation": {
+    "main_immutable": true,
+    "no_merge": true,
+    "no_deploy": true,
+    "no_force_push": true,
+    "preserve_git_history": true,
+    "preserve_original_bytes": true,
+    "append_only_provenance": true
+  },
+  "fetch": {
+    "prune": false,
+    "tags": true,
+    "recurse_submodules": false,
+    "depth": 0,
+    "refspecs": [
+      "+refs/heads/*:refs/remotes/origin/*",
+      "+refs/tags/*:refs/tags/*"
+    ]
+  },
+  "acquisition": {
+    "ancestry_walk": true,
+    "capture_unseen_commits": true,
+    "capture_uncommitted_worktree": false,
+    "retry_interrupted": true,
+    "require_manifest_chain_valid": true,
+    "require_object_hashes_valid": true,
+    "reject_unreferenced_objects": true
+  },
+  "limits": {
+    "interval_seconds": 1111,
+    "max_files_per_commit": 50000,
+    "max_file_bytes": 5242880
+  },
+  "guardian": {
+    "mode": "preflight-and-continuous",
+    "protected_refs": [
+      "refs/heads/main",
+      "refs/remotes/origin/main"
+    ],
+    "protected_ref_policy": "deny-all-mutations",
+    "protected_ref_visibility": "show-blocked-target-before-operation",
+    "prevent_mistakes_before_write": true,
+    "inspect_concurrent_creation": true,
+    "concurrency": {
+      "detect_competing_ref_updates": true,
+      "compare_and_swap_expected_old_sha": true,
+      "serialize_manifest_appends": true,
+      "per_object_exclusive_creation": true,
+      "duplicate_commit_path_idempotent": true,
+      "conflicting_content": "HOLD",
+      "stale_authorization": "HOLD"
+    },
+    "preflight": {
+      "inspect_target_ref": true,
+      "inspect_source_and_destination_refs": true,
+      "preview_file_and_ref_changes": true,
+      "show_risk_and_conflict_report": true,
+      "require_explicit_pons_grant_after_preview": true
+    },
+    "deny_conditions": [
+      "target-is-main",
+      "target-resolves-to-protected-main-ref",
+      "concurrent-ref-moved-since-preflight",
+      "expected-old-sha-mismatch",
+      "ambiguous-target",
+      "missing-or-expired-pons-grant"
+    ],
+    "allowed_working_area": "feature branches and isolated review refs only",
+    "no_implicit_fallback_to_main": true
+  }
+}

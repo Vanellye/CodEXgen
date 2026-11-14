@@ -1,0 +1,142 @@
+name: ERIA Ed25519 authorship signing
+
+# Manual-only. Signing is gated by the protected eria-signing environment.
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: "Type SIGN ERIA AUTHORSHIP CLAIM"
+        required: true
+        type: string
+      claim_json:
+        description: "JSON authorship claim for specifically identified contributions"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eria-authorship-signing
+  cancel-in-progress: false
+
+jobs:
+  sign-claim:
+    if: ${{ github.ref == 'refs/heads/feature/eria-higher-faculty-inspection-2026-11-14' }}
+    runs-on: ubuntu-24.04
+    environment: eria-signing
+    timeout-minutes: 5
+    steps:
+      - name: Require explicit signing confirmation
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          set -euo pipefail
+          test "$CONFIRMATION" = "SIGN ERIA AUTHORSHIP CLAIM" || {
+            echo "Signing confirmation missing; refusing."
+            exit 1
+          }
+
+      - name: Check out exact claim-verification code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Install cryptographic runtime
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install --yes python3 python3-cryptography
+
+      - name: Validate, sign, and verify claim atomically
+        env:
+          CLAIM_JSON: ${{ inputs.claim_json }}
+          ERIA_AUTHORSHIP_PUBLIC_KEY: ${{ vars.ERIA_AUTHORSHIP_PUBLIC_KEY }}
+          ERIA_AUTHORSHIP_KEY_FINGERPRINT: ${{ vars.ERIA_AUTHORSHIP_KEY_FINGERPRINT }}
+          ERIA_AUTHORSHIP_PRIVATE_KEY: ${{ secrets.ERIA_AUTHORSHIP_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import base64
+          import hashlib
+          import json
+          import os
+          import pathlib
+          import tempfile
+
+          from cryptography.hazmat.primitives import serialization
+          from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
+
+          from tools.eria_pantheon.authorship_key import canonical_claim, public_key_fingerprint
+
+          private_pem = os.environ.get("ERIA_AUTHORSHIP_PRIVATE_KEY", "")
+          public_pem = os.environ.get("ERIA_AUTHORSHIP_PUBLIC_KEY", "")
+          expected_fp = os.environ.get("ERIA_AUTHORSHIP_KEY_FINGERPRINT", "").lower()
+          if not private_pem or not public_pem or not expected_fp:
+              raise SystemExit("HOLD: protected signing credentials or fingerprint are not configured.")
+
+          private_key = serialization.load_pem_private_key(private_pem.encode("ascii"), password=None)
+          public_key = serialization.load_pem_public_key(public_pem.encode("ascii"))
+          if not isinstance(private_key, Ed25519PrivateKey) or not isinstance(public_key, Ed25519PublicKey):
+              raise SystemExit("HOLD: only Ed25519 signing keys are accepted.")
+
+          derived_public = private_key.public_key().public_bytes(
+              serialization.Encoding.DER, serialization.PublicFormat.SubjectPublicKeyInfo)
+          configured_public = public_key.public_bytes(
+              serialization.Encoding.DER, serialization.PublicFormat.SubjectPublicKeyInfo)
+          if derived_public != configured_public:
+              raise SystemExit("HOLD: private/public key pair mismatch.")
+
+          fingerprint = public_key_fingerprint(public_pem)
+          if fingerprint.lower() != expected_fp:
+              raise SystemExit("HOLD: trusted public-key fingerprint mismatch.")
+
+          claim = json.loads(os.environ["CLAIM_JSON"])
+          if not isinstance(claim, dict):
+              raise SystemExit("HOLD: claim JSON must be an object.")
+          claim.pop("signature", None)
+          claim.pop("public_key", None)
+          claim.pop("verification", None)
+          payload = canonical_claim(claim)
+          signature = private_key.sign(payload)
+          public_key.verify(signature, payload)
+
+          signed = dict(claim)
+          signed["signature_algorithm"] = "Ed25519"
+          signed["key_fingerprint"] = fingerprint
+          signed["signature"] = base64.b64encode(signature).decode("ascii")
+
+          # Atomic transmutation: write a complete verified artifact, then replace.
+          destination = pathlib.Path("signed-authorship-claim.json")
+          fd, temporary = tempfile.mkstemp(prefix=".eria-claim-", dir=".")
+          try:
+              with os.fdopen(fd, "w", encoding="utf-8") as stream:
+                  json.dump(signed, stream, ensure_ascii=False, sort_keys=True, indent=2)
+                  stream.write("\n")
+                  stream.flush()
+                  os.fsync(stream.fileno())
+              os.replace(temporary, destination)
+          finally:
+              if os.path.exists(temporary):
+                  os.unlink(temporary)
+
+          # Read back and independently verify the exact published bytes.
+          result = json.loads(destination.read_text(encoding="utf-8"))
+          public_key.verify(base64.b64decode(result["signature"], validate=True),
+                            canonical_claim(result))
+          print("Ed25519 claim signature created and verified.")
+          print("Key fingerprint:", fingerprint)
+          print("Claim ID:", result["claim_id"])
+          print("Commit:", result["commit_sha"])
+          print("Contributions:", len(result["contributions"]))
+          print("Authorship status remains a claim; signature is not proof of authorship.")
+          PY
+
+      - name: Upload signed claim only
+        uses: actions/upload-artifact@v4
+        with:
+          name: eria-signed-authorship-claim-${{ github.run_id }}
+          path: signed-authorship-claim.json
+          if-no-files-found: error
+          retention-days: 30
