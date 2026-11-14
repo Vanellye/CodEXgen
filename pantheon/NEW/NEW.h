@@ -2,6 +2,7 @@
 #define ERIA_PANTHEON_NEW_H
 
 #include <stddef.h>
+#include "../PONS/PONS.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,7 +28,8 @@ typedef enum {
     NEW_STATUS_UNSUPPORTED_DATA = 3,
     NEW_STATUS_PROVENANCE_MISSING = 4,
     NEW_STATUS_OUTPUT_TOO_SMALL = 5,
-    NEW_STATUS_PROOF_REFERENCE_MISSING = 6
+    NEW_STATUS_PROOF_REFERENCE_MISSING = 6,
+    NEW_STATUS_PONS_HOLD = 7
 } NewStatus;
 
 /* Caller supplies already-minimized data from an authorized source.
