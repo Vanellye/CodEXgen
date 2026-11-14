@@ -1,0 +1,102 @@
+name: ERIA isolated runner validation
+
+# Manual-only safety gate. This workflow never runs on push or pull_request.
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: "Type RUN ERIA ISOLATED VALIDATION to authorize this one validation run"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eria-isolated-runner-validation-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  isolated-runner:
+    name: Validate bubblewrap runner on Ubuntu
+    if: ${{ github.ref == 'refs/heads/feature/eria-higher-faculty-inspection-2026-11-14' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Require explicit workflow approval
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          set -euo pipefail
+          test "$CONFIRMATION" = "RUN ERIA ISOLATED VALIDATION" || {
+            echo "Explicit confirmation phrase missing; refusing to run."
+            exit 1
+          }
+
+      - name: Check out the exact dispatched revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Install isolated-runner prerequisites
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install --yes bubblewrap python3 python3-pytest git
+
+      - name: Verify bubblewrap and user-namespace support
+        run: |
+          set -euo pipefail
+          command -v bwrap
+          bwrap --unshare-all --die-with-parent \
+            --ro-bind /usr /usr --proc /proc --dev /dev \
+            -- true
+          echo "bubblewrap namespace smoke test passed"
+
+      - name: Issue exact-commit, one-use test approval
+        id: approval
+        env:
+          COMMIT: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          phrase="APPROVE python-tests ${COMMIT:0:12}"
+          approval_output="$(printf '%s\\n' "$phrase" | python3 -m tools.eria_pantheon.isolated_runner approve . python-tests)"
+          approval_id="$(printf '%s\\n' "$approval_output" | python3 -c 'import json,sys; s=sys.stdin.read(); print(json.loads(s[s.rfind("{"):])["approval_id"])')"
+          test -n "$approval_id"
+          echo "approval_id=$approval_id" >> "$GITHUB_OUTPUT"
+
+      - name: Execute approved tests in the isolated workspace
+        env:
+          APPROVAL_ID: ${{ steps.approval.outputs.approval_id }}
+        run: |
+          set -euo pipefail
+          python3 -m tools.eria_pantheon.isolated_runner run . python-tests \
+            --approval-id "$APPROVAL_ID" > runner-result.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          from tools.eria_pantheon.isolated_runner import verify_result_signature
+
+          result = json.loads(Path("runner-result.json").read_text(encoding="utf-8"))
+          assert verify_result_signature(result), "Runner result signature invalid"
+          assert result["status"] == "PASSED", result.get("stderr", "")
+          assert result["commit"] == "${{ github.sha }}"
+          assert result["network_namespace"] == "unshared"
+          assert result["host_checkout_writable"] is False
+          assert result["host_home_mounted"] is False
+          assert result["source_mutations"] is False
+          assert result["git_mutations"] is False
+          print("Signed isolated-run evidence verified for exact commit.")
+          print("Command:", result["argv"])
+          print("Duration:", result["duration_seconds"], "seconds")
+          PY
+
+      - name: Upload bounded validation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eria-isolated-runner-evidence-${{ github.run_id }}
+          path: runner-result.json
+          if-no-files-found: ignore
+          retention-days: 7
