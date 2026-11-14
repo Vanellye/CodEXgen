@@ -449,8 +449,44 @@ class Handler(BaseHTTPRequestHandler):
                 })
                 self.send_json(200, result)
                 return
+            if route == "/api/runner/run":
+                command_id = data.get("command_id")
+                approval_id = data.get("approval_id")
+                if command_id not in {"python-tests", "android-debug-build", "make-check-review"}:
+                    raise ValueError("command_id is not in the fixed runner allowlist.")
+                if not isinstance(approval_id, str) or len(approval_id) != 32:
+                    raise ValueError("A one-use CLI-issued approval_id is required.")
+                from eria_pantheon.isolated_runner import run_approved
+                result = run_approved(self.app.repository.root, command_id, approval_id)
+                self.app.store.add_audit("isolated_repository_command", result["status"], {
+                    "commit": result["commit"], "command_id": command_id,
+                    "approval_id": approval_id, "stdout_sha256": result["stdout_sha256"],
+                    "stderr_sha256": result["stderr_sha256"],
+                    "source_mutations": False, "git_mutations": False,
+                })
+                self.send_json(200, result)
+                return
+            if route == "/api/ai/execution-synthesis":
+                relative_path = data.get("path")
+                execution_result = data.get("execution_result")
+                if not isinstance(relative_path, str) or not relative_path.strip() or len(relative_path) > 500:
+                    raise ValueError("A repository-relative source path is required.")
+                if not isinstance(execution_result, dict):
+                    raise ValueError("A signed execution_result object is required.")
+                from eria_pantheon.ai import AiiConversation
+                result = self.app.pantheon.bridge.resolve(AiiConversation).synthesize_execution_evidence(
+                    relative_path.strip(), execution_result
+                )
+                self.app.store.add_audit("ai_execution_evidence_synthesis", result["status"], {
+                    "source_path": relative_path, "source_sha256": result["source"]["sha256"],
+                    "commit": result["execution_evidence"]["commit"],
+                    "command_id": result["execution_evidence"]["command_id"],
+                    "execution_status": result["execution_evidence"]["status"],
+                })
+                self.send_json(200, result)
+                return
             if route == "/api/repository/review":
-                raw_result = self.app.pantheon.handle("repository.review")
+                execution_results = data.get("execution_results", [])\n                if not isinstance(execution_results, list) or len(execution_results) > 20:\n                    raise ValueError("execution_results must be a list of at most 20 signed runner results.")\n                raw_result = self.app.pantheon.handle("repository.review")
                 try:
                     result = json.loads(raw_result)
                 except json.JSONDecodeError:
