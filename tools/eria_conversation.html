@@ -61,6 +61,23 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
 </div>
 <p id="ponsState" aria-live="polite">PONS approval state: HOLD until exact human confirmation and live fingerprint verification.</p>
 </section>
+<section class="quality-panel" aria-label="PONS patch hash authorization">
+<h3>PONS · Exact Patch Authorization</h3>
+<p>Provide the parent patch-preparation grant and the complete unified diff. PONS binds the exact patch bytes to the original approved file scope. A second human confirmation is required.</p>
+<label for="patchParentGrant">Parent PONS grant ID</label>
+<input id="patchParentGrant" type="text" autocomplete="off" spellcheck="false" style="width:100%;margin:8px 0;padding:10px;border-radius:8px">
+<label for="patchSource">Complete unified diff</label>
+<textarea id="patchSource" rows="8" spellcheck="false" style="width:100%;margin:8px 0;padding:10px;border-radius:8px" placeholder="Paste the complete reviewed unified diff here"></textarea>
+<div class="quality-actions">
+<button class="small" id="patchRequest" type="button">Create Patch Hash Request</button>
+<button class="small" id="patchHistory" type="button">Patch Approval History</button>
+</div>
+<pre id="patchScope" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:280px;overflow:auto">No patch request loaded.</pre>
+<label for="patchConfirmation">Type the exact patch confirmation phrase:</label>
+<input id="patchConfirmation" type="text" autocomplete="off" spellcheck="false" style="width:100%;margin:8px 0;padding:10px;border-radius:8px">
+<button class="small" id="patchApprove" type="button" disabled>Authorize Exact Patch Hash</button>
+<p id="patchState" aria-live="polite">Patch authorization: HOLD.</p>
+</section>
 <section class="quality-panel" aria-label="PONS ERIA-PACT executor">
 <h3>PONS · ERIA-PACT Transaction Executor</h3>
 <p>Declarative, allowlisted operations only. Review the complete program and exact execution plan before authorizing. Main/master writes are prohibited. Deployment remains disabled until its workflow is explicitly allowlisted.</p>
@@ -320,6 +337,36 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
       ponsRequest = null;
     } catch (error) { $("ponsState").textContent = "HOLD: " + error.message; }
     finally { button.disabled = false; }
+  });
+  let patchRequest = null, patchGrant = null;
+  $("patchRequest").addEventListener("click", async () => {
+    const parent_grant_id = $("patchParentGrant").value.trim();
+    const patch_text = $("patchSource").value;
+    if (!parent_grant_id || !patch_text.trim()) { $("patchState").textContent = "HOLD: parent grant and complete diff are required."; return; }
+    try {
+      patchGrant = null; $("patchApprove").disabled = true;
+      patchRequest = await api("/api/pons/patches/request", {method:"POST",body:JSON.stringify({parent_grant_id,patch_text})});
+      $("patchScope").textContent = JSON.stringify(patchRequest,null,2);
+      $("patchConfirmation").value = ""; $("patchApprove").disabled = false;
+      $("patchState").textContent = "HOLD · Review the exact patch hash and every target path.";
+    } catch (error) { $("patchState").textContent = "HOLD: " + error.message; }
+  });
+  $("patchApprove").addEventListener("click", async () => {
+    if (!patchRequest) { $("patchState").textContent = "HOLD: create a patch request first."; return; }
+    try {
+      const result = await api("/api/pons/patches/confirm", {method:"POST",body:JSON.stringify({
+        patch_request_id:patchRequest.patch_request_id,patch_sha256:patchRequest.patch_sha256,
+        confirmation:$("patchConfirmation").value
+      })});
+      patchGrant = result; $("patchConfirmation").value = "";
+      $("patchState").textContent = result.decision + " · Patch grant " + result.patch_grant_id + " · Source modified: " + result.source_modified;
+      $("pactProgram").value = "APPLY PATCH " + result.patch_grant_id + "\nCOMMIT MESSAGE \"Approved ERIA patch\"";
+      $("patchScope").textContent += "\n\nPATCH GRANT\n" + JSON.stringify(result,null,2);
+    } catch (error) { $("patchState").textContent = "HOLD: " + error.message; }
+  });
+  $("patchHistory").addEventListener("click", async () => {
+    try { const data=await api("/api/pons/approvals"); addMessage("assistant","PONS patch history:\n"+JSON.stringify({patch_requests:data.patch_requests,patch_grants:data.patch_grants},null,2)); }
+    catch(error) { addMessage("assistant","Patch history unavailable: "+error.message); }
   });
   let pactRequest = null, pactGrant = null;
   $("pactRequest").addEventListener("click", async () => {
