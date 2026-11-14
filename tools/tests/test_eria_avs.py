@@ -123,6 +123,15 @@ class AuthenticatedAVSTests(unittest.TestCase):
         with self.assertRaises(PermissionError):
             unconfigured.evaluate_accuracy(["claim-1"])
 
+    def test_operator_revoked_key_cannot_start_a_challenge(self):
+        revoked = Pons(
+            reviewer_root_public_key_b64=b64(raw_public(self.root_key)),
+            revoked_reviewer_key_ids={"key:alice:01"},
+        )
+        revoked.install_accuracy_service(str(self.path.parent / "revoked.jsonl"))
+        with self.assertRaises(PermissionError):
+            revoked.issue_reviewer_challenge(self.certificate)
+
     def test_direct_avs_construction_is_rejected(self):
         with self.assertRaises(PermissionError):
             AccuracyValidationService(self.path)
