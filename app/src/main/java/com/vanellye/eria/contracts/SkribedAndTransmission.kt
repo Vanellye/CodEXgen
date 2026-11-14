@@ -5,8 +5,6 @@ import java.security.MessageDigest
 import com.vanellye.eria.pons.PonsComponentStatus
 import com.vanellye.eria.pons.PonsAnchorIdentity
 import com.vanellye.eria.pons.requireReady
-import com.vanellye.eria.pons.PonsEffectiveState
-import com.vanellye.eria.pons.PonsAnchorIdentity
 
 /**
  * SKRIBED writing contract.
