@@ -12,7 +12,7 @@ class ERIAPantheonInterface:
     def __init__(self, repository: Any) -> None:
         self.repository = repository
         self.bridge = Pons()
-        self.avs = self.bridge.install_accuracy_service(
+        self.bridge.install_accuracy_service(
             str(repository.root / ".eria" / "avs" / "evidence.jsonl")
         )
 
@@ -34,7 +34,7 @@ class ERIAPantheonInterface:
         if low in {"integration.status", "bridge.status", "pons.status"}:
             return self.status()
         if low == "pons.avs.status":
-            state = self.avs.ledger.verify()
+            state = self.bridge.accuracy_ledger_status()
             return "PONS AVS ledger status\n" + "\n".join(
                 f"{key}: {value}" for key, value in state.items()
             )
