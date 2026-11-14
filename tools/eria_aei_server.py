@@ -114,7 +114,7 @@ def make_handler(repository: Path):
                         raise ValueError("Pantheon returned a non-JSON response.")
                 else:
                     result=inspect_file(root,relative.strip()).to_dict()
-            except (UnicodeDecodeError,json.JSONDecodeError,ValueError,AeiError,OSError) as exc:
+            except (UnicodeDecodeError,json.JSONDecodeError,ValueError,AeiError,ResonanceHold,OSError) as exc:
                 self._json(400,{"translator":"ERIA","status":"HOLD","error":str(exc)}); return
             self._json(200,result.to_dict() if hasattr(result,"to_dict") else result)
         def log_message(self,_format,*_args): return
