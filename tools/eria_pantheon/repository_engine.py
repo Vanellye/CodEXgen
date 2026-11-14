@@ -221,6 +221,15 @@ def quality_analysis(inventory: dict[str, Any], execution_results: list[dict[str
                          "finding": "Inventory reached its file cap; repository coverage is incomplete."})
     verified_runs = []
     for run in execution_results or []:
+        try:
+            from .isolated_runner import verify_result_signature
+            signature_valid = verify_result_signature(run)
+        except (OSError, RuntimeError, ValueError):
+            signature_valid = False
+        if not signature_valid:
+            findings.append({"class": "UNKNOWN", "severity": "HIGH",
+                             "finding": "Execution evidence signature invalid; result excluded."})
+            continue
         if run.get("commit") != inventory["git"]["commit"]:
             findings.append({"class": "UNKNOWN", "severity": "HIGH",
                              "finding": "Execution evidence revision mismatch; result excluded."})
