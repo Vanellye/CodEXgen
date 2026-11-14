@@ -353,5 +353,15 @@ class PonsApprovalService:
                 "FROM approval_grants ORDER BY approved_at DESC LIMIT ?",
                 (max(1, min(int(limit), 200)),),
             ).fetchall()
+            patch_requests = db.execute(
+                "SELECT patch_request_id,parent_grant_id,patch_sha256,created_at FROM patch_approval_requests ORDER BY created_at DESC LIMIT ?",
+                (max(1, min(int(limit), 200)),),
+            ).fetchall()
+            patch_grants = db.execute(
+                "SELECT patch_grant_id,patch_request_id,parent_grant_id,capability,patch_sha256,scope_sha256,decision,approved_at FROM patch_approval_grants ORDER BY approved_at DESC LIMIT ?",
+                (max(1, min(int(limit), 200)),),
+            ).fetchall()
         return {"requests": [dict(x) for x in requests],
-                "grants": [dict(x) for x in grants]}
+                "grants": [dict(x) for x in grants],
+                "patch_requests": [dict(x) for x in patch_requests],
+                "patch_grants": [dict(x) for x in patch_grants]}

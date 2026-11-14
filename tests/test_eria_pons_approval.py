@@ -64,8 +64,8 @@ class PonsApprovalTests(unittest.TestCase):
             request = service.create_request(proposal["proposal_id"])
             parent = service.approve(request["request_id"], request["scope_sha256"],
                                      request["confirmation_phrase"])
-            patch = ("diff --git a/a.py b/a.py\\n--- a/a.py\\n+++ b/a.py\\n"
-                     "@@ -1,2 +1,2 @@\\n def shared():\\n-    return 1\\n+    return 3\\n")
+            patch = ("diff --git a/a.py b/a.py\n--- a/a.py\n+++ b/a.py\n"
+                     "@@ -1,2 +1,2 @@\n def shared():\n-    return 1\n+    return 3\n")
             patch_request = service.create_patch_request(parent["grant_id"], patch)
             with self.assertRaisesRegex(ValueError, "confirmation phrase"):
                 service.approve_patch(patch_request["patch_request_id"],
@@ -76,8 +76,8 @@ class PonsApprovalTests(unittest.TestCase):
             self.assertTrue(checked["authorized"])
             self.assertFalse(checked["executor_enabled"])
             with self.assertRaisesRegex(ValueError, "differ from the human-approved hash"):
-                service.verify_patch_grant(grant["patch_grant_id"], patch + "# altered\\n")
-            self.assertEqual((root / "a.py").read_text(), "def shared():\\n    return 1\\n")
+                service.verify_patch_grant(grant["patch_grant_id"], patch + "# altered\n")
+            self.assertEqual((root / "a.py").read_text(), "def shared():\n    return 1\n")
 
     def test_patch_cannot_expand_parent_scope(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -86,8 +86,8 @@ class PonsApprovalTests(unittest.TestCase):
             request = service.create_request(proposal["proposal_id"])
             parent = service.approve(request["request_id"], request["scope_sha256"],
                                      request["confirmation_phrase"])
-            patch = ("diff --git a/outsider.py b/outsider.py\\n--- a/outsider.py\\n"
-                     "+++ b/outsider.py\\n@@ -0,0 +1 @@\\n+unauthorized\\n")
+            patch = ("diff --git a/outsider.py b/outsider.py\n--- a/outsider.py\n"
+                     "+++ b/outsider.py\n@@ -0,0 +1 @@\n+unauthorized\n")
             with self.assertRaisesRegex(ValueError, "expands beyond"):
                 service.create_patch_request(parent["grant_id"], patch)
 
