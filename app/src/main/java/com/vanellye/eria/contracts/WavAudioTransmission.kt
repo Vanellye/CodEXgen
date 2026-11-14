@@ -22,9 +22,7 @@ class WavAudioTransmissionEndpoint(
 ) : InternalTransmissionEndpoint {
 
     init {
-        require(ponsStatus.effectiveState == PonsEffectiveState.READY &&
-            ponsStatus.anchor == PonsAnchorIdentity.CANONICAL
-        ) { "PONS provenance/status gate did not authorize this audio component" }
+        ponsStatus.requireReady("audio.wav-transmission")
         require(sampleRateHz in 8_000..192_000) { "Unsupported sample rate" }
         require(channels == 1 || channels == 2) { "Only mono or stereo PCM is supported" }
     }
