@@ -5,9 +5,10 @@ import argparse, json, shlex
 from types import SimpleNamespace
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
 from eria_pantheon.aei import AeiError, inspect_file
 from eria_pantheon.interface import ERIAPantheonInterface
+from eria_pantheon.resonance import synthesize_tone
 MAX_BODY=4096
 UI_FILE=Path(__file__).resolve().parents[1]/"interfaces"/"aei-interface.html"
 def make_handler(repository: Path):
@@ -28,7 +29,20 @@ def make_handler(repository: Path):
         def do_GET(self):
             if not self._local_host():
                 self._json(403,{"status":"HOLD","error":"Host header is not a permitted loopback host"}); return
-            route=urlparse(self.path).path
+            parsed=urlparse(self.path)
+            route=parsed.path
+            if route=="/api/resonance/tone":
+                try:
+                    query=parse_qs(parsed.query)
+                    frequency=float(query.get("frequency",["440"])[0])
+                    duration=float(query.get("duration",["1"])[0])
+                    volume=float(query.get("volume",["25"])[0])
+                    payload=synthesize_tone(frequency,duration,volume)
+                except (ValueError, TypeError) as exc:
+                    self._json(400,{"status":"HOLD","error":str(exc)}); return
+                self.send_response(200); self.send_header("Content-Type","audio/wav")
+                self.send_header("Content-Length",str(len(payload))); self.send_header("Cache-Control","no-store")
+                self.end_headers(); self.wfile.write(payload); return
             if route=="/api/status":
                 self._json(200,{"service":"ERIA Æị","status":"ready","mode":"source-read-only; derived-storage-enabled","conversation":"Âï via Pantheon/PONS","endpoints":["/api/aei/inspect","/api/ai/ask","/api/aei/compile"],"repository":str(root)}); return
             if route in {"/","/aei-interface.html"}:
