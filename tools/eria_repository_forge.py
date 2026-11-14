@@ -40,8 +40,8 @@ SECRET_NAME = re.compile(
     re.I,
 )
 SECRET_VALUE = re.compile(
-    r"(?i)(api[_-]?key|access[_-]?token|password|client_secret|"
-    r"private[_-]?key)\s*[:=]\s*(['\"]?)([A-Za-z0-9_\-./+=]{8,})"
+    r"(?i)((?:api[_-]?key|access[_-]?token|password|client_secret|"
+    r"private[_-]?key)\s*[:=]\s*)(['\"]?)([A-Za-z0-9_\-./+=]{8,})\2"
 )
 LANGUAGES = {
     ".py": "Python", ".sh": "Bash", ".kt": "Kotlin", ".kts": "Kotlin DSL",
@@ -71,7 +71,10 @@ def utc_now() -> str:
 
 
 def redact(text: str) -> str:
-    return SECRET_VALUE.sub(lambda m: f"{m.group(1)}=[REDACTED]", text)
+    return SECRET_VALUE.sub(
+        lambda m: f"{m.group(1)}{m.group(2)}[REDACTED]{m.group(2)}",
+        text,
+    )
 
 
 def _safe_rel(root: Path, relative: str) -> Path:
@@ -235,6 +238,8 @@ def _resolve_local_import(root: Path, source: str, name: str) -> str | None:
             candidates.append(root / (str(module_path) + ".java"))
     for candidate in candidates:
         try:
+            if candidate.is_symlink():
+                continue
             resolved = candidate.resolve(strict=True)
             resolved.relative_to(root)
             if resolved.is_file() and not resolved.is_symlink():
@@ -379,12 +384,12 @@ def write_forge(report: dict[str, Any], output: str | Path, repository_root: Pat
     if target.exists() or target.is_symlink():
         raise FileExistsError(f"Refusing to overwrite forge output: {target}")
     target.parent.mkdir(parents=True, exist_ok=True)
+    report["safety"]["output_written"] = True
     with target.open("x", encoding="utf-8") as stream:
         json.dump(report, stream, ensure_ascii=False, indent=2, sort_keys=True)
         stream.write("\n")
         stream.flush()
         os.fsync(stream.fileno())
-    report["safety"]["output_written"] = True
     return target
 
 
