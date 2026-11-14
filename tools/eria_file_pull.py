@@ -256,11 +256,11 @@ class FilePullService:
         with urllib.request.urlopen(request, timeout=30) as response:
             return json.loads(response.read().decode("utf-8"))
 
-    def _github_raw(self, path: str):
-        branch = urllib.parse.quote(self.remote_branch, safe="/")
+    def _github_raw(self, path: str, commit: str):
+        # Pin raw retrieval to the exact commit whose tree was enumerated.
         relative = urllib.parse.quote(path, safe="/")
         url = "https://raw.githubusercontent.com/{}/{}/{}/{}".format(
-            self.owner, self.repository, branch, relative
+            self.owner, self.repository, commit, relative
         )
         headers = {"User-Agent": "ERIA-FilePull/1.0"}
         token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
@@ -309,7 +309,7 @@ class FilePullService:
                 counts["skipped"] += 1
                 continue
             try:
-                content = decode_eligible_text(path, self._github_raw(path))
+                content = decode_eligible_text(path, self._github_raw(path, commit))
                 if content is None:
                     counts["skipped"] += 1
                     continue
