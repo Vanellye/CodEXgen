@@ -81,7 +81,7 @@ class OprozalTests(unittest.TestCase):
         conversation = Conversation(FakeRepository())
         answer = conversation.ask("The runtime is lagging.")
         self.assertIn("Oprozal advisory", answer)
-        self.assertIn("Source revision: abc123", answer)
+        self.assertIn("abc123 (NON_AUTHORITATIVE provenance reference)", answer)
         self.assertEqual(conversation.last_oprozal_advice["source_revision"], "abc123")
         self.assertEqual(conversation.last_oprozal_advice["pons"]["status"], "HOLD")
 
