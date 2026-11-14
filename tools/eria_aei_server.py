@@ -10,6 +10,8 @@ from eria_pantheon.aei import AeiError, inspect_file
 from eria_pantheon.interface import ERIAPantheonInterface
 from eria_pantheon.resonance import synthesize_tone, InboxMonitor, load_config, ResonanceHold
 from eria_pantheon.approval import verify_signed_grant, ApprovalError
+from eria_pantheon.relay_lifecycle import RelayLifecycle
+from eria_pantheon.patch_executor import execute_exact_patch, PatchHold
 import os, threading
 REMOTE_APPROVAL_LOCK=threading.Lock()
 MAX_BODY=4096
@@ -17,6 +19,7 @@ UI_FILE=Path(__file__).resolve().parents[1]/"interfaces"/"aei-interface.html"
 def make_handler(repository: Path):
     root=repository.resolve(strict=True)
     inbox_monitor=InboxMonitor(root)
+    relay_lifecycle=RelayLifecycle(root,inbox_monitor)
     class Handler(BaseHTTPRequestHandler):
         server_version="ERIA-AEI/0.1"
         def _local_host(self):
@@ -50,7 +53,7 @@ def make_handler(repository: Path):
             if route=="/api/acquisition/status":
                 self._json(200,inbox_monitor.status()); return
             if route=="/api/status":
-                self._json(200,{"service":"ERIA Æị","status":"ready","mode":"source-read-only; derived-storage-enabled","conversation":"Âï via Pantheon/PONS","acquisition":inbox_monitor.status(),"endpoints":["/api/aei/inspect","/api/ai/ask","/api/aei/compile","/api/acquisition/start","/api/acquisition/pause","/api/acquisition/status","/api/resonance/tone"],"repository":str(root)}); return
+                self._json(200,{"service":"ERIA Æị","status":"ready","mode":"source-read-only; derived-storage-enabled","conversation":"Âï via Pantheon/PONS","acquisition":inbox_monitor.status(),"endpoints":["/api/aei/inspect","/api/ai/ask","/api/aei/compile","/api/acquisition/start","/api/acquisition/pause","/api/acquisition/status","/api/resonance/tone","/api/pons/relay/start","/api/pons/relay/stop","/api/pons/relay/status","/api/pons/execute-patch"],"relay":relay_lifecycle.status(),"repository":str(root)}); return
             if route in {"/","/portal","/resonance-portal"}:
                 portal_file=Path(__file__).resolve().parents[1]/"interfaces"/"eria-resonance-portal.html"
                 try: page=portal_file.read_bytes()
@@ -75,19 +78,19 @@ def make_handler(repository: Path):
             if origin and origin not in allowed_origins:
                 self._json(403,{"status":"HOLD","error":"Cross-origin requests are not permitted"}); return
             route=urlparse(self.path).path
-            if route not in {"/api/aei/inspect","/api/ai/ask","/api/aei/compile","/api/acquisition/start","/api/acquisition/pause","/api/pons/remote-approve"}:
+            if route not in {"/api/aei/inspect","/api/ai/ask","/api/aei/compile","/api/acquisition/start","/api/acquisition/pause","/api/pons/remote-approve","/api/pons/relay/start","/api/pons/relay/stop","/api/pons/execute-patch"}:
                 self._json(404,{"status":"HOLD","error":"Not found"}); return
             if self.headers.get("Content-Type","").split(";")[0].strip().lower()!="application/json":
                 self._json(415,{"status":"HOLD","error":"Content-Type must be application/json"}); return
             try: length=int(self.headers.get("Content-Length","0"))
             except ValueError:
                 self._json(400,{"status":"HOLD","error":"Invalid Content-Length"}); return
-            if length<1 or length>MAX_BODY:
+            if length<1 or length>1_100_000:
                 self._json(413,{"status":"HOLD","error":"Request body size is outside the allowed limit"}); return
             try:
                 request=json.loads(self.rfile.read(length).decode("utf-8"))
                 if not isinstance(request,dict): raise ValueError("JSON object required.")
-                if route=="/api/pons/remote-approve":
+                if route=="/api/pons/relay/start":\n                    self._json(200,relay_lifecycle.start()); return\n                if route=="/api/pons/relay/stop":\n                    self._json(200,relay_lifecycle.stop()); return\n                if route=="/api/pons/execute-patch":\n                    result=execute_exact_patch(root,relative_path=request.get("path"),\n                        replacement=request.get("replacement"),grant=request.get("grant"),\n                        signing_key=os.environ.get("ERIA_PONS_APPROVAL_KEY",""))\n                    self._json(200,result); return\n                if route=="/api/pons/remote-approve":
                     key=os.environ.get("ERIA_PONS_APPROVAL_KEY","")
                     grant=verify_signed_grant(request.get("grant"),key,
                         capability="eria.acquire",scope="storage/inbox/")
@@ -163,7 +166,7 @@ def make_handler(repository: Path):
                         raise ValueError("Pantheon returned a non-JSON response.")
                 else:
                     result=inspect_file(root,relative.strip()).to_dict()
-            except (UnicodeDecodeError,json.JSONDecodeError,ValueError,AeiError,ResonanceHold,ApprovalError,OSError) as exc:
+            except (UnicodeDecodeError,json.JSONDecodeError,ValueError,AeiError,ResonanceHold,ApprovalError,PatchHold,OSError) as exc:
                 self._json(400,{"translator":"ERIA","status":"HOLD","error":str(exc)}); return
             self._json(200,result.to_dict() if hasattr(result,"to_dict") else result)
         def log_message(self,_format,*_args): return
