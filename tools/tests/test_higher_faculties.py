@@ -50,7 +50,8 @@ class HigherFacultyPipelineTests(unittest.TestCase):
     def test_interface_command_is_connected(self):
         interface = ERIAPantheonInterface(RepositoryStub(self.root))
         response = json.loads(interface.handle("aei.translate sample.py"))
-        self.assertEqual(response["translator"], "Æị Higher Faculties")
+        self.assertEqual(response["translator"], "Æị")
+        self.assertEqual(response["subsystem"], "Higher Faculties")
         self.assertEqual(response["status"], "REVIEW_REQUIRED")
 
     def test_rejects_path_escape_and_non_code(self):
