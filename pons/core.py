@@ -52,7 +52,6 @@ class PONSRegistry:
         self._components: Dict[str, Component] = {}
         self._observations: Dict[str, dict] = {}
         self._provenance: Dict[str, dict] = {}
-        self._provenance: Dict[str, dict] = {}
         self._lock = RLock()
         self._last_event_hash = "0" * 64
         if self.ledger_path and self.ledger_path.exists():
@@ -153,8 +152,7 @@ class PONSRegistry:
         if self.ledger_path:
             self.ledger_path.parent.mkdir(parents=True, exist_ok=True)
             with self.ledger_path.open("a", encoding="utf-8") as stream:
-                stream.write(json.dumps(record, sort_keys=True, separators=(",", ":")) + "
-")
+                stream.write(json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n")
                 stream.flush()
                 os.fsync(stream.fileno())
         self._last_event_hash = digest
