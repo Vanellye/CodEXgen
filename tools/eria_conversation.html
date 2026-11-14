@@ -44,6 +44,23 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
 <button class="small" id="qualityPrepare" type="button">Prepare Proposal</button>
 <button class="small" id="qualityProposals" type="button">Proposal History</button>
 </div></section>
+<section class="quality" aria-label="PONS exact-scope approval">
+<h3>PONS · Human Authorization</h3>
+<p>Approval is bound to one proposal, branch, commit, and exact source fingerprints. A mismatch leaves the request on HOLD. Approval records authorization only; it does not apply a patch.</p>
+<div class="quality-actions">
+<select id="ponsProposal" aria-label="Select proposal"><option value="">Load a proposal…</option></select>
+<button class="small" id="ponsLoad" type="button">Load Proposals</button>
+<button class="small" id="ponsRequest" type="button">Create Exact-Scope Request</button>
+</div>
+<pre id="ponsScope" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:260px;overflow:auto">No approval request loaded.</pre>
+<label for="ponsConfirmation">Type the exact confirmation phrase shown in the request:</label>
+<input id="ponsConfirmation" type="text" autocomplete="off" spellcheck="false" style="width:100%;margin:8px 0;padding:10px;border-radius:8px">
+<div class="quality-actions">
+<button class="small" id="ponsApprove" type="button">Confirm Exact-Scope Approval</button>
+<button class="small" id="ponsHistory" type="button">Approval History</button>
+</div>
+<p id="ponsState" aria-live="polite">PONS approval state: HOLD until exact human confirmation and live fingerprint verification.</p>
+</section>
 <section id="chat" class="chat" aria-live="polite">
 <div class="welcome"><h2>Welcome to ERIA</h2><p>Ask questions about repository files, branches, commits, architecture, provenance, or the PONS bridge. Original source remains non-authoritative; translations are derived records, not replacements.</p></div>
 </section>
@@ -235,6 +252,62 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
         data.proposals.map(x => x.proposal_id + " · " + x.symbol + " · " + x.status).join("\n") :
         "No qualitative proposals prepared yet.");
     } catch (error) { addMessage("assistant", "Proposal history unavailable: " + error.message); }
+  });
+  let ponsRequest = null;
+  $("ponsLoad").addEventListener("click", async () => {
+    try {
+      const data = await api("/api/quality/proposals");
+      const select = $("ponsProposal");
+      select.innerHTML = '<option value="">Select a proposal…</option>';
+      data.proposals.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item.proposal_id;
+        option.textContent = item.symbol + " · " + item.status + " · " + item.proposal_id.slice(0,8);
+        select.append(option);
+      });
+      $("ponsState").textContent = "Loaded " + data.proposals.length + " proposal(s). Select one to request exact-scope authorization.";
+    } catch (error) { $("ponsState").textContent = "HOLD: " + error.message; }
+  });
+  $("ponsRequest").addEventListener("click", async () => {
+    const proposalId = $("ponsProposal").value;
+    if (!proposalId) { $("ponsState").textContent = "HOLD: select a proposal first."; return; }
+    try {
+      ponsRequest = await api("/api/pons/approvals/request", {
+        method:"POST", body:JSON.stringify({proposal_id:proposalId})
+      });
+      $("ponsScope").textContent = JSON.stringify({
+        proposal_id: ponsRequest.proposal_id, capability: ponsRequest.capability,
+        exact_scope: ponsRequest.scope, scope_sha256: ponsRequest.scope_sha256,
+        required_confirmation: ponsRequest.confirmation_phrase, state: ponsRequest.status
+      }, null, 2);
+      $("ponsConfirmation").value = "";
+      $("ponsState").textContent = "HOLD · Review every listed path, fingerprint, branch and commit. Type the exact phrase to authorize this scope.";
+    } catch (error) { $("ponsState").textContent = "HOLD: " + error.message; }
+  });
+  $("ponsApprove").addEventListener("click", async () => {
+    if (!ponsRequest) { $("ponsState").textContent = "HOLD: create an exact-scope request first."; return; }
+    const confirmation = $("ponsConfirmation").value;
+    if (!confirmation.trim()) { $("ponsState").textContent = "HOLD: exact confirmation phrase required."; return; }
+    const button = $("ponsApprove"); button.disabled = true;
+    try {
+      const result = await api("/api/pons/approvals/confirm", {
+        method:"POST", body:JSON.stringify({
+          request_id:ponsRequest.request_id, scope_sha256:ponsRequest.scope_sha256, confirmation
+        })
+      });
+      $("ponsState").textContent = result.decision + " · Grant " + result.grant_id +
+        " · Source modified: " + result.source_modified +
+        ". A separate reviewed patch executor is still required.";
+      $("ponsConfirmation").value = "";
+      ponsRequest = null;
+    } catch (error) { $("ponsState").textContent = "HOLD: " + error.message; }
+    finally { button.disabled = false; }
+  });
+  $("ponsHistory").addEventListener("click", async () => {
+    try {
+      const data = await api("/api/pons/approvals");
+      addMessage("assistant", "PONS exact-scope requests:\\n" + JSON.stringify(data, null, 2));
+    } catch (error) { addMessage("assistant", "PONS history unavailable: " + error.message); }
   });
   status(); history(); qualityStatus();
 })();
