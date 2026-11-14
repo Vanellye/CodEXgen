@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import stat
 import uuid
 from datetime import datetime
@@ -19,17 +20,21 @@ MAX_ANCESTRY_DEPTH = 256
 MAX_ANCESTRY_RECORDS = 10_000
 
 # Typed lineage policy. "any" is used only when verifying a record as a root.
-DERIVED_TYPES = {"translation", "interpretation", "correction"}
-RECORD_TYPES = {"original"} | DERIVED_TYPES
+DERIVED_TYPES = {"translation", "interpretation", "correction"}  # legacy named types
+RECORD_TYPES = {"original"}  # additional typed descendants use the validated slug grammar
+RECORD_TYPE_PATTERN = re.compile(r"^[a-z][a-z0-9_-]{0,63}$")
 
-# Explicit allowed parent/child relationships for the supported GOD record types.
-ALLOWED_PARENT_TYPES: dict[str, set[str]] = {
-    "any": set(RECORD_TYPES),
-    "original": {"original"},
-    "translation": set(RECORD_TYPES),
-    "interpretation": set(RECORD_TYPES),
-    "correction": set(RECORD_TYPES),
-}
+
+def _valid_record_type(value: Any) -> bool:
+    return isinstance(value, str) and RECORD_TYPE_PATTERN.fullmatch(value) is not None
+
+
+def _parent_type_allowed(parent_type: str, child_type: str) -> bool:
+    if child_type == "original":
+        return parent_type == "original"
+    if child_type == "any":
+        return _valid_record_type(parent_type)
+    return _valid_record_type(parent_type)
 
 
 class ParentValidationError(ValueError):
@@ -72,8 +77,8 @@ def _safe_relative_object(vault: Path, value: Any, expected_digest: str) -> Path
         raise ParentValidationError("object_relative_path contains traversal or absolute path")
     if rel.parts[0:2] == ("ORIGINAL_DATA", "objects"):
         expected_root = "ORIGINAL_DATA"
-    elif rel.parts[0:2] == ("DERIVED_DATA", "objects"):
-        expected_root = "DERIVED_DATA"
+    elif rel.parts[0:2] == ("SHOP", "objects"):
+        expected_root = "SHOP"
     else:
         raise ParentValidationError("object_relative_path uses an unsupported object store")
     expected = PurePosixPath(expected_root) / "objects" / expected_digest[:2] / expected_digest
@@ -135,8 +140,8 @@ def _validate_record_shape(record: dict[str, Any], requested_id: str) -> None:
     if embedded_id != requested_id:
         raise ParentValidationError("parent record identity mismatch")
     record_type = record.get("record_type")
-    if record_type not in RECORD_TYPES:
-        raise ParentValidationError("parent record type is unsupported")
+    if not _valid_record_type(record_type):
+        raise ParentValidationError("parent record type must be a lowercase typed identifier")
     digest = record.get("sha256")
     if not isinstance(digest, str) or len(digest) != 64 or any(
         char not in "0123456789abcdef" for char in digest
@@ -269,7 +274,7 @@ def validate_parent_chain(
             raise ParentValidationError("ancestry cycle detected")
         if record_id in visited:
             proof = visited[record_id]
-            if proof["record_type"] not in ALLOWED_PARENT_TYPES[expected_child_type]:
+            if not _parent_type_allowed(proof["record_type"], expected_child_type):
                 raise ParentValidationError("parent/child record-type relationship is not permitted")
             return proof
         if len(visited) + len(visiting) >= MAX_ANCESTRY_RECORDS:
@@ -294,13 +299,13 @@ def validate_parent_chain(
                 ) from exc
         record = _json_object(record_path, "parent provenance record")
         _validate_record_shape(record, record_id)
-        if record["record_type"] not in ALLOWED_PARENT_TYPES[expected_child_type]:
+        if not _parent_type_allowed(record["record_type"], expected_child_type):
             raise ParentValidationError("parent/child record-type relationship is not permitted")
 
         object_path = _safe_relative_object(
             vault_path, record["object_relative_path"], record["sha256"]
         )
-        expected_store = "ORIGINAL_DATA" if record["record_type"] == "original" else "DERIVED_DATA"
+        expected_store = "ORIGINAL_DATA" if record["record_type"] == "original" else "SHOP"
         if PurePosixPath(record["object_relative_path"]).parts[0] != expected_store:
             raise ParentValidationError("object store does not match record type")
         actual_digest, actual_size = _hash_file(object_path)
@@ -351,7 +356,7 @@ def validate_parent_chain(
             ),
             "source_filename": record["source"]["filename"],
         }
-        if record["record_type"] in DERIVED_TYPES:
+        if record["record_type"] != "original":
             context = record["derivation"]["source_context"]
             if not any(
                 item["sha256"] == context["source_sha256"]
