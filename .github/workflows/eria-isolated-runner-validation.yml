@@ -61,8 +61,8 @@ jobs:
         run: |
           set -euo pipefail
           phrase="APPROVE python-tests ${COMMIT:0:12}"
-          approval_output="$(printf '%s\\n' "$phrase" | python3 -m tools.eria_pantheon.isolated_runner approve . python-tests)"
-          approval_id="$(printf '%s\\n' "$approval_output" | python3 -c 'import json,sys; s=sys.stdin.read(); print(json.loads(s[s.rfind("{"):])["approval_id"])')"
+          approval_output="$(printf '%s\n' "$phrase" | python3 -m tools.eria_pantheon.isolated_runner approve . python-tests)"
+          approval_id="$(printf '%s\n' "$approval_output" | python3 -c 'import json,sys; s=sys.stdin.read(); print(json.loads(s[s.rfind("{"):])["approval_id"])')"
           test -n "$approval_id"
           echo "approval_id=$approval_id" >> "$GITHUB_OUTPUT"
 
