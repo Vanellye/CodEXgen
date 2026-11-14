@@ -189,9 +189,6 @@ def validate_parent_chain(
     The proof list preserves caller-supplied parent order. Missing, malformed,
     ambiguous, cyclic, inaccessible, or hash-mismatched records fail closed.
     """
-    vault_path = Path(vault).expanduser().resolve(strict=True)
-    if not vault_path.is_dir():
-        raise ParentValidationError("GOD vault must be an existing directory")
     if child_record_type not in ALLOWED_PARENT_TYPES:
         raise ParentValidationError("unknown child record type")
     if isinstance(parent_record_ids, (str, bytes)):
@@ -206,6 +203,10 @@ def validate_parent_chain(
         if child_record_type != "original":
             raise ParentValidationError("a derived record must have at least one validated parent")
         return []
+
+    vault_path = Path(vault).expanduser().resolve(strict=True)
+    if not vault_path.is_dir():
+        raise ParentValidationError("GOD vault must be an existing directory")
 
     visiting: set[str] = set()
     visited: dict[str, dict[str, Any]] = {}
