@@ -111,6 +111,21 @@ class PONSRegistry:
             self._append("provenance_checked", {"component_id": component_id, **result})
             return result
 
+    def execute_guarded(self, component_id: str, source_bytes: Optional[bytes],
+                        operation, *args, **kwargs) -> dict:
+        """Execute a registered Python operation only after exact source digest verification.
+
+        The operation is never called for UNKNOWN or HOLD provenance. This is a
+        local guard, not a sandbox: approved code still runs with caller privileges.
+        """
+        proof = self.verify_provenance(component_id, source_bytes)
+        if proof["state"] != "VERIFIED":
+            return {"state": "HOLD" if proof["state"] == "HOLD" else "UNKNOWN",
+                    "executed": False, "provenance": proof, "result": None}
+        result = operation(*args, **kwargs)
+        return {"state": "VERIFIED", "executed": True,
+                "provenance": proof, "result": result}
+
     def component_status(self, component_id: str) -> dict:
         component = self._components[component_id]
         obs = self._observations.get(component_id, {"state": "UNKNOWN", "detail": "no status observation"})
