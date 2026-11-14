@@ -11,6 +11,7 @@ import hashlib
 import hmac
 import json
 import os
+import re
 import secrets
 import shutil
 import subprocess
@@ -26,6 +27,7 @@ COMMANDS = {
 }
 MAX_SECONDS = 900
 MAX_OUTPUT = 2_000_000
+SENSITIVE_PATH = re.compile(r"(^|[/_.-])(\\.env(?:\\.|$)|secrets?|credentials?|id_rsa|id_ed25519|keystore|\\.pem|\\.p12|\\.jks)([/_.-]|$)", re.I)
 
 
 def _paths():
@@ -119,7 +121,7 @@ def _extract_archive(root, commit, destination):
     with tarfile.open(fileobj=io.BytesIO(archive.stdout), mode="r:") as bundle:
         for member in bundle.getmembers():
             name = PurePosixPath(member.name)
-            if name.is_absolute() or ".." in name.parts or not (member.isfile() or member.isdir()):
+            if name.is_absolute() or ".." in name.parts or SENSITIVE_PATH.search(name.as_posix()) or not (member.isfile() or member.isdir()):
                 raise RuntimeError("Unsafe archive member rejected.")
         bundle.extractall(destination)
 
