@@ -14,6 +14,7 @@ import json
 import mimetypes
 import re
 import sqlite3
+import shlex
 import sys
 import threading
 import uuid
@@ -28,6 +29,8 @@ UI_FILE = HERE / "eria_conversation.html"
 sys.path.insert(0, str(TOOLS))
 from eria_repository_conversation import Conversation, Repository  # noqa: E402
 from eria_pantheon.pons import Pons  # noqa: E402
+from eria_pantheon.interface import ERIAPantheonInterface  # noqa: E402
+from eria_pantheon.github_actions_reader import inspect_validation, GitHubActionsReadError  # noqa: E402
 
 DB_DEFAULT = Path.home() / ".eria" / "data" / "eria_conversation.sqlite3"
 MAX_BODY = 16_384
@@ -300,7 +303,10 @@ class Handler(BaseHTTPRequestHandler):
             self.wfile.write(raw)
             return
         if route == "/api/pons/status":
-            self.send_json(200, Pons.describe())
+            state = Pons.describe()
+            state["service_state"] = "ON"
+            state["inspection_bridge"] = "CONNECTED"
+            self.send_json(200, state)
             return
         if route == "/api/pons/requests":
             self.send_json(200, {
@@ -343,6 +349,20 @@ class Handler(BaseHTTPRequestHandler):
             except Exception as exc:
                 self.send_json(400, {"error": "File inspection unavailable: " + type(exc).__name__})
             return
+        if route == "/api/github/actions/validation":
+            try:
+                result = inspect_validation()
+                self.app.store.add_audit("github_actions_validation_read", "RECORDED", {
+                    "repository": result["repository"],
+                    "branch": result["branch"],
+                    "workflow": result["workflow"],
+                    "run_count": result["run_count"],
+                    "read_only": True,
+                })
+                self.send_json(200, result)
+            except GitHubActionsReadError as exc:
+                self.send_json(502, {"error": str(exc), "read_only": True})
+            return
         if route == "/api/status":
             self.send_json(200, {
                 "ok": True, "repository": str(self.app.repository.root),
@@ -383,6 +403,132 @@ class Handler(BaseHTTPRequestHandler):
                 self.app.store.add_message(session, "assistant", answer)
                 self.send_json(200, {"answer": answer})
                 return
+            if route == "/api/translate":
+                relative_path = data.get("path")
+                if not isinstance(relative_path, str) or not relative_path.strip():
+                    raise ValueError("path must be a repository-relative source path.")
+                if len(relative_path) > 500 or SAFE_NAME.search(Path(relative_path).name):
+                    raise ValueError("Path is too long or matches a protected credential-like name.")
+                raw_result = self.app.pantheon.handle("aei.translate " + shlex.quote(relative_path.strip()))
+                try:
+                    result = json.loads(raw_result)
+                except json.JSONDecodeError:
+                    raise ValueError("Higher Faculty translator returned an invalid response.")
+                if result.get("status") == "HOLD":
+                    self.send_json(400, result)
+                    return
+                self.app.store.add_audit("higher_faculty_translation", result.get("status", "REVIEW_REQUIRED"), {
+                    "source_path": result.get("source", {}).get("path", relative_path),
+                    "source_sha256": result.get("source", {}).get("sha256", ""),
+                    "finding_count": result.get("translation", {}).get("finding_count", 0),
+                    "antithesis_flag_count": result.get("antithesis", {}).get("flag_count", 0),
+                    "pipeline": [stage.get("stage") for stage in result.get("pipeline", [])],
+                })
+                self.send_json(200, result)
+                return
+            if route == "/api/ai/higher-faculty":
+                relative_path = data.get("path")
+                question = data.get("question")
+                comparison_path = data.get("comparison_path")
+                if not isinstance(relative_path, str) or not relative_path.strip():
+                    raise ValueError("path must be a repository-relative source path.")
+                if not isinstance(question, str) or not question.strip():
+                    raise ValueError("question must be non-empty text.")
+                if len(relative_path) > 500 or len(question) > 2000:
+                    raise ValueError("Path or question exceeds its length limit.")
+                if SAFE_NAME.search(Path(relative_path).name):
+                    raise ValueError("Credential-like paths are not eligible for Âï analysis.")
+                command = "ai.higher " + shlex.quote(relative_path.strip()) + " --question " + shlex.quote(question.strip())
+                if comparison_path is not None:
+                    if not isinstance(comparison_path, str) or not comparison_path.strip() or len(comparison_path) > 500:
+                        raise ValueError("comparison_path must be a valid repository-relative path.")
+                    if SAFE_NAME.search(Path(comparison_path).name):
+                        raise ValueError("Credential-like comparison paths are not eligible for analysis.")
+                    command += " --compare " + shlex.quote(comparison_path.strip())
+                raw_result = self.app.pantheon.handle(command)
+                try:
+                    result = json.loads(raw_result)
+                except json.JSONDecodeError:
+                    raise ValueError("Âï returned an invalid Higher Faculty response.")
+                if result.get("status") == "HOLD":
+                    self.send_json(400, result)
+                    return
+                analysis = result.get("analysis", {})
+                self.app.store.add_audit("ai_higher_faculty_analysis", "RECORDED", {
+                    "source_path": result.get("source", {}).get("path", relative_path),
+                    "source_sha256": result.get("source", {}).get("sha256", ""),
+                    "question_length": len(question),
+                    "analysis_dimensions": sorted(analysis.keys()),
+                    "comparison_requested": bool(comparison_path),
+                    "pons_state": result.get("pons", {}).get("service_state", "UNKNOWN"),
+                })
+                self.send_json(200, result)
+                return
+            if route == "/api/runner/run":
+                command_id = data.get("command_id")
+                approval_id = data.get("approval_id")
+                if command_id not in {"python-tests", "android-debug-build", "make-check-review"}:
+                    raise ValueError("command_id is not in the fixed runner allowlist.")
+                if not isinstance(approval_id, str) or len(approval_id) != 32:
+                    raise ValueError("A one-use CLI-issued approval_id is required.")
+                from eria_pantheon.isolated_runner import run_approved
+                result = run_approved(self.app.repository.root, command_id, approval_id)
+                self.app.store.add_audit("isolated_repository_command", result["status"], {
+                    "commit": result["commit"], "command_id": command_id,
+                    "approval_id": approval_id, "stdout_sha256": result["stdout_sha256"],
+                    "stderr_sha256": result["stderr_sha256"],
+                    "source_mutations": False, "git_mutations": False,
+                })
+                self.send_json(200, result)
+                return
+            if route == "/api/ai/execution-synthesis":
+                relative_path = data.get("path")
+                execution_result = data.get("execution_result")
+                if not isinstance(relative_path, str) or not relative_path.strip() or len(relative_path) > 500:
+                    raise ValueError("A repository-relative source path is required.")
+                if not isinstance(execution_result, dict):
+                    raise ValueError("A signed execution_result object is required.")
+                from eria_pantheon.ai import AiiConversation
+                result = self.app.pantheon.bridge.resolve(AiiConversation).synthesize_execution_evidence(
+                    relative_path.strip(), execution_result
+                )
+                self.app.store.add_audit("ai_execution_evidence_synthesis", result["status"], {
+                    "source_path": relative_path, "source_sha256": result["source"]["sha256"],
+                    "commit": result["execution_evidence"]["commit"],
+                    "command_id": result["execution_evidence"]["command_id"],
+                    "execution_status": result["execution_evidence"]["status"],
+                })
+                self.send_json(200, result)
+                return
+            if route == "/api/repository/review":
+                execution_results = data.get("execution_results", [])
+                if not isinstance(execution_results, list) or len(execution_results) > 20:
+                    raise ValueError("execution_results must be a list of at most 20 signed runner results.")
+                raw_result = self.app.pantheon.handle("repository.review")
+                try:
+                    result = json.loads(raw_result)
+                except json.JSONDecodeError:
+                    raise ValueError("Repository engineering engine returned invalid JSON.")
+                if result.get("status") == "HOLD":
+                    self.send_json(400, result)
+                    return
+                inventory = result.get("inventory", {})
+                summary = inventory.get("summary", {})
+                self.app.store.add_audit("repository_wide_engineering_review", "RECORDED", {
+                    "commit": inventory.get("git", {}).get("commit", ""),
+                    "branch": inventory.get("git", {}).get("branch", ""),
+                    "file_count": summary.get("file_count", 0),
+                    "test_candidate_count": summary.get("test_candidate_count", 0),
+                    "execution_state": result.get("execution_plan", {}).get("execution_state", "UNKNOWN"),
+                    "source_mutations": False,
+                })
+                if execution_results:
+                    from eria_pantheon.repository_engine import acquire_repository, quality_analysis, execution_plan, synthesize
+                    inventory = acquire_repository(self.app.repository.root)
+                    result["quality"] = quality_analysis(inventory, execution_results)
+                    result["synthesis"] = synthesize(inventory, result["quality"], execution_plan(inventory))
+                self.send_json(200, result)
+                return
             if route == "/api/index":
                 count = self.app.store.index_repository(self.app.repository)
                 self.send_json(200, {"indexed": count,
@@ -413,6 +559,7 @@ class App:
     def __init__(self, root: Path, database: Path):
         self.repository = Repository(root)
         self.conversation = Conversation(self.repository)
+        self.pantheon = ERIAPantheonInterface(self.repository)
         self.store = Store(database)
         self.store.index_repository(self.repository)
 
