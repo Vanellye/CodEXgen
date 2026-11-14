@@ -98,7 +98,7 @@ class AccuracyValidationService:
     truth; verifier quality and source quality remain explicit dependencies.
     """
 
-    def __init__(self, ledger_path: str | Path, *, authority: object):
+    def __init__(self, ledger_path: str | Path, *, authority: object = None):
         if authority is not _PONS_AUTHORITY:
             raise PermissionError("AVS may only be constructed by PONS.")
         self.ledger = EvidenceLedger(ledger_path)
