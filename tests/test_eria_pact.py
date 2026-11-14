@@ -31,6 +31,6 @@ class PactTests(unittest.TestCase):
    self.rt.execute(grant["grant_id"])
  def test_main_branch_is_prohibited(self):
   subprocess.run(["git","-C",str(self.root),"branch","-M","main"],check=True)
-  with self.assertRaisesRegex(ValueError,"branch/HEAD changed|main/master writes are prohibited"):
+  with self.assertRaisesRegex(ValueError,"Branch or HEAD changed|main/master writes are prohibited"):
    self.rt.create_request(f"APPLY PATCH {self.pg}\n")
 if __name__=="__main__": unittest.main()

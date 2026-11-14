@@ -96,7 +96,7 @@ class PactRuntime:
             if c["op"]=="MERGE" and not re.fullmatch(r"[0-9a-f]{40}",c["expected_head_sha"]): raise ValueError("MERGE requires full PR head SHA.")
             if c["op"]=="DEPLOY" and (not re.fullmatch(r"[A-Za-z0-9_.-]+",c["workflow"]) or c["ref"]!=branch): raise ValueError("Invalid deployment workflow/ref.")
         caps=["repository.patch.apply"]+[{"COMMIT":"git.commit","PUSH":"git.push","MERGE":"github.pull_request.merge","DEPLOY":"github.workflow.dispatch"}[c["op"]] for c in commands[1:]]
-        plan={"language":"ERIA-PACT/1","repository":str(self.root),"branch":branch,"head":head,
+        plan={"language":"ERIA-PACT/1","program_sha256":hashlib.sha256(program.encode()).hexdigest(),"repository":str(self.root),"branch":branch,"head":head,
               "patch_grant_id":pgid,"patch_sha256":prow["patch_sha256"],"paths":verified["paths"],
               "commands":commands,"capabilities":caps,
               "limitations":["No arbitrary shell or executable statements","main/master writes and merge targets prohibited",

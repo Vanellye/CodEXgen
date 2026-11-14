@@ -162,6 +162,8 @@ class Pons:
             "arbitrary_shell_execution": False,
             "main_master_writes": False,
             "deployment_allowlist_required": True,
+            "scoped_source_executor": "ERIA-PACT/1",
+            "per_transaction_human_approval": True,
             "source_authority": "NON_AUTHORITATIVE",
             "derived_authority": "NON_AUTHORITATIVE",
             "capability_policy": "exact-scope; missing-or-unverified-approval=HOLD",

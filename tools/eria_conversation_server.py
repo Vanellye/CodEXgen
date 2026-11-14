@@ -34,7 +34,7 @@ from eria_pons_approval import PonsApprovalService
 from eria_pact import PactRuntime
 
 DB_DEFAULT = Path.home() / ".eria" / "data" / "eria_conversation.sqlite3"
-MAX_BODY = 16_384
+MAX_BODY = 2_162_688
 SAFE_NAME = re.compile(r"(secret|credential|token|password|private[_-]?key|\.env)", re.I)
 SKIP_PARTS = {".git", ".gradle", ".idea", "node_modules", "__pycache__", ".venv", "venv", "build", "dist"}
 DB_LOCK = threading.RLock()
