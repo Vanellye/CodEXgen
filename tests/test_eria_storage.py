@@ -6,6 +6,7 @@ from pathlib import Path
 
 from tools.eria_pantheon.storage import AeiStorage
 from tools.eria_pantheon.aei import AeiError
+from tools.eria_pantheon.interface import ERIAPantheonInterface
 
 
 class AeiStorageTests(unittest.TestCase):
@@ -32,6 +33,16 @@ class AeiStorageTests(unittest.TestCase):
         self.assertEqual(meta["artifact_sha256"], hashlib.sha256(artifact.read_bytes()).hexdigest())
         self.assertEqual(meta["source"]["path"], "stream.json")
         self.assertEqual((self.root / "stream.json").read_bytes(), self.source_bytes)
+
+    def test_pantheon_command_compiles_through_pons(self):
+        class Repository:
+            def __init__(self, root):
+                self.root = root
+        interface = ERIAPantheonInterface(Repository(self.root))
+        result = json.loads(interface.handle("aei.compile stream.json"))
+        self.assertEqual(result["status"], "stored")
+        self.assertTrue((self.root / result["artifact"]).is_file())
+        self.assertFalse(result["source_modified"])
 
     def test_each_compilation_creates_a_new_artifact(self):
         first = self.storage.compile("stream.json")
