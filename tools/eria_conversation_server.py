@@ -28,6 +28,7 @@ UI_FILE = HERE / "eria_conversation.html"
 sys.path.insert(0, str(TOOLS))
 from eria_repository_conversation import Conversation, Repository  # noqa: E402
 from eria_pantheon.pons import Pons  # noqa: E402
+from eria_pantheon.interface import ERIAPantheonInterface  # noqa: E402
 
 DB_DEFAULT = Path.home() / ".eria" / "data" / "eria_conversation.sqlite3"
 MAX_BODY = 16_384
@@ -300,7 +301,10 @@ class Handler(BaseHTTPRequestHandler):
             self.wfile.write(raw)
             return
         if route == "/api/pons/status":
-            self.send_json(200, Pons.describe())
+            state = Pons.describe()
+            state["service_state"] = "ON"
+            state["inspection_bridge"] = "CONNECTED"
+            self.send_json(200, state)
             return
         if route == "/api/pons/requests":
             self.send_json(200, {
@@ -383,6 +387,29 @@ class Handler(BaseHTTPRequestHandler):
                 self.app.store.add_message(session, "assistant", answer)
                 self.send_json(200, {"answer": answer})
                 return
+            if route == "/api/translate":
+                relative_path = data.get("path")
+                if not isinstance(relative_path, str) or not relative_path.strip():
+                    raise ValueError("path must be a repository-relative source path.")
+                if len(relative_path) > 500 or SAFE_NAME.search(Path(relative_path).name):
+                    raise ValueError("Path is too long or matches a protected credential-like name.")
+                raw_result = self.app.pantheon.handle("aei.translate " + shlex.quote(relative_path.strip()))
+                try:
+                    result = json.loads(raw_result)
+                except json.JSONDecodeError:
+                    raise ValueError("Higher Faculty translator returned an invalid response.")
+                if result.get("status") == "HOLD":
+                    self.send_json(400, result)
+                    return
+                self.app.store.add_audit("higher_faculty_translation", result.get("status", "REVIEW_REQUIRED"), {
+                    "source_path": result.get("source", {}).get("path", relative_path),
+                    "source_sha256": result.get("source", {}).get("sha256", ""),
+                    "finding_count": result.get("translation", {}).get("finding_count", 0),
+                    "antithesis_flag_count": result.get("antithesis", {}).get("flag_count", 0),
+                    "pipeline": [stage.get("stage") for stage in result.get("pipeline", [])],
+                })
+                self.send_json(200, result)
+                return
             if route == "/api/index":
                 count = self.app.store.index_repository(self.app.repository)
                 self.send_json(200, {"indexed": count,
@@ -413,6 +440,7 @@ class App:
     def __init__(self, root: Path, database: Path):
         self.repository = Repository(root)
         self.conversation = Conversation(self.repository)
+        self.pantheon = ERIAPantheonInterface(self.repository)
         self.store = Store(database)
         self.store.index_repository(self.repository)
 
