@@ -12,9 +12,7 @@ import com.vanellye.eria.pons.PonsAnchorIdentity
  */
 object TransmissionAudioPlayer {
     fun play(wavFile: File, ponsStatus: PonsComponentStatus, onCompletion: (() -> Unit)? = null) {
-        require(ponsStatus.effectiveState == PonsEffectiveState.READY &&
-            ponsStatus.anchor == PonsAnchorIdentity.CANONICAL
-        ) { "PONS provenance/status gate did not authorize audio playback" }
+        ponsStatus.requireReady("audio.player")
         require(wavFile.isFile && wavFile.canRead()) { "WAV file is not readable" }
         val player = MediaPlayer()
         try {
