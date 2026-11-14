@@ -155,7 +155,7 @@ class Store:
                 "INSERT OR REPLACE INTO metadata(key,value) VALUES('repository_root',?)",
                 (str(repository.root),),
             )
-        self.add_audit("repository_indexed", "REVIEW_READY", {
+        self.add_audit("repository_indexed", "RECORDED", {
             "files_indexed": len(records), "repository_root": str(repository.root),
             "source_hashes": "SHA-256 for eligible files up to 5 MiB",
         })
