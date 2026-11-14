@@ -1,7 +1,7 @@
 # Âï conversation layer
 
-Âï is integrated above Æị as a deterministic, evidence-grounded retrieval layer.
-It is not an LLM and does not invent answers. Each question triggers a fresh,
+Âï is integrated above Æị as a deterministic, evidence-grounded retrieval layer registered with PONS and invoked through ERIA/PANTHEON.
+It is not an LLM and does not invent answers. The browser endpoint delegates to the Pantheon command adapter, which resolves Âï through PONS. Each question triggers a fresh,
 read-only Æị inspection of the selected repository-relative file.
 
 ## Local API
@@ -17,6 +17,10 @@ The browser interface is at http://127.0.0.1:8765/.
     curl -sS -X POST http://127.0.0.1:8765/api/ai/ask \
       -H 'Content-Type: application/json' \
       -d '{"path":"README.md","question":"Summarize this file"}'
+
+The browser route is translated to the Pantheon command form:
+
+    ai.ask README.md --question "Summarize this file"
 
 The response contains:
 - answer and evidence status;
