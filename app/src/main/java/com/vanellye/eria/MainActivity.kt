@@ -31,6 +31,7 @@ class MainActivity : ComponentActivity() {
                 var pageStatus by remember { mutableStateOf("Connecting to ERIA server…") }
                 var loading by remember { mutableStateOf(true) }
                 var reloadKey by remember { mutableIntStateOf(0) }
+                var showRepositoryDashboard by remember { mutableStateOf(false) }
 
                 Surface(modifier = Modifier.fillMaxSize()) {
                     Column(modifier = Modifier.fillMaxSize()) {
@@ -40,77 +41,103 @@ class MainActivity : ComponentActivity() {
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text("ERIA", style = MaterialTheme.typography.h6)
-                                Text(pageStatus, style = MaterialTheme.typography.caption)
+                                Text(
+                                    if (showRepositoryDashboard) {
+                                        "Native repository dashboard · local Termux API"
+                                    } else {
+                                        pageStatus
+                                    },
+                                    style = MaterialTheme.typography.caption
+                                )
                             }
-                            if (loading) {
+                            if (loading && !showRepositoryDashboard) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.padding(end = 12.dp),
                                     strokeWidth = 2.dp
                                 )
                             }
-                            Button(onClick = { reloadKey++ }) { Text("Reload") }
+                            Button(
+                                onClick = {
+                                    showRepositoryDashboard = !showRepositoryDashboard
+                                    if (showRepositoryDashboard) {
+                                        loading = false
+                                    } else {
+                                        reloadKey++
+                                        loading = true
+                                    }
+                                }
+                            ) {
+                                Text(if (showRepositoryDashboard) "Conversation" else "Dashboard")
+                            }
+                            if (!showRepositoryDashboard) {
+                                Button(onClick = { reloadKey++ }) { Text("Reload") }
+                            }
                         }
 
-                        key(reloadKey) {
-                            AndroidView(
-                                modifier = Modifier.fillMaxWidth().weight(1f),
-                                factory = { context ->
-                                    WebView(context).apply {
-                                        settings.javaScriptEnabled = true
-                                        settings.domStorageEnabled = true
-                                        settings.allowFileAccess = false
-                                        settings.allowContentAccess = false
-                                        settings.javaScriptCanOpenWindowsAutomatically = false
-                                        settings.setSupportMultipleWindows(false)
-                                        settings.mixedContentMode =
-                                            android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW
+                        if (showRepositoryDashboard) {
+                            RepositoryDashboardScreen()
+                        } else {
+                            key(reloadKey) {
+                                AndroidView(
+                                    modifier = Modifier.fillMaxWidth().weight(1f),
+                                    factory = { context ->
+                                        WebView(context).apply {
+                                            settings.javaScriptEnabled = true
+                                            settings.domStorageEnabled = true
+                                            settings.allowFileAccess = false
+                                            settings.allowContentAccess = false
+                                            settings.javaScriptCanOpenWindowsAutomatically = false
+                                            settings.setSupportMultipleWindows(false)
+                                            settings.mixedContentMode =
+                                                android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW
 
-                                        webViewClient = object : WebViewClient() {
-                                            override fun shouldOverrideUrlLoading(
-                                                view: WebView,
-                                                request: WebResourceRequest
-                                            ): Boolean {
-                                                val uri = request.url
-                                                return !(uri.scheme == "http" &&
-                                                    uri.host == EriaServerConfig.HOST &&
-                                                    uri.port == EriaServerConfig.PORT)
-                                            }
+                                            webViewClient = object : WebViewClient() {
+                                                override fun shouldOverrideUrlLoading(
+                                                    view: WebView,
+                                                    request: WebResourceRequest
+                                                ): Boolean {
+                                                    val uri = request.url
+                                                    return !(uri.scheme == "http" &&
+                                                        uri.host == EriaServerConfig.HOST &&
+                                                        uri.port == EriaServerConfig.PORT)
+                                                }
 
-                                            override fun onPageStarted(
-                                                view: WebView,
-                                                url: String?,
-                                                favicon: Bitmap?
-                                            ) {
-                                                pageStatus = "Loading " + EriaServerConfig.BASE_URL
-                                                loading = true
-                                            }
+                                                override fun onPageStarted(
+                                                    view: WebView,
+                                                    url: String?,
+                                                    favicon: Bitmap?
+                                                ) {
+                                                    pageStatus = "Loading " + EriaServerConfig.BASE_URL
+                                                    loading = true
+                                                }
 
-                                            override fun onPageFinished(
-                                                view: WebView,
-                                                url: String?
-                                            ) {
-                                                pageStatus = "Connected · " +
-                                                    (url ?: EriaServerConfig.BASE_URL)
-                                                loading = false
-                                            }
-
-                                            override fun onReceivedError(
-                                                view: WebView,
-                                                request: WebResourceRequest,
-                                                error: android.webkit.WebResourceError
-                                            ) {
-                                                if (request.isForMainFrame) {
-                                                    pageStatus = "Server unavailable · " +
-                                                        error.description
+                                                override fun onPageFinished(
+                                                    view: WebView,
+                                                    url: String?
+                                                ) {
+                                                    pageStatus = "Connected · " +
+                                                        (url ?: EriaServerConfig.BASE_URL)
                                                     loading = false
                                                 }
+
+                                                override fun onReceivedError(
+                                                    view: WebView,
+                                                    request: WebResourceRequest,
+                                                    error: android.webkit.WebResourceError
+                                                ) {
+                                                    if (request.isForMainFrame) {
+                                                        pageStatus = "Server unavailable · " +
+                                                            error.description
+                                                        loading = false
+                                                    }
+                                                }
                                             }
+                                            loadUrl(EriaServerConfig.BASE_URL)
                                         }
-                                        loadUrl(EriaServerConfig.BASE_URL)
-                                    }
-                                },
-                                update = { }
-                            )
+                                    },
+                                    update = { }
+                                )
+                            }
                         }
                     }
                 }
