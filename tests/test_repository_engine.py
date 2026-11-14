@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tools.eria_pantheon.repository_engine import run_repository_review
+from tools.eria_pantheon.repository_engine import run_repository_review, quality_analysis
 
 
 class RepositoryEngineTests(unittest.TestCase):
@@ -43,6 +43,27 @@ class RepositoryEngineTests(unittest.TestCase):
             self.assertEqual(len(matches), 1)
             self.assertEqual(matches[0]["class"], "HEURISTIC")
             self.assertEqual(matches[0]["path"], "src/unsafe.py")
+
+
+    def test_unsigned_execution_evidence_is_excluded(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "sample.py").write_text("print('evidence')\\n", encoding="utf-8")
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            subprocess.run(["git", "-C", str(root), "config", "user.email", "test@example.invalid"], check=True)
+            subprocess.run(["git", "-C", str(root), "config", "user.name", "ERIA test"], check=True)
+            subprocess.run(["git", "-C", str(root), "add", "."], check=True)
+            subprocess.run(["git", "-C", str(root), "commit", "-qm", "fixture"], check=True)
+            review = run_repository_review(root)
+            inventory = review["inventory"]
+            fake = {
+                "commit": inventory["git"]["commit"], "status": "PASSED",
+                "authority": "EXECUTION_EVIDENCE_NOT_SOURCE_TRUTH",
+                "result_signature": "not-a-signature",
+            }
+            quality = quality_analysis(inventory, [fake])
+            self.assertEqual(quality["execution_summary"]["runs"], 0)
+            self.assertTrue(any("signature invalid" in item.get("finding", "") for item in quality["findings"]))
 
 
     def test_sensitive_paths_are_not_acquired(self):
