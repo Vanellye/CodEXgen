@@ -11,7 +11,7 @@ from .pons import BridgeEnvelope, Pons
 class ERIAPantheonInterface:
     def __init__(self, repository: Any) -> None:
         self.repository = repository
-        self.bridge = Pons()
+        self.bridge = Pons()\n        self.avs = self.bridge.install_accuracy_service(\n            str(repository.root / ".eria" / "avs" / "evidence.jsonl")\n        )
 
     def status(self) -> str:
         state = self.bridge.describe()
@@ -37,7 +37,7 @@ class ERIAPantheonInterface:
         return (
             "Supported commands: integration.status, bridge.status, "
             "repository.ask <question>, "
-            "code.bypass <repo-relative-path> --reason <text>"
+            "code.bypass <repo-relative-path> --reason <text>, pons.avs.status"
         )
 
     def _code_bypass(self, arguments: str) -> str:
