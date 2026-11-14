@@ -318,11 +318,22 @@ def validate_parent_chain(
             stored_manifest = record.get("validated_parents")
             if stored_manifest is not None:
                 expected_manifest = [
+                    {
+                        "record_id": item["record_id"],
+                        "record_type": item["record_type"],
+                        "sha256": item["sha256"],
+                        "size_bytes": item["size_bytes"],
+                        "source_relative_path": item["source_relative_path"],
+                        "source_filename": item["source_filename"],
+                    }
+                    for item in ancestor_proofs
+                ]
+                legacy_manifest = [
                     {"record_id": item["record_id"], "sha256": item["sha256"],
                      "size_bytes": item["size_bytes"]}
                     for item in ancestor_proofs
                 ]
-                if stored_manifest != expected_manifest:
+                if stored_manifest not in (expected_manifest, legacy_manifest):
                     raise ParentValidationError(
                         "stored validated-parent manifest does not match live ancestors"
                     )
