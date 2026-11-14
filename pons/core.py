@@ -116,7 +116,8 @@ class PONSRegistry:
             raise ValueError("manifest signature and key_id are required")
         if verify_signature(canonical, key_id, signature) is not True:
             raise PermissionError("manifest signature rejected")
-        loaded = []
+        components = []
+        seen = set()
         for item in entries:
             if not isinstance(item, dict):
                 raise ValueError("each component pin must be an object")
@@ -127,10 +128,24 @@ class PONSRegistry:
                 expected_sha256=item["sha256"],
                 manifest_id=payload["manifest_version"],
             )
-            self._register(component)
-            loaded.append(component.component_id)
+            if component.component_id in seen:
+                raise ValueError("duplicate component ID in signed manifest")
+            seen.add(component.component_id)
+            if not re.fullmatch(r"[0-9a-fA-F]{64}", component.expected_sha256 or ""):
+                raise ValueError("manifest component requires a valid SHA-256 pin")
+            if not component.source_ref or not component.source_path:
+                raise ValueError("manifest component source identity is incomplete")
+            components.append(component)
+        with self._lock:
+            for component in components:
+                existing = self._components.get(component.component_id)
+                if existing is not None and existing != component:
+                    raise ValueError("manifest conflicts with an existing immutable component pin")
+            for component in components:
+                self._register(component)
         return {"accepted": True, "manifest_version": payload["manifest_version"],
-                "components": loaded, "anchor_id": self.anchor.anchor_id}
+                "components": [item.component_id for item in components],
+                "anchor_id": self.anchor.anchor_id}
 
     def observe_status(self, component_id: str, state: str, detail: str = "") -> dict:
         state = state.upper()
