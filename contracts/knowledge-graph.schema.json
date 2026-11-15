@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://eria.dev/contracts/knowledge-graph/1.0.0",
+  "title": "ERIA Knowledge Graph Event Stream",
+  "description": "Canonical, platform-neutral graph contract. The graph is a deterministic projection of an append-only event stream; clients must not mutate or re-key historical records.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "graphId", "events"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "graphId": { "$ref": "#/$defs/identifier" },
+    "events": { "type": "array", "items": { "$ref": "#/$defs/event" } }
+  },
+  "$defs": {
+    "identifier": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]*$" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "source": { "type": "object", "additionalProperties": false, "required": ["ref", "digest"], "properties": { "ref": { "type": "string", "minLength": 1 }, "digest": { "$ref": "#/$defs/digest" } } },
+    "node": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "kind", "label", "createdAt", "source"],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" }, "kind": { "$ref": "#/$defs/identifier" },
+        "label": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "createdAt": { "$ref": "#/$defs/timestamp" }, "source": { "$ref": "#/$defs/source" },
+        "attributes": { "type": "object", "additionalProperties": true }
+      }
+    },
+    "edge": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "fromNodeId", "toNodeId", "relation", "createdAt", "source"],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" }, "fromNodeId": { "$ref": "#/$defs/identifier" },
+        "toNodeId": { "$ref": "#/$defs/identifier" }, "relation": { "$ref": "#/$defs/identifier" },
+        "createdAt": { "$ref": "#/$defs/timestamp" }, "source": { "$ref": "#/$defs/source" },
+        "attributes": { "type": "object", "additionalProperties": true }
+      }
+    },
+    "event": {
+      "oneOf": [
+        { "type": "object", "additionalProperties": false, "required": ["eventId","sequence","type","recordedAt","actor","node"],
+          "properties": { "eventId": { "$ref": "#/$defs/identifier" }, "sequence": { "type": "integer", "minimum": 1 }, "type": { "const": "node.created" }, "recordedAt": { "$ref": "#/$defs/timestamp" }, "actor": { "$ref": "#/$defs/identifier" }, "node": { "$ref": "#/$defs/node" } } },
+        { "type": "object", "additionalProperties": false, "required": ["eventId","sequence","type","recordedAt","actor","edge"],
+          "properties": { "eventId": { "$ref": "#/$defs/identifier" }, "sequence": { "type": "integer", "minimum": 1 }, "type": { "const": "edge.created" }, "recordedAt": { "$ref": "#/$defs/timestamp" }, "actor": { "$ref": "#/$defs/identifier" }, "edge": { "$ref": "#/$defs/edge" } } },
+        { "type": "object", "additionalProperties": false, "required": ["eventId","sequence","type","recordedAt","actor","subjectId","replacementId","reason"],
+          "properties": { "eventId": { "$ref": "#/$defs/identifier" }, "sequence": { "type": "integer", "minimum": 1 }, "type": { "const": "node.superseded" }, "recordedAt": { "$ref": "#/$defs/timestamp" }, "actor": { "$ref": "#/$defs/identifier" }, "subjectId": { "$ref": "#/$defs/identifier" }, "replacementId": { "$ref": "#/$defs/identifier" }, "reason": { "type": "string", "minLength": 1, "maxLength": 2048 } } },
+        { "type": "object", "additionalProperties": false, "required": ["eventId","sequence","type","recordedAt","actor","subjectId","replacementId","reason"],
+          "properties": { "eventId": { "$ref": "#/$defs/identifier" }, "sequence": { "type": "integer", "minimum": 1 }, "type": { "const": "edge.superseded" }, "recordedAt": { "$ref": "#/$defs/timestamp" }, "actor": { "$ref": "#/$defs/identifier" }, "subjectId": { "$ref": "#/$defs/identifier" }, "replacementId": { "$ref": "#/$defs/identifier" }, "reason": { "type": "string", "minLength": 1, "maxLength": 2048 } } }
+      ]
+    }
+  }
+}
