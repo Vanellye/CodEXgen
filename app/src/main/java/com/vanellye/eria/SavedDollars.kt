@@ -3,8 +3,6 @@ package com.vanellye.eria
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -15,122 +13,235 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import org.json.JSONObject
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.math.MathContext
 import java.net.HttpURLConnection
 import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 private const val BASE_RPC = "https://mainnet.base.org"
 private const val BASE_CHAIN_ID = "0x2105"
-private const val ETHERSCAN_BASE = "https://basescan.org/address/"
+private const val BLOCKSCOUT_API = "https://base.blockscout.com/api/v2"
+private const val BASESCAN_ADDRESS = "https://basescan.org/address/"
+
+internal object SavedDollarsMath {
+    fun isAddress(value: String): Boolean =
+        Regex("^0x[a-fA-F0-9]{40}$").matches(value.trim())
+
+    fun tokenAmount(rawValue: String, decimals: Int): BigDecimal {
+        require(decimals in 0..36) { "Unsupported token decimals: $decimals" }
+        return BigDecimal(rawValue).movePointLeft(decimals)
+    }
+
+    fun allocationPercent(valueUsd: BigDecimal, totalUsd: BigDecimal): BigDecimal {
+        if (totalUsd <= BigDecimal.ZERO) return BigDecimal.ZERO
+        return valueUsd.multiply(BigDecimal("100")).divide(totalUsd, 4, java.math.RoundingMode.HALF_UP)
+    }
+}
 
 private data class WalletAsset(
     val symbol: String,
     val name: String,
-    val amount: String,
-    val contract: String? = null,
-    val note: String = ""
+    val amount: BigDecimal,
+    val contract: String?,
+    val priceUsd: BigDecimal?,
+    val valueUsd: BigDecimal?,
+    val isNative: Boolean = false
+)
+
+private data class WalletActivity(
+    val hash: String,
+    val timestamp: String,
+    val title: String,
+    val detail: String,
+    val explorerUrl: String
 )
 
 private data class BaseSnapshot(
     val address: String,
     val chainId: String,
     val blockNumber: String,
-    val eth: String,
     val assets: List<WalletAsset>,
-    val sampledAt: String
-)
+    val activities: List<WalletActivity>,
+    val sampledAt: String,
+    val indexer: String
+) {
+    val pricedTotal: BigDecimal
+        get() = assets.mapNotNull { it.valueUsd }.fold(BigDecimal.ZERO, BigDecimal::add)
+    val pricedAssetCount: Int get() = assets.count { it.valueUsd != null }
+}
 
-/**
- * Read-only Base JSON-RPC client. It never signs, sends, or broadcasts transactions.
- * Token discovery is intentionally bounded to canonical assets; arbitrary ERC-20
- * discovery requires an indexed token-list / transfer-history provider.
- */
 private object BaseReadOnlyClient {
-    private fun rpc(method: String, params: String): JSONObject {
-        val conn = (URL(BASE_RPC).openConnection() as HttpURLConnection).apply {
+    private fun getText(url: String): String {
+        val connection = (URL(url).openConnection() as HttpURLConnection).apply {
+            requestMethod = "GET"
+            connectTimeout = 15_000
+            readTimeout = 25_000
+            setRequestProperty("Accept", "application/json")
+            setRequestProperty("User-Agent", "ERIA-SavedDollars/1.0")
+        }
+        try {
+            val code = connection.responseCode
+            val stream = if (code in 200..299) connection.inputStream else connection.errorStream
+            val body = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
+            if (code !in 200..299) error("Explorer API returned HTTP $code: ${body.take(180)}")
+            return body
+        } finally {
+            connection.disconnect()
+        }
+    }
+
+    private fun rpc(method: String, params: JSONArray): String {
+        val connection = (URL(BASE_RPC).openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             connectTimeout = 12_000
             readTimeout = 20_000
             doOutput = true
             setRequestProperty("Content-Type", "application/json")
+            setRequestProperty("Accept", "application/json")
         }
         try {
-            val body = JSONObject()
+            val request = JSONObject()
                 .put("jsonrpc", "2.0")
                 .put("id", 1)
                 .put("method", method)
-                .put("params", org.json.JSONArray(params))
-                .toString()
-            conn.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
-            val response = (if (conn.responseCode in 200..299) conn.inputStream else conn.errorStream)
-                .bufferedReader().use { it.readText() }
+                .put("params", params)
+            connection.outputStream.use { it.write(request.toString().toByteArray(Charsets.UTF_8)) }
+            val code = connection.responseCode
+            val stream = if (code in 200..299) connection.inputStream else connection.errorStream
+            val response = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
+            if (code !in 200..299) error("Base RPC returned HTTP $code")
             val json = JSONObject(response)
-            if (json.has("error")) error(json.getJSONObject("error").optString("message", "RPC error"))
-            return json.getJSONObject("result")
+            if (json.has("error")) error(json.optJSONObject("error")?.optString("message") ?: "Base RPC error")
+            return json.optString("result").takeIf { it.isNotBlank() }
+                ?: error("Base RPC response did not contain a result")
         } finally {
-            conn.disconnect()
+            connection.disconnect()
         }
     }
 
-    private fun call(to: String, data: String): String {
-        val params = org.json.JSONArray()
-            .put(JSONObject().put("to", to).put("data", data))
-            .put("latest")
-        return rpc("eth_call", params.toString()).toString()
-    }
+    private fun explorer(path: String): String = getText("$BLOCKSCOUT_API$path")
 
-    private fun hexQuantity(hex: String, decimals: Int): String {
-        val raw = BigInteger(hex.removePrefix("0x").ifBlank { "0" }, 16)
-        return BigDecimal(raw).movePointLeft(decimals)
-            .stripTrailingZeros().toPlainString()
-    }
+    private fun decimalOrNull(value: String?): BigDecimal? =
+        value?.takeIf { it.isNotBlank() && it != "null" }?.toBigDecimalOrNull()
 
-    private fun balanceOf(address: String, contract: String): String {
-        val encodedAddress = address.removePrefix("0x").lowercase(Locale.US).padStart(64, '0')
-        val result = call(contract, "0x70a08231$encodedAddress")
-        return hexQuantity(result, 6)
-    }
+    private fun usdValue(amount: BigDecimal, price: BigDecimal?): BigDecimal? =
+        price?.let { amount.multiply(it, MathContext.DECIMAL64) }
 
     suspend fun load(address: String): BaseSnapshot = withContext(Dispatchers.IO) {
-        val chain = rpc("eth_chainId", "[]").toString()
-        require(chain.equals(BASE_CHAIN_ID, ignoreCase = true)) {
-            "RPC returned chain ID $chain, expected Base mainnet 8453."
-        }
-        val block = rpc("eth_blockNumber", "[]").toString()
-        val weiHex = rpc(
-            "eth_getBalance",
-            org.json.JSONArray().put(address).put("latest").toString()
-        ).toString()
-        val wei = BigInteger(weiHex.removePrefix("0x").ifBlank { "0" }, 16)
-        val eth = BigDecimal(wei).movePointLeft(18).stripTrailingZeros().toPlainString()
+        require(SavedDollarsMath.isAddress(address)) { "Enter a valid public wallet address." }
 
-        val assets = mutableListOf(
-            WalletAsset("ETH", "Ether", eth, note = "Native Base balance")
-        )
-        // Canonical Base USDC (native USDC) and WETH contracts.
-        val tokens = listOf(
-            Triple("USDC", "USD Coin", "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"),
-            Triple("WETH", "Wrapped Ether", "0x4200000000000000000000000000000000000006")
-        )
-        for ((symbol, name, contract) in tokens) {
-            val decimals = if (symbol == "WETH") 18 else 6
-            val encodedAddress = address.removePrefix("0x").lowercase(Locale.US).padStart(64, '0')
-            val result = call(contract, "0x70a08231$encodedAddress")
-            val amount = hexQuantity(result, decimals)
-            assets += WalletAsset(symbol, name, amount, contract, "ERC-20 balanceOf at latest block")
+        val chainId = rpc("eth_chainId", JSONArray())
+        require(chainId.equals(BASE_CHAIN_ID, ignoreCase = true)) {
+            "RPC chain ID mismatch: expected Base 8453, received $chainId."
         }
+        val blockHex = rpc("eth_blockNumber", JSONArray())
+        val blockNumber = BigInteger(blockHex.removePrefix("0x").ifBlank { "0" }, 16).toString()
+        val nativeHex = rpc("eth_getBalance", JSONArray().put(address).put("latest"))
+        val nativeWei = BigInteger(nativeHex.removePrefix("0x").ifBlank { "0" }, 16)
+        val ethAmount = BigDecimal(nativeWei).movePointLeft(18)
+
+        val addressInfo = JSONObject(explorer("/addresses/$address"))
+        val nativePrice = decimalOrNull(addressInfo.optString("exchange_rate", null))
+        val assets = mutableListOf(
+            WalletAsset(
+                symbol = "ETH",
+                name = "Ether",
+                amount = ethAmount,
+                contract = null,
+                priceUsd = nativePrice,
+                valueUsd = usdValue(ethAmount, nativePrice),
+                isNative = true
+            )
+        )
+
+        // Blockscout's address token-balances endpoint enumerates indexed token holdings.
+        // It cannot prove the existence of tokens that the indexer has not discovered.
+        val tokenArray = JSONArray(explorer("/addresses/$address/token-balances"))
+        for (i in 0 until tokenArray.length()) {
+            val row = tokenArray.optJSONObject(i) ?: continue
+            val token = row.optJSONObject("token") ?: continue
+            if (!token.optString("type").equals("ERC-20", ignoreCase = true)) continue
+            val decimals = token.optString("decimals").toIntOrNull() ?: continue
+            if (decimals !in 0..36) continue
+            val raw = row.optString("value")
+            val amount = runCatching { SavedDollarsMath.tokenAmount(raw, decimals) }.getOrNull() ?: continue
+            if (amount.compareTo(BigDecimal.ZERO) <= 0) continue
+            val symbol = token.optString("symbol").ifBlank { "TOKEN" }
+            val name = token.optString("name").ifBlank { symbol }
+            val contract = token.optString("address_hash").ifBlank {
+                token.optString("address").ifBlank { null }
+            }
+            val price = decimalOrNull(token.optString("exchange_rate", null))
+            assets += WalletAsset(symbol, name, amount, contract, price, usdValue(amount, price))
+        }
+
+        val activities = mutableListOf<WalletActivity>()
+        val txResponse = JSONObject(explorer("/addresses/$address/transactions"))
+        val txItems = txResponse.optJSONArray("items") ?: JSONArray()
+        for (i in 0 until minOf(txItems.length(), 25)) {
+            val tx = txItems.optJSONObject(i) ?: continue
+            val hash = tx.optString("hash")
+            if (hash.isBlank()) continue
+            val from = tx.optJSONObject("from")?.optString("hash").orEmpty()
+            val to = tx.optJSONObject("to")?.optString("hash").orEmpty()
+            val direction = when {
+                to.equals(address, true) -> "Incoming native transaction"
+                from.equals(address, true) -> "Outgoing transaction / contract call"
+                else -> "Transaction"
+            }
+            val timestamp = tx.optString("timestamp").ifBlank { "Timestamp unavailable" }
+            val valueWei = tx.optString("value").toBigDecimalOrNull() ?: BigDecimal.ZERO
+            val valueEth = valueWei.movePointLeft(18).stripTrailingZeros().toPlainString()
+            activities += WalletActivity(
+                hash, timestamp, direction, "Value: $valueEth ETH · Block ${tx.optString("block")}",
+                "https://basescan.org/tx/$hash"
+            )
+        }
+
+        val transferResponse = JSONObject(explorer("/addresses/$address/token-transfers?type=ERC-20"))
+        val transferItems = transferResponse.optJSONArray("items") ?: JSONArray()
+        for (i in 0 until minOf(transferItems.length(), 30)) {
+            val transfer = transferItems.optJSONObject(i) ?: continue
+            val hash = transfer.optString("transaction_hash")
+            if (hash.isBlank()) continue
+            val token = transfer.optJSONObject("token") ?: JSONObject()
+            val from = transfer.optJSONObject("from")?.optString("hash").orEmpty()
+            val to = transfer.optJSONObject("to")?.optString("hash").orEmpty()
+            val direction = if (to.equals(address, true)) "Received" else "Sent"
+            val symbol = token.optString("symbol").ifBlank { "ERC-20" }
+            val raw = transfer.optJSONObject("total")?.optString("value")
+                ?: transfer.optString("total").takeIf { it.isNotBlank() }
+                ?: "?"
+            val decimals = token.optString("decimals").toIntOrNull() ?: 0
+            val quantity = raw.toBigDecimalOrNull()?.movePointLeft(decimals)?.stripTrailingZeros()?.toPlainString() ?: raw
+            activities += WalletActivity(
+                hash,
+                transfer.optString("timestamp").ifBlank { "Timestamp unavailable" },
+                "$direction $symbol",
+                "Amount: $quantity · Contract: ${token.optString("address_hash")}",
+                "https://basescan.org/tx/$hash"
+            )
+        }
+
+        val time = SimpleDateFormat("yyyy-MM-dd HH:mm:ss 'UTC'", Locale.US).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }.format(Date())
+
         BaseSnapshot(
             address = address,
-            chainId = chain,
-            blockNumber = BigInteger(block.removePrefix("0x"), 16).toString(),
-            eth = eth,
-            assets = assets,
-            sampledAt = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss 'UTC'", Locale.US)
-                .apply { timeZone = java.util.TimeZone.getTimeZone("UTC") }
-                .format(java.util.Date())
+            chainId = chainId,
+            blockNumber = blockNumber,
+            assets = assets.sortedByDescending { it.valueUsd ?: BigDecimal.ZERO },
+            activities = activities.distinctBy { it.hash + it.title }.sortedByDescending { it.timestamp }.take(40),
+            sampledAt = time,
+            indexer = "Base Blockscout API v2"
         )
     }
 }
@@ -145,10 +256,10 @@ fun SavedDollarsScreen() {
 
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text("SAVED DOLLARS", style = MaterialTheme.typography.h5, fontWeight = FontWeight.Bold)
-        Text("Base Mainnet · Read-only wallet monitor")
+        Text("Base Mainnet · Read-only portfolio monitor")
         OutlinedTextField(
             value = address,
             onValueChange = { address = it.trim(); error = null },
@@ -160,7 +271,7 @@ fun SavedDollarsScreen() {
         )
         Button(
             onClick = {
-                if (!Regex("^0x[a-fA-F0-9]{40}$").matches(address)) {
+                if (!SavedDollarsMath.isAddress(address)) {
                     error = "Enter a valid 0x address containing 40 hexadecimal characters."
                 } else {
                     loading = true
@@ -178,41 +289,68 @@ fun SavedDollarsScreen() {
             },
             enabled = !loading,
             modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(if (loading) "Reading Base…" else "Check balances")
-        }
+        ) { Text(if (loading) "Refreshing…" else "Refresh portfolio") }
+
         Text(
-            "Only public blockchain reads are performed. No wallet connection, private key, " +
-                "seed phrase, transaction signing, or transfer capability.",
+            "Public-data mode only: no wallet connection, private key, seed phrase, signing, " +
+                "approval, or transaction broadcast.",
             style = MaterialTheme.typography.caption
         )
         error?.let { Text(it, color = MaterialTheme.colors.error) }
+
         snapshot?.let { data ->
             Divider()
-            Text("PORTFOLIO", style = MaterialTheme.typography.overline)
-            Text("USD valuation unavailable", style = MaterialTheme.typography.h6)
-            Text("Token quantities are live on-chain readings; no price feed is configured.")
-            Text("Network: Base Mainnet · Chain ID 8453")
-            Text("Latest block: ${data.blockNumber}")
-            Text("Verified at: ${data.sampledAt}")
+            Text("PORTFOLIO VALUE", style = MaterialTheme.typography.overline)
+            Text(
+                if (data.pricedAssetCount == 0) "USD valuation unavailable"
+                else "$" + data.pricedTotal.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString(),
+                style = MaterialTheme.typography.h4,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                "Priced assets: ${data.pricedAssetCount} / ${data.assets.size}. " +
+                    "Unpriced tokens are shown without invented values.",
+                style = MaterialTheme.typography.caption
+            )
+            Text("Base Mainnet · Chain ID ${data.chainId} · Block ${data.blockNumber}")
+            Text("Read at ${data.sampledAt} · ${data.indexer}", style = MaterialTheme.typography.caption)
             Text("Address: ${data.address.take(8)}…${data.address.takeLast(6)}")
             Divider()
-            Text("ASSETS", style = MaterialTheme.typography.subtitle1, fontWeight = FontWeight.Bold)
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(data.assets) { asset ->
-                    Card(modifier = Modifier.fillMaxWidth(), elevation = 2.dp) {
-                        Column(Modifier.padding(12.dp)) {
-                            Text("${asset.name} (${asset.symbol})", fontWeight = FontWeight.SemiBold)
-                            Text(asset.amount, style = MaterialTheme.typography.h6)
-                            Text(asset.note.ifBlank { asset.contract ?: "Native asset" },
-                                style = MaterialTheme.typography.caption)
+            Text("ASSET ALLOCATION", style = MaterialTheme.typography.subtitle1, fontWeight = FontWeight.Bold)
+            data.assets.forEach { asset ->
+                val allocation = SavedDollarsMath.allocationPercent(asset.valueUsd ?: BigDecimal.ZERO, data.pricedTotal)
+                Card(modifier = Modifier.fillMaxWidth(), elevation = 2.dp) {
+                    Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                        Text("${asset.name} (${asset.symbol})", fontWeight = FontWeight.SemiBold)
+                        Text(asset.amount.stripTrailingZeros().toPlainString())
+                        Text(
+                            asset.valueUsd?.let {
+                                "$" + it.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString() +
+                                    " · " + allocation.toPlainString() + "%"
+                            } ?: "USD price unavailable · allocation excluded",
+                            style = MaterialTheme.typography.caption
+                        )
+                        asset.contract?.let { Text("Contract: $it", style = MaterialTheme.typography.caption) }
+                    }
+                }
+            }
+            Divider()
+            Text("RECENT ACTIVITY", style = MaterialTheme.typography.subtitle1, fontWeight = FontWeight.Bold)
+            if (data.activities.isEmpty()) {
+                Text("No indexed transactions returned for this address.")
+            } else {
+                data.activities.forEach { activity ->
+                    Card(modifier = Modifier.fillMaxWidth(), elevation = 1.dp) {
+                        Column(Modifier.padding(10.dp)) {
+                            Text(activity.title, fontWeight = FontWeight.SemiBold)
+                            Text(activity.detail, style = MaterialTheme.typography.caption)
+                            Text(activity.timestamp, style = MaterialTheme.typography.caption)
+                            Text(activity.explorerUrl, style = MaterialTheme.typography.caption)
                         }
                     }
                 }
             }
-            TextButton(onClick = {
-                /* Open a block explorer URL using Android intent in the host app if desired. */
-            }) { Text("BaseScan: $ETHERSCAN_BASE${data.address}") }
+            Text("Verify independently: $BASESCAN_ADDRESS${data.address}", style = MaterialTheme.typography.caption)
         }
     }
 }
