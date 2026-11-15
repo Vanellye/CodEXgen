@@ -98,3 +98,18 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew --no-daemon --stacktrace :app:assembleDebug
+
+  shared-knowledge-graph-web:
+    name: Shared knowledge graph web schema tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install JSON Schema validator
+        working-directory: contracts/web
+        run: npm install --ignore-scripts
+      - name: Validate canonical graph schema and fixture
+        working-directory: contracts/web
+        run: npm test
