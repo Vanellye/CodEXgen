@@ -13,7 +13,7 @@ data class GraphNode(val id: String, val kind: String, val label: String, val cr
 data class GraphEdge(val id: String, val fromNodeId: String, val toNodeId: String, val relation: String, val createdAt: String, val source: GraphSource, val attributes: Map<String, String> = emptyMap())
 data class NodeCreatedEvent(override val eventId: String, override val sequence: Long, override val recordedAt: String, override val actor: String, val node: GraphNode) : KnowledgeGraphEvent
 data class EdgeCreatedEvent(override val eventId: String, override val sequence: Long, override val recordedAt: String, override val actor: String, val edge: GraphEdge) : KnowledgeGraphEvent
-data class RecordSupersededEvent(override val eventId: String, override val sequence: Long, override val recordedAt: String, override val actor: String, val subjectId: String, val replacementId: String, val reason: String, val subjectType: String) : KnowledgeGraphEvent
+data class RecordSupersededEvent(override val eventId: String, override val sequence: Long, override val recordedAt: String, override val actor: String, val subjectId: String, val replacementId: String, val reason: String) : KnowledgeGraphEvent
 
 object KnowledgeGraphContract {
     const val SCHEMA_VERSION = "1.0.0"
