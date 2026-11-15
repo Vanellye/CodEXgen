@@ -1,0 +1,1 @@
+{"name":"@eria/knowledge-graph-contract","private":true,"type":"module","scripts":{"test":"node --test"},"devDependencies":{"ajv":"^8.17.1","ajv-formats":"^3.0.1"}}
