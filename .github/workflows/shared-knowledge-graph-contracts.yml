@@ -1,0 +1,37 @@
+name: Shared Knowledge Graph Contract Verification
+on:
+  push:
+    branches: [feature/shared-knowledge-graph-contracts]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  android-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Run Android contract unit tests
+        run: ./gradlew --no-daemon :app:testDebugUnitTest
+  web-contract:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: contracts/web/package-lock.json
+      - name: Install contract validator
+        run: npm install --ignore-scripts
+      - name: Validate shared graph schema and fixtures
+        run: npm test
