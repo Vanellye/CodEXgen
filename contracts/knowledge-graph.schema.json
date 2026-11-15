@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://eria.dev/contracts/knowledge-graph/1.0.0",
+  "$id": "urn:eria:contracts:knowledge-graph:1.0.0",
   "title": "ERIA Knowledge Graph Event Stream",
   "description": "Canonical, platform-neutral graph contract. The graph is a deterministic projection of an append-only event stream; clients must not mutate or re-key historical records.",
   "type": "object",
