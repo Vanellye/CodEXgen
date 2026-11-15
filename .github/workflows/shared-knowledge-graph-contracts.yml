@@ -29,8 +29,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: npm
-          cache-dependency-path: contracts/web/package-lock.json
       - name: Install contract validator
         run: npm install --ignore-scripts
       - name: Validate shared graph schema and fixtures
