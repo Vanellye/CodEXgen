@@ -1,12 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import Ajv from "ajv";
+import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 
 const schema = JSON.parse(fs.readFileSync(new URL("../knowledge-graph.schema.json", import.meta.url)));
 const fixture = JSON.parse(fs.readFileSync(new URL("../fixtures/knowledge-graph.valid.json", import.meta.url)));
-const ajv = new Ajv({ allErrors: true, strict: true });
+const ajv = new Ajv2020({ allErrors: true, strict: true });
 addFormats(ajv);
 const validate = ajv.compile(schema);
 
