@@ -1,12 +1,13 @@
 package com.vanellye.eria
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -17,7 +18,6 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.math.RoundingMode
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.Locale
@@ -100,10 +100,11 @@ private object BaseReadOnlyClient {
             "RPC returned chain ID $chain, expected Base mainnet 8453."
         }
         val block = rpc("eth_blockNumber", "[]").toString()
-        val wei = BigInteger(rpc(
+        val weiHex = rpc(
             "eth_getBalance",
             org.json.JSONArray().put(address).put("latest").toString()
-        ).toString().removePrefix("0x"), 16)
+        ).toString()
+        val wei = BigInteger(weiHex.removePrefix("0x").ifBlank { "0" }, 16)
         val eth = BigDecimal(wei).movePointLeft(18).stripTrailingZeros().toPlainString()
 
         val assets = mutableListOf(
@@ -143,7 +144,7 @@ fun SavedDollarsScreen() {
     val scope = rememberCoroutineScope()
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(20.dp),
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         Text("SAVED DOLLARS", style = MaterialTheme.typography.h5, fontWeight = FontWeight.Bold)
