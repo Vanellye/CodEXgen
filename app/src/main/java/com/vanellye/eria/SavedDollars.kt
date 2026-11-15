@@ -73,7 +73,7 @@ private data class BaseSnapshot(
     val indexer: String
 ) {
     val pricedTotal: BigDecimal
-        get() = assets.mapNotNull { it.valueUsd }.fold(BigDecimal.ZERO, BigDecimal::add)
+        get() = assets.mapNotNull { it.valueUsd }.fold(BigDecimal.ZERO) { total, value -> total.add(value) }
     val pricedAssetCount: Int get() = assets.count { it.valueUsd != null }
 }
 
