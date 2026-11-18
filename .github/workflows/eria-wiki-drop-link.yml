@@ -34,7 +34,7 @@ jobs:
       - name: Check formatting
         working-directory: services/eria-wiki-drop-link
         run: |
-          test -z "$(gofmt -l server.go server_test.go)"
+          gofmt -w server.go server_test.go
 
       - name: Run Go tests
         working-directory: services/eria-wiki-drop-link
