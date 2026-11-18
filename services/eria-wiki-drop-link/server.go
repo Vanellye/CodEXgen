@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"crypto/rand"
 	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/hex"
@@ -246,19 +247,11 @@ func (s *Service) handler() http.Handler {
 }
 
 func newID() string {
-	b := make([]byte,16)
-	if _, err := io.ReadFull(strings.NewReader(strings.ReplaceAll(fmt.Sprintf("%032x", time.Now().UnixNano())," ","")), b); err != nil {
-		// Fall back to crypto/rand below; this branch is not expected.
-	}
-	// UUIDs are generated from crypto/rand in the helper.
-	return randomUUID()
-}
-
-func randomUUID() string {
-	b := make([]byte,16)
-	if _, err := os.ReadFile("/dev/urandom"); err == nil { /* OS entropy is available; use crypto/rand in production path below. */ }
-	// crypto/rand is used by the separate helper to avoid predictable identifiers.
-	return uuidFromCrypto()
+	b := make([]byte, 16)
+	if _, err := rand.Read(b); err != nil { panic("secure random UUID generation failed: " + err.Error()) }
+	b[6] = (b[6] & 0x0f) | 0x40
+	b[8] = (b[8] & 0x3f) | 0x80
+	return fmt.Sprintf("%08x-%04x-%04x-%04x-%012x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:16])
 }
 
 func main() {
