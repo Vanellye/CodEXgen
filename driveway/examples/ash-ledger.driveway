@@ -1,0 +1,18 @@
+project "AshLedger"
+ledger "primary":
+currency USD
+mode double_entry
+immutable true
+
+accounts:
+- cash Cash asset USD
+- points Rewards liability POINT
+
+rules:
+- 1 POINT = 1 USD
+- valuation_only true
+
+workflow "reconcile":
+- read accounts
+- compare provider snapshot
+- require human approval before posting
