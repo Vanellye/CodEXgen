@@ -5,7 +5,7 @@ Status: configured for production-readiness validation; live money movement is D
 ## Scope
 - Provider family: Open Banking API (provider adapter remains unselected/unconnected).
 - Currency mode: MULTI, but every individual transfer MUST use exactly one ISO-4217 currency.
-- Proposed amount: the literal string "71111117". Its denomination and currency allocation are UNKNOWN. It is not an executable payment instruction.
+- Proposed amount: 71,111,117 major currency units, as confirmed by the user. No currency is assigned yet. The amount is not executable until a single currency is selected for each transfer and the amount is converted to integer minor units using that currency's exponent.
 - PONS authorization is mandatory for every transfer instruction and every privileged state transition.
 - Human confirmation is mandatory after PONS approval and immediately before provider submission.
 - Credit posting remains disabled until independent bank-credit verification.
@@ -41,11 +41,10 @@ Where the provider and bank evidence share the same upstream source, require a s
 Append-only event log. Each event includes event ID, transaction ID, event type, UTC timestamp, actor/service identity, evidence source and reference, PONS approval ID, previous-event hash, event hash, and schema/policy version. Store no full IBAN, credentials, access tokens, or secrets. Use keyed account fingerprints and masked display values. Corrections and reversals are new events; never overwrite prior events. Periodically anchor signed ledger checkpoints outside the transaction service.
 
 ## Current blocking conditions
-1. Amount denomination is unresolved (major units vs minor units).
-2. No per-currency allocation or single transfer currency supplied.
-3. No beneficiary or destination account verification.
-4. No Open Banking provider/tenant connection or bank transaction feed verified.
-5. No production signing keys, identity trust policy, revocation store, or durable atomic nonce store verified.
-6. No independently confirmed bank credit exists.
+1. No per-transfer ISO-4217 currency selected; therefore minor-unit conversion cannot be finalized.
+2. No beneficiary or destination account verification.
+3. No Open Banking provider/tenant connection or bank transaction feed verified.
+4. No production signing keys, identity trust policy, revocation store, or durable atomic nonce store verified.
+5. No independently confirmed bank credit exists.
 
 Until all blocking conditions are resolved, live submission and credit posting remain disabled. This configuration does not initiate, schedule, reserve, withdraw, or move funds.
