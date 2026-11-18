@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# ERIA Wiki Drop-Link API examples. Requires curl and jq (for extracting the created ID).
+# ERIA Wiki Drop-Link API examples. Requires curl and jq (for safely encoding JSON request bodies).
 set -eu
 : "${ERIA_BASE_URL:?Set ERIA_BASE_URL, e.g. https://eria.example.com}"
 : "${ERIA_API_TOKEN:?Set ERIA_API_TOKEN (32+ characters)}"
