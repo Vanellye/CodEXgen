@@ -1,0 +1,52 @@
+name: ERIA Wiki Drop-Link Go CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "services/eria-wiki-drop-link/**"
+      - ".github/workflows/eria-wiki-drop-link.yml"
+  push:
+    branches:
+      - "feature/eria-wiki-drop-link-service-2026-11-17"
+    paths:
+      - "services/eria-wiki-drop-link/**"
+      - ".github/workflows/eria-wiki-drop-link.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  go-test:
+    name: Go build, tests, vet, and shell validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23.x"
+          cache: true
+          cache-dependency-path: services/eria-wiki-drop-link/go.mod
+
+      - name: Check formatting
+        working-directory: services/eria-wiki-drop-link
+        run: |
+          test -z "$(gofmt -l server.go server_test.go)"
+
+      - name: Run Go tests
+        working-directory: services/eria-wiki-drop-link
+        run: go test -race -count=1 ./...
+
+      - name: Run Go vet
+        working-directory: services/eria-wiki-drop-link
+        run: go vet ./...
+
+      - name: Build API
+        working-directory: services/eria-wiki-drop-link
+        run: go build -trimpath -o /tmp/eria-wiki-drop-link .
+
+      - name: Validate cURL helper syntax
+        run: sh -n services/eria-wiki-drop-link/curl-examples.sh
