@@ -119,3 +119,19 @@ Tests cover authentication, link creation/listing/archiving, unsafe URL rejectio
 The supplied `eria_wiki_drop_link.html` remains a browser-local prototype; it stores data in browser local storage and does not call this API. Do not put the API token in browser JavaScript. A same-origin authenticated session/proxy adapter is a separate integration step. Until then, use trusted server-side clients or authenticated command-line requests.
 
 GitHub stores this source; it does not run the service. Deploy the Go binary to a host with a persistent volume, configure `ERIA_API_TOKEN`, `ERIA_DATA_DIR`, and `PORT`, and expose it only over HTTPS. A host with ephemeral filesystem storage is unsuitable for this ledger without a durable external storage adapter.
+
+## Deploy to Fly.io
+
+This service is deployed from this directory (the directory containing this `go.mod`). The included `Dockerfile` builds a static Go binary, and `fly.toml` configures HTTPS, the health check, Chicago region, and a persistent volume mounted at `/data`.
+
+1. Install and authenticate `flyctl`.
+2. Replace the placeholder `app` value in `fly.toml` with a globally unique Fly app name.
+3. From this directory, create the app without deploying: `fly launch --no-deploy --region ord`.
+4. Create the persistent volume in the same region: `fly volumes create eria_data --region ord --size 1 --app YOUR_APP_NAME`.
+5. Set the API secret locally (do not commit or paste it): `fly secrets set ERIA_API_TOKEN="$(openssl rand -hex 32)" --app YOUR_APP_NAME`. To retain a client-side copy, generate and save the token locally before setting it.
+6. Deploy: `fly deploy --app YOUR_APP_NAME`.
+7. Verify: `curl --fail-with-body https://YOUR_APP_NAME.fly.dev/health`.
+
+The JSONL ledger is local to one Fly Volume. Run one Machine only; do not scale this service to multiple Machines or attach the same volume to multiple writers. Keep the API token out of browser code. The supplied browser prototype is not yet integrated with this API.
+
+Fly.io volumes are persistent local storage and are not a substitute for an independent backup. Back up the volume and test restoration before storing important records.
