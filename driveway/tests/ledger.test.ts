@@ -27,7 +27,7 @@ describe("Driveway ledger", () => {
     expect(onePointOneDollar.valuationOnly).toBe(true);
   });
   it("parses the Driveway DSL starter", () => {
-    const spec = parseDriveway('project "Demo"\nledger "main":\ncurrency USD\nmode double_entry');
+    const spec = parseDriveway('project "Demo"\nledger "main":\n    currency USD\n    mode double_entry\n    immutable true');
     expect(spec.project).toBe("Demo");
     expect(spec.ledger).toBe("main");
   });
