@@ -16,11 +16,11 @@ Requirements: Node.js 20+ and npm.
 ```sh
 cd driveway
 npm install
-npm test
+npm run check
 npm run dev
 ```
 
-Open http://localhost:5173 for the Studio and http://localhost:8787/health for the API.
+Open http://localhost:5173 for the Studio and http://localhost:8787/health for the API. Use `npm run dev:web` or `npm run dev:api` to run either service separately. `npm run typecheck`, `npm test`, `npm run build`, and `npm run check` are available for development validation.
 
 ## Driveway DSL
 See `examples/ash-ledger.driveway` and `docs/DSL.md`.
