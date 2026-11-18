@@ -1,23 +1,26 @@
-# ERIA Wiki Drop-Link API
+# ERIA Wiki Drop-Link API (Go)
 
-A small, dependency-free Node.js API for the ERIA Wiki Drop-Link workflow. It adds authenticated, persistent link capture and a tamper-evident event ledger while keeping external publication and dispatch disabled.
+A dependency-free Go HTTP service for ERIA Wiki Drop-Link. It provides authenticated link capture, archive-with-provenance behavior, and a tamper-evident JSONL event ledger. Publication and background dispatch remain disabled.
 
 ## Requirements
 
-- Node.js 20 or newer
+- Go 1.22 or newer
 - A persistent writable data directory
 - A high-entropy API token of at least 32 characters
-- TLS termination at the hosting platform or reverse proxy
+- HTTPS termination at the hosting platform or reverse proxy
 
 ## Run locally
 
-```bash
+```sh
 export ERIA_API_TOKEN="$(openssl rand -hex 32)"
 export ERIA_DATA_DIR="./data"
-node services/eria-wiki-drop-link/server.mjs
+export PORT=8787
+cd services/eria-wiki-drop-link
+go test ./...
+go run .
 ```
 
-The service listens on `PORT` (default `8787`). Keep `ERIA_API_TOKEN` out of source control and do not put it in browser JavaScript. The `data/` directory contains the append-only event log and should be backed up with the host's persistent-volume mechanism.
+Keep `ERIA_API_TOKEN` out of source control and browser JavaScript. The `data/` directory contains the append-only event log; back it up using the host's persistent-volume mechanism. The process listens on `PORT` (default `8787`).
 
 ## API
 
@@ -28,40 +31,91 @@ All `/api/*` routes require `Authorization: Bearer $ERIA_API_TOKEN`. `GET /healt
 | GET | `/api/links` | List active links; optional `?q=` filter |
 | POST | `/api/links` | Add a validated HTTP(S) link |
 | DELETE | `/api/links/:id` | Archive a link; original events remain in the ledger |
-| GET | `/api/audit` | Read the event ledger after its startup integrity check |
+| GET | `/api/audit` | Read the event ledger after startup integrity verification |
 | POST | `/api/authorization-intents` | Record a narrowly scoped human intent; never enables execution |
 
-### Create a link
+Supported categories: `Reference`, `Architecture`, `Research`, `Governance`, `Implementation`, `Other`.
 
-```bash
-curl -X POST "$ERIA_BASE_URL/api/links" \
+## cURL client
+
+Set the base URL and token in the shell:
+
+```sh
+export ERIA_BASE_URL="https://your-eria-host.example"
+export ERIA_API_TOKEN="replace-with-a-secret-of-32-or-more-characters"
+```
+
+Health check:
+
+```sh
+curl --fail-with-body -sS "$ERIA_BASE_URL/health"
+```
+
+List and search:
+
+```sh
+curl --fail-with-body -sS -H "Authorization: Bearer $ERIA_API_TOKEN" \
+  "$ERIA_BASE_URL/api/links"
+
+curl --fail-with-body -sS -G -H "Authorization: Bearer $ERIA_API_TOKEN" \
+  --data-urlencode "q=architecture" "$ERIA_BASE_URL/api/links"
+```
+
+Create a link:
+
+```sh
+curl --fail-with-body -sS -X POST "$ERIA_BASE_URL/api/links" \
   -H "Authorization: Bearer $ERIA_API_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"title":"ERIA reference","url":"https://example.com/eria","category":"Reference","description":"Reference material","source":"manual"}'
 ```
 
-Supported categories: Reference, Architecture, Research, Governance, Implementation, Other.
+Archive a link (replace the UUID):
 
-### Authorization boundary
+```sh
+curl --fail-with-body -sS -X DELETE "$ERIA_BASE_URL/api/links/00000000-0000-4000-8000-000000000000" \
+  -H "Authorization: Bearer $ERIA_API_TOKEN"
+```
 
-The intent endpoint accepts only `publish_wiki` and `background_dispatch`, and requires the caller to repeat the exact scope in `confirmation`. It writes an audit event with `executionEnabled: false`. There is deliberately no publish, webhook-dispatch, or external execution endpoint in this first version. An intent record is not a PONS grant and does not establish runtime authority.
+Read the audit ledger:
+
+```sh
+curl --fail-with-body -sS -H "Authorization: Bearer $ERIA_API_TOKEN" \
+  "$ERIA_BASE_URL/api/audit"
+```
+
+Record an authorization intent (this is an audit record only):
+
+```sh
+curl --fail-with-body -sS -X POST "$ERIA_BASE_URL/api/authorization-intents" \
+  -H "Authorization: Bearer $ERIA_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"scope":"publish_wiki","confirmation":"publish_wiki","reason":"Reviewed request"}'
+```
+
+A runnable command wrapper is provided at `curl-examples.sh`; it requires `curl` and `jq`. Run it with `health`, `list`, `search QUERY`, `add TITLE URL [CATEGORY]`, `archive UUID`, `audit`, or `intent SCOPE [REASON]`.
+
+## Authorization boundary
+
+The intent endpoint accepts only `publish_wiki` and `background_dispatch`, and requires the caller to repeat the exact scope in `confirmation`. It writes an event with `executionEnabled: false`. There is deliberately no publish, webhook-dispatch, or external-execution endpoint in this version. An intent record is not a PONS grant and does not establish runtime authority. Any future privileged integration must independently verify a valid, scoped PONS grant at the actual mutation boundary.
 
 ## Data and integrity
 
-Events are stored as JSON Lines in `events.jsonl`. Each event includes a sequence number, timestamp, event type, payload, previous hash, and SHA-256 hash. Startup verifies the complete chain and refuses to serve if it detects a malformed or modified entry. This is tamper-evident, not immutable: an administrator with write access to the host can replace the file and recompute the chain. For stronger assurance, replicate signed checkpoints to an independently controlled append-only store.
+Events are stored as JSON Lines in `events.jsonl`. Each event includes a sequence number, timestamp, event type, payload, previous hash, and SHA-256 hash. Startup verifies the entire chain and refuses to serve if an entry is malformed or modified. Writes are serialized within one process and synced before the in-memory sequence advances.
 
-The service serializes writes within one Node.js process. Run one instance per data directory; do not mount the same ledger read-write into multiple replicas. Back up the persistent volume and restrict filesystem permissions.
+This is tamper-evident, not immutable: an administrator with write access to the host can replace the file and recompute the chain. For stronger assurance, replicate signed checkpoints to an independently controlled append-only store. Run one instance per data directory; do not share the same ledger read-write across replicas. Back up the persistent volume and restrict filesystem permissions.
 
 ## Tests
 
-```bash
-node --test services/eria-wiki-drop-link/server.test.mjs
+```sh
+cd services/eria-wiki-drop-link
+go test ./...
 ```
 
-## Current frontend status
+Tests cover authentication, link creation/listing/archiving, unsafe URL rejection, non-executable authorization intents, and fail-closed ledger tampering detection.
 
-The supplied `eria_wiki_drop_link.html` is a browser-local prototype. It stores links and audit records in that browser's local storage and does not call this API. Do not put the API token in that HTML. A same-origin authenticated session/proxy adapter is a separate integration step; until then, the API can be used by trusted server-side clients or authenticated command-line requests.
+## Frontend and deployment status
 
-## Deployment note
+The supplied `eria_wiki_drop_link.html` remains a browser-local prototype; it stores data in browser local storage and does not call this API. Do not put the API token in browser JavaScript. A same-origin authenticated session/proxy adapter is a separate integration step. Until then, use trusted server-side clients or authenticated command-line requests.
 
-GitHub stores the source; it does not run this Node.js service. Deploy it to a Node.js host with a persistent volume, configure `ERIA_API_TOKEN`, `ERIA_DATA_DIR`, and `PORT`, and expose it only over HTTPS. A serverless host with ephemeral filesystem storage is not suitable for the event ledger without an external durable database or storage adapter.
+GitHub stores this source; it does not run the service. Deploy the Go binary to a host with a persistent volume, configure `ERIA_API_TOKEN`, `ERIA_DATA_DIR`, and `PORT`, and expose it only over HTTPS. A host with ephemeral filesystem storage is unsuitable for this ledger without a durable external storage adapter.
