@@ -6,9 +6,10 @@
   "currency_mode": "MULTI",
   "proposed_amount": {
     "value": "71111117",
-    "denomination": "unresolved",
+    "denomination": "major_units",
     "currency_allocation": null,
-    "executable": false
+    "executable": false,
+    "note": "Major-unit amount confirmed by user; no currency assigned. Convert to integer minor units only after a single ISO-4217 currency is selected for each transfer."
   },
   "controls": {
     "live_transfer_enabled": false,
@@ -25,7 +26,7 @@
   },
   "required_per_transfer": {
     "currency": "one ISO-4217 code",
-    "amount": "integer minor units",
+    "amount": "integer minor units after currency-specific conversion",
     "beneficiary_verification": true,
     "unique_idempotency_key": true,
     "pons_signed_scope": [
@@ -65,7 +66,6 @@
     "external_checkpoint_anchor_required": true
   },
   "blocking_reasons": [
-    "amount_denomination_unresolved",
     "currency_allocation_missing",
     "beneficiary_not_verified",
     "provider_connection_not_configured",
