@@ -7,9 +7,10 @@
   "proposed_amount": {
     "value": "71111117",
     "denomination": "major_units",
-    "currency_allocation": null,
+    "currency_allocation": "MULTI",
+    "allocation_semantics": "multiple currencies may be supported across separate transfers; each transfer must specify exactly one ISO-4217 currency",
     "executable": false,
-    "note": "Major-unit amount confirmed by user; no currency assigned. Convert to integer minor units only after a single ISO-4217 currency is selected for each transfer."
+    "note": "Major-unit amount confirmed by user. No currency or distribution among currencies has been specified. Never split or convert this amount automatically."
   },
   "controls": {
     "live_transfer_enabled": false,
@@ -25,7 +26,7 @@
     "fail_closed": true
   },
   "required_per_transfer": {
-    "currency": "one ISO-4217 code",
+    "currency": "exactly one ISO-4217 code",
     "amount": "integer minor units after currency-specific conversion",
     "beneficiary_verification": true,
     "unique_idempotency_key": true,
@@ -66,7 +67,7 @@
     "external_checkpoint_anchor_required": true
   },
   "blocking_reasons": [
-    "currency_allocation_missing",
+    "per_transfer_currency_and_allocation_not_specified",
     "beneficiary_not_verified",
     "provider_connection_not_configured",
     "production_trust_services_not_verified",
