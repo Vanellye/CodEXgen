@@ -26,33 +26,33 @@ const maxBodyBytes = 16 << 10
 
 var categories = map[string]bool{"Reference": true, "Architecture": true, "Research": true, "Governance": true, "Implementation": true, "Other": true}
 var intentScopes = map[string]bool{"publish_wiki": true, "background_dispatch": true}
-var uuidPattern = regexp.MustCompile(\`(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$\`)
+var uuidPattern = regexp.MustCompile(`(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`)
 
 type Link struct {
-	ID          string    \`json:"id"\`
-	URL         string    \`json:"url"\`
-	Title       string    \`json:"title"\`
-	Category    string    \`json:"category"\`
-	Description string    \`json:"description"\`
-	Source      string    \`json:"source"\`
-	CreatedAt   time.Time \`json:"createdAt"\`
+	ID          string    `json:"id"`
+	URL         string    `json:"url"`
+	Title       string    `json:"title"`
+	Category    string    `json:"category"`
+	Description string    `json:"description"`
+	Source      string    `json:"source"`
+	CreatedAt   time.Time `json:"createdAt"`
 }
 
 type Intent struct {
-	ID              string    \`json:"id"\`
-	Scope           string    \`json:"scope"\`
-	Reason          string    \`json:"reason"\`
-	RecordedAt      time.Time \`json:"recordedAt"\`
-	ExecutionEnabled bool     \`json:"executionEnabled"\`
+	ID              string    `json:"id"`
+	Scope           string    `json:"scope"`
+	Reason          string    `json:"reason"`
+	RecordedAt      time.Time `json:"recordedAt"`
+	ExecutionEnabled bool     `json:"executionEnabled"`
 }
 
 type Event struct {
-	Seq          int             \`json:"seq"\`
-	At           time.Time       \`json:"at"\`
-	Type         string          \`json:"type"\`
-	Payload      json.RawMessage \`json:"payload"\`
-	PreviousHash string          \`json:"previousHash"\`
-	Hash         string          \`json:"hash,omitempty"\`
+	Seq          int             `json:"seq"`
+	At           time.Time       `json:"at"`
+	Type         string          `json:"type"`
+	Payload      json.RawMessage `json:"payload"`
+	PreviousHash string          `json:"previousHash"`
+	Hash         string          `json:"hash,omitempty"`
 }
 
 type Service struct {
@@ -141,7 +141,7 @@ func (s *Service) links() []Link {
 			var link Link
 			if json.Unmarshal(e.Payload, &link) == nil { state[link.ID] = link }
 		case "link.archived":
-			var p struct { ID string \`json:"id"\` }
+			var p struct { ID string `json:"id"` }
 			if json.Unmarshal(e.Payload, &p) == nil { delete(state, p.ID) }
 		}
 	}
@@ -208,7 +208,7 @@ func (s *Service) handler() http.Handler {
 			}
 			writeJSON(w, 200, map[string]any{"links":links})
 		case r.URL.Path == "/api/links" && r.Method == http.MethodPost:
-			var body struct { Title string \`json:"title"\`; URL string \`json:"url"\`; Category string \`json:"category"\`; Description string \`json:"description"\`; Source string \`json:"source"\` }
+			var body struct { Title string `json:"title"`; URL string `json:"url"`; Category string `json:"category"`; Description string `json:"description"`; Source string `json:"source"` }
 			if !decodeBody(w,r,&body) { return }
 			if !validText(body.Title,200,true) { writeJSON(w,400,map[string]string{"error":"title must be 1–200 characters."}); return }
 			if !validText(body.URL,2048,true) { writeJSON(w,400,map[string]string{"error":"url must be 1–2048 characters."}); return }
@@ -229,7 +229,7 @@ func (s *Service) handler() http.Handler {
 			if _, err := s.append("link.archived",map[string]string{"id":id}); err != nil { writeJSON(w,500,map[string]string{"error":"Unable to persist event."}); return }
 			writeJSON(w,200,map[string]any{"archived":true,"id":id,"recordRetainedInLedger":true})
 		case r.URL.Path == "/api/authorization-intents" && r.Method == http.MethodPost:
-			var body struct { Scope string \`json:"scope"\`; Confirmation string \`json:"confirmation"\`; Reason string \`json:"reason"\` }
+			var body struct { Scope string `json:"scope"`; Confirmation string `json:"confirmation"`; Reason string `json:"reason"` }
 			if !decodeBody(w,r,&body) { return }
 			if !intentScopes[body.Scope] { writeJSON(w,400,map[string]string{"error":"Unsupported authorization scope."}); return }
 			if body.Confirmation != body.Scope { writeJSON(w,403,map[string]string{"error":"Exact-scope confirmation required."}); return }
