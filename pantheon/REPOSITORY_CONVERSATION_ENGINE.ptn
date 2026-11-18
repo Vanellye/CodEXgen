@@ -1,0 +1,31 @@
+# Pantheon draft contract; descriptive only, not executable.
+LANGUAGE Pantheon;
+MODULE ERIA.Repository.Conversation VERSION "1.0";
+TARGET LOCAL_GIT_WORKTREE;
+MODE READ_ONLY;
+CAPABILITIES {
+  INSPECT status, branches, commits, tags, remote_names;
+  INVENTORY file_paths, file_extensions;
+  SEARCH bounded_UTF8_text;
+  INTERPRET format_hints_and_repository_evidence;
+}
+PROVENANCE {
+  ATTACH repository_root;
+  ATTACH relative_path;
+  ATTACH line_number_when_available;
+  REDACT likely_credentials;
+}
+BOUNDARIES {
+  DO_NOT execute_repository_code;
+  DO_NOT mutate_worktree_or_git_refs;
+  DO_NOT reveal remote_URL_credentials;
+  DO_NOT follow_paths_outside_repository_root;
+  DO_NOT treat_text_matches_as_verified_truth;
+}
+RESPONSE {
+  DISTINGUISH observed_facts, inferred_hints, unknowns;
+  REPORT skipped_files_and_access_errors;
+  PRESERVE evidence_locations;
+}
+DECISION INSPECTION_ONLY;
+END MODULE;

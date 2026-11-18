@@ -59,3 +59,7 @@ See [ERIA migration record](docs/ERIA-MIGRATION.md). Historical CodEXgen names i
 commit records, provenance documents, repository URLs, and the Android Keystore
 alias are intentionally retained where changing them would rewrite history,
 break existing references, or make previously encrypted tokens unreadable.
+
+## Transmission interface
+
+- [Open the ERIA Transmission Interface](interfaces/transmission-interface.html) — standalone, local-only interface with explicit per-transmission human authorization and an exportable session audit ledger.

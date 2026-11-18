@@ -1,0 +1,48 @@
+# ERIA Pantheon — filesystem inventory contract
+# DRAFT LANGUAGE SPECIFICATION: descriptive only; no Pantheon compiler exists.
+# The executable reference implementation is termux/eria-show-files.sh.
+
+LANGUAGE Pantheon;
+MODULE ERIA.Filesystem.Inventory VERSION "1.0";
+
+TARGET TERMUX.USER_SELECTED_ROOT;
+MODE READ_ONLY;
+PURPOSE "Enumerate file paths, including hidden files, within a user-selected readable directory.";
+
+POLICY {
+  INCLUDE hidden_entries;
+  INCLUDE regular_files;
+  INCLUDE directories;
+  DO_NOT read_file_contents;
+  DO_NOT follow_symbolic_links;
+  DO_NOT escalate_privileges;
+  DO_NOT bypass Android_scoped_storage;
+  DO_NOT access outside TARGET;
+  DO_NOT transmit_inventory;
+  DO_NOT modify_or_delete_files;
+}
+
+ACCESS {
+  REQUIRE user_selected_root;
+  REQUIRE root_is_directory;
+  REQUIRE read_and_traverse_permissions;
+  ON permission_denied RECORD "DENIED" AND CONTINUE;
+  ON unavailable_path RECORD "UNAVAILABLE" AND CONTINUE;
+}
+
+OUTPUT {
+  FORMAT newline_delimited_paths;
+  REPORT inaccessible_paths_to_stderr;
+  EXIT nonzero_if_root_invalid;
+}
+
+ETHICS {
+  PRESERVE provenance;
+  MINIMIZE disclosure;
+  HUMAN selects root;
+  NO generated code execution;
+  NO privilege escalation;
+}
+
+DECISION PROPOSAL_ONLY;
+END MODULE;

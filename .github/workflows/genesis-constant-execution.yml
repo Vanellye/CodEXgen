@@ -1,0 +1,47 @@
+name: Generation Genesis Constant Execution
+
+on:
+  push:
+    branches: [core]
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: genesis-constant-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  genesis-cycle:
+    name: Bounded, auditable Genesis cycle
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run one Genesis cycle
+        run: python tools/genesis_constant_runner.py --once
+      - name: Preserve generated output and run ledger
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-run-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            generated_modules/
+            .eria/genesis-runs.jsonl
+          if-no-files-found: warn
+          retention-days: 30
+
+# This workflow runs bounded cycles; it is not an always-on daemon.
+# It has read-only repository permissions and never commits, merges,
+# releases, deploys, deletes source, or dispatches external actions.

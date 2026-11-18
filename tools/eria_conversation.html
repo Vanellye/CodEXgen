@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<title>ERIA ÂÆị Conversation</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:#0b1020;color:#e9eef7;--panel:#141d31;--panel2:#10182a;--line:#2a3852;--muted:#9aabc3;--accent:#83d6c2;--blue:#6e9eff}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#172744 0,#0b1020 55%);display:flex;justify-content:center}
+.app{width:min(100%,980px);min-height:100vh;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom)}
+header{padding:22px 4px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px}.mark{width:42px;height:42px;border-radius:13px;background:linear-gradient(145deg,#83d6c2,#6e9eff);display:grid;place-items:center;color:#071321;font-weight:900;font-size:19px}.brand h1{font-size:18px;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:12px}
+.status{font-size:11px;color:var(--accent);border:1px solid #31594f;border-radius:99px;padding:6px 9px;white-space:nowrap}.status.off{color:#ffb0a7;border-color:#70413c}
+main{flex:1;display:flex;flex-direction:column;min-height:0}.overview{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:14px 0}.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px}.stat b{font-size:16px;display:block}.stat span{font-size:10px;color:var(--muted)}
+.chat{flex:1;min-height:300px;overflow:auto;padding:12px 2px 18px;display:flex;flex-direction:column;gap:12px}
+.welcome{background:linear-gradient(135deg,#172943,#141d31);border:1px solid var(--line);border-radius:16px;padding:17px}.welcome h2{font-size:18px;margin:0 0 7px}.welcome p{font-size:13px;color:var(--muted);line-height:1.5;margin:0}
+.message{max-width:92%;padding:12px 14px;border-radius:15px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.55}.user{align-self:flex-end;background:#254466;border:1px solid #3c6086}.assistant{align-self:flex-start;background:var(--panel);border:1px solid var(--line)}.meta{font-size:10px;color:var(--muted);margin-bottom:5px}
+.composer{position:sticky;bottom:0;background:linear-gradient(transparent,#0b1020 20%);padding:12px 0 calc(12px + env(safe-area-inset-bottom))}
+form{display:flex;gap:8px;background:var(--panel);border:1px solid #3b4c68;border-radius:15px;padding:8px}
+textarea{flex:1;resize:none;min-height:42px;max-height:130px;background:transparent;color:inherit;border:0;outline:0;padding:10px;font:inherit;font-size:14px}
+button{border:0;border-radius:11px;background:var(--accent);color:#071b20;font-weight:750;padding:0 17px;min-width:68px}button:disabled{opacity:.5}
+.actions{display:flex;gap:8px;flex-wrap:wrap;padding-top:9px}.small{background:#18243a;color:#c8d7ed;border:1px solid var(--line);font-size:11px;padding:8px 11px;min-width:0}
+footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
+@media(min-width:700px){.app{padding-left:24px;padding-right:24px}.chat{padding:18px 8px}.message{max-width:80%}}
+</style>
+</head>
+<body><div class="app">
+<header><div class="brand"><div class="mark">Æ</div><div><h1>ERIA ÂÆị Conversation</h1><p>Termux · Repository intelligence · Provenance-aware</p></div></div><div id="connection" class="status">Connecting…</div></header>
+<main>
+<section class="overview">
+<div class="stat"><b id="fileCount">—</b><span>Indexed files</span></div>
+<div class="stat"><b id="dbState">—</b><span>Repository database</span></div>
+<div class="stat"><b id="engineState">—</b><span>Conversation engine</span></div>
+</section>
+<section id="chat" class="chat" aria-live="polite">
+<div class="welcome"><h2>Welcome to ERIA</h2><p>Ask questions about repository files, branches, commits, architecture, provenance, or the PONS bridge. Original source remains non-authoritative; translations are derived records, not replacements.</p></div>
+</section>
+<div class="composer">
+<form id="form"><textarea id="message" rows="1" placeholder="Ask ERIA about your repository…" aria-label="Message"></textarea><button id="send" type="submit">Send</button></form>
+<div class="actions">
+<button class="small" id="statusBtn" type="button">Integration status</button>
+<button class="small" id="filesBtn" type="button">Search indexed paths</button>
+<button class="small" id="refreshBtn" type="button">Refresh index</button>
+</div></div>
+</main>
+<footer>Local Termux session · SQLite stored under ~/.eria · No automatic Git mutation or remote transmission</footer>
+</div>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const session = (() => {
+    let value = sessionStorage.getItem("eria_session");
+    if (!value) {
+      value = "eria-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,9);
+      sessionStorage.setItem("eria_session", value);
+    }
+    return value;
+  })();
+  const chat = $("chat");
+  let busy = false;
+  function addMessage(role, content) {
+    const wrap = document.createElement("div");
+    wrap.className = "message " + role;
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.textContent = role === "user" ? "YOU" : "ERIA";
+    const body = document.createElement("div");
+    body.textContent = content;
+    wrap.append(meta, body);
+    chat.append(wrap);
+    chat.scrollTop = chat.scrollHeight;
+  }
+  async function api(path, options={}) {
+    const response = await fetch(path, {
+      ...options,
+      headers: {"Content-Type":"application/json","X-ERIA-Session":session,...(options.headers||{})}
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Request failed: " + response.status);
+    return data;
+  }
+  async function status() {
+    try {
+      const data = await api("/api/status");
+      $("connection").textContent = "Termux connected";
+      $("connection").classList.remove("off");
+      $("fileCount").textContent = data.index.files;
+      $("dbState").textContent = "Ready";
+      $("engineState").textContent = "Online";
+    } catch (error) {
+      $("connection").textContent = "Disconnected";
+      $("connection").classList.add("off");
+      $("dbState").textContent = "Offline";
+      $("engineState").textContent = "Offline";
+    }
+  }
+  async function history() {
+    try {
+      const data = await api("/api/history");
+      if (data.messages.length) {
+        chat.innerHTML = "";
+        data.messages.forEach(item => addMessage(item.role, item.content));
+      }
+    } catch (_) {}
+  }
+  async function send(text) {
+    if (busy || !text.trim()) return;
+    busy = true; $("send").disabled = true;
+    addMessage("user", text);
+    try {
+      const data = await api("/api/chat", {
+        method:"POST", body:JSON.stringify({message:text,session_id:session})
+      });
+      addMessage("assistant", data.answer);
+    } catch (error) {
+      addMessage("assistant", "HOLD: " + error.message);
+    } finally {
+      busy = false; $("send").disabled = false; $("message").focus();
+    }
+  }
+  $("form").addEventListener("submit", event => {
+    event.preventDefault();
+    const value = $("message").value;
+    $("message").value = "";
+    send(value);
+  });
+  $("message").addEventListener("keydown", event => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault(); $("form").requestSubmit();
+    }
+  });
+  $("statusBtn").addEventListener("click", () => send("integration.status"));
+  $("filesBtn").addEventListener("click", async () => {
+    const query = prompt("Find repository paths containing:");
+    if (query === null || !query.trim()) return;
+    try {
+      const data = await api("/api/files?q=" + encodeURIComponent(query));
+      addMessage("assistant", data.files.length
+        ? "Indexed path matches:\n" + data.files.map(x => x.path + " (" + x.size_bytes + " bytes)").join("\n")
+        : "No indexed paths matched: " + query);
+    } catch (error) { addMessage("assistant", "HOLD: " + error.message); }
+  });
+  $("refreshBtn").addEventListener("click", async () => {
+    $("refreshBtn").disabled = true;
+    try {
+      const data = await api("/api/index", {method:"POST",body:"{}"});
+      $("fileCount").textContent = data.indexed;
+      addMessage("assistant", "Repository index refreshed. Files indexed: " + data.indexed);
+    } catch (error) { addMessage("assistant", "Index refresh failed: " + error.message); }
+    finally { $("refreshBtn").disabled = false; }
+  });
+  status(); history();
+})();
+</script></body></html>

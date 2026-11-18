@@ -1,0 +1,76 @@
+{
+  "schema_version": "eria.transfer-policy.v1",
+  "environment": "production",
+  "provider_family": "open_banking_api",
+  "provider_connection": "not_configured",
+  "currency_mode": "MULTI",
+  "proposed_amount": {
+    "value": "71111117",
+    "denomination": "major_units",
+    "currency_allocation": "MULTI",
+    "allocation_semantics": "multiple currencies may be supported across separate transfers; each transfer must specify exactly one ISO-4217 currency",
+    "executable": false,
+    "note": "Major-unit amount confirmed by user. No currency or distribution among currencies has been specified. Never split or convert this amount automatically."
+  },
+  "controls": {
+    "live_transfer_enabled": false,
+    "transfer_submission_enabled": false,
+    "withdrawal_enabled": false,
+    "credit_posting_enabled": false,
+    "pons_required": true,
+    "human_confirmation_required": true,
+    "webhook_is_settlement_evidence": false,
+    "iban_checksum_is_account_ownership_evidence": false,
+    "independent_bank_credit_verification_required": true,
+    "append_only_audit_required": true,
+    "fail_closed": true
+  },
+  "required_per_transfer": {
+    "currency": "exactly one ISO-4217 code",
+    "amount": "integer minor units after currency-specific conversion",
+    "beneficiary_verification": true,
+    "unique_idempotency_key": true,
+    "pons_signed_scope": [
+      "transaction_id",
+      "source_account_fingerprint",
+      "beneficiary_account_fingerprint",
+      "amount_minor_units",
+      "currency",
+      "fee_ceiling",
+      "rail",
+      "execution_date",
+      "purpose",
+      "provider",
+      "policy_version",
+      "expires_at",
+      "nonce"
+    ]
+  },
+  "posting_gate": {
+    "required_state": "BANK_CREDIT_VERIFIED",
+    "required_evidence": [
+      "bank_originated_transaction_or_statement_record",
+      "exact_end_to_end_reference",
+      "exact_amount_and_currency",
+      "beneficiary_account_fingerprint_match",
+      "final_settled_status",
+      "bank_transaction_id",
+      "value_date"
+    ],
+    "webhook_alone_sufficient": false
+  },
+  "audit": {
+    "format": "append_only_hash_chained_events",
+    "store_full_iban": false,
+    "store_credentials_or_tokens": false,
+    "reversals_are_new_events": true,
+    "external_checkpoint_anchor_required": true
+  },
+  "blocking_reasons": [
+    "per_transfer_currency_and_allocation_not_specified",
+    "beneficiary_not_verified",
+    "provider_connection_not_configured",
+    "production_trust_services_not_verified",
+    "bank_credit_not_independently_verified"
+  ]
+}

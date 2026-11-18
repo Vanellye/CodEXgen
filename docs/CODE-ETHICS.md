@@ -16,10 +16,13 @@ This standard governs code creation, review, repair, execution, and transmission
 8. **No covert actuation:** Detection, scheduling, webhook receipt, or a passing quality score never independently authorizes execution, publication, or external dispatch.
 9. **Human review:** Security-sensitive, rights-sensitive, production, permission, credential, and external-facing changes require human review.
 10. **Accountability:** Record the finding, evidence, scope, proposed change, authorization, validation result, and disposition.
+11. **Planting Seeds:** Treat every injected code fragment, configuration, prompt, dependency, generated module, or runtime instruction as a proposed seed. Identify its origin, purpose, target, compatibility, effects, and rollback before integration. A seed remains inert until its checks pass and an authorized human accepts the proposal.
 
 ## Required change record
 
 Every consequential repair must identify the source repository, branch, exact base commit, affected paths, observed behavior, evidence and confidence, proposed patch and expected effects, authorizing actor and scope, tests, review, recovery method, and final disposition.
+
+For code injection or generated-code integration, also record the seed identifier, source hash, target hash or version, requested scope, compatibility evidence, consent/security/safety/ownership checks, reviewer reference, and final decision. Caller-supplied Boolean flags are assertions, not cryptographic proof of approval.
 
 ## Prohibited shortcuts
 
@@ -28,9 +31,14 @@ Every consequential repair must identify the source repository, branch, exact ba
 - Automatic publication, network dispatch, deployment, or physical actuation from trigger detection alone.
 - Treating heuristic output as a verified security finding.
 - Concealing failed tests, uncertainty, or incomplete recovery.
+- Executing injected or generated code merely because parsing, validation, or a quality score succeeded.
+
+## Relationship to Pantheon and I-INJECT
+
+Pantheon is the repository's contract-first governance and runtime-boundary layer; the existing implementation is a set of C99 contracts and adapters, not a general-purpose programming language or unrestricted execution engine. I-INJECT validates proposals and returns `PROPOSAL_ONLY`; it does not mutate or execute the target. Planting Seeds extends its review checklist without bypassing its consent, security, safety, ownership, approval, compatibility, and exact-scope gates.
 
 ## Relationship to ÆĀÄÂ
 
 ÆĀÄÂ is the code-rehabilitation process implementing these principles. Its default operation is read-only detection and diagnosis. It may prepare a patch for review, but repair execution remains separately authorized. See [ÆĀÄÂ Code Rehabilitation](./AEAA-CODE-REHABILITATION.md).
 
-This document defines repository policy. It does not itself grant credentials, alter GitHub permissions, activate a runtime capability, or authorize any specific repair.
+This document defines repository policy. It does not itself grant credentials, alter Android/Termux permissions, activate a runtime capability, or authorize any specific repair.
