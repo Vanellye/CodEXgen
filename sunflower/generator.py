@@ -40,7 +40,7 @@ class HabitPattern:
 def _clean_steps(steps: Iterable[str]) -> tuple[str, ...]:
     cleaned = []
     for step in steps:
-        value = re.sub(r"\\s+", " ", str(step)).strip()
+        value = re.sub(r"\s+", " ", str(step)).strip()
         if value:
             cleaned.append(value)
     return tuple(cleaned)
@@ -99,10 +99,10 @@ class SunflowerGenerator:
         }
 
     def write(self, habits: Iterable[Iterable[str]], output: Path) -> Path:
-        payload = json.dumps(self.build(habits), ensure_ascii=False, indent=2) + "\\n"
+        payload = json.dumps(self.build(habits), ensure_ascii=False, indent=2) + "\n"
         output.parent.mkdir(parents=True, exist_ok=True)
         if not output.exists() or output.read_text(encoding="utf-8") != payload:
-            output.write_text(payload, encoding="utf-8", newline="\\n")
+            output.write_text(payload, encoding="utf-8", newline="\n")
         return output
 
 
