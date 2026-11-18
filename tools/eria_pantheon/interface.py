@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import shlex
 import os
+from pathlib import Path
 from typing import Any
 
 from .pons import BridgeEnvelope, Pons
@@ -17,9 +18,18 @@ class ERIAPantheonInterface:
             reviewer_root_public_key_b64=os.environ.get("ERIA_PONS_REVIEWER_ROOT_PUBKEY"),
             revoked_reviewer_key_ids=revoked,
         )
-        self.bridge.install_accuracy_service(
-            str(repository.root / ".eria" / "avs" / "evidence.jsonl")
-        )
+        # Keep the append-only AVS ledger out of the checked-out repository.
+        # Operators may select a protected external location explicitly.
+        ledger_path = Path(
+            os.environ.get(
+                "ERIA_PONS_AVS_LEDGER",
+                str(Path.home() / ".eria" / "avs" / "evidence.jsonl"),
+            )
+        ).expanduser().resolve()
+        repository_root = Path(repository.root).resolve()
+        if ledger_path == repository_root or repository_root in ledger_path.parents:
+            raise ValueError("PONS AVS ledger must be outside the repository root.")
+        self.bridge.install_accuracy_service(str(ledger_path))
 
     def status(self) -> str:
         state = self.bridge.describe()
@@ -80,7 +90,7 @@ class ERIAPantheonInterface:
         if path.stat().st_size > 1_000_000:
             return "HOLD: source exceeds the 1 MB inspection limit."
         raw = path.read_bytes()
-        if b"\x00" in raw[:8192]:
+        if b"\\x00" in raw[:8192]:
             return "HOLD: binary source is not classified as text code."
 
         try:

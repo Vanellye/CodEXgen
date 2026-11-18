@@ -64,10 +64,10 @@ class PonsTests(unittest.TestCase):
             home.mkdir()
             original = b"print('unchanged')\n"
             (root / "sample.py").write_bytes(original)
-            interface = ERIAPantheonInterface(FakeRepository(root))
             old_home = os.environ.get("HOME")
             os.environ["HOME"] = str(home)
             try:
+                interface = ERIAPantheonInterface(FakeRepository(root))
                 result = interface.handle(
                     'code.bypass sample.py --reason "preserve source"'
                 )
