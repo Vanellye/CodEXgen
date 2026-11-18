@@ -1,0 +1,51 @@
+name: Pantheon Node 24 and C99 contract validation
+
+on:
+  push:
+    paths:
+      - "pantheon/**"
+      - ".github/workflows/pantheon-contracts.yml"
+  pull_request:
+    paths:
+      - "pantheon/**"
+      - ".github/workflows/pantheon-contracts.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pantheon-contracts-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pantheon-contracts:
+    name: Pantheon contract suites (C99 + Node 24 toolchain)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+      - name: Set up Node.js 24 toolchain
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Verify Node.js runtime
+        run: |
+          node --version
+          node -e 'if (Number(process.versions.node.split(".")[0]) !== 24) process.exit(1)'
+      - name: Install C99 compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes clang
+      - name: Run all Pantheon C99 contract tests
+        run: bash pantheon/run-contract-tests.sh
+      - name: Check workflow and contract whitespace
+        run: git diff --check
+
+# Node 24 is provided as an explicit project toolchain; GitHub Actions
+# JavaScript action runtimes are independently selected by each action's
+# runs.using metadata. This workflow does not grant repository write access.

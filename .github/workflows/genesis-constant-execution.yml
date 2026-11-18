@@ -21,19 +21,19 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.sha }}
           fetch-depth: 1
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
       - name: Run one Genesis cycle
         run: python tools/genesis_constant_runner.py --once
       - name: Preserve generated output and run ledger
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: genesis-run-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
