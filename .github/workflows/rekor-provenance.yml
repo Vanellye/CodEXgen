@@ -1,9 +1,9 @@
 name: ERIA Rekor provenance anchor
 
 on:
-  push:
+  pull_request:
     branches:
-      - security/eria-rekor-provenance
+      - feature/eria-multicurrency-pons-transfer-gate
   workflow_dispatch:
 
 permissions:
@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   sign-and-anchor:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
       - name: Check out provenance source
@@ -33,9 +34,7 @@ jobs:
               "predicateType": "https://eria.example/provenance/ci-run/v1",
               "subject": [{
                   "name": "Vanellye/CodEXgen",
-                  "digest": {
-                      "gitCommit": "acbe77e46c4c66d89929480de1c4a261b7573069"
-                  }
+                  "digest": {"gitCommit": "acbe77e46c4c66d89929480de1c4a261b7573069"}
               }],
               "predicate": {
                   "repository": "https://github.com/Vanellye/CodEXgen",
@@ -46,7 +45,7 @@ jobs:
                   "ciRunUrl": "https://github.com/Vanellye/CodEXgen/actions/runs/44278993559",
                   "ciConclusion": "success",
                   "anchoringWorkflow": ".github/workflows/rekor-provenance.yml",
-                  "signerIdentityMode": "GitHub Actions OIDC keyless; workflow identity, no personal email asserted"
+                  "signerIdentityMode": "GitHub Actions OIDC keyless workflow identity; no personal email asserted"
               }
           }
           with open("eria-provenance.json", "w", encoding="utf-8") as f:
@@ -55,18 +54,18 @@ jobs:
           PY
 
       - name: Sign statement and submit to public Rekor
-        env:
-          COSIGN_YES: "true"
         run: cosign sign-blob --yes --bundle eria-provenance.sigstore.json eria-provenance.json
 
-      - name: Verify signature and transparency-log inclusion
+      - name: Verify signature and Rekor inclusion proof
+        env:
+          CERTIFICATE_IDENTITY: https://github.com/${{ github.workflow_ref }}
         run: |
           cosign verify-blob eria-provenance.json \
             --bundle eria-provenance.sigstore.json \
-            --certificate-identity="https://github.com/Vanellye/CodEXgen/.github/workflows/rekor-provenance.yml@refs/heads/security/eria-rekor-provenance" \
+            --certificate-identity="${CERTIFICATE_IDENTITY}" \
             --certificate-oidc-issuer="https://token.actions.githubusercontent.com"
 
-      - name: Publish verification bundle
+      - name: Publish provenance and Sigstore bundle
         uses: actions/upload-artifact@v4
         with:
           name: eria-rekor-provenance
