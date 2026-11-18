@@ -40,9 +40,9 @@ func TestHealthAndAuthentication(t *testing.T) {
 
 func TestCreateListArchiveAndAudit(t *testing.T) {
 	s, ts := testService(t)
-	res := request(t,ts,"POST","/api/links",\`{"title":"ERIA reference","url":"https://example.com/eria","category":"Architecture"}\`,true)
+	res := request(t,ts,"POST","/api/links",`{"title":"ERIA reference","url":"https://example.com/eria","category":"Architecture"}`,true)
 	if res.StatusCode != 201 { t.Fatalf("create: %d",res.StatusCode) }
-	var created struct { Link Link \`json:"link"\` }
+	var created struct { Link Link `json:"link"` }
 	if err := json.NewDecoder(res.Body).Decode(&created); err != nil { t.Fatal(err) }
 	res.Body.Close()
 	if got := len(s.links()); got != 1 { t.Fatalf("links=%d",got) }
@@ -55,10 +55,10 @@ func TestCreateListArchiveAndAudit(t *testing.T) {
 
 func TestRejectsUnsafeURLAndIntentNeverExecutes(t *testing.T) {
 	_, ts := testService(t)
-	res := request(t,ts,"POST","/api/links",\`{"title":"unsafe","url":"javascript:alert(1)"}\`,true)
+	res := request(t,ts,"POST","/api/links",`{"title":"unsafe","url":"javascript:alert(1)"}`,true)
 	if res.StatusCode != 400 { t.Fatalf("unsafe URL status=%d",res.StatusCode) }
 	res.Body.Close()
-	res = request(t,ts,"POST","/api/authorization-intents",\`{"scope":"publish_wiki","confirmation":"publish_wiki","reason":"reviewed"}\`,true)
+	res = request(t,ts,"POST","/api/authorization-intents",`{"scope":"publish_wiki","confirmation":"publish_wiki","reason":"reviewed"}`,true)
 	if res.StatusCode != 201 { t.Fatalf("intent status=%d",res.StatusCode) }
 	var result map[string]any
 	if err := json.NewDecoder(res.Body).Decode(&result); err != nil { t.Fatal(err) }
