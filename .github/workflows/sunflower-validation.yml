@@ -3,7 +3,7 @@ name: Sunflower and DeepAppState validation
 on:
   pull_request:
     branches:
-      - security/eria-rekor-provenance
+      - chore/node24-pantheon-workflow-modernization
   push:
     branches:
       - feature/sunflower-gamma-deepappstate
