@@ -40,6 +40,6 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-      - run: sudo apt-get update && sudo apt-get install -y kotlin
-      - run: kotlinc language/og/kotlin/YoroStarCodec.kt -include-runtime -d /tmp/yoro-codec.jar
+      - run: curl -fsSL https://github.com/JetBrains/kotlin/releases/download/v2.2.20/kotlin-compiler-2.2.20.zip -o /tmp/kotlin.zip && unzip -q /tmp/kotlin.zip -d /tmp/kotlin-dist
+      - run: /tmp/kotlin-dist/kotlinc/bin/kotlinc language/og/kotlin/YoroStarCodec.kt -include-runtime -d /tmp/yoro-codec.jar
       - run: java -jar /tmp/yoro-codec.jar language/og/test-vectors/yoro-star-v2.tsv
