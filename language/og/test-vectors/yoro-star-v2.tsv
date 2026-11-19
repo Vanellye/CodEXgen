@@ -1,0 +1,9 @@
+# name|hex bytes|Ɣơ/2 encoding
+empty||Ɣơ/2:
+zero|00|Ɣơ/2:☆☆☆☆☆☆☆☆
+one|01|Ɣơ/2:☆☆☆☆☆☆☆k
+seven_f|7f|Ɣơ/2:☆kkkkkkk
+eight_0|80|Ɣơ/2:k☆☆☆☆☆☆☆
+ff|ff|Ɣơ/2:kkkkkkkk
+mixed|00017fff80ff|Ɣơ/2:☆☆☆☆☆☆☆☆.☆☆☆☆☆☆☆k.☆kkkkkkk.kkkkkkkk.k☆☆☆☆☆☆☆.kkkkkkkk
+utf8_eria|45524941|Ɣơ/2:☆k☆☆☆k☆k.☆k☆k☆☆k☆.☆k☆☆k☆☆k.☆k☆☆☆☆☆k

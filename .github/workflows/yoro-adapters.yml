@@ -1,0 +1,45 @@
+name: Ɣơ adapter parity
+
+on:
+  pull_request:
+    paths:
+      - "language/og/**"
+      - ".github/workflows/yoro-adapters.yml"
+  push:
+    branches:
+      - "feature/yoro-adapters-grammar-parser"
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python language/og/python/yoro_star_codec.py language/og/test-vectors/yoro-star-v2.tsv
+      - run: python -m unittest language/og/tests/test_yoro_adapters.py -v
+
+  javascript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node language/og/javascript/test-yoro.mjs
+
+  kotlin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - run: curl -fsSL https://github.com/JetBrains/kotlin/releases/download/v2.2.20/kotlin-compiler-2.2.20.zip -o /tmp/kotlin.zip && unzip -q /tmp/kotlin.zip -d /tmp/kotlin-dist
+      - run: /tmp/kotlin-dist/kotlinc/bin/kotlinc language/og/kotlin/YoroStarCodec.kt -include-runtime -d /tmp/yoro-codec.jar
+      - run: java -jar /tmp/yoro-codec.jar language/og/test-vectors/yoro-star-v2.tsv
