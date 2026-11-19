@@ -1,5 +1,5 @@
 /** Ɣơ parser prototype: syntax to AST only; never evaluates source. */
-const tokenPattern = /\s+|"(?:\\.|[^"\\])*"|[A-Za-z_][A-Za-z0-9_]*|☆|k|∞|△|§|∴|&|→|[{}(),;=]/uy;
+const tokenPattern = /\s+|"(?:\\.|[^"\\])*"|☆|k|∞|△|§|∴|&|→|[A-Za-z_][A-Za-z0-9_]*|[{}(),;=]/uy;
 export function tokenize(source) {
   const tokens = [];
   let offset = 0;
