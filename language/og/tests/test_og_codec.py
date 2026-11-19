@@ -67,6 +67,25 @@ class OgCodecTests(unittest.TestCase):
         with self.assertRaises(OgCodecError):
             decode(oversized)
 
+    def test_repository_examples_decode(self):
+        from pathlib import Path
+        root = Path(__file__).resolve().parents[1]
+        for filename in ("empty.og", "zero-and-one.og", "sample-bytes.og"):
+            with self.subTest(filename=filename):
+                self.assertIsInstance(decode((root / "examples" / filename).read_text(encoding="utf-8")), bytes)
+
+    def test_no_extra_whitespace_or_duplicate_lines(self):
+        encoded = encode(b"\\x00")
+        with self.assertRaises(OgCodecError):
+            decode(encoded + "\\n")
+        with self.assertRaises(OgCodecError):
+            decode(encoded.replace("kind:BYTES", "kind:BYTES\\nkind:BYTES"))
+
+    def test_non_ascii_length_rejected(self):
+        encoded = encode(b"\\x00").replace("length:1", "length:１")
+        with self.assertRaises(OgCodecError):
+            decode(encoded)
+
 
 if __name__ == "__main__":
     unittest.main()
