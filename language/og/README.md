@@ -53,7 +53,7 @@ For a byte value, each base-5 digit is mapped to a syllable:
 
 A byte is represented by a fixed-width sequence of four base-5 digits (because 5^4 = 625, covering 0..255). Each byte is therefore four syllables. Separators make byte boundaries visible.
 
-Example: byte 1 becomes `ba-be-ba-ba` (digits 0001 in base 5, most significant first). This is a notation only; it does not make the payload positive or change its value.
+Example: byte 1 becomes `ba-ba-ba-be` (digits 0001 in base 5, most significant first). This is a notation only; it does not make the payload positive or change its value.
 
 ## Scope boundaries
 
