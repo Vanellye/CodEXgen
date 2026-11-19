@@ -51,7 +51,7 @@ export function parse(source) {
       take("}");
       return { type: "Scope", name, body };
     }
-    if (t?.startsWith('"')) return { type: "String", value: JSON.parse(t) };
+    if (t?.startsWith('"')) { take(); return { type: "String", value: JSON.parse(t) }; }
     if (t && /^[A-Za-z_]/u.test(t)) { take(); return { type: "Identifier", name: t }; }
     throw new SyntaxError("Expected expression, got " + String(t));
   };
