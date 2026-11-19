@@ -99,7 +99,7 @@ Illustrative, non-executable syntax:
 OG/0
 kind:U8
 length:1
-payload:ba
+payload:be
 source-sha256:<64 lowercase hex digits>
 encoder:og-reference/0.1
 ```
@@ -146,7 +146,7 @@ value enabled : BOOL = true
 value payload : BYTES = [00, 00, 7F]
 ```
 
-Here `be` is the base-5 digit pair for decimal one in the syllable layer. A complete byte value uses four syllables: decimal one is `ba-ba-ba-be`. The byte array explicitly retains its two leading zero bytes.
+Here `be` is the base-5 digit pair for decimal one when a single base-5 digit is sufficient. A byte value uses four syllables: decimal one is `ba-ba-ba-be`. The byte array explicitly retains its two leading zero bytes.
 
 ## 10. Rejected transformations
 
