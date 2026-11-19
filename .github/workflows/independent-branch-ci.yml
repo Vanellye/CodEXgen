@@ -37,6 +37,19 @@ jobs:
       - name: Compile and run every Pantheon contract suite
         run: bash pantheon/run-contract-tests.sh
 
+  og-language-validation:
+    name: Ɣơ .og codec and package tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile the Ɣơ reference codec and tests
+        run: python -m py_compile language/og/reference/og_codec.py language/og/tests/test_og_codec.py
+      - name: Run Ɣơ lossless codec tests
+        run: python -m unittest discover -s language/og/tests -v
+
   python-validation:
     name: Python syntax and available unit tests
     runs-on: ubuntu-24.04
