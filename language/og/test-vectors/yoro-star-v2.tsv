@@ -1,9 +1,9 @@
 # name|hex bytes|Ɣơ/2 encoding
 empty||
-zero|00|Ɣơ/2:☆☆☆☆☆☆☆☆
-one|01|Ɣơ/2:☆☆☆☆☆☆☆k
-seven_f|7f|Ɣơ/2:☆☆☆☆☆kkk
-eight_0|80|Ɣơ/2:k☆☆☆☆☆☆☆
-ff|ff|Ɣơ/2:kkkkkkkk
-mixed|00017fff80ff|Ɣơ/2:☆☆☆☆☆☆☆☆.☆☆☆☆☆☆☆k.☆kkkkkkk.k☆☆☆☆☆☆☆.kkkkkkkk
-utf8_eria|45524941|Ɣơ/2:☆k☆☆☆k☆k.☆k☆k☆k☆k.☆k☆k☆☆☆k.☆k☆k☆☆☆k
+zero|00|☆☆☆☆☆☆☆☆
+one|01|☆☆☆☆☆☆☆k
+seven_f|7f|☆kkkkkkk
+eight_0|80|k☆☆☆☆☆☆☆
+ff|ff|kkkkkkkk
+mixed|00017fff80ff|☆☆☆☆☆☆☆☆.☆☆☆☆☆☆☆k.☆kkkkkkk.kkkkkkkk.k☆☆☆☆☆☆☆.kkkkkkkk
+utf8_eria|45524941|☆k☆☆☆k☆k.☆k☆k☆☆k☆.☆k☆☆k☆☆k.☆k☆☆☆☆☆k
