@@ -16,7 +16,7 @@ Four base-5 digits cover values 0..624, so all byte values fit.
 OG/0
 kind:BYTES
 length:3
-payload:ba-ba-ba-ba,ba-ba-ba-be,bo-bu-bu-bu
+payload:ba-ba-ba-ba, ba-ba-ba-be, ba-ba-bo-bu
 codec:og-base5-syllables/0.1
 ```
 
