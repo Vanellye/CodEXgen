@@ -11,13 +11,13 @@ document    = "OG/0", newline,
               "payload:", payload, newline,
               "codec:og-base5-syllables/0.1", newline ;
 
-payload     = "empty" | byte_value, { ",", byte_value } ;
+payload     = "empty" | byte_value, { ", ", byte_value } ;
 byte_value  = syllable, "-", syllable, "-", syllable, "-", syllable ;
 syllable    = "ba" | "be" | "bi" | "bo" | "bu" ;
 integer     = "0" | nonzero_digit, { digit } ;
 digit       = "0" | nonzero_digit ;
 nonzero_digit = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
-newline     = ? LF byte ? ;
+newline     = ? LF character ? ;
 ```
 
 ## Semantic checks
