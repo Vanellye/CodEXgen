@@ -146,7 +146,7 @@ value enabled : BOOL = true
 value payload : BYTES = [00, 00, 7F]
 ```
 
-Here `ba` illustrates the proposed base-5 digit pair for decimal one in the syllable layer. The byte array explicitly retains its two leading zero bytes.
+Here `be` is the base-5 digit pair for decimal one in the syllable layer. A complete byte value uses four syllables: decimal one is `ba-ba-ba-be`. The byte array explicitly retains its two leading zero bytes.
 
 ## 10. Rejected transformations
 
