@@ -82,7 +82,7 @@ class OgCodecTests(unittest.TestCase):
             decode(encoded.replace("kind:BYTES", "kind:BYTES\nkind:BYTES"))
 
     def test_non_ascii_length_rejected(self):
-        encoded = encode(b"\\x00").replace("length:1", "length:１")
+        encoded = encode(bytes([0])).replace("length:1", "length:１")
         with self.assertRaises(OgCodecError):
             decode(encoded)
 
