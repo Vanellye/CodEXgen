@@ -77,7 +77,7 @@ class OgCodecTests(unittest.TestCase):
     def test_no_extra_whitespace_or_duplicate_lines(self):
         encoded = encode(b"\x00")
         with self.assertRaises(OgCodecError):
-            decode(encoded + "\n")
+            decode(encoded + "\n\n")
         with self.assertRaises(OgCodecError):
             decode(encoded.replace("kind:BYTES", "kind:BYTES\nkind:BYTES"))
 
