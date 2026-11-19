@@ -46,7 +46,7 @@ export function parse(source) {
       while (peek() !== "}") {
         if (peek() === undefined) throw new SyntaxError("Unclosed scope");
         body.push(expression()); if (peek() === ";") take(";");
-        // Semicolons are accepted separators; adjacent expressions are also tolerated in this prototype.
+        else if (peek() !== "}") throw new SyntaxError("Expected ';' or '}'");
       }
       take("}");
       return { type: "Scope", name, body };
