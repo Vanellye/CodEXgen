@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { encodeBytes, decodeBytes, validateVectors } from "./yoro-star-codec.mjs";
-import { parse, tokenize } from "./yoro-parser.mjs";
+import { parse } from "./yoro-parser.mjs";
 const vectors = new URL("../test-vectors/yoro-star-v2.tsv", import.meta.url);
 console.log("JavaScript shared vectors passed:", validateVectors(vectors));
 for (let n = 0; n < 256; n++) {
@@ -9,7 +9,6 @@ for (let n = 0; n < 256; n++) {
 }
 assert.throws(() => decodeBytes("Ɣơ/2:kkkk"));
 const source = '§core { △(☆, k, ∞); "hello" → ∴ result; }';
-console.log("Ɣơ parser tokens:", tokenize(source));
 const ast = parse(source);
 assert.equal(ast.type, "Program");
 assert.equal(ast.body[0].type, "Scope");
