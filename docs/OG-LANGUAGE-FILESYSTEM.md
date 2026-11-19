@@ -23,15 +23,19 @@ CodEXgen/
         ├── ENCODING.md
         ├── FILESYSTEM.md
         ├── COMPILER-ROADMAP.md
+        ├── QUICKSTART.md
+        ├── .gitignore
         ├── reference/
         │   └── og_codec.py
         ├── tests/
         │   └── test_og_codec.py
         ├── examples/
+        │   ├── README.md
         │   ├── empty.og
         │   ├── zero-and-one.og
         │   └── sample-bytes.og
         └── fixtures/
+            ├── README.md
             └── byte-vectors.json
 ```
 
