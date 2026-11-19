@@ -7,7 +7,7 @@ object YoroStarCodec {
     private const val PREFIX = "Ɣơ/2:"
     fun encode(bytes: ByteArray): String = PREFIX + bytes.joinToString(".") { byte ->
         (7 downTo 0).joinToString("") { bit ->
-            if (((byte.toInt() and 0xff) ushr bit) and 1 == 1) "k" else "☆"
+            if ((((byte.toInt() and 0xff) ushr bit) and 1) == 1) "k" else "☆"
         }
     }
 
