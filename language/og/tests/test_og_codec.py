@@ -86,6 +86,40 @@ class OgCodecTests(unittest.TestCase):
         with self.assertRaises(OgCodecError):
             decode(encoded)
 
+    def test_every_byte_round_trips_individually(self):
+        for value in range(256):
+            with self.subTest(value=value):
+                original = bytes([value])
+                self.assertEqual(decode(encode(original)), original)
+
+    def test_payload_with_wrong_token_count_rejected(self):
+        encoded = encode(bytes([0, 1]))
+        shortened = encoded.replace(", ba-ba-ba-be", "")
+        with self.assertRaises(OgCodecError):
+            decode(shortened)
+
+    def test_payload_with_extra_token_rejected(self):
+        encoded = encode(bytes([0]))
+        extra = encoded.replace(
+            "payload:ba-ba-ba-ba",
+            "payload:ba-ba-ba-ba, ba-ba-ba-ba",
+        )
+        with self.assertRaises(OgCodecError):
+            decode(extra)
+
+    def test_payload_with_invalid_digit_count_rejected(self):
+        encoded = encode(bytes([0])).replace(
+            "ba-ba-ba-ba",
+            "ba-ba-ba",
+        )
+        with self.assertRaises(OgCodecError):
+            decode(encoded)
+
+    def test_payload_with_noncanonical_token_space_rejected(self):
+        encoded = encode(bytes([0, 1])).replace(", ", ",  ")
+        with self.assertRaises(OgCodecError):
+            decode(encoded)
+
 
 if __name__ == "__main__":
     unittest.main()
