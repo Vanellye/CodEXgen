@@ -44,5 +44,12 @@ object YoroStarCodec {
 
 fun main(args: Array<String>) {
     require(args.size == 1) { "Usage: YoroStarCodec <path-to-yoro-star-v2.tsv>" }
-    println("Kotlin Ɣơ/2 vectors passed: ${YoroStarCodec.validateVectors(File(args[0]))}")
+    val count = YoroStarCodec.validateVectors(File(args[0]))
+    for (value in 0..255) {
+        val bytes = byteArrayOf(value.toByte())
+        check(YoroStarCodec.decode(YoroStarCodec.encode(bytes)).contentEquals(bytes)) {
+            "Single-byte round-trip mismatch: $value"
+        }
+    }
+    println("Kotlin Ɣơ/2 vectors passed: $count; exhaustive byte round-trips: 256")
 }
