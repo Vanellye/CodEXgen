@@ -24,6 +24,7 @@
 - [Encoding profile](ENCODING.md)
 - [Filesystem contract](FILESYSTEM.md)
 - [Compiler roadmap](COMPILER-ROADMAP.md)
+- [Local quickstart](QUICKSTART.md)
 - [Reference codec](reference/og_codec.py)
 - [Unit tests](tests/test_og_codec.py)
 - [Examples](examples/)
