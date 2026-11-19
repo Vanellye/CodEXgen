@@ -8,7 +8,7 @@ for (let n = 0; n < 256; n++) {
   assert.deepEqual([...decodeBytes(encodeBytes(bytes))], [n]);
 }
 assert.throws(() => decodeBytes("Ɣơ/2:kkkk"));
-const source = '§core { △(☆, k, ∞); "hello" → ∴ result; }');
+const source = '§core { △(☆, k, ∞); "hello" → ∴ result; }';
 console.log("Ɣơ parser tokens:", tokenize(source));
 const ast = parse(source);
 assert.equal(ast.type, "Program");
