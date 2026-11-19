@@ -75,11 +75,11 @@ class OgCodecTests(unittest.TestCase):
                 self.assertIsInstance(decode((root / "examples" / filename).read_text(encoding="utf-8")), bytes)
 
     def test_no_extra_whitespace_or_duplicate_lines(self):
-        encoded = encode(b"\\x00")
+        encoded = encode(b"\x00")
         with self.assertRaises(OgCodecError):
-            decode(encoded + "\\n")
+            decode(encoded + "\n")
         with self.assertRaises(OgCodecError):
-            decode(encoded.replace("kind:BYTES", "kind:BYTES\\nkind:BYTES"))
+            decode(encoded.replace("kind:BYTES", "kind:BYTES\nkind:BYTES"))
 
     def test_non_ascii_length_rejected(self):
         encoded = encode(b"\\x00").replace("length:1", "length:１")
