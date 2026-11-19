@@ -141,7 +141,7 @@ The exact grammar, escaping, canonical byte order, and checksum coverage must be
 
 ```text
 Ɣơ/0
-value count : U8 = ba
+value count : U8 = be
 value enabled : BOOL = true
 value payload : BYTES = [00, 00, 7F]
 ```
