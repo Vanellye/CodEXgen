@@ -23,9 +23,12 @@ def assess_marker(marker: str, record_id: str, *, independent_report_ref=None,
     if marker not in MARKERS or not record_id.strip():
         return MarkerAssessment(marker, record_id, ValuationState.HOLD, None, None,
                                 "unknown marker or missing record identifier")
-    if not independent_report_ref or not reviewer_approval or not enrolled_reviewers:
+    if not independent_report_ref or not reviewer_approval:
         return MarkerAssessment(marker, record_id, ValuationState.REVIEW_REQUIRED, None, None,
-                                "independent report and enrolled reviewer approval are required")
+                                "independent report and reviewer approval are required")
+    if not enrolled_reviewers:
+        return MarkerAssessment(marker, record_id, ValuationState.HOLD, None, None,
+                                "no trusted independent reviewer enrollment registry is available")
     if value_minor is None or currency is None or expected_proposal_sha256 is None or expected_scope is None:
         return MarkerAssessment(marker, record_id, ValuationState.REVIEW_REQUIRED, None, None,
                                 "valuation amount, currency, proposal digest, and exact scope are required")
