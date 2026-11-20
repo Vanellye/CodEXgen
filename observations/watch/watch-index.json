@@ -1,0 +1,17 @@
+{
+  "watch_version": "0.1-draft",
+  "panels": [
+    "new_artifacts",
+    "changed_fingerprints",
+    "unavailable_sources",
+    "provenance_gaps",
+    "conflicts",
+    "validation_results",
+    "pending_independent_review",
+    "historical_snapshots"
+  ],
+  "default_mode": "read_only",
+  "fold_refold_is_presentation_only": true,
+  "source_mutations_enabled": false,
+  "execution_enabled": false
+}
