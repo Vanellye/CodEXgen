@@ -1,0 +1,18 @@
+{
+  "policy_version": "0.1-draft",
+  "decision": "deny_unless_all_verified",
+  "independent_issuer_required": true,
+  "reviewer_identity_verified": true,
+  "signature_verified": true,
+  "content_digest_bound": true,
+  "repository_and_scope_bound": true,
+  "action_bound": true,
+  "expiry_checked": true,
+  "revocation_checked": true,
+  "human_confirmation_required": true,
+  "self_authorization": false,
+  "model_output_is_authority": false,
+  "repository_content_is_authority": false,
+  "missing_or_invalid_evidence": "DENY",
+  "historical_evidence": "append_only"
+}
