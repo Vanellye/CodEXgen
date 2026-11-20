@@ -1,0 +1,116 @@
+{
+  "format": "ERIA_OPERABLE_REGISTRY",
+  "version": 1,
+  "policy": {
+    "readiness_is_not_execution_authority": true,
+    "default_state": "NOT_READY",
+    "live_financial_execution_allowed": false
+  },
+  "operables": [
+    {
+      "operable_id": "eria-read-only-observer",
+      "name": "ERIA Read-Only Narrative Terminal",
+      "state": "PROPOSED_IMPLEMENTATION",
+      "readiness_state": "NOT_READY",
+      "execution_tier": "READ_ONLY",
+      "live_execution_enabled": false,
+      "source_ref": "feature/gamma-finance-arm-runflow:Ɣơ/operations/src/gamma_ops/cli.py",
+      "artifact_path": "Ɣơ/operations/README.md",
+      "checks": {
+        "python_tests": "NOT_RUN",
+        "arm64_compile": "NOT_RUN",
+        "inventory": "NOT_RUN",
+        "coddoc_validation": "NOT_RUN"
+      },
+      "review": {
+        "state": "NOT_RECORDED",
+        "reviewer_identity_verified": false,
+        "review_ref": null
+      },
+      "notify_when_ready": true
+    },
+    {
+      "operable_id": "gamma-finance",
+      "name": "Ɣơ Finance Backend",
+      "state": "PREPARE_ONLY",
+      "readiness_state": "NOT_READY",
+      "execution_tier": "FINANCIAL_PROPOSAL_ONLY",
+      "live_execution_enabled": false,
+      "source_ref": "PR #104 / Ɣơ/finance/ / PREPARE_ONLY",
+      "artifact_path": "Ɣơ/finance/SECURITY-AND-LIVE-GATE.md",
+      "checks": {
+        "python_tests": "PASS_AT_3b83c6e",
+        "arm64_compile": "PASS_AT_3b83c6e",
+        "inventory": "PASS_AT_3b83c6e",
+        "coddoc_validation": "NOT_RUN"
+      },
+      "review": {
+        "state": "NEEDS_REVISION",
+        "reviewer_identity_verified": false,
+        "review_ref": null
+      },
+      "notify_when_ready": false
+    },
+    {
+      "operable_id": "pantheon-new",
+      "name": "Pantheon NEW",
+      "state": "STAGED_NOT_WIRED_TO_RUNTIME",
+      "readiness_state": "NOT_READY",
+      "execution_tier": "REVIEW_ONLY",
+      "live_execution_enabled": false,
+      "source_ref": "main:13f80dce/pantheon/NEW/README.md",
+      "artifact_path": "pantheon/NEW/README.md",
+      "checks": {
+        "python_tests": "NOT_APPLICABLE",
+        "arm64_compile": "NOT_APPLICABLE",
+        "inventory": "NOT_RUN",
+        "coddoc_validation": "NOT_RUN"
+      },
+      "review": {
+        "state": "NOT_REVIEWED_FOR_THIS_INTEGRATION",
+        "reviewer_identity_verified": false,
+        "review_ref": null
+      },
+      "notify_when_ready": false
+    },
+    {
+      "operable_id": "pantheon-android-runtime-gate",
+      "name": "Pantheon Android Runtime Gate",
+      "state": "REVIEW_READY_ONLY_ACTION_TAKEN_FALSE",
+      "readiness_state": "NOT_READY",
+      "execution_tier": "REVIEW_ONLY",
+      "live_execution_enabled": false,
+      "source_ref": "main:13f80dce/app/src/main/java/com/vanellye/eria/pantheon/PantheonRuntimeGate.kt",
+      "artifact_path": "pantheon/RUNTIME-INTEGRATION.md",
+      "checks": {
+        "python_tests": "NOT_APPLICABLE",
+        "arm64_compile": "NOT_APPLICABLE",
+        "inventory": "NOT_RUN",
+        "coddoc_validation": "NOT_RUN"
+      },
+      "review": {
+        "state": "NOT_REVIEWED_FOR_THIS_INTEGRATION",
+        "reviewer_identity_verified": false,
+        "review_ref": null
+      },
+      "notify_when_ready": false
+    },
+    {
+      "operable_id": "trading-binary",
+      "name": "Trading Binary",
+      "state": "NOT_IMPLEMENTED",
+      "readiness_state": "BLOCKED",
+      "execution_tier": "LIVE_FINANCIAL",
+      "live_execution_enabled": false,
+      "source_ref": "PR #104 security gate",
+      "artifact_path": null,
+      "checks": {},
+      "review": {
+        "state": "NOT_RECORDED",
+        "reviewer_identity_verified": false,
+        "review_ref": null
+      },
+      "notify_when_ready": false
+    }
+  ]
+}
