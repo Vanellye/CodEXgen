@@ -181,6 +181,37 @@
       "observation": "Added a repository-eyes CI job that scans the checked-out repository and uploads an onion-layer report artifact; the readiness notification job now waits for that scanner.",
       "interpretation": "The code is wired into the IC workflow but the new head's job results and artifact have not yet been verified.",
       "state": "CI_PENDING"
+    },
+    {
+      "event_id": "repository-eyes-multi-repository-context",
+      "sequence": 14,
+      "occurred_at": null,
+      "evidence_class": "CODE_REFERENCE",
+      "source_refs": [
+        "7e178336bdca8a378b727086207fff52a4622926:Ɣơ/operations/src/gamma_ops/repo_eyes.py",
+        "27b0521811d4c210ecadef39a1a835180a82d14d:Ɣơ/operations/src/gamma_ops/cli.py",
+        "a6c93e2770963dd3a9eeeb4b70c51f0321628d4b:Ɣơ/operations/tests/test_repo_eyes.py",
+        "d06988fbb17cf86ee70f872348729a41e6220f7b:Ɣơ/operations/ui/index.html",
+        "e8df45ed93a48cea8dbe66e13272c7c7af341235:.github/workflows/gamma-finance.yml"
+      ],
+      "observation": "Repository Eyes reports can now carry repository name, branch, checkout commit SHA, PR head SHA, base SHA and event context; the local dashboard accepts multiple reports and aggregates their onion-layer counts while keeping records labeled by repository.",
+      "interpretation": "The scanner can be run against any local checkout and reports can be compared in one local view. The current GitHub Actions integration still scans only Vanellye/CodEXgen; it does not enumerate all account repositories or history.",
+      "state": "IMPLEMENTED_VALIDATION_PENDING"
+    },
+    {
+      "event_id": "readiness-review-registry-hardening",
+      "sequence": 15,
+      "occurred_at": null,
+      "evidence_class": "CODE_REFERENCE",
+      "source_refs": [
+        "42e4921ad46c3cad9258e98c0b69c4791992cbf9:Ɣơ/operations/src/gamma_ops/reviewer.py",
+        "da93a01d956450fa7010b9a29e6d4650afe8f5e8:Ɣơ/operations/src/gamma_ops/readiness.py",
+        "729bc5643169fc045f03768c4ae81bd71cc3c352:Ɣơ/operations/registry/reviewers.json",
+        "642f83d2963f445b5956bf7512f135ba2f342607:.github/workflows/gamma-finance.yml"
+      ],
+      "observation": "READY_TO_OPEN qualification now requires an Ed25519-signed review bound to exact artifact digest, commit SHA, scope and review reference, with expiry and revocation checks against a registry whose SHA-256 is pinned in an externally configured repository variable. Email notification is restricted to main pushes after validation and compares registry state for newly ready transitions.",
+      "interpretation": "The reviewer registry remains empty and no external registry digest pin or SMTP configuration has been confirmed; therefore the readiness notification path stays fail-closed and no mail is claimed.",
+      "state": "SECURITY_GATES_IMPLEMENTED_VALIDATION_PENDING"
     }
   ],
   "capability_gates": {
