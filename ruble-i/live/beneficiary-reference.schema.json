@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ruble-i/beneficiary-reference.schema.json",
+  "title": "Ruble-I Beneficiary Reference",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "beneficiary_id",
+    "provider",
+    "provider_beneficiary_ref",
+    "asset_route",
+    "verification_status",
+    "verified_at"
+  ],
+  "properties": {
+    "beneficiary_id": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 128
+    },
+    "provider": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "provider_beneficiary_ref": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 256,
+      "description": "Opaque provider token, not raw bank or wallet secret."
+    },
+    "display_label": {
+      "type": "string",
+      "maxLength": 80
+    },
+    "asset_route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "asset_code"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "BANK",
+            "WALLET"
+          ]
+        },
+        "asset_code": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 32
+        },
+        "network": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "token_contract": {
+          "type": "string",
+          "maxLength": 128
+        }
+      }
+    },
+    "verification_status": {
+      "enum": [
+        "UNVERIFIED",
+        "PENDING",
+        "VERIFIED",
+        "REVOKED"
+      ]
+    },
+    "verified_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "verification_evidence_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 256
+    }
+  },
+  "not": {
+    "anyOf": [
+      {
+        "required": [
+          "password"
+        ]
+      },
+      {
+        "required": [
+          "private_key"
+        ]
+      },
+      {
+        "required": [
+          "seed_phrase"
+        ]
+      },
+      {
+        "required": [
+          "full_account_number"
+        ]
+      },
+      {
+        "required": [
+          "full_routing_number"
+        ]
+      }
+    ]
+  }
+}
