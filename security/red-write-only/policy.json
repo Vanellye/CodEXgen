@@ -1,6 +1,6 @@
 {
   "policy_id": "ERIA-RED-WRITE-ONLY",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "status": "draft",
   "mode": "proposal_and_report_creation_only",
   "default_decision": "DENY",
@@ -46,6 +46,9 @@
     "authorization_is_time_bounded": true,
     "authorization_is_revocable": true,
     "require_audit_record": true,
+    "scope_mode": "exact_allowed_output_prefix_and_operation_only",
+    "wildcard_scope_allowed": false,
+    "denied_wildcard_scope_values": ["*", "**", "ANY", "ALL"],
     "glyphs_and_symbolic_markers_are_not_authorization": true
   },
   "audit": {
