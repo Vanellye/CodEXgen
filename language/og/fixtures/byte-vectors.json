@@ -1,0 +1,10 @@
+{
+  "profile": "og-base5-syllables/0.1",
+  "vectors": [
+    {"hex": "", "bytes": 0, "meaning": "empty byte sequence"},
+    {"hex": "00", "bytes": 1, "meaning": "one explicit zero byte"},
+    {"hex": "01", "bytes": 1, "meaning": "decimal one"},
+    {"hex": "000001", "bytes": 3, "meaning": "two leading zero bytes and one"},
+    {"hex": "7fff80ff", "bytes": 4, "meaning": "boundary values around 0x7f/0x80 and maximum byte"}
+  ]
+}
