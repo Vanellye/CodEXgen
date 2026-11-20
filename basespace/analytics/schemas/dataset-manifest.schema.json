@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://basespace.invalid/schemas/analytics-dataset.schema.json",
+  "title": "BaseSpace Analytics Dataset Manifest",
+  "type": "object",
+  "required": [
+    "dataset_id",
+    "title",
+    "source_uri",
+    "source_type",
+    "grain",
+    "status"
+  ],
+  "properties": {
+    "dataset_id": {
+      "type": "string",
+      "pattern": "^DS-[A-Z0-9-]+$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string"
+    },
+    "source_uri": {
+      "type": "string",
+      "format": "uri"
+    },
+    "source_type": {
+      "enum": [
+        "CSV",
+        "TSV",
+        "JSON",
+        "SQLITE",
+        "GITHUB_API",
+        "WEB_PAGE",
+        "CONNECTOR",
+        "USER_UPLOAD"
+      ]
+    },
+    "retrieved_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "content_sha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-fA-F0-9]{64}$"
+    },
+    "byte_length": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "row_count": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "grain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "PENDING",
+        "INGESTED",
+        "VALIDATED",
+        "QUARANTINED"
+      ]
+    },
+    "lineage": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}
