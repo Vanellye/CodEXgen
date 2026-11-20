@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "name": "ERIA Faculty endpoint correction runtime policy",
+  "default_state": "disabled",
+  "lifecycle": [
+    "validation",
+    "eligibility",
+    "activation_authorization",
+    "execution_by_separate_adapter"
+  ],
+  "separation_invariants": {
+    "validation_does_not_imply_eligibility": true,
+    "eligibility_does_not_imply_activation": true,
+    "activation_authorization_does_not_execute": true,
+    "endpoint_correction_bypass": false,
+    "faculty_checkpoint_required_at_each_stage": true,
+    "human_approval_required_for_activation": true,
+    "independent_approver_required": true,
+    "audit_failure_fails_closed": true,
+    "expired_or_revoked_grant_fails_closed": true
+  },
+  "endpoint_correction_points": {
+    "external_dispatch": [
+      "authenticated_provider",
+      "destination_allowlist",
+      "payload_and_purpose_review",
+      "consent_confirmation",
+      "replay_protection",
+      "endpoint_health_and_identity"
+    ],
+    "hardware_activation": [
+      "documented_device_api",
+      "device_identity",
+      "bounded_command_manifest",
+      "operator_confirmation",
+      "safety_interlock",
+      "emergency_stop",
+      "endpoint_health_and_identity"
+    ],
+    "biological_research": [
+      "literature_and_provenance_review",
+      "model_assumptions_and_uncertainty",
+      "approved_or_synthetic_data",
+      "non_interventional_scope",
+      "endpoint_and_model_validation"
+    ]
+  },
+  "capability_modes": {
+    "external_dispatch": "eligible_only_after_all_correction_points_and_separate_human_authorization",
+    "hardware_activation": "eligible_only_after_all_correction_points_and_operator_confirmation",
+    "biological_research": "non_interventional_computational_simulation_only",
+    "biological_intervention": "denied"
+  },
+  "failure_behavior": {
+    "any_missing_or_failed_correction_point": "disabled",
+    "unknown_endpoint": "disabled",
+    "policy_or_evidence_disagreement": "disabled",
+    "audit_unavailable": "disabled",
+    "no_automatic_retry_or_scope_expansion": true
+  },
+  "activation": {
+    "requires_exact_request_scope_resource_and_manifest_binding": true,
+    "requires_unexpired_non_revoked_verified_grant": true,
+    "requires_distinct_requester_and_approver": true,
+    "requires_durable_audit_record_before_adapter_handoff": true,
+    "adapter_handoff_is_not_execution_evidence": true
+  }
+}
