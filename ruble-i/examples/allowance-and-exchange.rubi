@@ -1,0 +1,17 @@
+SIMULATE
+
+# Starting balances are integer minor units.
+ACCOUNT reserve-usd USD 250000
+ACCOUNT hourly-allowance-usd USD 0
+ACCOUNT travel-eur EUR 0
+
+# Simulated hourly budget movement, not an external payment.
+ALLOWANCE hourly-food FROM reserve-usd TO hourly-allowance-usd 5000 USD EVERY HOUR
+
+# Conversion evidence is explicit, bounded, and time-limited.
+QUOTE quote-usd-eur USD TO EUR RATE 92/100 AT 2026-11-20T10:00:00Z EXPIRES 2026-11-20T11:00:00Z SOURCE "synthetic-fixture:fx-quote-001"
+
+EXCHANGE exchange-001 FROM reserve-usd TO travel-eur 10000 USD USING quote-usd-eur
+
+EVIDENCE science-note-001 KIND "science" SOURCE "synthetic-fixture:lab-notes-v1" DIGEST "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" AT 2026-11-20T10:00:00Z
+EVIDENCE code-reading-001 KIND "code-interpretation" SOURCE "synthetic-fixture:source-tree@abc123" DIGEST "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" AT 2026-11-20T10:00:00Z
