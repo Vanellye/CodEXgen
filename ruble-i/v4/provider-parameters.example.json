@@ -1,0 +1,58 @@
+{
+  "schema": "ruble-i.v4.provider-parameters.v1",
+  "mode": "PREPARE_ONLY",
+  "network_calls_enabled": false,
+  "wise_platform": {
+    "enabled_for_prepare": true,
+    "live_enabled": false,
+    "environment": "sandbox",
+    "api_base_url": null,
+    "client_id_secret_ref": null,
+    "client_secret_ref": null,
+    "profile_id_secret_ref": null,
+    "source_balance_ref": null,
+    "recipient_ref_field": "opaque_provider_recipient_id",
+    "supported_flows": [
+      "IBAN_SEPA",
+      "INTERNATIONAL_PAYOUT"
+    ],
+    "required_checks": [
+      "provider_onboarding",
+      "recipient_verification",
+      "quote_expiry",
+      "fee_limit",
+      "transfer_state_reconciliation"
+    ],
+    "webhook_signature_verification_required": true
+  },
+  "plaid_transfer": {
+    "enabled_for_prepare": true,
+    "live_enabled": false,
+    "environment": "sandbox",
+    "client_id_secret_ref": null,
+    "secret_ref": null,
+    "access_token_secret_ref": null,
+    "account_id_secret_ref": null,
+    "recipient_id_secret_ref": null,
+    "supported_flows": [
+      "ACH",
+      "US_WIRE",
+      "RTP",
+      "FEDNOW"
+    ],
+    "required_checks": [
+      "product_entitlement",
+      "account_holder_verification",
+      "recipient_verification",
+      "idempotency",
+      "transfer_status_reconciliation"
+    ],
+    "webhook_signature_verification_required": true
+  },
+  "secret_policy": {
+    "secret_values_must_not_be_committed": true,
+    "secret_values_must_not_be_logged": true,
+    "only_external_secret_manager_references_allowed": true,
+    "iban_is_not_authorization": true
+  }
+}

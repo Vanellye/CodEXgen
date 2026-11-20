@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Ruble-I v4 History Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "event_type",
+    "occurred_at",
+    "actor_ref",
+    "provider",
+    "intent_sha256",
+    "result",
+    "previous_event_hash",
+    "event_hash"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "minLength": 8
+    },
+    "event_type": {
+      "enum": [
+        "AUTHENTICATION_SUCCEEDED",
+        "AUTHENTICATION_FAILED",
+        "REVIEW_SIGNATURE_VERIFIED",
+        "REVIEW_SIGNATURE_REJECTED",
+        "INTENT_PREPARED",
+        "PROVIDER_REQUEST_PREPARED",
+        "PROVIDER_SUBMITTED",
+        "TRANSFER_PENDING",
+        "TRANSFER_SETTLED",
+        "TRANSFER_FAILED",
+        "TRANSFER_RETURNED",
+        "TRANSFER_REVERSED",
+        "POLICY_HOLD"
+      ]
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "actor_ref": {
+      "type": "string",
+      "description": "Pseudonymous identity/provider reference; no passwords or secrets."
+    },
+    "provider": {
+      "type": "string"
+    },
+    "intent_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "result": {
+      "enum": [
+        "SUCCESS",
+        "FAILURE",
+        "PENDING",
+        "HOLD"
+      ]
+    },
+    "evidence_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "evidence_sha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^([a-f0-9]{64})?$"
+    },
+    "previous_event_hash": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "event_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "schema": "ruble-i.v4.bounded-withdrawal-policy.v1",
+  "version": "v4.0.0",
+  "mode": "PREPARE_ONLY",
+  "live_submission_enabled": false,
+  "provider_adapters": {
+    "wise_platform": {
+      "enabled_for_prepare": true,
+      "live_enabled": false
+    },
+    "plaid_transfer": {
+      "enabled_for_prepare": true,
+      "live_enabled": false
+    }
+  },
+  "limits": {
+    "configured": false,
+    "allowed_providers": [],
+    "allowed_rails": [],
+    "allowed_assets": [],
+    "allowed_beneficiary_ids": [],
+    "per_transfer_max_minor": null,
+    "rolling_24h_max_minor": null,
+    "per_beneficiary_rolling_24h_max_minor": null,
+    "max_fee_minor": null
+  },
+  "authorization": {
+    "required_for_each_transfer": true,
+    "independent_reviewer_required": true,
+    "bind_fields": [
+      "intent_sha256",
+      "source_account_ref",
+      "beneficiary_id",
+      "provider",
+      "rail",
+      "asset",
+      "amount_minor",
+      "fee_limit_minor",
+      "idempotency_key",
+      "expires_at",
+      "policy_version"
+    ],
+    "verify_identity_signature_scope_freshness_revocation": true,
+    "missing_or_invalid_evidence": "HOLD",
+    "legacy_approval_reuse": false
+  },
+  "settlement": {
+    "provider_submission_is_settlement": false,
+    "webhook_alone_is_settlement": false,
+    "independent_destination_credit_or_network_finality_required": true
+  },
+  "history": {
+    "append_only": true,
+    "existing_authorization_index": "../history/authorization-migration-index.json",
+    "existing_transfer_index": "../history/transfer-history-index.json",
+    "do_not_rewrite_existing_indexes": true
+  }
+}

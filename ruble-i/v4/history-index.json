@@ -1,0 +1,26 @@
+{
+  "schema": "ruble-i.v4.history-index.v1",
+  "status": "initialized_no_live_transactions",
+  "mode": "PREPARE_ONLY",
+  "preserved_indexes": [
+    "ruble-i/history/authorization-migration-index.json",
+    "ruble-i/history/transfer-history-index.json"
+  ],
+  "preservation_policy": {
+    "rewrite_existing_indexes": false,
+    "delete_historical_records": false,
+    "legacy_authorizations_are_v4_grants": false,
+    "new_v4_events_append_only": true
+  },
+  "entries": [],
+  "event_types": [
+    "INTENT_PREPARED",
+    "POLICY_HOLD",
+    "APPROVAL_EVIDENCE_VERIFIED",
+    "APPROVAL_REJECTED",
+    "PROVIDER_REQUEST_PREPARED",
+    "PROVIDER_SUBMISSION_DISABLED",
+    "SETTLEMENT_EVIDENCE_RECORDED"
+  ],
+  "note": "No live payment, withdrawal, provider submission, or settlement has been performed. This index records future v4 lifecycle events only."
+}
