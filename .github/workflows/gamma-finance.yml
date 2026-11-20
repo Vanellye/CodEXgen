@@ -91,7 +91,15 @@ jobs:
       - name: Install observer package
         run: python -m pip install -e './Ɣơ/operations'
       - name: Scan complete checked-out repository into onion layers
-        run: python -m gamma_ops.cli scan . --output "$RUNNER_TEMP/eria-repository-eyes.json"
+        run: >-
+          python -m gamma_ops.cli scan .
+          --repository "${{ github.repository }}"
+          --branch "${{ github.head_ref || github.ref_name }}"
+          --commit-sha "${{ github.sha }}"
+          --pr-head-sha "${{ github.event.pull_request.head.sha }}"
+          --base-sha "${{ github.event.pull_request.base.sha }}"
+          --event-name "${{ github.event_name }}"
+          --output "$RUNNER_TEMP/eria-repository-eyes.json"
       - uses: actions/upload-artifact@v4
         with:
           name: eria-repository-eyes-onion-report
