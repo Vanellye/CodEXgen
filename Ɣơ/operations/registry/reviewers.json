@@ -1,0 +1,11 @@
+{
+  "format": "ERIA_REVIEWER_REGISTRY",
+  "version": 1,
+  "policy": {
+    "enrollment_requires_independent_administrator": true,
+    "registry_sha256_must_be_pinned_outside_pull_request": true,
+    "missing_external_pin_means_hold": true
+  },
+  "reviewers": {},
+  "revoked": []
+}
