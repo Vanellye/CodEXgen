@@ -98,3 +98,20 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew --no-daemon --stacktrace :app:assembleDebug
+
+  elixir-observation-engine:
+    name: ERIA Elixir observation engine tests
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: elixir
+    steps:
+      - uses: actions/checkout@v4
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: '27'
+          elixir-version: '1.18.4'
+      - name: Compile with warnings as errors
+        run: mix compile --warnings-as-errors
+      - name: Run observation and parser tests
+        run: mix test
