@@ -19,7 +19,7 @@ class RubleRuntimeTests(unittest.TestCase):
         self.assertEqual(first["accounts"]["hourly-allowance-usd"]["balance"], 3750)
         self.assertEqual(first["accounts"]["ration-spend-usd"]["balance"], 1250)
         self.assertEqual(first["accounts"]["travel-eur"]["balance"], 9200)
-        self.assertEqual(len(first["events"]), 5)
+        self.assertEqual(len(first["events"]), 6)
         self.assertEqual(first["events"][-1]["previous_hash"], first["events"][-2]["hash"])
 
     def test_transfer_rejects_insufficient_funds(self):
