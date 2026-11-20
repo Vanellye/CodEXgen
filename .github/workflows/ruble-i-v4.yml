@@ -1,4 +1,4 @@
-name: Ruble-I v4 prepare-only
+name: Ruble-I v4 IC integrity runflow
 on:
   push:
     paths:
@@ -10,15 +10,30 @@ on:
       - '.github/workflows/ruble-i-v4.yml'
 permissions:
   contents: read
+  actions: read
 jobs:
-  test:
+  integrity-check:
+    name: IC autonomous evidence and provenance review
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install v4 cryptographic verification dependency
+      - name: Install verification dependency
         run: python -m pip install -r ruble-i/v4/requirements.txt
-      - name: Run v4 safety and adapter tests
-        run: python -m unittest discover -s ruble-i/v4/tests -v
+      - name: Execute unit tests
+        run: |
+          python -m unittest discover -s ruble-i/v4/tests -v
+          touch ruble-i-v4-tests.passed
+      - name: Inspect provenance, index, policy, tests, and authorization gates
+        run: python ruble-i/v4/integrity_check.py
+      - name: Preserve IC report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ruble-i-v4-ic-report
+          path: ruble-i-v4-ic-report.json
+          if-no-files-found: warn
