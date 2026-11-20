@@ -1,0 +1,26 @@
+name: Gamma Finance Isolated CI
+on:
+  push:
+    paths: ['Ɣơ/finance/**', '.github/workflows/gamma-finance.yml']
+  pull_request:
+    paths: ['Ɣơ/finance/**', '.github/workflows/gamma-finance.yml']
+permissions:
+  contents: read
+jobs:
+  python-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e './Ɣơ/finance[test]'
+      - run: python -m pytest -q Ɣơ/finance/tests
+  arm-toolchain-preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Report ARM boundary
+        run: |
+          chmod +x Ɣơ/finance/scripts/arm-build.sh
+          Ɣơ/finance/scripts/arm-build.sh || test "$?" -eq 2
