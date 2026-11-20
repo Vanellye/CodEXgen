@@ -1,0 +1,106 @@
+# Seed Pits — protected failure and recovery record
+
+## Purpose
+
+The Seed Pits preserve failures, defects, near misses, rejected assumptions, recovery evidence, and the lessons that make future work safer and more reliable. They are a learning archive, not a blacklist, punishment mechanism, or public ranking of contributors.
+
+**A failure is retained as evidence; a person is never reduced to a failure.** Records must distinguish observed facts, hypotheses, impact, remediation, verification, and remaining uncertainty. Corrections append a new record or linked amendment; they do not erase the original evidence.
+
+## Entry SP-STRIDE-ANDROID-BRIDGE-001 — Android bridge and APK verification
+
+- **Scope:** Stride Android JOB dashboard, Python bridge, Faculty Engine, Geometry Laboratory artifact persistence and recovery, Android API 11 Views build.
+- **Observed CI evidence:** GitHub Actions run [#230](https://github.com/Vanellye/CodEXgen/actions/runs/42707572413), commit `ba42cabab3adfa0f36098abd2bffd6d795cd3fc2`.
+- **Passing lanes in that run:** Geometry Laboratory browser automation; Python compatibility compilation and reference tests; Pantheon Node.js 11 runtime contract; Pantheon native C++11 host tests; platform-independent framework C++11 contracts.
+- **Android Java source failure:** `Api21WorkspaceTreeImporter.java` declared a constructor named `Api19WorkspaceTreeImporter`, so Java treated it as an invalid method declaration. The dashboard's default Faculty JSON literal also contained doubled backslash escapes that Java rejected.
+- **Android APK build failure:** SDK Manager could not find the pinned `cmake;3.10.2` package. The failure occurred before NDK setup and before APK assembly; no APK was produced by that job.
+- **Impact:** bridge client and dashboard Java compilation were not verified; no claim of a working APK was justified. Existing Python/Geometry/native successes did not cover Android runtime behavior.
+- **Remediation seeded:** correct the constructor name; correct the Java JSON string; use the available Android SDK CMake package `3.22.1` consistently in Gradle and CI; add HTTP-level tests that import an Android JOB, run Faculty, attach Geometry, list artifacts, restart the service against the same SQLite database, export a snapshot, and recover it into a fresh database.
+- **Verification gate:** require the bridge end-to-end tests, Python suite, Android Java compile, full `:app:assembleDebug`, and inspection/upload of the resulting APK artifact to pass before declaring this work verified.
+- **Remaining uncertainty until CI completes:** whether CMake 3.22.1 is compatible with the pinned NDK r16b and legacy Android Gradle Plugin 3.5.4; whether the Android app compiles and assembles after the Java corrections; whether the end-to-end test passes against the current Faculty Engine implementation.
+- **Stewardship:** retain this entry even after remediation passes. Append the successful run ID, commit, test counts, APK artifact name and digest as a verification amendment. Do not rewrite this observed failure as if it never happened.
+
+## Required record format for future entries
+
+1. Stable record ID and affected subsystem.
+2. Timestamp and exact source (run, commit, test, report, or reproducible command).
+3. Observed behavior, with logs or minimal reproduction.
+4. Expected behavior and impact.
+5. Facts separated from interpretation and unknowns.
+6. Remediation proposal and responsible review.
+7. Independent verification evidence and remaining limitations.
+8. Linked amendment, never silent replacement.
+
+## Governance
+
+- Preserve provenance and the minimum necessary evidence; redact secrets, personal data, and sensitive operational details.
+- No automated score may turn Seed Pit entries into a measure of a contributor's worth or trustworthiness.
+- Repeated defects may justify stronger technical controls, not humiliation or permanent exclusion.
+- A lesson is portable; ownership of the lesson is not transferred by sharing it.
+- The Main indexes these records but does not own them.
+
+## Verification amendment — source remediation committed
+
+- **Commit:** [`791dddf`](https://github.com/Vanellye/CodEXgen/commit/791dddf6ee88a0d6d74f5b3ff5fc6356db151b79) corrected the Android Faculty JSON literal and the API 21 importer constructor, aligned Gradle and CI on SDK CMake 3.22.1, and added a real HTTP bridge persistence/recovery test.
+- **Follow-up:** [`8443fbb`](https://github.com/Vanellye/CodEXgen/commit/8443fbba754ef14c2bce2d1697fc3ef31f1fe821) corrected test resource handling after confirming the Python JOB store opens short-lived SQLite connections rather than exposing a close method.
+- **Current state:** source remediation is committed; no successful post-remediation CI result or APK artifact has yet been recorded. The CMake 3.22.1 / NDK r16b combination remains an explicit compatibility question until the APK build runs.
+- **Next evidence to append:** CI run URL and conclusion; Python end-to-end test result; Android Java compile result; APK path, package/application ID, version, and SHA-256 digest; whether the APK installs and launches on the declared API range.
+
+
+## Verification amendment — second CI pass exposed legacy API drift
+
+- **Source run:** [CI #231](https://github.com/Vanellye/CodEXgen/actions/runs/42708468400), commit `791dddf6ee88a0d6d74f5b3ff5fc6356db151b79`.
+- **Observed:** the HTTP integration test reached the Geometry endpoint but asserted the wrong response nesting; the endpoint correctly returns the artifact object directly. The test fixture also initially attempted to close a `JobStore` that owns no long-lived connection.
+- **Android Java compile evidence:** `MainActivity.java` imported `InputType` from the wrong Android package. The app also called JGit `Repository.findRef`, which is absent from the pinned JGit 3.7.1 API.
+- **Remediation:** assert the direct Geometry artifact response, use short-lived SQLite connection lifecycle in the test, import `android.text.InputType`, and use JGit 3.7's `Repository.getRef` API.
+- **Status:** these corrections are source changes awaiting the next CI run; no APK success is claimed.
+
+## Verification amendment — restore the legacy CMake toolchain correctly
+
+- **Source run:** [CI #231](https://github.com/Vanellye/CodEXgen/actions/runs/42708468400), API 11 build job.
+- **Observed:** CMake 3.22.1 installed, but the pinned Android Gradle Plugin 3.5.4 could not parse the SDK CMake binary's version string `3.22.1-g37088a8` (`Revision.parseRevision` raised `NumberFormatException`). This failed before native compilation.
+- **Correction:** return the project pin to CMake 3.10.2 and install its exact SDK package identifier `cmake;3.10.2.4988404` rather than the incomplete package identifier `cmake;3.10.2`. This retains the legacy project's intended CMake generation while fixing the package lookup.
+- **Status:** correction committed for the next build attempt; APK assembly remains unverified until CI produces and inspects the artifact.
+
+## Verification amendment — Java bridge client wiring
+
+- **Source run:** [CI #232](https://github.com/Vanellye/CodEXgen/actions/runs/42708912309), commit `eb5071499e85ece0ad51541b65958dc7b7f7e473`.
+- **Passing evidence:** 27 Python tests, including the end-to-end HTTP bridge/persistence/recovery case; browser automation; Node.js runtime contract; native C++11 and portable framework tests.
+- **Observed Android compile defect:** `MainActivity` referenced `StrideEngineClient` from the `.jobs` package without importing it. The Java source job reported four unresolved-symbol errors at the four bridge calls.
+- **Remediation:** add the explicit import. Extend the Android workflow to inspect package ID, minimum SDK, packaged `armeabi-v7a` JNI library, APK signature, and SHA-256 before uploading the APK and checksum.
+- **Status:** pending next CI verification. This is a source correction and verification gate, not yet an APK success claim.
+
+## Verification amendment — legacy NDK host dependency
+
+- **Source run:** [CI #232](https://github.com/Vanellye/CodEXgen/actions/runs/42708912309), commit `eb5071499e85ece0ad51541b65958dc7b7f7e473`.
+- **Observed:** SDK CMake 3.10.2.4988404 and archived NDK r16b installed successfully. Native configuration then failed because the Ubuntu 26.04 runner image did not provide the legacy host library `libncurses.so.5` required by the NDK r16b Clang binary.
+- **Classification:** CI host-image compatibility issue, not a source-level C++ error.
+- **Remediation:** run the legacy Android native build on Ubuntu 22.04 and explicitly install `libncurses5` before invoking the archived NDK.
+- **Additional verification gate:** before upload, inspect the APK package ID and minSdk, confirm the `armeabi-v7a` JNI library is packaged, verify the APK signature, and publish a SHA-256 checksum beside the APK.
+- **Status:** pending next CI run; no APK artifact is yet verified.
+
+## Verification amendment — JNI native link dependency
+
+- **Source run:** [CI #234](https://github.com/Vanellye/CodEXgen/actions/runs/42709345888), commit `80c93b57d156081fcdc56b62e368536b4e2c5403`.
+- **Passing evidence:** Android Views Java compilation passed; all 27 Python tests passed; browser automation, Node.js runtime contract, native host tests, and portable framework tests passed. The legacy NDK host dependency was resolved by moving the API 11 build to Ubuntu 22.04 and installing `libncurses5`.
+- **Observed APK build failure:** native CMake compilation completed all five C++ compilation units, but JNI shared-library linking failed with an undefined reference to `pantheon::ControlGate::evaluate(...)`.
+- **Root cause:** Android's CMake target linked `runtime.cpp` but omitted the implementation file `pantheon/src/control_gate.cpp`, although `Runtime::executeControlled` calls that method. Host Pantheon CMake already includes this implementation; the Android target had drifted from it.
+- **Remediation:** add `control_gate.cpp` to the Android JNI shared-library target.
+- **Status:** source correction committed; the next CI run must rebuild, inspect the APK metadata and ABI, verify the debug signature, and publish its checksum before the APK is considered verified.
+
+## Verification amendment — bridge recovery and Android APK verified
+
+- **Verified workflow:** [CI #237](https://github.com/Vanellye/CodEXgen/actions/runs/42709953664), built from commit `07da1600a5e4afe2c0e4e13e68be0214c173bb6e`.
+- **Overall result:** all seven workflow jobs succeeded: Python compatibility engines/tests, Geometry Laboratory browser automation, Node.js 11 runtime contract, Pantheon native C++11 host tests, portable framework C++11 contracts, Android Views Java compilation, and Android API 11 Views/JNI APK assembly.
+- **Bridge/recovery evidence:** all 27 Python tests passed. The HTTP integration test imported an Android JOB, ran Faculty Engine, attached a Geometry Lab experiment, listed both artifacts and their digests, restarted the service over the same SQLite database, verified both artifacts persisted, exported a JOB snapshot, restored it into a fresh database, and rejected a tampered snapshot. The bridge's invalid-token path also returned 401; remote non-TLS binding and weak tokens are rejected.
+- **APK:** workflow artifact `codexgen-android-api11-views-debug-apk`, artifact ID `13715436914`, 1,496,446 bytes (ZIP archive containing APK and checksum). [Open the successful workflow and artifact](https://github.com/Vanellye/CodEXgen/actions/runs/42709953664).
+- **APK identity:** package `com.vanellye.codexgen`; versionCode `3`; versionName `1.2-android-views-api11`; minSdk `11`; targetSdk `29`; launch activity `com.vanellye.codexgen.MainActivity`.
+- **Native payload:** `lib/armeabi-v7a/libcodexgen_pons.so` is present in the APK.
+- **Signature:** `apksigner verify --verbose` succeeded; APK Signature Scheme v1 and v2 are valid with one signer. This is a debug-signed APK, not a release-signing artifact.
+- **APK SHA-256:** `803bf211d7bb4f96f99942d810e7c79394fc882fd69368578cfefb7135104ff2`.
+- **Artifact ZIP SHA-256:** `19694503bffb82647548339b89e129d9457c6f30c663fb9242980bafe310d560`.
+- **Scope and limits:** this verifies CI compilation, APK packaging, package metadata, native ABI presence, and debug signature. It does not claim installation/launch testing on a physical Android device or emulator, and it does not constitute a Play Store release signature. Two later commits on the same branch changed only `docs/BRANCH-BRAID.md` and `docs/RESONANCE-STEWARDSHIP.md`; the Android build inputs were unchanged.
+- **Learning retained:** the earlier Java package/import defects, SDK CMake package mismatch, missing Ubuntu legacy library, wrong bridge test response expectation, and omitted JNI `control_gate.cpp` remain preserved above. Successful remediation is appended as evidence; it does not erase the failures that taught the system how to recover.
+
+## Legacy preservation and future peering
+
+Seed Pit entries that concern legacy code, historical artifacts, or extracted components must also follow the [Legacy Preservation & Independent Peering Protocol](../../docs/LEGACY-PEERING-PROTOCOL.md). Preserve the original artifact and provenance; record interfaces, dependencies, historical behavior, and unknowns; and append corrections or derivatives without erasing the original evidence. A defect record is not deletion authority. Future compatibility must be established through explicit, tested peering, with exact source SHAs and limitations recorded. The initial bridge/APK success documented above remains a bounded verification milestone, not a repository-wide repair certification.
