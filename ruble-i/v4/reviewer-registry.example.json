@@ -1,0 +1,10 @@
+{
+  "registry_id": "EXTERNAL_GOVERNANCE_REQUIRED",
+  "version": 0,
+  "issued_at": null,
+  "expires_at": null,
+  "governance_signature": null,
+  "reviewers": [],
+  "status": "UNTRUSTED_TEMPLATE",
+  "note": "Do not add keys until reviewer identity, role, independence, key custody, registry governance, and signed registry publication are independently verified."
+}
