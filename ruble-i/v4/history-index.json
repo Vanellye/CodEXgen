@@ -1,6 +1,6 @@
 {
-  "schema": "ruble-i.v4.history-index.v1",
-  "status": "initialized_no_live_transactions",
+  "schema": "ruble-i.v4.history-index.v2",
+  "status": "IC_INDEXED_PREPARE_ONLY",
   "mode": "PREPARE_ONLY",
   "preserved_indexes": [
     "ruble-i/history/authorization-migration-index.json",
@@ -20,7 +20,29 @@
     "APPROVAL_REJECTED",
     "PROVIDER_REQUEST_PREPARED",
     "PROVIDER_SUBMISSION_DISABLED",
-    "SETTLEMENT_EVIDENCE_RECORDED"
+    "SETTLEMENT_EVIDENCE_RECORDED",
+    "ATTENDANCE_EVIDENCE_RECORDED",
+    "ALLOWANCE_PROPOSAL_PREPARED",
+    "ALLOWANCE_PROPOSAL_HELD",
+    "INDEPENDENT_APPROVAL_VERIFIED",
+    "ALLOCATION_COMMIT_AUTHORIZED"
   ],
-  "note": "No live payment, withdrawal, provider submission, or settlement has been performed. This index records future v4 lifecycle events only."
+  "note": "Index metadata only. No live payment, attendance grant, provider submission, or settlement has been performed.",
+  "integrity_check": {
+    "workflow": "IC_AUTONOMOUS_EVIDENCE_REVIEW",
+    "checks": [
+      "source_provenance",
+      "index_and_journal_integrity",
+      "policy_scope",
+      "test_results",
+      "authorization_gates",
+      "live_execution_disabled"
+    ],
+    "decision_states": [
+      "PASS",
+      "HOLD",
+      "FAIL"
+    ],
+    "rule": "Missing external trust evidence yields HOLD; integrity violations yield FAIL; no automated self-approval"
+  }
 }
