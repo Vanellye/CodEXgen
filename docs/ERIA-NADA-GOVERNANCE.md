@@ -123,3 +123,9 @@ No transition may skip a gate. A state transition records the actor, timestamp, 
 This document specifies required behavior; it does not claim that all six gates are implemented or enforced by the current application or CI. Each implementation must be added in a separately reviewable change with focused tests. Until enforcement is demonstrated, treat the contract as a design requirement, not a security guarantee.
 
 The contract is conceptual and software-governance focused. The term resonance describes measured architectural compatibility; it does not assert physical, biological, or electromagnetic effects.
+
+
+## Wantever propagation boundary
+
+Wantever may discover, compare, map, and propose compatible contributions across branches, but it cannot bypass any governance gate in this contract. Propagation must be bound to exact source and target SHAs, retain branch ancestry and provenance, report unknown evidence honestly, and use reviewable changes. No propagation agent, signature, tag, score, or CI workflow may authorize its own adoption. Human approval remains specific to the exact reviewed diff; material changes require renewed review. Prefer additive commits and reviewed pull requests; do not rewrite protected history as a propagation shortcut.
+
