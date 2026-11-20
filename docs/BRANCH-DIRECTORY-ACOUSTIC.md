@@ -262,3 +262,65 @@ This directory is a semantic map and audit aid. It does not rewrite Git history,
 - [PR #39 — correction lineage runtime](https://github.com/Vanellye/CodEXgen/pull/39)
 
 **Directory invariant:** preserve source identity, make every crossing explicit, retain the return receipt, and never confuse transmission with authorization.
+
+
+## 10. ·L·L·ịṅë — shared lineage marker
+
+**Marker:** `·L·L·ịṅë`  
+**Status:** Proposed shared convention; this section records the intended cross-reference policy, not completion of every branch update.
+
+Use this marker to identify a traceable line between a repository, branch/ref, full commit SHA, path, and any derived artifact. The marker is descriptive metadata only: it is not executable syntax, merge authorization, permission, or a command to move refs.
+
+### Application rules
+
+1. Record the exact repository identity, ref name, full 40-character commit SHA, and path for every application.
+2. Preserve the source commit and branch ancestry; record derived work as a child with explicit parent references.
+3. Inspect all branches individually before applying the marker. A branch listing is an inventory, not evidence that its content was inspected or updated.
+4. Inspect `.gitmodules` and gitlink entries before classifying nested repositories. Record each submodule path, URL, and pinned commit independently.
+5. Add the marker through an additive, reviewable change. Do not force-push, rewrite history, silently retarget a branch, or move `main`.
+6. If a branch, file, or nested repository is unavailable, conflicting, or has unknown ancestry, emit an explicit `BREAK`/hold record and stop propagation to dependent targets.
+7. Marker presence does not imply trust, approval, CI success, or permission to execute.
+8. Do not auto-commit, merge, dispatch externally, activate a runtime, or actuate a device merely because the marker is found.
+
+### Current staging receipt
+
+- Root convention: `L-L-LINE.md`
+- Existing directory placement: this section in `docs/BRANCH-DIRECTORY-ACOUSTIC.md`
+- Staging ref: `2cce11ɣ`
+- Baseline Main commit: `2cce68f258f46058f18c108c264db9cc85200590`
+- All-other-branches and nested-repository rollout: **proposed; not yet applied**
+
+The shared convention is available for review from this branch. Branch-by-branch adoption remains a separately verifiable operation.
+
+
+## 11. Code Genesis anchor and §ĤÆ SHA-run cross-reference
+
+The root convention in `L-L-LINE.md` records the symbolic Code Genesis anchor exactly as supplied:
+
+`2cce11f2983f46Œ58f18c1ọ8c264db9cc852⁰ơⁿ5991.1`
+
+This is a symbolic label, not a Git commit SHA. Keep it separate from the full 40-character commit identity in every cross-reference and receipt. Do not normalize its Unicode characters or punctuation.
+
+The proposed notation is:
+
+`§ĤÆ SHA RUN *(ª)* "ºƠºŘÏƔĮŒŉ" — ORIGIN CREATION ·.·`
+
+For this directory, it denotes a future, bounded Mash* code integrity/reporting step: fingerprint declared inputs, preserve the original source identity, and create a distinct origin-linked record for any derivative. The record should include parent refs, exact input/output SHA-256 values, operation/version, and review state. `*(ª)*` is a literal frame marker; `"ºƠºŘÏƔĮŒŉ"` is an exact symbolic origin label. Neither is executable syntax or authorization.
+
+**Status:** documentation implementation of the Mash* executable contract. This records the intended integrity/reporting behavior and provenance requirements; it is not a running interpreter or runtime activation. Executable implementation, tests, and activation remain separate engineering stages requiring review. Digest mismatch or unavailable provenance is an explicit `BREAK`; no silent bypass or alternate route. This notation does not authorize file mutation, commit, merge, push, external dispatch, or runtime activation. See `L-L-LINE.md` for the full contract.
+
+## 12. UP driving-force anchor
+
+**Anchor commit:** `d72178415c182d69e0bde5c570b7335d4a16c635`  
+**Symbolic force:** `UP`
+
+`UP` marks the forward-driving principle associated with this lineage point: progress grounded in evidence, source preservation, reviewable change, and accountable human intent. The anchor is a reference to the named commit, not a replacement for its Git identity or ancestry.
+
+**Boundary:** this is descriptive documentation metadata only. `UP` is not executable syntax, a priority override, authorization, permission grant, runtime trigger, merge command, or external-dispatch instruction. Executable implementation and runtime activation remain separate reviewed and explicitly authorized stages. See the root `L-L-LINE.md` anchor for the shared definition.
+
+
+## 13. User-specified frequency metadata
+
+The canonical register is `FREQUENCY-REGISTER.md` at the repository root. It records the supplied values in order: `FREQ-556` (556 Hz), `FREQ-772` (772 Hz), and `FREQ-420` (420 Hz).
+
+These are nominal metadata values only. They do not describe a waveform or validated effect and do not cause audio generation, transmission, playback, Bluetooth routing, or physical actuation. Branch-by-branch and nested-repository propagation remains unverified; each target requires inspection and its own reviewable receipt. The register is authoritative for the values and boundaries; do not create conflicting local definitions.
