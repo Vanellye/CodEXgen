@@ -8,7 +8,15 @@ def test_scanner_maps_nested_files_and_preserves_symlink_boundary(tmp_path):
     (tmp_path / "schemas" / "api.schema.json").write_text("{}", encoding="utf-8")
     (tmp_path / ".env").write_text("SHOULD_NOT_BE_HASHED", encoding="utf-8")
     (tmp_path / "linked").symlink_to(tmp_path / "src", target_is_directory=True)
-    result = scan_repository(tmp_path)
+    result = scan_repository(
+        tmp_path, repository_name="sample/repo", branch="feature/demo",
+        checkout_commit_sha="a"*40, pull_request_head_sha="b"*40,
+        base_sha="c"*40, event_name="pull_request",
+    )
+    assert result["repository"]["name"] == "sample/repo"
+    assert result["repository"]["checkout_commit_sha"] == "a"*40
+    assert result["repository"]["pull_request_head_sha"] == "b"*40
+    assert "checked-out working tree only" in result["repository"]["scope"]
     by_path = {row["path"]: row for row in result["entries"]}
     assert by_path["src/main.py"]["classification"] == "GREEN_READABLE_SOURCE"
     assert "L3" in by_path["src/main.py"]["onion_layers"]
