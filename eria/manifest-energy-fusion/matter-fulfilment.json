@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "status": "proposed-reviewable-artifact",
+  "artifact": "read-only Bash manifest verifier plus isolated regression tests",
+  "validation": {
+    "syntax": "bash -n",
+    "behavior": "tests/test_manifest_bridge.sh",
+    "integrity": "verify_manifest.sh manifest.json integrity.sha256"
+  },
+  "not_authorized": [
+    "automatic merge",
+    "automatic deployment or release",
+    "external dispatch",
+    "secret extraction",
+    "filesystem mutation outside temporary test fixtures",
+    "hardware activation",
+    "biological intervention"
+  ],
+  "human_gate": "Review and approve the exact pull-request head before merge."
+}

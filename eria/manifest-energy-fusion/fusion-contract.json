@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "name": "ERIA Manifest Energy Fusion Contract",
+  "inputs": ["manifest.json", "integrity.sha256", "explicitly recorded source refs"],
+  "invariants": [
+    "The anchor commit and tree are recorded exactly.",
+    "Source branch names and heads are provenance snapshots, not immutable refs.",
+    "Fusion is a documented association of verified references; it does not merge branches.",
+    "Manifest data is parsed as data and is never sourced or executed by the Bash bridge.",
+    "A SHA-256 match establishes file integrity relative to the supplied checksum, not authorship or remote-ref authenticity."
+  ],
+  "rejection_conditions": [
+    "Missing manifest or checksum",
+    "Malformed checksum",
+    "SHA-256 mismatch",
+    "Invalid JSON"
+  ],
+  "side_effects": [],
+  "approval": "Independent human review is required before merge or downstream fulfilment."
+}
