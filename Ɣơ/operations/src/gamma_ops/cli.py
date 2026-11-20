@@ -50,7 +50,7 @@ def main(argv: list[str] | None = None) -> int:
                 except ValueError:
                     pass
             report = scan_repository(args.root, exclude_paths=excluded)
-            serialized = json.dumps(report, ensure_ascii=False, indent=2) + "\\n"
+            serialized = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
             if output is None:
                 print(serialized, end="")
             else:
