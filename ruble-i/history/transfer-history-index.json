@@ -1,0 +1,54 @@
+{
+  "index_schema": "ruble-i.transfer-history.v1",
+  "status": "schema_initialized_no_live_transfers",
+  "execution_mode": "PREPARE_ONLY",
+  "policy": {
+    "append_only": true,
+    "corrections_are_linked_compensating_events": true,
+    "raw_bank_account_or_routing_numbers_allowed": false,
+    "bank_credentials_or_wallet_secrets_allowed": false,
+    "beneficiary_must_be_provider_verified": true,
+    "each_transfer_requires_fresh_exact_scope_human_approval": true,
+    "settled_requires_independent_provider_or_network_evidence": true,
+    "webhook_alone_proves_settlement": false,
+    "historical_legacy_approval_is_current_authorization": false
+  },
+  "entries": [],
+  "required_entry_fields": [
+    "event_id",
+    "intent_id",
+    "event_type",
+    "event_timestamp",
+    "source_account_ref",
+    "beneficiary_id",
+    "asset",
+    "amount_minor",
+    "fee_minor",
+    "idempotency_key",
+    "approval_evidence_ref",
+    "provider_reference",
+    "settlement_evidence_ref",
+    "previous_event_hash",
+    "event_hash"
+  ],
+  "event_types": [
+    "INTENT_CREATED",
+    "BENEFICIARY_VERIFIED",
+    "APPROVAL_GRANTED",
+    "APPROVAL_REVOKED",
+    "SUBMISSION_REQUESTED",
+    "PROVIDER_ACCEPTED",
+    "SETTLEMENT_PENDING",
+    "SETTLED",
+    "FAILED",
+    "RETURNED",
+    "REVERSED",
+    "HOLD"
+  ],
+  "integrity": {
+    "hash_algorithm": "SHA-256",
+    "external_checkpoint_anchor": "required_before_production_use",
+    "unknown_metadata_is_not_inferred": true
+  },
+  "migration_note": "This index is separate from authorization-migration-index.json. Existing authorization history remains preserved and is never rewritten into transfer approvals."
+}
