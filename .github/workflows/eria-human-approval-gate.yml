@@ -1,0 +1,54 @@
+name: ERIA Human Approval Gate
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review]
+  pull_request_review:
+    types: [submitted, dismissed]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: eria-human-approval-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  human-approval-gate:
+    name: eria-human-approval-gate
+    if: github.event.pull_request != null
+    runs-on: ubuntu-24.04
+    steps:
+      # pull_request_target and pull_request_review use the trusted base branch.
+      # Never check out or execute code from the pull-request head in this job.
+      - name: Check out trusted base-branch verifier
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Collect review evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${PR_NUMBER}" ]]; then
+            echo "::error::A pull-request context is required."
+            exit 2
+          fi
+          gh api --paginate --slurp "repos/${GH_REPO}/pulls/${PR_NUMBER}/reviews" | jq 'add' > reviews.json
+
+      - name: Verify current human approval against exact PR head
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          set -euo pipefail
+          python tools/eria/approval_gate.py \
+            --reviews reviews.json \
+            --head-sha "${HEAD_SHA}" \
+            --pr-author "${PR_AUTHOR}"

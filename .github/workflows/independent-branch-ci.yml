@@ -98,3 +98,17 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew --no-daemon --stacktrace :app:assembleDebug
+
+
+  eria-approval-verifier-tests:
+    name: eria-approval-verifier-tests
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Run fail-closed ERIA approval tests
+        env:
+          PYTHONPATH: tools/eria
+        run: python -m unittest discover -s tools/eria -p 'test_approval_gate.py' -v
