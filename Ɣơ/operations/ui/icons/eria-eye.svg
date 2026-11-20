@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="ERIA Repository Eyes">
+  <rect width="128" height="128" rx="26" fill="#10151b"/>
+  <path d="M12 64c14-22 32-33 52-33s38 11 52 33c-14 22-32 33-52 33S26 86 12 64Z" fill="none" stroke="#91d9bd" stroke-width="8" stroke-linejoin="round"/>
+  <circle cx="64" cy="64" r="19" fill="#233a3b" stroke="#91d9bd" stroke-width="7"/>
+  <circle cx="64" cy="64" r="6" fill="#e8eef4"/>
+  <path d="M64 11v12M64 105v12M11 64h12M105 64h12" stroke="#e5c27b" stroke-width="5" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "ERIA Repository Eyes",
+  "short_name": "Repo Eyes",
+  "description": "Offline, read-only multi-repository onion-layer inventory and narrative observer.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#10151b",
+  "theme_color": "#10151b",
+  "icons": [
+    {
+      "src": "./icons/eria-eye.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

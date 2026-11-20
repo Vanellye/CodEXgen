@@ -1,0 +1,106 @@
+{
+  "format": "ERIA_SOURCE_DISCOVERY_MAP",
+  "version": 1,
+  "scope": {
+    "repository": "Vanellye/CodEXgen",
+    "main_commit": "13f80dce0e03552f51a288528eb796c7e497a7db",
+    "pr104_commit": "3b83c6ebbf713f71a6f94bf20e275a7273e23608",
+    "main_tree_entries": 191,
+    "pr104_tree_entries": 226,
+    "main_tree_truncated": false,
+    "pr104_tree_truncated": false,
+    "limitations": [
+      "These counts are recursive Git tree entries, not claims that every historical branch or remote runtime was inspected.",
+      "Code search covered the default branch; branch-specific history is represented only where an exact source reference was inspected.",
+      "A historical branch name does not prove that the ref still exists or that its code remains operational."
+    ]
+  },
+  "confirmed_sources": [
+    {
+      "area": "runflow",
+      "source": "docs/ERIA-RUNFLOW-OPERATING-PROTOCOL.md",
+      "ref": "main@13f80dce",
+      "finding": "Canonical Origin → Intent → Authorization → Execution → Evidence → Review → Recovery → Learning → New Growth cycle; documentation-only initialization states that no background process or runtime service is started."
+    },
+    {
+      "area": "pantheon_new",
+      "source": "pantheon/NEW/README.md",
+      "ref": "main@13f80dce",
+      "finding": "Consent-based narrative proposal layer; staged and not wired into Pantheon runtime; no source connector, monitor, private stream, or action executor."
+    },
+    {
+      "area": "runtime_gate",
+      "source": "app/src/main/java/com/vanellye/eria/pantheon/PantheonRuntimeGate.kt",
+      "ref": "main@13f80dce",
+      "finding": "Can prepare a review record only; actionTaken is always false; no wallet, provider, file writer, process launcher, network client, or Git mutation capability."
+    },
+    {
+      "area": "ic",
+      "source": "pantheon/IC/README.md",
+      "ref": "main@13f80dce",
+      "finding": "IC is an Integration Core contract; gate checks are caller-supplied flags, not cryptographic evidence or execution authority."
+    },
+    {
+      "area": "historical_exchange_and_engines",
+      "source": "docs/BRANCH-DIRECTORY-ACOUSTIC.md",
+      "ref": "main@13f80dce",
+      "finding": "Historical references include pantheon/signed-package-exchange (PR #13), pantheon/source-digest-engine (PR #11), and pantheon/cpp-html-consent-engine; this directory states branch references are not merge authorization or proof of current runtime status."
+    },
+    {
+      "area": "historical_implementation",
+      "source": "docs/TRUE-NORTH-IMPLEMENTATION-STATUS.md",
+      "ref": "main@13f80dce",
+      "finding": "Historical branch implementation status includes C++ data-envelope, package verification, consent-engine, and runflow-related work; each line is a snapshot, not current execution evidence."
+    },
+    {
+      "area": "finance_and_excedra_marker",
+      "source": "Ɣơ/finance/src/gamma_finance/valuation.py",
+      "ref": "PR104@3b83c6eb",
+      "finding": "The .excedra string is a marker in PR #104 finance valuation logic; it is not a verified asset, ownership record, collateral, or liquidity proof."
+    },
+    {
+      "area": "dependabot",
+      "source": ".github/dependabot.yml",
+      "ref": "main@13f80dce",
+      "finding": "A dependency-update bot configuration exists; no generic autonomous trading bot or live exchange execution service was identified in the inspected PR tree."
+    }
+  ],
+  "not_resolved_source_labels": [
+    {
+      "label": "Fah",
+      "status": "UNRESOLVED",
+      "reason": "No exact source URL, API, repository path, or stable identifier was provided or found in default-branch search."
+    },
+    {
+      "label": ".wrkply",
+      "status": "UNRESOLVED",
+      "reason": "No exact schema, file path, or source interface was found in default-branch search."
+    },
+    {
+      "label": "Sunflowers",
+      "status": "UNRESOLVED",
+      "reason": "Preserved as a user-defined label; no source feed or schema was established."
+    }
+  ],
+  "path_name_search": {
+    "main": {
+      "dependabot_paths": [".github/dependabot.yml"],
+      "paths_containing_engine": [],
+      "paths_containing_exchange": [],
+      "paths_containing_excedra": [],
+      "paths_containing_runflow": [
+        "docs/ERIA-RUNFLOW-OPERATING-PROTOCOL.md",
+        "docs/ERIA-RUNFLOW-SYMBOL-MAP.md"
+      ]
+    },
+    "pr104": {
+      "paths_containing_coddoc": [],
+      "paths_containing_runflow": [
+        "docs/ERIA-RUNFLOW-OPERATING-PROTOCOL.md",
+        "docs/ERIA-RUNFLOW-SYMBOL-MAP.md",
+        "Ɣơ/finance/src/gamma_finance/runflow.py"
+      ],
+      "paths_containing_excedra": []
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "fixture_only": true,
+  "payload": {
+    "proposal_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "scope": "marker-valuation:asset-fixture-001",
+    "issued_at": 1795190400,
+    "expires_at": 1795276800,
+    "reviewer_id": "fixture-independent-reviewer"
+  },
+  "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAqW10Y7FYYkMTVPdy6HZr5z06DBZ2So8COspTlXJwDec=\n-----END PUBLIC KEY-----\n",
+  "signature_base64": "dWGTcdigK0xV4Wcu3/KRPGyFIwPorhj/gEvQRCLVlLnKqZERAguuqkdEE1wYqz3PUp+BCGgLjW/cWUuns7VOBA==",
+  "canonical_payload_sha256": "f9c933759ed1437f8f5d7afee4026969b3d79855747c3d5db77af8327ebea857",
+  "notice": "Synthetic test fixture only; not an enrolled production reviewer or authorization."
+}

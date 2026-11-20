@@ -1,0 +1,48 @@
+{
+  "format": "ERIA_WATCH_POLICY",
+  "version": 1,
+  "default_mode": "READ_ONLY",
+  "github": {
+    "enabled": true,
+    "repository": "Vanellye/CodEXgen",
+    "observed_event_types": ["push", "pull_request", "workflow_run"],
+    "permissions": ["contents:read"],
+    "write_actions": false,
+    "auto_merge": false,
+    "auto_release": false,
+    "auto_deploy": false
+  },
+  "firecrawl": {
+    "enabled": false,
+    "api_version": "v2",
+    "allowed_hosts": [],
+    "host_matching": "EXACT_ONLY",
+    "allow_subdomains": false,
+    "allow_external_links": false,
+    "tld_wildcards": false,
+    "max_pages_per_manual_request": 1,
+    "evidence_class": "UNTRUSTED_PUBLIC_SOURCE",
+    "requires_explicit_host_approval": true,
+    "blocked_suffixes": [".local", ".localhost", ".internal", ".test", ".invalid", ".example"],
+    "reason_disabled": "No exact test hostname has been approved yet."
+  },
+  "user_defined_labels": {
+    "FAH": {"status": "UNRESOLVED_SOURCE_LABEL", "fetch_enabled": false},
+    ".wrkply": {"status": "UNRESOLVED_SCHEMA_LABEL", "fetch_enabled": false},
+    "Sunflowers": {"status": "UNRESOLVED_STREAM_LABEL", "fetch_enabled": false},
+    ".runflw": {
+      "status": "MAPPED_TO_EXISTING_PROTOCOL",
+      "source": "docs/ERIA-RUNFLOW-OPERATING-PROTOCOL.md",
+      "starts_background_work": false
+    }
+  },
+  "policy": [
+    "Never enumerate or crawl every website matching a top-level domain.",
+    "Never treat a TLD as permission to crawl a hostname.",
+    "A host must be individually approved and added to allowed_hosts.",
+    "Reject .local and other private or reserved namespaces.",
+    "Treat crawled text as untrusted evidence, not authorization or financial truth.",
+    "Every observation records its source URL, retrieval time, response metadata, digest and review state.",
+    "Unknown source labels remain unresolved and are not silently bound to an endpoint."
+  ]
+}

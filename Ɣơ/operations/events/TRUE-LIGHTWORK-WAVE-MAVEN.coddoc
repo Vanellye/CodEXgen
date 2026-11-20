@@ -1,0 +1,240 @@
+{
+  "format": "ERIA_CODDOC",
+  "version": 1,
+  "document_id": "true-lightwork-wave-maven",
+  "title": "TRUE LIGHTWORK WAVE-MAVEN",
+  "created_at": null,
+  "runflow_state": "REVIEW",
+  "narrative": "A source-traceable observer concept that turns authored narrative into ordered events, keeps unknown time values unknown, links code and evidence to a reviewable terminal, and separates capability from authority. 'Lightwork Wave-Maven', 'capacitor', and 'intergalactic terminal' are symbolic project labels, not claims of physical energy, beyond-time measurement, or external connectivity.",
+  "source_scope": "Vanellye/CodEXgen main commit 13f80dce0e03552f51a288528eb796c7e497a7db and PR #104 head 3b83c6ebbf713f71a6f94bf20e275a7273e23608; recursive Git trees inspected with truncated=false.",
+  "time_model": {
+    "ordering": "authored sequence, with source timestamps shown only when recorded",
+    "unknown_time": null,
+    "interpolation": false,
+    "duration_rule": "calculate a duration only when both endpoint timestamps are explicit and timezone-aware"
+  },
+  "events": [
+    {
+      "event_id": "eria-runflow-protocol",
+      "sequence": 1,
+      "occurred_at": null,
+      "evidence_class": "SOURCE_TEXT",
+      "source_refs": [
+        "main@13f80dce:docs/ERIA-RUNFLOW-OPERATING-PROTOCOL.md",
+        "main@13f80dce:docs/ERIA-RUNFLOW-SYMBOL-MAP.md"
+      ],
+      "observation": "ERIA Runflow defines an accountable cycle from Origin through Learning and New Growth; initialization creates no background process or runtime service.",
+      "interpretation": "Use this protocol as the canonical narrative-to-operation state model.",
+      "state": "DOCUMENTATION_ONLY"
+    },
+    {
+      "event_id": "pantheon-new-staged",
+      "sequence": 2,
+      "occurred_at": null,
+      "evidence_class": "SOURCE_TEXT",
+      "source_refs": [
+        "main@13f80dce:pantheon/NEW/README.md"
+      ],
+      "observation": "Pantheon NEW is described as staged and not wired into Pantheon runtime.",
+      "interpretation": "Connect through a review adapter only; do not claim a runtime integration.",
+      "state": "STAGED_NOT_WIRED"
+    },
+    {
+      "event_id": "pantheon-android-review-gate",
+      "sequence": 3,
+      "occurred_at": null,
+      "evidence_class": "CODE_REFERENCE",
+      "source_refs": [
+        "main@13f80dce:app/src/main/java/com/vanellye/eria/pantheon/PantheonRuntimeGate.kt",
+        "main@13f80dce:pantheon/RUNTIME-INTEGRATION.md"
+      ],
+      "observation": "The Android adapter prepares review records only and reports actionTaken=false; the C modules are not wired through JNI.",
+      "interpretation": "Expose review status, not action execution.",
+      "state": "REVIEW_ONLY"
+    },
+    {
+      "event_id": "historical-exchange-and-engine-lines",
+      "sequence": 4,
+      "occurred_at": null,
+      "evidence_class": "HISTORICAL_REFERENCE",
+      "source_refs": [
+        "main@13f80dce:docs/BRANCH-DIRECTORY-ACOUSTIC.md",
+        "main@13f80dce:docs/TRUE-NORTH-IMPLEMENTATION-STATUS.md"
+      ],
+      "observation": "Historical documentation lists pantheon/signed-package-exchange (PR #13), pantheon/source-digest-engine (PR #11), and pantheon/cpp-html-consent-engine.",
+      "interpretation": "These are lineage references only; their current branch existence and runtime behavior are not established by this record.",
+      "state": "HISTORICAL_REFERENCE_ONLY"
+    },
+    {
+      "event_id": "excedra-marker-scope",
+      "sequence": 5,
+      "occurred_at": null,
+      "evidence_class": "CODE_REFERENCE",
+      "source_refs": [
+        "PR104@3b83c6eb:Ɣơ/finance/src/gamma_finance/valuation.py",
+        "PR104@3b83c6eb:Ɣơ/finance/schemas/insurance-marker.schema.json"
+      ],
+      "observation": "The PR #104 finance module recognizes .excedra as a marker label.",
+      "interpretation": "A marker is not proof of an asset, ownership, collateral, valuation, or liquidity.",
+      "state": "METADATA_ONLY"
+    },
+    {
+      "event_id": "dependency-bot-scope",
+      "sequence": 6,
+      "occurred_at": null,
+      "evidence_class": "CODE_REFERENCE",
+      "source_refs": [
+        "main@13f80dce:.github/dependabot.yml"
+      ],
+      "observation": "A dependency-update bot configuration exists in the inspected main tree.",
+      "interpretation": "This does not establish a general autonomous trading or exchange bot.",
+      "state": "DEPENDENCY_AUTOMATION_ONLY"
+    },
+    {
+      "event_id": "finance-prepare-only",
+      "sequence": 7,
+      "occurred_at": null,
+      "evidence_class": "CODE_REFERENCE",
+      "source_refs": [
+        "PR104@3b83c6eb:Ɣơ/finance/src/gamma_finance/runflow.py",
+        "PR104@3b83c6eb:Ɣơ/finance/SECURITY-AND-LIVE-GATE.md"
+      ],
+      "observation": "The finance withdrawal lifecycle prepares proposals only and explicitly disables live submission.",
+      "interpretation": "Future trading-related work belongs in local paper replay and analysis until separately authorized security work is complete.",
+      "state": "PREPARE_ONLY"
+    },
+    {
+      "event_id": "ic-validation-and-inventory-artifact",
+      "sequence": 8,
+      "occurred_at": "2026-11-20T19:05:57Z",
+      "evidence_class": "ARTIFACT_REFERENCE",
+      "source_refs": [
+        "https://github.com/Vanellye/CodEXgen/actions/runs/44798805879",
+        "https://github.com/Vanellye/CodEXgen/actions/runs/44798805879/artifacts/14660990352"
+      ],
+      "observation": "At the recorded artifact creation time, the inventory report was uploaded from PR #104 head 3b83c6ebbf713f71a6f94bf20e275a7273e23608; the IC and Independent Branch workflows completed successfully.",
+      "interpretation": "The result validates that exact tested head only, not subsequent new modules or live financial execution.",
+      "state": "PASSED_FOR_RECORDED_HEAD",
+      "artifact_sha256": "a635992ee0451ff59c1c7c3212e3b2b35adc5a825252bed9aab7af2e41af076f"
+    },
+    {
+      "event_id": "fah-wrkply-sunflowers-labels",
+      "sequence": 9,
+      "occurred_at": null,
+      "evidence_class": "USER_DEFINED_LABEL",
+      "source_refs": [
+        "conversation:current-user-request"
+      ],
+      "observation": "The labels Fah, .wrkply, and Sunflowers were requested as watcher/data-pulling concepts.",
+      "interpretation": "No endpoint, schema, or source identity was supplied; keep each unresolved and disable fetching until defined.",
+      "state": "UNRESOLVED"
+    },
+    {
+      "event_id": "firecrawl-redirect-boundary",
+      "sequence": 10,
+      "occurred_at": "2026-11-20T19:32:44Z",
+      "evidence_class": "CODE_REFERENCE",
+      "source_refs": [
+        "2ce11d4aede4fea727b0191ae627ff35a4a420f4:Ɣơ/finance/src/gamma_finance/firecrawl.py",
+        "f8c4e32a269e8456daebf75687d1addb5ae3c3c0:Ɣơ/finance/tests/test_valuation_firecrawl.py"
+      ],
+      "observation": "Firecrawl adapter now requires exact public HTTPS hostname allowlisting and validates source and final URL hostnames; mocked tests exercise redirect rejection and allowed same-host response.",
+      "interpretation": "The adapter boundary is strengthened but no live crawl or API credential was used; the hostname allowlist remains empty until approved.",
+      "state": "LIVE_CRAWL_NOT_RUN"
+    },
+    {
+      "event_id": "repository-eyes-onion-scanner",
+      "sequence": 11,
+      "occurred_at": "2026-11-20T19:38:06Z",
+      "evidence_class": "CODE_REFERENCE",
+      "source_refs": [
+        "6a9aabc1ba0cb6607184eee05f280138e14235cf:Ɣơ/operations/src/gamma_ops/repo_eyes.py",
+        "9e69c76023c0fb442f2902ba7d9f4ba7e864a4b2:Ɣơ/operations/tests/test_repo_eyes.py",
+        "819f9f4c8716aa8471e9f22e8016b7b2ae830b75:Ɣơ/operations/registry/onion-map.json"
+      ],
+      "observation": "Added a read-only recursive repository scanner that classifies source, binary, unknown, symlink, and sensitive candidates, and maps files into eight L0-L7 layers.",
+      "interpretation": "The scan applies to the checked-out repository working tree, not every historical branch or every other repository; it does not execute files or follow symlinks.",
+      "state": "IMPLEMENTED_VALIDATION_PENDING"
+    },
+    {
+      "event_id": "repository-eyes-offline-dashboard",
+      "sequence": 12,
+      "occurred_at": "2026-11-20T19:38:11Z",
+      "evidence_class": "CODE_REFERENCE",
+      "source_refs": [
+        "cbe32b060c0163007be2526fc975bc35e23d32fd:Ɣơ/operations/ui/index.html",
+        "81c8f9b8efbef524f0c10e58366226ff548a0d8e:Ɣơ/operations/README.md"
+      ],
+      "observation": "Added an offline browser dashboard that locally reads Repository Eyes JSON or .coddoc files and displays layers, classifications, source references, and event order.",
+      "interpretation": "This is a local file viewer, not a hosted public application and not a runtime service; selected files are not uploaded.",
+      "state": "IMPLEMENTED_VALIDATION_PENDING"
+    },
+    {
+      "event_id": "ic-repository-eyes-workflow",
+      "sequence": 13,
+      "occurred_at": "2026-11-20T19:38:57Z",
+      "evidence_class": "CODE_REFERENCE",
+      "source_refs": [
+        "6b1ab4a0a1a8720fd276a52002883ce479d5b452:.github/workflows/gamma-finance.yml",
+        "PR #104"
+      ],
+      "observation": "Added a repository-eyes CI job that scans the checked-out repository and uploads an onion-layer report artifact; the readiness notification job now waits for that scanner.",
+      "interpretation": "The code is wired into the IC workflow but the new head's job results and artifact have not yet been verified.",
+      "state": "CI_PENDING"
+    },
+    {
+      "event_id": "repository-eyes-multi-repository-context",
+      "sequence": 14,
+      "occurred_at": null,
+      "evidence_class": "CODE_REFERENCE",
+      "source_refs": [
+        "7e178336bdca8a378b727086207fff52a4622926:Ɣơ/operations/src/gamma_ops/repo_eyes.py",
+        "27b0521811d4c210ecadef39a1a835180a82d14d:Ɣơ/operations/src/gamma_ops/cli.py",
+        "a6c93e2770963dd3a9eeeb4b70c51f0321628d4b:Ɣơ/operations/tests/test_repo_eyes.py",
+        "d06988fbb17cf86ee70f872348729a41e6220f7b:Ɣơ/operations/ui/index.html",
+        "e8df45ed93a48cea8dbe66e13272c7c7af341235:.github/workflows/gamma-finance.yml"
+      ],
+      "observation": "Repository Eyes reports can now carry repository name, branch, checkout commit SHA, PR head SHA, base SHA and event context; the local dashboard accepts multiple reports and aggregates their onion-layer counts while keeping records labeled by repository.",
+      "interpretation": "The scanner can be run against any local checkout and reports can be compared in one local view. The current GitHub Actions integration still scans only Vanellye/CodEXgen; it does not enumerate all account repositories or history.",
+      "state": "IMPLEMENTED_VALIDATION_PENDING"
+    },
+    {
+      "event_id": "readiness-review-registry-hardening",
+      "sequence": 15,
+      "occurred_at": null,
+      "evidence_class": "CODE_REFERENCE",
+      "source_refs": [
+        "42e4921ad46c3cad9258e98c0b69c4791992cbf9:Ɣơ/operations/src/gamma_ops/reviewer.py",
+        "da93a01d956450fa7010b9a29e6d4650afe8f5e8:Ɣơ/operations/src/gamma_ops/readiness.py",
+        "729bc5643169fc045f03768c4ae81bd71cc3c352:Ɣơ/operations/registry/reviewers.json",
+        "642f83d2963f445b5956bf7512f135ba2f342607:.github/workflows/gamma-finance.yml"
+      ],
+      "observation": "READY_TO_OPEN qualification now requires an Ed25519-signed review bound to exact artifact digest, commit SHA, scope and review reference, with expiry and revocation checks against a registry whose SHA-256 is pinned in an externally configured repository variable. Email notification is restricted to main pushes after validation and compares registry state for newly ready transitions.",
+      "interpretation": "The reviewer registry remains empty and no external registry digest pin or SMTP configuration has been confirmed; therefore the readiness notification path stays fail-closed and no mail is claimed.",
+      "state": "SECURITY_GATES_IMPLEMENTED_VALIDATION_PENDING"
+    },
+    {
+      "event_id": "repository-eyes-installable-local-pwa",
+      "sequence": 16,
+      "occurred_at": null,
+      "evidence_class": "CODE_REFERENCE",
+      "source_refs": [
+        "301137ae14e60b0e495d820e0353cc7199bf161d:Ɣơ/operations/ui/index.html",
+        "e88bc453a6a4ef77ebc581e5f06856e6dce88f50:Ɣơ/operations/ui/manifest.webmanifest",
+        "f69877454c26a3f99fe4a4cfafef0820f4e9a51d:Ɣơ/operations/ui/service-worker.js",
+        "bd840df1c9630bb266958392b8e7099916394447:Ɣơ/operations/scripts/serve-ui.sh"
+      ],
+      "observation": "The Repository Eyes dashboard now has installable PWA metadata, a static-asset-only service worker, an SVG app icon, and a loopback-only local server launcher. The UI supports multiple repository scan reports and narrative records.",
+      "interpretation": "This creates a local, installable report viewer, not a hosted GitHub App or account-wide repository scanner. It makes no crawl requests and does not upload imported files.",
+      "state": "IMPLEMENTED_VALIDATION_PENDING"
+    }
+  ],
+  "capability_gates": {
+    "source_provenance": "REQUIRED",
+    "coddoc_validity": "REQUIRED",
+    "tests_and_build": "REQUIRED",
+    "independent_review": "REQUIRED",
+    "human_open_decision": "REQUIRED",
+    "live_financial_execution": "DISABLED"
+  }
+}

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#10151b">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/eria-eye.svg" type="image/svg+xml">
+<title>ERIA Repository Eyes</title>
+<style>
+:root{color-scheme:dark;--bg:#10151b;--panel:#19232d;--line:#30404f;--text:#e8eef4;--muted:#a8b6c4;--accent:#91d9bd;--warn:#e5c27b;--red:#ef9999}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,sans-serif}
+header{padding:24px clamp(16px,4vw,48px);border-bottom:1px solid var(--line);background:#121c24}
+h1{margin:0;font-size:1.6rem}header p{margin:6px 0 0;color:var(--muted)}
+main{max-width:1320px;margin:auto;padding:24px 16px 60px}.toolbar,.stats,.layers,.repoCards{display:grid;gap:12px}
+.toolbar{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-bottom:18px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+input,button{font:inherit;border:1px solid var(--line);border-radius:8px;padding:10px;background:#101a22;color:var(--text);max-width:100%}
+button{cursor:pointer;background:#233a3b;border-color:#43655f}button:focus,input:focus{outline:2px solid var(--accent);outline-offset:2px}
+.stats{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin:16px 0}
+.stat strong{font-size:1.5rem;display:block}.muted{color:var(--muted)}.layers,.repoCards{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.layer{min-height:130px}.layer h3{margin:0 0 6px;color:var(--accent)}.layer small{color:var(--muted)}
+.repo h3{margin:0 0 6px}.repo p{margin:4px 0}.repo code{font-size:.82rem}
+table{border-collapse:collapse;width:100%;font-size:.9rem}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted)}
+.table-wrap{overflow:auto}.good{color:var(--accent)}.warn{color:var(--warn)}.bad{color:var(--red)}
+#message{min-height:24px;color:var(--muted)}code{overflow-wrap:anywhere}
+</style></head>
+<body>
+<header><h1>ERIA Repository Eyes</h1><p>Multi-repository onion-layer map · source identity first · read-only by design</p></header>
+<main>
+<section class="toolbar panel" aria-label="Load repository reports">
+<div><label for="report">Load one or more Repository Eyes reports</label><br><input id="report" type="file" multiple accept=".json,application/json"></div>
+<div><label for="coddoc">Load one or more .coddoc records</label><br><input id="coddoc" type="file" multiple accept=".coddoc,.json,application/json"></div>
+<div><button id="reset" type="button">Clear all loaded reports</button><p class="muted">Files stay in this browser tab. No upload, crawl, or network request is made.</p></div>
+</section>
+<p id="message" role="status" aria-live="polite">Load reports from one or more local repository scans.</p>
+<section id="repoCards" class="repoCards" aria-label="Repository identities"></section>
+<section id="stats" class="stats" aria-label="Combined inventory summary"></section>
+<section id="layers" class="layers" aria-label="Combined onion layers"></section>
+<section class="panel" style="margin-top:14px">
+<h2 id="tableTitle">Repository entries</h2>
+<div><label for="filter">Filter path, repository, source, or classification</label> <input id="filter" type="search" placeholder="Search loaded repositories…"></div>
+<div class="table-wrap"><table><thead><tr><th>Repository</th><th>Path / Event</th><th>Layer(s)</th><th>Classification</th><th>SHA-256 / Source</th></tr></thead><tbody id="rows"><tr><td colspan="5" class="muted">No report loaded.</td></tr></tbody></table></div>
+</section>
+<section class="panel" style="margin-top:14px"><h2>Operating boundary</h2><p class="muted">Each report identifies the checked-out working tree and its commit context. It does not imply every branch or every repository was scanned. Green readable source is not a security approval. Amber and red entries require human review. No inspected file is executed, and no financial or external action is enabled.</p></section>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);let reports=[];let currentRows=[];
+function el(tag,text,cls){const n=document.createElement(tag);if(text!==undefined)n.textContent=String(text);if(cls)n.className=cls;return n}
+function labelFor(report){const repo=report.repository||{};return repo.name||report.document_id||report.file_name||"Repository identity not supplied"}
+function renderRepoCards(){
+ $("repoCards").replaceChildren();
+ for(const report of reports){const repo=report.repository||{};const card=el("div",undefined,"panel repo");
+  card.append(el("h3",labelFor(report)));card.append(el("p","Branch: "+(repo.branch||"not recorded"),"muted"));
+  card.append(el("p","Checkout: "+(repo.checkout_commit_sha||"not recorded"),"muted"));
+  if(repo.pull_request_head_sha)card.append(el("p","PR head: "+repo.pull_request_head_sha,"muted"));
+  if(repo.base_sha)card.append(el("p","Base: "+repo.base_sha,"muted"));
+  card.append(el("p",(report.files_scanned??(report.events||[]).length)+" records · "+(report.mode||"NARRATIVE"),"muted"));
+  $("repoCards").append(card)}
+}
+function renderStats(items){
+ $("stats").replaceChildren();const pairs=[["Reports",reports.length],["Files / Events",items.length],
+ ["Green readable",items.filter(x=>(x.classification||x.evidence_class)==="GREEN_READABLE_SOURCE"||x.evidence_class==="SOURCE_TEXT").length],
+ ["Red holds",items.filter(x=>(x.classification||"").startsWith("RED_HOLD")).length],
+ ["Unknown / amber",items.filter(x=>(x.classification||"").startsWith("AMBER")||x.evidence_class==="UNKNOWN").length]];
+ for(const [label,value] of pairs){const box=el("div",undefined,"panel stat");box.append(el("strong",value));box.append(el("span",label,"muted"));$("stats").append(box)}
+}
+function renderLayers(){
+ $("layers").replaceChildren();const grouped=new Map();
+ for(const report of reports){for(const layer of report.layers||[]){const old=grouped.get(layer.id)||{title:layer.title,count:0,repos:new Set()};old.count+=layer.file_count||0;old.repos.add(labelFor(report));grouped.set(layer.id,old)}}
+ for(const [id,layer] of grouped){const card=el("div",undefined,"panel layer");card.append(el("h3",id+" · "+layer.title));card.append(el("p",layer.count+" files across "+layer.repos.size+" report(s)"));card.append(el("small",[...layer.repos].join(" · ")));$("layers").append(card)}
+}
+function renderRows(){
+ const q=$("filter").value.trim().toLowerCase();$("rows").replaceChildren();
+ const filtered=currentRows.filter(row=>JSON.stringify(row).toLowerCase().includes(q));
+ for(const row of filtered){const tr=document.createElement("tr");tr.append(el("td",row.repository_label||"unknown"));
+  tr.append(el("td",row.path||row.event_id||"UNNAMED"));tr.append(el("td",(row.onion_layers||[]).join(", ")||"—"));
+  const text=row.classification||row.evidence_class||"UNKNOWN";const cls=text.startsWith("RED")?"bad":text.startsWith("AMBER")||text==="UNKNOWN"?"warn":"good";
+  tr.append(el("td",text,cls));tr.append(el("td",row.sha256||(row.source_refs||[]).join("; ")||"not recorded"));$("rows").append(tr)}
+ if(!filtered.length){const tr=document.createElement("tr");const td=el("td","No matching records.");td.colSpan=5;tr.append(td);$("rows").append(tr)}
+}
+function rebuild(){
+ currentRows=[];
+ for(const report of reports){const repo=labelFor(report);const rows=report.format==="ERIA_REPOSITORY_EYES"?(report.entries||[]):(report.events||[]);
+  for(const item of rows)currentRows.push({...item,repository_label:repo})}
+ renderRepoCards();renderStats(currentRows);renderLayers();renderRows();
+ $("tableTitle").textContent="Combined repository files and narrative events";
+ $("message").textContent=reports.length+" report(s) loaded from "+new Set(reports.map(labelFor)).size+" repository identity/label(s). Reports are not treated as a complete history of every branch.";
+}
+async function loadFiles(files){
+ const additions=[];const failures=[];
+ for(const file of files){try{const parsed=JSON.parse(await file.text());if(parsed.format!=="ERIA_REPOSITORY_EYES"&&parsed.format!=="ERIA_CODDOC")throw new Error("unsupported file format");
+  parsed.file_name=file.name;additions.push(parsed)}catch(error){failures.push(file.name+": "+error.message)}}
+ reports=reports.concat(additions);rebuild();
+ if(failures.length)$("message").textContent+=" HOLD: "+failures.join("; ");
+}
+$("report").addEventListener("change",event=>loadFiles([...event.target.files]));
+$("coddoc").addEventListener("change",event=>loadFiles([...event.target.files]));
+$("filter").addEventListener("input",renderRows);
+$("reset").addEventListener("click",()=>{reports=[];currentRows=[];rebuild();$("message").textContent="View cleared. No local files were changed.";$("report").value="";$("coddoc").value="";$("filter").value=""});
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  navigator.serviceWorker.register("./service-worker.js").catch(() => {
+    $("message").textContent += " Offline cache registration unavailable; local viewing still works.";
+  });
+}
+</script></body></html>

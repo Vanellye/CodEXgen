@@ -1,0 +1,147 @@
+name: Ɣơ Integrity Check (IC) Flow
+on:
+  push:
+    paths:
+      - 'Ɣơ/finance/**'
+      - 'Ɣơ/operations/**'
+      - 'docs/Ɣơ/**'
+      - 'docs/ERIA-RUNFLOW-*.md'
+      - 'pantheon/**'
+      - '.github/workflows/gamma-finance.yml'
+  pull_request:
+    paths:
+      - 'Ɣơ/finance/**'
+      - 'Ɣơ/operations/**'
+      - 'docs/Ɣơ/**'
+      - 'docs/ERIA-RUNFLOW-*.md'
+      - 'pantheon/**'
+      - '.github/workflows/gamma-finance.yml'
+permissions:
+  contents: read
+jobs:
+  python-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install isolated finance and observer packages
+        run: python -m pip install -e './Ɣơ/finance[test]' -e './Ɣơ/operations[test]'
+      - name: Run finance and observer tests
+        run: python -m pytest -q 'Ɣơ/finance/tests' 'Ɣơ/operations/tests'
+  operations-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install observer package
+        run: python -m pip install -e './Ɣơ/operations'
+      - name: Validate .coddoc event record
+        run: python -m gamma_ops.cli validate 'Ɣơ/operations/events/TRUE-LIGHTWORK-WAVE-MAVEN.coddoc' | tee "$RUNNER_TEMP/coddoc-validation.txt"
+      - name: Show current operable catalog and ready-to-open set
+        run: |
+          python -m gamma_ops.cli catalog
+          python -m gamma_ops.cli ready
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gamma-coddoc-validation
+          path: ${{ runner.temp }}/coddoc-validation.txt
+          if-no-files-found: error
+          retention-days: 90
+  repository-inventory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Generate read-only repository inventory
+        run: python 'Ɣơ/finance/scripts/look-readonly.py' . --output "$RUNNER_TEMP/repository-inventory.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gamma-repository-read-only-inventory
+          path: ${{ runner.temp }}/repository-inventory.json
+          if-no-files-found: error
+          retention-days: 90
+  arm64-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Install NDK
+        run: sdkmanager "ndk;27.2.12479018"
+      - uses: actions/checkout@v4
+      - name: Compile ARM64 codec probe
+        run: ANDROID_NDK_HOME="$ANDROID_HOME/ndk/27.2.12479018" bash Ɣơ/finance/scripts/arm-build.sh
+  repository-eyes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install observer package
+        run: python -m pip install -e './Ɣơ/operations'
+      - name: Scan complete checked-out repository into onion layers
+        run: >-
+          python -m gamma_ops.cli scan .
+          --repository "${{ github.repository }}"
+          --branch "${{ github.head_ref || github.ref_name }}"
+          --commit-sha "${{ github.sha }}"
+          --pr-head-sha "${{ github.event.pull_request.head.sha }}"
+          --base-sha "${{ github.event.pull_request.base.sha }}"
+          --event-name "${{ github.event_name }}"
+          --output "$RUNNER_TEMP/eria-repository-eyes.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: eria-repository-eyes-onion-report
+          path: ${{ runner.temp }}/eria-repository-eyes.json
+          if-no-files-found: error
+          retention-days: 90
+  notify-ready:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [python-tests, operations-validate, repository-inventory, repository-eyes, arm64-build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Capture previous registry for transition-only notification
+        env:
+          GITHUB_EVENT_BEFORE: ${{ github.event.before }}
+        run: |
+          previous="$RUNNER_TEMP/previous-operables.json"
+          if [ -n "$GITHUB_EVENT_BEFORE" ] && [ "$GITHUB_EVENT_BEFORE" != "0000000000000000000000000000000000000000" ]; then
+            git show "$GITHUB_EVENT_BEFORE:Ɣơ/operations/registry/operables.json" > "$previous" 2>/dev/null || printf '{"operables":[]}' > "$previous"
+          else
+            printf '{"operables":[]}' > "$previous"
+          fi
+          echo "OPERABLE_PREVIOUS_REGISTRY=$previous" >> "$GITHUB_ENV"
+      - name: Install observer notifier
+        run: python -m pip install -e './Ɣơ/operations'
+      - name: Notify only independently reviewed READY_TO_OPEN operables
+        env:
+          OPERABLE_NOTIFY_TO: ${{ vars.OPERABLE_NOTIFY_TO }}
+          ERIA_REVIEWER_REGISTRY_SHA256: ${{ vars.ERIA_REVIEWER_REGISTRY_SHA256 }}
+          OPERABLE_PREVIOUS_REGISTRY: ${{ env.OPERABLE_PREVIOUS_REGISTRY }}
+          OPERABLE_SMTP_HOST: ${{ secrets.OPERABLE_SMTP_HOST }}
+          OPERABLE_SMTP_PORT: ${{ secrets.OPERABLE_SMTP_PORT }}
+          OPERABLE_SMTP_USER: ${{ secrets.OPERABLE_SMTP_USER }}
+          OPERABLE_SMTP_PASSWORD: ${{ secrets.OPERABLE_SMTP_PASSWORD }}
+          OPERABLE_SMTP_FROM: ${{ secrets.OPERABLE_SMTP_FROM }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+        run: python 'Ɣơ/operations/scripts/notify_ready.py' --previous-registry "$OPERABLE_PREVIOUS_REGISTRY"
