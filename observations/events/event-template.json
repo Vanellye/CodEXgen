@@ -1,0 +1,19 @@
+{
+  "event_id": "evt_<unique-id>",
+  "artifact_id": "artifact_<id>",
+  "event_type": "created|observed|changed|missing|recovered|compared|validated|conflict_detected",
+  "source_locator": "",
+  "source_timestamp": null,
+  "retrieved_at": "<ISO-8601>",
+  "observed_at": "<ISO-8601>",
+  "fingerprint": null,
+  "parent_event_ids": [],
+  "conflict_group": null,
+  "corrects_event_id": null,
+  "actor": {
+    "kind": "user|assistant|connector|automation",
+    "id": null
+  },
+  "evidence_refs": [],
+  "immutable": true
+}
