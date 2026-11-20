@@ -10,6 +10,9 @@ This module connects source-linked narratives to a local runnable terminal witho
 - `src/gamma_ops/coddoc.py`: validates and hashes .coddoc records.
 - `src/gamma_ops/readiness.py`: fail-closed READY_TO_OPEN qualification.
 - `src/gamma_ops/cli.py`: read-only terminal commands.
+- `src/gamma_ops/repo_eyes.py`: recursive, read-only eight-layer repository scanner.
+- `registry/onion-map.json`: layer definitions and safety invariants.
+- `ui/index.html`: offline browser dashboard for inventory and .coddoc files.
 - `registry/discovery-map.json`: inspected source lineage and search limitations.
 - `registry/operables.json`: staged, review-only, PREPARE_ONLY and not-implemented module states.
 - `watchers/watch-policy.json`: read-only GitHub watch contract and disabled Firecrawl policy.
@@ -24,8 +27,25 @@ PYTHONPATH='Ɣơ/operations/src' python -m gamma_ops.cli validate 'Ɣơ/operatio
 PYTHONPATH='Ɣơ/operations/src' python -m gamma_ops.cli timeline 'Ɣơ/operations/events/TRUE-LIGHTWORK-WAVE-MAVEN.coddoc'
 PYTHONPATH='Ɣơ/operations/src' python -m gamma_ops.cli catalog
 PYTHONPATH='Ɣơ/operations/src' python -m gamma_ops.cli ready
+PYTHONPATH='Ɣơ/operations/src' python -m gamma_ops.cli scan . --output /tmp/eria-repository-eyes.json
 python -m pytest -q 'Ɣơ/operations/tests'
+
+# Offline dashboard: open Ɣơ/operations/ui/index.html in a browser,
+# then load /tmp/eria-repository-eyes.json or the .coddoc event file.
 ```
+
+## Repository Eyes onion model
+
+- L0 — repository boundary and identity
+- L1 — source files and authored assets
+- L2 — contracts, schemas, manifests and interfaces
+- L3 — modules, libraries and adapters
+- L4 — dependencies, workflows and build wiring
+- L5 — runtime, authorization and capability gates
+- L6 — history, provenance and lineage
+- L7 — tests, CI evidence and generated reports
+
+The scanner does not execute files, follow symlinks, return file contents, or hash sensitive-name/content candidates. It excludes tool caches and dependency directories and limits per-file hashing to 8 MiB. Amber and red records require human review; no file is automatically opened or activated.
 
 Commands are read-only. No watcher is started by importing this package or running the CLI.
 
