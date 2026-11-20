@@ -33,9 +33,13 @@ class OgCodecTests(unittest.TestCase):
                 self.assertEqual(decode(encode(original)), original)
 
     def test_non_canonical_spacing_rejected(self):
-        encoded = encode(b"\x01").replace(", ", ",")
+        # Two bytes are required to produce the canonical byte separator.
+        encoded = encode(b"\x01\x02")
+        self.assertIn(", ", encoded)
+        malformed = encoded.replace(", ", ",")
+        self.assertNotEqual(malformed, encoded)
         with self.assertRaises(OgCodecError):
-            decode(encoded)
+            decode(malformed)
 
     def test_length_mismatch_rejected(self):
         encoded = encode(b"\x01").replace("length:1", "length:2")
