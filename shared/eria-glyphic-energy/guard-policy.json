@@ -1,0 +1,62 @@
+{
+  "policy_id": "ERIA-EXECUTION-BOUNDARY-GLYPH-LAYER",
+  "version": "1.0.0",
+  "default": "DENY",
+  "actions": {
+    "local_parse": {
+      "decision": "ALLOW",
+      "scope": "local"
+    },
+    "local_display": {
+      "decision": "ALLOW",
+      "scope": "local"
+    },
+    "local_annotation": {
+      "decision": "ALLOW",
+      "scope": "local"
+    },
+    "local_export": {
+      "decision": "ALLOW",
+      "scope": "local"
+    },
+    "dynamic_code_evaluation": {
+      "decision": "DENY",
+      "scope": "execution"
+    },
+    "filesystem_write": {
+      "decision": "DENY",
+      "scope": "mutation"
+    },
+    "external_dispatch": {
+      "decision": "DENY",
+      "scope": "external"
+    },
+    "hardware_activation": {
+      "decision": "DENY",
+      "scope": "physical"
+    },
+    "biological_intervention": {
+      "decision": "DENY",
+      "scope": "biological"
+    }
+  },
+  "authorization_requirements": {
+    "explicit_human_approval": true,
+    "scope_bound": true,
+    "time_bound": true,
+    "revocable": true,
+    "audit_record_required": true,
+    "symbolic_marker_is_authorization": false
+  },
+  "audit_fields": [
+    "event_id",
+    "timestamp",
+    "actor",
+    "action",
+    "scope",
+    "decision",
+    "reason",
+    "source_revision",
+    "verification_status"
+  ]
+}
