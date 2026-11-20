@@ -33,7 +33,7 @@ class OgCodecTests(unittest.TestCase):
                 self.assertEqual(decode(encode(original)), original)
 
     def test_non_canonical_spacing_rejected(self):
-        encoded = encode(b"\x01").replace(", ", ",")
+        encoded = encode(b"\\x01\\x02").replace(", ", ",")
         with self.assertRaises(OgCodecError):
             decode(encoded)
 
