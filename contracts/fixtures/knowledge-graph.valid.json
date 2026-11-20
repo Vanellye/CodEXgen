@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.0.0",
+  "graphId": "eria.main-knowledge",
+  "events": [
+    {"eventId":"evt.node-001","sequence":1,"type":"node.created","recordedAt":"2026-11-15T12:00:00Z","actor":"human.operator","node":{"id":"node.origin","kind":"concept","label":"Origin","createdAt":"2026-11-15T12:00:00Z","source":{"ref":"repo:Vanellye/CodEXgen@main","digest":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},"attributes":{"status":"canonical"}}},
+    {"eventId":"evt.node-002","sequence":2,"type":"node.created","recordedAt":"2026-11-15T12:01:00Z","actor":"human.operator","node":{"id":"node.evidence","kind":"evidence","label":"Evidence record","createdAt":"2026-11-15T12:01:00Z","source":{"ref":"repo:Vanellye/CodEXgen@main","digest":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}}},
+    {"eventId":"evt.edge-001","sequence":3,"type":"edge.created","recordedAt":"2026-11-15T12:02:00Z","actor":"human.operator","edge":{"id":"edge.supports","fromNodeId":"node.evidence","toNodeId":"node.origin","relation":"supports","createdAt":"2026-11-15T12:02:00Z","source":{"ref":"repo:Vanellye/CodEXgen@main","digest":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}}},
+    {"eventId":"evt.node-003","sequence":4,"type":"node.superseded","recordedAt":"2026-11-15T12:03:00Z","actor":"human.operator","subjectId":"node.evidence","replacementId":"node.evidence.v2","reason":"A corrected evidence record was appended; the original remains in history."}
+  ]
+}
