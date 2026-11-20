@@ -102,14 +102,14 @@ class Ledger:
                 cmd = p[0]
                 if cmd == "ACCOUNT" and len(p) == 4:
                     self.account(p[1], p[2], p[3])
-                elif cmd == "ALLOWANCE" and len(p) == 9 and p[2] == "FROM" and p[4] == "TO" and p[7] == "EVERY":
-                    if p[8] != "HOUR":
+                elif cmd == "ALLOWANCE" and len(p) == 10 and p[2] == "FROM" and p[4] == "TO" and p[8] == "EVERY":
+                    if p[9] != "HOUR":
                         raise RubleError("unsupported_allowance_period")
                     self.move(p[1], p[3], p[5], p[6], p[7], "ALLOWANCE",
                               {"period": "HOUR", "mode": "SIMULATE"})
                 elif cmd == "TRANSFER" and len(p) == 10 and p[2] == "FROM" and p[4] == "TO" and p[8] == "PURPOSE":
                     self.move(p[1], p[3], p[5], p[6], p[7], "TRANSFER",
-                              {"purpose": p[8], "mode": "SIMULATE"})
+                              {"purpose": p[9], "mode": "SIMULATE"})
                 elif cmd == "QUOTE" and len(p) == 13 and p[3] == "TO" and p[5] == "RATE" and p[7] == "AT" and p[9] == "EXPIRES" and p[11] == "SOURCE":
                     qid = ident(p[1])
                     if qid in self.quotes or qid in self.ids:
