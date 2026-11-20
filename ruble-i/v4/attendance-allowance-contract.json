@@ -1,0 +1,40 @@
+{
+  "schema": "ruble-i.v4.attendance-allowance-contract.v1",
+  "mode": "PREPARE_ONLY",
+  "status": "CONFIGURED_HOLD_CURRENCY_AND_ATTENDANCE_SOURCE",
+  "trigger": "VERIFIED_ATTENDANCE_EVIDENCE",
+  "attendance": {
+    "source_ref": null,
+    "record_id_required": true,
+    "occurred_at_required": true,
+    "units_required": true,
+    "unit_name": "verified_hour",
+    "base_grant_trigger": "one_per_verified_attendance",
+    "replay_protection": "unique_source_ref+record_id"
+  },
+  "grant": {
+    "calculation": "min(base_per_verified_attendance_minor + hourly_rate_minor * verified_hours, per_attendance_cap_minor)",
+    "asset": null,
+    "currency_code_required": true,
+    "base_per_verified_attendance_minor": 777,
+    "hourly_rate_minor": 1111,
+    "variable_basis": "verified_hours",
+    "per_attendance_cap_minor": 7117,
+    "period_cap_minor": null,
+    "amounts_are_integer_minor_units": true,
+    "rounding": "not_applicable_integer_minor_units"
+  },
+  "authorization": {
+    "independent_reviewer_required": true,
+    "registry": "reviewer-registry.example.json",
+    "signature_algorithm": "Ed25519",
+    "exact_proposal_digest_required": true
+  },
+  "execution": {
+    "automatic_proposal_preparation": true,
+    "automatic_approval": false,
+    "automatic_money_movement": false,
+    "live_submission_enabled": false
+  },
+  "note": "Hybrid attendance allowance configured in integer minor units: 777 base per verified attendance plus 1111 per verified hour, capped at 7117 per attendance. Currency code and trusted attendance source remain unset; system must HOLD until both are configured and evidence is verified. PREPARE_ONLY; no approval or payment is implied."
+}

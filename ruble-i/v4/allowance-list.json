@@ -1,0 +1,40 @@
+{
+  "schema": "ruble-i.v4.allowance-list.v1",
+  "mode": "PREPARE_ONLY",
+  "status": "EMPTY_NO_GRANTS_ISSUED",
+  "entries": [],
+  "entry_fields": [
+    "proposal_id",
+    "schedule_id",
+    "occurrence_id",
+    "beneficiary_ref",
+    "attendance_evidence_ref",
+    "attendance_units",
+    "asset",
+    "amount_minor",
+    "policy_version",
+    "proposal_sha256",
+    "wise_evidence_refs",
+    "plaid_evidence_refs",
+    "reviewer_registry_version",
+    "approval_artifact_ref",
+    "approval_status",
+    "created_at",
+    "expires_at",
+    "allocation_record_ref"
+  ],
+  "uniqueness": [
+    "proposal_id",
+    "schedule_id+occurrence_id",
+    "attendance_evidence_ref"
+  ],
+  "rules": {
+    "attendance_evidence_required": true,
+    "attendance_replay_denied": true,
+    "amounts_minor_units_only": true,
+    "independent_approval_required": true,
+    "missing_evidence": "HOLD",
+    "live_submission_enabled": false
+  },
+  "note": "No real identities, attendance records, provider connections, or money movements are populated."
+}
