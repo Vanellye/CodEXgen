@@ -60,7 +60,15 @@ class PostgresReadOnlyStore:
             # The transaction-level read-only flag is set before any data query.
             conn.execute("SET TRANSACTION READ ONLY")
             cursor = conn.execute(template, params)
-            rows = tuple(dict(row) for row in cursor.fetchall())
+            fetched = cursor.fetchall()
+            if fetched and isinstance(fetched[0], Mapping):
+                rows = tuple(dict(row) for row in fetched)
+            elif fetched:
+                description = cursor.description or ()
+                columns = [getattr(col, "name", col[0]) for col in description]
+                rows = tuple(dict(zip(columns, row)) for row in fetched)
+            else:
+                rows = ()
             captured = now
             import json, hashlib
             payload = json.dumps(rows, sort_keys=True, separators=(",", ":"), default=str).encode()
