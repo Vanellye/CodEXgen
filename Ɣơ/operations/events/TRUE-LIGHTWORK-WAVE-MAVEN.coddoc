@@ -212,6 +212,21 @@
       "observation": "READY_TO_OPEN qualification now requires an Ed25519-signed review bound to exact artifact digest, commit SHA, scope and review reference, with expiry and revocation checks against a registry whose SHA-256 is pinned in an externally configured repository variable. Email notification is restricted to main pushes after validation and compares registry state for newly ready transitions.",
       "interpretation": "The reviewer registry remains empty and no external registry digest pin or SMTP configuration has been confirmed; therefore the readiness notification path stays fail-closed and no mail is claimed.",
       "state": "SECURITY_GATES_IMPLEMENTED_VALIDATION_PENDING"
+    },
+    {
+      "event_id": "repository-eyes-installable-local-pwa",
+      "sequence": 16,
+      "occurred_at": null,
+      "evidence_class": "CODE_REFERENCE",
+      "source_refs": [
+        "301137ae14e60b0e495d820e0353cc7199bf161d:Ɣơ/operations/ui/index.html",
+        "e88bc453a6a4ef77ebc581e5f06856e6dce88f50:Ɣơ/operations/ui/manifest.webmanifest",
+        "f69877454c26a3f99fe4a4cfafef0820f4e9a51d:Ɣơ/operations/ui/service-worker.js",
+        "bd840df1c9630bb266958392b8e7099916394447:Ɣơ/operations/scripts/serve-ui.sh"
+      ],
+      "observation": "The Repository Eyes dashboard now has installable PWA metadata, a static-asset-only service worker, an SVG app icon, and a loopback-only local server launcher. The UI supports multiple repository scan reports and narrative records.",
+      "interpretation": "This creates a local, installable report viewer, not a hosted GitHub App or account-wide repository scanner. It makes no crawl requests and does not upload imported files.",
+      "state": "IMPLEMENTED_VALIDATION_PENDING"
     }
   ],
   "capability_gates": {
