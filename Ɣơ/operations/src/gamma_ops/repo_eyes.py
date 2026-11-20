@@ -93,7 +93,8 @@ def scan_repository(root: str | Path, *, max_hash_bytes: int = 8 * 1024 * 1024,
     while stack:
         directory = stack.pop()
         try:
-            children = sorted(os.scandir(directory), key=lambda entry: entry.name.lower(), reverse=True)
+            with os.scandir(directory) as iterator:
+                children = sorted(iterator, key=lambda entry: entry.name.lower(), reverse=True)
         except OSError as exc:
             errors.append({"path": directory.relative_to(base).as_posix() or ".", "error": type(exc).__name__})
             continue
