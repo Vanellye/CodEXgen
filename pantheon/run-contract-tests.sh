@@ -13,13 +13,23 @@ run_pair() {
   "$BUILD_DIR/$name"
 }
 
+echo "== PONS C99 provenance adapter =="
+"$CC" "${COMMON[@]}" -I"$ROOT/pantheon/PONS" \
+  "$ROOT/pantheon/PONS/PONS.c" "$ROOT/pantheon/PONS/tests/test_PONS.c" \
+  -o "$BUILD_DIR/pons"
+"$BUILD_DIR/pons"
+
 echo "== DO authorization self-test =="
 "$CC" "${COMMON[@]}" -DDO_C_SELF_TEST "$ROOT/pantheon/DO.c" -o "$BUILD_DIR/do-self-test"
 "$BUILD_DIR/do-self-test"
 
 run_pair integration-core pantheon/IC/IC.c pantheon/IC/tests/test_IC.c pantheon/IC
 run_pair factual-logic pantheon/FACTUAL_LOGIC/FACTUAL_LOGIC.c pantheon/FACTUAL_LOGIC/tests/test_FACTUAL_LOGIC.c pantheon/FACTUAL_LOGIC
-run_pair new pantheon/NEW/NEW.c pantheon/NEW/tests/test_NEW.c pantheon/NEW
+echo "== new (PONS-gated) =="
+"$CC" "${COMMON[@]}" -I"$ROOT/pantheon/NEW" -I"$ROOT/pantheon/PONS" \
+  "$ROOT/pantheon/NEW/NEW.c" "$ROOT/pantheon/PONS/PONS.c" \
+  "$ROOT/pantheon/NEW/tests/test_NEW.c" -o "$BUILD_DIR/new"
+"$BUILD_DIR/new"
 run_pair facade pantheon/NEW/FaCADE/FaCADE.c pantheon/NEW/FaCADE/tests/test_FaCADE.c pantheon/NEW/FaCADE
 run_pair thought-tott pantheon/NEW/THOUGHT_TOTT/THOUGHT_TOTT.c pantheon/NEW/THOUGHT_TOTT/tests/test_THOUGHT_TOTT.c pantheon/NEW/THOUGHT_TOTT
 run_pair z-to-a pantheon/NEW/Z_TO_A/Z_TO_A.c pantheon/NEW/Z_TO_A/tests/test_Z_TO_A.c pantheon/NEW/Z_TO_A

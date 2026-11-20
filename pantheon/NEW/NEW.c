@@ -30,6 +30,10 @@ NewStatus new_build_narrative(const NewRecord *record,
     }
     output[0] = '\0';
 
+    if (!pons_c_proof_is_valid(record->pons_proof, "pantheon.new")) {
+        return NEW_STATUS_PONS_HOLD;
+    }
+
     if (!record->authorization_confirmed ||
         !present(record->permission_basis) ||
         !present(record->purpose)) {
