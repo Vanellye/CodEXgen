@@ -90,3 +90,23 @@ class AllowanceTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CrossProviderBridgeTests(unittest.TestCase):
+    def test_bridge_requires_provider_auth_and_permission(self):
+        from bridge import ProviderConnectionEvidence, prepare_cross_provider_allowance
+        connection = ProviderConnectionEvidence("wise_platform", True, True, True,
+            frozenset({"IBAN_SEPA"}), "evidence:wise-connection")
+        result = prepare_cross_provider_allowance(self.policy, [connection], [self.balance],
+            [BeneficiaryRequest("ben-a", 1000, 1000)], now=self.now)
+        self.assertEqual(result["provider_set"], ["wise_platform"])
+        self.assertEqual(result["status"], "CROSS_PROVIDER_PROPOSAL_AWAITING_INDEPENDENT_APPROVAL")
+        self.assertFalse(result["live_submission_enabled"])
+
+    def test_bridge_rejects_missing_provider_permissions(self):
+        from bridge import ProviderConnectionEvidence, prepare_cross_provider_allowance
+        connection = ProviderConnectionEvidence("wise_platform", True, True, False,
+            frozenset({"IBAN_SEPA"}), "evidence:wise-connection")
+        with self.assertRaises(AllowanceHold):
+            prepare_cross_provider_allowance(self.policy, [connection], [self.balance],
+                [BeneficiaryRequest("ben-a", 1000, 1000)], now=self.now)
