@@ -36,6 +36,8 @@ The historical directory references `pantheon/signed-package-exchange` (PR #13),
 - **operable registry:** distinguishes proposed, staged, read-only, PREPARE_ONLY, and NOT_IMPLEMENTED modules.
 - **readiness capacitor:** requires all declared checks plus independently verified human review; it is a boolean gate, not a numeric confidence score.
 - **local terminal:** lists, validates, and displays records; it has no command execution or external dispatch.
+- **Repository Eyes:** recursively maps the checked-out repository into eight onion layers, hashes only eligible bounded files, marks sensitive paths/content and symlinks as red holds, and classifies binaries/unknown formats for review.
+- **offline dashboard:** `Ɣơ/operations/ui/index.html` renders a supplied inventory JSON or .coddoc record locally; it has no network calls or upload path.
 - **watch policy:** GitHub repository events are read-only; Firecrawl is disabled until individually approved hostnames exist.
 - **notification adapter:** sends email only when the registry record is explicitly READY_TO_OPEN and all checks pass. SMTP credentials are supplied as GitHub Actions secrets, never committed.
 
@@ -82,7 +84,10 @@ PYTHONPATH='Ɣơ/operations/src' python -m gamma_ops.cli validate 'Ɣơ/operatio
 PYTHONPATH='Ɣơ/operations/src' python -m gamma_ops.cli timeline 'Ɣơ/operations/events/TRUE-LIGHTWORK-WAVE-MAVEN.coddoc'
 PYTHONPATH='Ɣơ/operations/src' python -m gamma_ops.cli catalog
 PYTHONPATH='Ɣơ/operations/src' python -m gamma_ops.cli ready
+PYTHONPATH='Ɣơ/operations/src' python -m gamma_ops.cli scan . --output /tmp/eria-repository-eyes.json
 ```
+
+Open `Ɣơ/operations/ui/index.html` locally and select the generated JSON report to inspect the eight layers. The browser UI only reads the chosen file and renders text.
 
 These commands read and display records only. They do not activate a watcher, crawl a website, authorize an action, launch a process, or place a trade.
 
