@@ -1,0 +1,16 @@
+{
+  "schema": "ruble-i.v4.hybrid-allowance-policy.v1",
+  "mode": "PREPARE_ONLY",
+  "allocation_mode": "SCHEDULED",
+  "live_submission_enabled": false,
+  "asset": "USD",
+  "total_pool_cap_minor": null,
+  "per_beneficiary_cap_minor": null,
+  "per_transfer_cap_minor": null,
+  "rolling_period_cap_minor": null,
+  "period_seconds": 86400,
+  "max_balance_age_seconds": 300,
+  "allocation_expires_at": null,
+  "configured": false,
+  "note": "Template only. No amounts, beneficiaries, provider accounts, or permissions are configured."
+}
