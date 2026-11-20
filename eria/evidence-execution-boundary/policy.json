@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "ERIA-EVIDENCE-EXECUTION-BOUNDARY-1",
+  "mode": "verify-only",
+  "consequential_actions": [
+    "merge",
+    "deployment",
+    "release",
+    "external_dispatch",
+    "hardware_activation",
+    "biological_intervention"
+  ],
+  "trusted_issuers": [
+    "github-actions",
+    "github",
+    "deployment-controller",
+    "release-controller",
+    "device-attestor",
+    "ethics-review-authority"
+  ],
+  "requirements": {
+    "https_source_urls_only": true,
+    "exact_subject_sha_binding": true,
+    "human_approval_for_consequential_actions": true,
+    "approval_must_bind_action_and_sha": true,
+    "approval_must_be_distinct_from_actor": true,
+    "reject_unknown_fields": false
+  },
+  "execution": {
+    "enabled": false,
+    "network": false,
+    "shell": false,
+    "filesystem_mutation": false,
+    "external_dispatch": false,
+    "hardware_control": false,
+    "biological_control": false
+  },
+  "warning": "Issuer names and evidence fields are assertions supplied by the caller. This verifier does not authenticate upstream systems, signatures, identities, deployments, devices, or research approvals."
+}

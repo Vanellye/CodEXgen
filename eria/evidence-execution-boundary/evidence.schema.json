@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://eria.invalid/schemas/evidence-execution-boundary-1.0.json",
+  "title": "ERIA Action Evidence Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "action_type", "subject_sha", "evidence"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "action_type": {
+      "enum": ["ci", "merge", "deployment", "release", "external_dispatch", "hardware_activation", "biological_intervention"]
+    },
+    "subject_sha": { "type": "string", "pattern": "^[a-fA-F0-9]{40}$" },
+    "evidence": {
+      "type": "object",
+      "required": ["event_id", "status", "source_url", "observed_at", "issuer", "actor"],
+      "properties": {
+        "event_id": { "type": "string", "minLength": 1 },
+        "status": { "const": "confirmed" },
+        "source_url": { "type": "string", "format": "uri", "pattern": "^https://" },
+        "observed_at": { "type": "string", "format": "date-time" },
+        "issuer": { "type": "string", "minLength": 1 },
+        "actor": { "type": "string", "minLength": 1 },
+        "workflow_sha": { "type": "string", "pattern": "^[a-fA-F0-9]{40}$" },
+        "conclusion": { "const": "success" },
+        "pr_merged": { "type": "boolean" },
+        "merge_commit_sha": { "type": "string", "pattern": "^[a-fA-F0-9]{40}$" },
+        "deployed_sha": { "type": "string", "pattern": "^[a-fA-F0-9]{40}$" },
+        "environment": { "type": "string", "minLength": 1 },
+        "deployment_status": { "const": "success" },
+        "published": { "type": "boolean" },
+        "release_tag": { "type": "string", "minLength": 1 },
+        "destination": { "type": "string", "minLength": 1 },
+        "dispatch_id": { "type": "string", "minLength": 1 },
+        "device_id": { "type": "string", "minLength": 1 },
+        "attestation_id": { "type": "string", "minLength": 1 },
+        "protocol_id": { "type": "string", "minLength": 1 },
+        "protocol_version": { "type": "string", "minLength": 1 },
+        "ethics_approval_id": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "approval": {
+      "type": "object",
+      "required": ["kind", "approver_id", "approved_action", "approved_sha", "approved_at", "approval_ref"],
+      "properties": {
+        "kind": { "const": "human" },
+        "approver_id": { "type": "string", "minLength": 1 },
+        "approved_action": { "type": "string" },
+        "approved_sha": { "type": "string", "pattern": "^[a-fA-F0-9]{40}$" },
+        "approved_at": { "type": "string", "format": "date-time" },
+        "approval_ref": { "type": "string", "pattern": "^https://" }
+      },
+      "additionalProperties": false
+    }
+  }
+}
