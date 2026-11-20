@@ -1,9 +1,21 @@
 name: Ɣơ Integrity Check (IC) Flow
 on:
   push:
-    paths: ['Ɣơ/finance/**', '.github/workflows/gamma-finance.yml']
+    paths:
+      - 'Ɣơ/finance/**'
+      - 'Ɣơ/operations/**'
+      - 'docs/Ɣơ/**'
+      - 'docs/ERIA-RUNFLOW-*.md'
+      - 'pantheon/**'
+      - '.github/workflows/gamma-finance.yml'
   pull_request:
-    paths: ['Ɣơ/finance/**', '.github/workflows/gamma-finance.yml']
+    paths:
+      - 'Ɣơ/finance/**'
+      - 'Ɣơ/operations/**'
+      - 'docs/Ɣơ/**'
+      - 'docs/ERIA-RUNFLOW-*.md'
+      - 'pantheon/**'
+      - '.github/workflows/gamma-finance.yml'
 permissions:
   contents: read
 jobs:
@@ -14,8 +26,31 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python -m pip install -e './Ɣơ/finance[test]'
-      - run: python -m pytest -q Ɣơ/finance/tests
+      - name: Install isolated finance and observer packages
+        run: python -m pip install -e './Ɣơ/finance[test]' -e './Ɣơ/operations[test]'
+      - name: Run finance and observer tests
+        run: python -m pytest -q 'Ɣơ/finance/tests' 'Ɣơ/operations/tests'
+  operations-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install observer package
+        run: python -m pip install -e './Ɣơ/operations'
+      - name: Validate .coddoc event record
+        run: python -m gamma_ops.cli validate 'Ɣơ/operations/events/TRUE-LIGHTWORK-WAVE-MAVEN.coddoc' | tee "$RUNNER_TEMP/coddoc-validation.txt"
+      - name: Show current operable catalog and ready-to-open set
+        run: |
+          python -m gamma_ops.cli catalog
+          python -m gamma_ops.cli ready
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gamma-coddoc-validation
+          path: ${{ runner.temp }}/coddoc-validation.txt
+          if-no-files-found: error
+          retention-days: 90
   repository-inventory:
     runs-on: ubuntu-latest
     steps:
@@ -44,3 +79,26 @@ jobs:
       - uses: actions/checkout@v4
       - name: Compile ARM64 codec probe
         run: ANDROID_NDK_HOME="$ANDROID_HOME/ndk/27.2.12479018" bash Ɣơ/finance/scripts/arm-build.sh
+  notify-ready:
+    needs: [python-tests, operations-validate, repository-inventory, arm64-build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install observer notifier
+        run: python -m pip install -e './Ɣơ/operations'
+      - name: Notify only independently reviewed READY_TO_OPEN operables
+        env:
+          OPERABLE_NOTIFY_TO: ${{ vars.OPERABLE_NOTIFY_TO }}
+          OPERABLE_SMTP_HOST: ${{ secrets.OPERABLE_SMTP_HOST }}
+          OPERABLE_SMTP_PORT: ${{ secrets.OPERABLE_SMTP_PORT }}
+          OPERABLE_SMTP_USER: ${{ secrets.OPERABLE_SMTP_USER }}
+          OPERABLE_SMTP_PASSWORD: ${{ secrets.OPERABLE_SMTP_PASSWORD }}
+          OPERABLE_SMTP_FROM: ${{ secrets.OPERABLE_SMTP_FROM }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+        run: python 'Ɣơ/operations/scripts/notify_ready.py'
