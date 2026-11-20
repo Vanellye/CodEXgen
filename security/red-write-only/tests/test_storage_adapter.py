@@ -85,6 +85,13 @@ class StorageBoundaryTests(unittest.TestCase):
                 with self.assertRaises(StorageDenied):
                     self.adapter.create("create_new_report", "reports/no.txt", b"x", grant)
 
+    def test_wildcard_and_any_scopes_are_denied(self):
+        for scope in ("*", "**", "ANY", "ALL"):
+            with self.subTest(scope=scope):
+                wildcard = AuthorizationGrant(**{**self.grant.__dict__, "output_prefix": scope})
+                with self.assertRaises(StorageDenied):
+                    self.adapter.create("create_new_report", "reports/no.txt", b"x", wildcard)
+
     def test_unverified_grant_denied(self):
         invalid = AuthorizationGrant(**{**self.grant.__dict__, "signature": "invalid"})
         with self.assertRaises(StorageDenied):
