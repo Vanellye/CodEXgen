@@ -1,0 +1,35 @@
+{
+  "schema": "PROPULSION-SCENIC/1",
+  "question": "How can a new symbol represent an empty value without losing the original byte?",
+  "routes": [
+    {
+      "id": "route-shortcut-01",
+      "kind": "shortcut",
+      "steps": [
+        "Preserve source bytes",
+        "Render marker in separate view",
+        "Decode and compare exact bytes/length",
+        "Reject on mismatch"
+      ],
+      "evidence_status": "illustrative"
+    },
+    {
+      "id": "route-scenic-01",
+      "kind": "scenic",
+      "steps": [
+        "Disambiguate zero/null/absent/empty/unknown",
+        "Trace format and origin",
+        "Compare meanings",
+        "Use paired mythic examples",
+        "Translate into invariants",
+        "Run cross-adapter vectors"
+      ],
+      "evidence_status": "illustrative"
+    }
+  ],
+  "review": {
+    "human_decision_required": true,
+    "automation_authority": false,
+    "source_hash_required": true
+  }
+}
