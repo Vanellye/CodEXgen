@@ -24,7 +24,7 @@ Create-new only. Existing files are never overwritten or deleted.
 - `tests/test_storage_adapter.py` exercises the real adapter against temporary synthetic directories. No production repository files are targets.
 - `.github/workflows/eria-write-only-boundary.yml` runs this suite in isolated CI.
 
-The injected grant verifier is a required integration point, not a placeholder authorization scheme: production wiring must validate an authentic approval issued by the trusted human-approval authority and check current revocation state. The adapter does not mint grants. The host must provision the output root and the append-only audit sink securely. This code is not a complete OS sandbox and does not make arbitrary host processes safe.
+Wildcard authorization scopes are forbidden. Grants must bind one exact allowed output prefix and one exact operation; values such as `*`, `**`, `ANY`, or `ALL` are denied. Regression tests exercise these denials.\n\nThe injected grant verifier is a required integration point, not a placeholder authorization scheme: production wiring must validate an authentic approval issued by the trusted human-approval authority and check current revocation state. The adapter does not mint grants. The host must provision the output root and the append-only audit sink securely. This code is not a complete OS sandbox and does not make arbitrary host processes safe.
 
 ## Explicitly denied
 
