@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Ɣơ independent insurance marker",
+  "type": "object",
+  "required": ["marker", "record_id", "purpose", "valuation_status"],
+  "properties": {
+    "marker": {"enum": [".rock", ".air", ".ether", ".excedra"]},
+    "record_id": {"type": "string", "minLength": 1},
+    "purpose": {"type": "string", "minLength": 1},
+    "valuation_status": {"enum": ["UNVALUED", "PENDING_INDEPENDENT_VALUATION", "VALUED_WITH_EVIDENCE", "REJECTED"]},
+    "value_minor": {"type": ["integer", "null"], "minimum": 0},
+    "currency": {"enum": ["USD", "EUR", "RUB", "KRW", null]},
+    "evidence_ref": {"type": ["string", "null"]}
+  },
+  "additionalProperties": false
+}
