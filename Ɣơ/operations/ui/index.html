@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#10151b">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/eria-eye.svg" type="image/svg+xml">
 <title>ERIA Repository Eyes</title>
 <style>
 :root{color-scheme:dark;--bg:#10151b;--panel:#19232d;--line:#30404f;--text:#e8eef4;--muted:#a8b6c4;--accent:#91d9bd;--warn:#e5c27b;--red:#ef9999}
@@ -95,4 +98,9 @@ $("report").addEventListener("change",event=>loadFiles([...event.target.files]))
 $("coddoc").addEventListener("change",event=>loadFiles([...event.target.files]));
 $("filter").addEventListener("input",renderRows);
 $("reset").addEventListener("click",()=>{reports=[];currentRows=[];rebuild();$("message").textContent="View cleared. No local files were changed.";$("report").value="";$("coddoc").value="";$("filter").value=""});
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  navigator.serviceWorker.register("./service-worker.js").catch(() => {
+    $("message").textContent += " Offline cache registration unavailable; local viewing still works.";
+  });
+}
 </script></body></html>
