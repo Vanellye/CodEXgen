@@ -1,11 +1,11 @@
 import json
-from pathlib import Path
+from io import BytesIO
 import pytest
 from gamma_finance.valuation import ValuationState, assess_marker
 from gamma_finance.reviewer import verify_reviewer_approval
 from gamma_finance.firecrawl import scrape
 
-FIXTURE=json.loads((Path(__file__).parent/"fixtures"/"reviewer-approval-test-only.json").read_text())
+FIXTURE=json.loads((__import__("pathlib").Path(__file__).parent/"fixtures"/"reviewer-approval-test-only.json").read_text())
 PAYLOAD=FIXTURE["payload"]
 REGISTRY={PAYLOAD["reviewer_id"]:{"public_key_pem":FIXTURE["public_key_pem"],"enabled":True}}
 
@@ -46,6 +46,34 @@ def test_invalid_marker_or_value_holds():
       enrolled_reviewers=REGISTRY,expected_proposal_sha256=PAYLOAD["proposal_sha256"],
       expected_scope=PAYLOAD["scope"],value_minor=-1,currency="USD",now_epoch=PAYLOAD["issued_at"]+1).state==ValuationState.HOLD
 
-def test_firecrawl_enforces_https_allowlist():
+def test_firecrawl_rejects_http_unapproved_and_local_hosts():
     with pytest.raises(ValueError): scrape("http://example.com",allowed_domains={"example.com"})
-    with pytest.raises(ValueError): scrape("https://bad.example",allowed_domains={"example.com"})
+    with pytest.raises(ValueError): scrape("https://not-allowed.com",allowed_domains={"example.com"})
+    with pytest.raises(ValueError): scrape("https://service.local",allowed_domains={"service.local"})
+    with pytest.raises(ValueError): scrape("https://example.com",allowed_domains={"*.com"})
+
+def test_firecrawl_rejects_unapproved_final_redirect(monkeypatch):
+    monkeypatch.setenv("FIRECRAWL_API_KEY","fixture-key-not-real")
+    payload={"success":True,"data":{"markdown":"evidence",
+      "metadata":{"sourceURL":"https://example.com/start","url":"https://redirect-target.com/final"}}}
+    class Response(BytesIO):
+        def __enter__(self): return self
+        def __exit__(self,*args): self.close()
+    monkeypatch.setattr("gamma_finance.firecrawl.urlopen",
+      lambda request,timeout: Response(json.dumps(payload).encode("utf-8")))
+    with pytest.raises(RuntimeError,match="redirect hostname"):
+        scrape("https://example.com/start",allowed_domains={"example.com"})
+
+def test_firecrawl_accepts_mocked_same_host_response(monkeypatch):
+    monkeypatch.setenv("FIRECRAWL_API_KEY","fixture-key-not-real")
+    payload={"success":True,"data":{"markdown":"public sample",
+      "metadata":{"sourceURL":"https://example.com/start","url":"https://example.com/final"}}}
+    class Response(BytesIO):
+        def __enter__(self): return self
+        def __exit__(self,*args): self.close()
+    monkeypatch.setattr("gamma_finance.firecrawl.urlopen",
+      lambda request,timeout: Response(json.dumps(payload).encode("utf-8")))
+    result=scrape("https://example.com/start",allowed_domains={"example.com"})
+    assert result.domain=="example.com"
+    assert result.final_url=="https://example.com/final"
+    assert result.mode=="SOURCE_EVIDENCE_ONLY"
