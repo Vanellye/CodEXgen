@@ -21,8 +21,9 @@ def grant(**overrides):
 
 
 class FakeCursor:
+    description = (("business_date",), ("gross_sales",), ("order_count",))
     def fetchall(self):
-        return [{"business_date": "2026-11-20", "gross_sales": "100.00", "order_count": 2}]
+        return [("2026-11-20", "100.00", 2)]
 
 
 class FakeConnection:
@@ -46,6 +47,7 @@ class ReadOnlyIntelligenceTests(unittest.TestCase):
         snap = self.store.read("shop_daily_sales", ("2026-11-01", 30), grant=grant(),
                                source_revision=REV, now=NOW)
         self.assertEqual(len(snap.rows), 1)
+        self.assertEqual(snap.rows[0]["order_count"], 2)
         self.assertEqual(self.conn.calls[0][0], "SET TRANSACTION READ ONLY")
         self.assertTrue(self.conn.rolled_back and self.conn.closed)
         self.assertEqual(snap.evidence.source_revision, REV)
