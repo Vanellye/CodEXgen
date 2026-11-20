@@ -1,0 +1,17 @@
+{
+  "schema": "ash.rights.v1",
+  "rights": ["COMMUNICATE", "READ_DATA", "WRITE_DATA", "EXPORT_DATA", "INITIATE_TRANSACTION", "APPROVE_TRANSACTION", "EXECUTE_TRANSACTION", "AUTHOR_ADMIN"],
+  "roles": {
+    "AUTHOR": ["COMMUNICATE", "READ_DATA", "WRITE_DATA", "EXPORT_DATA", "INITIATE_TRANSACTION", "APPROVE_TRANSACTION", "EXECUTE_TRANSACTION", "AUTHOR_ADMIN"],
+    "MEMBER": ["COMMUNICATE", "READ_DATA", "WRITE_DATA", "EXPORT_DATA", "INITIATE_TRANSACTION"],
+    "REVIEWER": ["COMMUNICATE", "READ_DATA", "APPROVE_TRANSACTION"],
+    "GUEST": ["COMMUNICATE"]
+  },
+  "invariants": [
+    "Permission is checked server-side on every protected request.",
+    "Transaction initiator cannot approve their own transaction.",
+    "Execution is denied when no verified payment provider is configured.",
+    "AUTHOR administration does not bypass account-owner consent or external provider controls.",
+    "Audit events are recorded for administrative and transaction state changes."
+  ]
+}
