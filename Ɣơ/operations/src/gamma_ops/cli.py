@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 from .coddoc import load_coddoc, ordered_events
 from .readiness import readiness_result, ready_records
+from .repo_eyes import scan_repository
 
 def _load_json(path: str) -> dict:
     value = json.loads(Path(path).read_text(encoding="utf-8"))
@@ -23,6 +24,9 @@ def main(argv: list[str] | None = None) -> int:
     catalog.add_argument("--registry", default="Ɣơ/operations/registry/operables.json")
     ready = commands.add_parser("ready", help="list only independently reviewed READY_TO_OPEN records")
     ready.add_argument("--registry", default="Ɣơ/operations/registry/operables.json")
+    scan = commands.add_parser("scan", help="recursively inventory repository files without executing them")
+    scan.add_argument("root", nargs="?", default=".")
+    scan.add_argument("--output", default=None)
     args = parser.parse_args(argv)
     try:
         if args.command == "validate":
@@ -36,6 +40,24 @@ def main(argv: list[str] | None = None) -> int:
                 when = event["occurred_at"] or "NOT_RECORDED"
                 refs = ", ".join(event["source_refs"])
                 print(f'{event["sequence"]:04d} | {when} | {event["event_id"]} | {event["observation"]} | {refs}')
+            return 0
+        if args.command == "scan":
+            output = Path(args.output).resolve() if args.output else None
+            excluded = set()
+            if output is not None:
+                try:
+                    excluded.add(output.relative_to(Path(args.root).resolve()).as_posix())
+                except ValueError:
+                    pass
+            report = scan_repository(args.root, exclude_paths=excluded)
+            serialized = json.dumps(report, ensure_ascii=False, indent=2) + "\\n"
+            if output is None:
+                print(serialized, end="")
+            else:
+                output.parent.mkdir(parents=True, exist_ok=True)
+                output.write_text(serialized, encoding="utf-8")
+                print(json.dumps({"report": output.as_posix(), "files_scanned": report["files_scanned"],
+                                  "classifications": report["classifications"]}, indent=2))
             return 0
         registry = _load_json(args.registry)
         if args.command == "catalog":
