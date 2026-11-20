@@ -16,9 +16,10 @@ class RubleRuntimeTests(unittest.TestCase):
         second = Ledger().execute(parse(source), stamp("2026-11-20T10:30:00Z"))
         self.assertEqual(first, second)
         self.assertEqual(first["accounts"]["reserve-usd"]["balance"], 235000)
-        self.assertEqual(first["accounts"]["hourly-allowance-usd"]["balance"], 5000)
+        self.assertEqual(first["accounts"]["hourly-allowance-usd"]["balance"], 3750)
+        self.assertEqual(first["accounts"]["ration-spend-usd"]["balance"], 1250)
         self.assertEqual(first["accounts"]["travel-eur"]["balance"], 9200)
-        self.assertEqual(len(first["events"]), 4)
+        self.assertEqual(len(first["events"]), 5)
         self.assertEqual(first["events"][-1]["previous_hash"], first["events"][-2]["hash"])
 
     def test_transfer_rejects_insufficient_funds(self):
