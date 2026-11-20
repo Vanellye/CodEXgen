@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ERIA CODDOC v1",
+  "type": "object",
+  "required": ["format", "version", "document_id", "title", "narrative", "source_scope", "runflow_state", "events"],
+  "properties": {
+    "format": {"const": "ERIA_CODDOC"},
+    "version": {"const": 1},
+    "document_id": {"type": "string", "minLength": 1},
+    "title": {"type": "string", "minLength": 1},
+    "created_at": {"type": ["string", "null"], "format": "date-time"},
+    "runflow_state": {
+      "enum": ["DRAFT", "READY", "AUTHORIZED", "RUNNING", "BLOCKED", "UNRESOLVED", "REVIEW", "RECOVERY-REQUIRED", "RECOVERED", "COMPLETE", "LEARNED"]
+    },
+    "narrative": {"type": "string", "minLength": 1},
+    "source_scope": {"type": "string", "minLength": 1},
+    "time_model": {"type": "object"},
+    "capability_gates": {"type": "object"},
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["event_id", "sequence", "occurred_at", "evidence_class", "source_refs", "observation", "interpretation"],
+        "properties": {
+          "event_id": {"type": "string", "minLength": 1},
+          "sequence": {"type": "integer", "minimum": 1},
+          "occurred_at": {"type": ["string", "null"], "format": "date-time"},
+          "evidence_class": {"enum": ["SOURCE_TEXT", "CODE_REFERENCE", "WORKFLOW_RESULT", "ARTIFACT_REFERENCE", "HISTORICAL_REFERENCE", "USER_DEFINED_LABEL", "UNKNOWN"]},
+          "source_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+          "observation": {"type": "string", "minLength": 1},
+          "interpretation": {"type": "string"},
+          "state": {"type": "string"}
+        }
+      }
+    }
+  }
+}
