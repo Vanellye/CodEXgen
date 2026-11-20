@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#152638">
+<title>Propulsion °v — Scenic Route Fixture</title>
+<link rel="stylesheet" href="./fixture.css">
+</head>
+<body>
+<main class="shell">
+<header>
+  <p class="eyebrow">PROPULSION °v · ROUTE FACULTY</p>
+  <h1>Choose the way through.</h1>
+  <p class="lede">A mobile fixture for comparing direct findings with longer, transparent scenic routes.</p>
+</header>
+<section class="question panel">
+  <label for="question">Question in question</label>
+  <input id="question" value="How can a new symbol represent an empty value without losing the original byte?">
+  <p class="hint">Edit the question to see the sample route explanation adapt.</p>
+</section>
+<section class="controls" aria-label="Route controls">
+  <button id="shortcut" class="active" type="button">Shortcut</button>
+  <button id="scenic" type="button">Scenic route</button>
+  <button id="compare" type="button">Compare both</button>
+</section>
+<section id="routes" class="routes" aria-live="polite"></section>
+<section class="panel">
+  <h2>TITAN · over / under / through</h2>
+  <p>Break a large claim into traceable units: origin, meaning, evidence, time and consequence. “Dimensional” is a navigation metaphor here, not a physical claim.</p>
+  <div class="chips"><span>Origin</span><span>Meaning</span><span>Evidence</span><span>Time</span><span>Consequence</span></div>
+</section>
+<section class="panel myth">
+  <h2>Alpha Phish / Beta Quest</h2>
+  <p><strong>Alpha Phish — The False Beacon:</strong> a deceptive beacon tempts the traveller with a hidden shortcut. The positive lesson is curiosity; the rebuke is that trust must be checked against provenance.</p>
+  <p><strong>Beta Quest — The Two Bridges:</strong> a short, poorly marked bridge competes with a longer bridge carrying witnesses and repair stations. The scenic route adds context, but still needs inspection.</p>
+  <p class="hint">Fictional narrative modes only—not credential collection, phishing instructions or real-world social engineering.</p>
+</section>
+<section class="panel">
+  <h2>Portable route record</h2>
+  <pre id="json"></pre>
+  <button id="copy" type="button" class="secondary">Copy JSON</button>
+  <p id="status" class="hint" role="status"></p>
+</section>
+<footer>Local fixture · no network requests · no repository writes</footer>
+</main>
+<script src="./fixture.js"></script>
+</body>
+</html>
