@@ -1,0 +1,5 @@
+{
+  "registry_version": "0.1-draft",
+  "artifacts": [],
+  "notes": "Append artifact entries; do not overwrite prior observations. Keep source and derivative artifacts separate. Store metadata and source locators only unless content retention is explicitly authorized."
+}
