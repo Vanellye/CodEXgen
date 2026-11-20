@@ -1,0 +1,141 @@
+{
+  "format": "ERIA_CODDOC",
+  "version": 1,
+  "document_id": "true-lightwork-wave-maven",
+  "title": "TRUE LIGHTWORK WAVE-MAVEN",
+  "created_at": null,
+  "runflow_state": "REVIEW",
+  "narrative": "A source-traceable observer concept that turns authored narrative into ordered events, keeps unknown time values unknown, links code and evidence to a reviewable terminal, and separates capability from authority. 'Lightwork Wave-Maven', 'capacitor', and 'intergalactic terminal' are symbolic project labels, not claims of physical energy, beyond-time measurement, or external connectivity.",
+  "source_scope": "Vanellye/CodEXgen main commit 13f80dce0e03552f51a288528eb796c7e497a7db and PR #104 head 3b83c6ebbf713f71a6f94bf20e275a7273e23608; recursive Git trees inspected with truncated=false.",
+  "time_model": {
+    "ordering": "authored sequence, with source timestamps shown only when recorded",
+    "unknown_time": null,
+    "interpolation": false,
+    "duration_rule": "calculate a duration only when both endpoint timestamps are explicit and timezone-aware"
+  },
+  "events": [
+    {
+      "event_id": "eria-runflow-protocol",
+      "sequence": 1,
+      "occurred_at": null,
+      "evidence_class": "SOURCE_TEXT",
+      "source_refs": [
+        "main@13f80dce:docs/ERIA-RUNFLOW-OPERATING-PROTOCOL.md",
+        "main@13f80dce:docs/ERIA-RUNFLOW-SYMBOL-MAP.md"
+      ],
+      "observation": "ERIA Runflow defines an accountable cycle from Origin through Learning and New Growth; initialization creates no background process or runtime service.",
+      "interpretation": "Use this protocol as the canonical narrative-to-operation state model.",
+      "state": "DOCUMENTATION_ONLY"
+    },
+    {
+      "event_id": "pantheon-new-staged",
+      "sequence": 2,
+      "occurred_at": null,
+      "evidence_class": "SOURCE_TEXT",
+      "source_refs": [
+        "main@13f80dce:pantheon/NEW/README.md"
+      ],
+      "observation": "Pantheon NEW is described as staged and not wired into Pantheon runtime.",
+      "interpretation": "Connect through a review adapter only; do not claim a runtime integration.",
+      "state": "STAGED_NOT_WIRED"
+    },
+    {
+      "event_id": "pantheon-android-review-gate",
+      "sequence": 3,
+      "occurred_at": null,
+      "evidence_class": "CODE_REFERENCE",
+      "source_refs": [
+        "main@13f80dce:app/src/main/java/com/vanellye/eria/pantheon/PantheonRuntimeGate.kt",
+        "main@13f80dce:pantheon/RUNTIME-INTEGRATION.md"
+      ],
+      "observation": "The Android adapter prepares review records only and reports actionTaken=false; the C modules are not wired through JNI.",
+      "interpretation": "Expose review status, not action execution.",
+      "state": "REVIEW_ONLY"
+    },
+    {
+      "event_id": "historical-exchange-and-engine-lines",
+      "sequence": 4,
+      "occurred_at": null,
+      "evidence_class": "HISTORICAL_REFERENCE",
+      "source_refs": [
+        "main@13f80dce:docs/BRANCH-DIRECTORY-ACOUSTIC.md",
+        "main@13f80dce:docs/TRUE-NORTH-IMPLEMENTATION-STATUS.md"
+      ],
+      "observation": "Historical documentation lists pantheon/signed-package-exchange (PR #13), pantheon/source-digest-engine (PR #11), and pantheon/cpp-html-consent-engine.",
+      "interpretation": "These are lineage references only; their current branch existence and runtime behavior are not established by this record.",
+      "state": "HISTORICAL_REFERENCE_ONLY"
+    },
+    {
+      "event_id": "excedra-marker-scope",
+      "sequence": 5,
+      "occurred_at": null,
+      "evidence_class": "CODE_REFERENCE",
+      "source_refs": [
+        "PR104@3b83c6eb:Ɣơ/finance/src/gamma_finance/valuation.py",
+        "PR104@3b83c6eb:Ɣơ/finance/schemas/insurance-marker.schema.json"
+      ],
+      "observation": "The PR #104 finance module recognizes .excedra as a marker label.",
+      "interpretation": "A marker is not proof of an asset, ownership, collateral, valuation, or liquidity.",
+      "state": "METADATA_ONLY"
+    },
+    {
+      "event_id": "dependency-bot-scope",
+      "sequence": 6,
+      "occurred_at": null,
+      "evidence_class": "CODE_REFERENCE",
+      "source_refs": [
+        "main@13f80dce:.github/dependabot.yml"
+      ],
+      "observation": "A dependency-update bot configuration exists in the inspected main tree.",
+      "interpretation": "This does not establish a general autonomous trading or exchange bot.",
+      "state": "DEPENDENCY_AUTOMATION_ONLY"
+    },
+    {
+      "event_id": "finance-prepare-only",
+      "sequence": 7,
+      "occurred_at": null,
+      "evidence_class": "CODE_REFERENCE",
+      "source_refs": [
+        "PR104@3b83c6eb:Ɣơ/finance/src/gamma_finance/runflow.py",
+        "PR104@3b83c6eb:Ɣơ/finance/SECURITY-AND-LIVE-GATE.md"
+      ],
+      "observation": "The finance withdrawal lifecycle prepares proposals only and explicitly disables live submission.",
+      "interpretation": "Future trading-related work belongs in local paper replay and analysis until separately authorized security work is complete.",
+      "state": "PREPARE_ONLY"
+    },
+    {
+      "event_id": "ic-validation-and-inventory-artifact",
+      "sequence": 8,
+      "occurred_at": "2026-11-20T19:05:57Z",
+      "evidence_class": "ARTIFACT_REFERENCE",
+      "source_refs": [
+        "https://github.com/Vanellye/CodEXgen/actions/runs/44798805879",
+        "https://github.com/Vanellye/CodEXgen/actions/runs/44798805879/artifacts/14660990352"
+      ],
+      "observation": "At the recorded artifact creation time, the inventory report was uploaded from PR #104 head 3b83c6ebbf713f71a6f94bf20e275a7273e23608; the IC and Independent Branch workflows completed successfully.",
+      "interpretation": "The result validates that exact tested head only, not subsequent new modules or live financial execution.",
+      "state": "PASSED_FOR_RECORDED_HEAD",
+      "artifact_sha256": "a635992ee0451ff59c1c7c3212e3b2b35adc5a825252bed9aab7af2e41af076f"
+    },
+    {
+      "event_id": "fah-wrkply-sunflowers-labels",
+      "sequence": 9,
+      "occurred_at": null,
+      "evidence_class": "USER_DEFINED_LABEL",
+      "source_refs": [
+        "conversation:current-user-request"
+      ],
+      "observation": "The labels Fah, .wrkply, and Sunflowers were requested as watcher/data-pulling concepts.",
+      "interpretation": "No endpoint, schema, or source identity was supplied; keep each unresolved and disable fetching until defined.",
+      "state": "UNRESOLVED"
+    }
+  ],
+  "capability_gates": {
+    "source_provenance": "REQUIRED",
+    "coddoc_validity": "REQUIRED",
+    "tests_and_build": "REQUIRED",
+    "independent_review": "REQUIRED",
+    "human_open_decision": "REQUIRED",
+    "live_financial_execution": "DISABLED"
+  }
+}
