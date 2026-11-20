@@ -111,6 +111,7 @@ jobs:
       - name: Notify only independently reviewed READY_TO_OPEN operables
         env:
           OPERABLE_NOTIFY_TO: ${{ vars.OPERABLE_NOTIFY_TO }}
+          ERIA_REVIEWER_REGISTRY_SHA256: ${{ vars.ERIA_REVIEWER_REGISTRY_SHA256 }}
           OPERABLE_SMTP_HOST: ${{ secrets.OPERABLE_SMTP_HOST }}
           OPERABLE_SMTP_PORT: ${{ secrets.OPERABLE_SMTP_PORT }}
           OPERABLE_SMTP_USER: ${{ secrets.OPERABLE_SMTP_USER }}
