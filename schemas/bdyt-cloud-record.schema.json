@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://eria.invalid/schemas/bdyt-cloud-record.schema.json",
+  "title": "bđyt Cloud Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["recordId", "kind", "sha256", "byteCount", "parentRecordIds", "methodVersion", "createdAtEpochMillis"],
+  "properties": {
+    "recordId": {"type": "string", "minLength": 1},
+    "kind": {"enum": ["SOURCE", "DERIVED", "EXECUTION_RECEIPT"]},
+    "sha256": {"type": "string", "pattern": "^[a-fA-F0-9]{64}$"},
+    "byteCount": {"type": "integer", "minimum": 0},
+    "parentRecordIds": {"type": "array", "items": {"type": "string"}},
+    "methodVersion": {"type": "string", "minLength": 1},
+    "createdAtEpochMillis": {"type": "integer", "minimum": 0}
+  }
+}
