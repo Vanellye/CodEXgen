@@ -1,0 +1,99 @@
+name: ERIA human approval checkpoint
+
+on:
+  workflow_dispatch:
+    inputs:
+      request_id:
+        description: Unique approval request identifier
+        required: true
+        type: string
+      operation:
+        description: Exact proposed operation (record only; never executed here)
+        required: true
+        type: string
+      target_commit:
+        description: Full immutable commit SHA being reviewed
+        required: true
+        type: string
+      scope:
+        description: Exact scope of the requested approval
+        required: true
+        type: string
+      request_digest:
+        description: SHA-256 digest of the complete approval request
+        required: true
+        type: string
+      expires_at:
+        description: Approval expiry as ISO-8601 UTC timestamp
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  record-human-review:
+    # Configure this GitHub Environment with required reviewers before relying on this gate.
+    # No consequential action is performed by this workflow.
+    environment:
+      name: eria-human-approval
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate request shape
+        shell: bash
+        env:
+          REQUEST_ID: ${{ inputs.request_id }}
+          TARGET_COMMIT: ${{ inputs.target_commit }}
+          REQUEST_DIGEST: ${{ inputs.request_digest }}
+          EXPIRES_AT: ${{ inputs.expires_at }}
+        run: |
+          set -euo pipefail
+          [[ -n "$REQUEST_ID" ]]
+          [[ "$TARGET_COMMIT" =~ ^[a-fA-F0-9]{40,64}$ ]]
+          [[ "$REQUEST_DIGEST" =~ ^[a-fA-F0-9]{64}$ ]]
+          date -u -d "$EXPIRES_AT" >/dev/null
+
+      - name: Write review checkpoint evidence
+        shell: bash
+        env:
+          REQUEST_ID: ${{ inputs.request_id }}
+          OPERATION: ${{ inputs.operation }}
+          TARGET_COMMIT: ${{ inputs.target_commit }}
+          SCOPE: ${{ inputs.scope }}
+          REQUEST_DIGEST: ${{ inputs.request_digest }}
+          EXPIRES_AT: ${{ inputs.expires_at }}
+          REQUESTED_BY: ${{ github.actor }}
+          REPOSITORY: ${{ github.repository }}
+          WORKFLOW_RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          mkdir -p approval-evidence
+          python3 - <<'PY'
+          import json, os\n          from datetime import datetime, timezone
+          record = {
+              "schema_version": "1.0.0",
+              "request_id": os.environ["REQUEST_ID"],
+              "status": "review_checkpoint_recorded",
+              "requested_by": os.environ["REQUESTED_BY"],
+              "repository": os.environ["REPOSITORY"],
+              "target_commit": os.environ["TARGET_COMMIT"],
+              "operation": os.environ["OPERATION"],
+              "scope": [s.strip() for s in os.environ["SCOPE"].split(",") if s.strip()],
+              "request_digest": os.environ["REQUEST_DIGEST"],
+              "requested_at": datetime.now(timezone.utc).isoformat(),\n              "expires_at": os.environ["EXPIRES_AT"],
+              "workflow_run": os.environ["WORKFLOW_RUN"],
+              "environment": "eria-human-approval",
+              "note": "This artifact records a checkpoint after the configured GitHub Environment gate. Consult GitHub environment/deployment history for reviewer identity. This workflow does not execute the requested operation."
+          }
+          with open("approval-evidence/review-checkpoint.json", "w", encoding="utf-8") as f:
+              json.dump(record, f, indent=2)
+              f.write("\n")
+          PY
+
+      - name: Upload audit evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: eria-approval-${{ inputs.request_id }}
+          path: approval-evidence/review-checkpoint.json
+          if-no-files-found: error
+          retention-days: 90

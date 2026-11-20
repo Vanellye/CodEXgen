@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://eria.invalid/schemas/approval-record-1.0.0.json",
+  "title": "ERIA Human Approval Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "request_id", "status", "requested_by",
+    "repository", "target_commit", "operation", "scope",
+    "policy_version", "request_digest", "requested_at", "expires_at"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "request_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "status": { "enum": ["proposed", "validated", "eligible", "approved", "denied", "expired", "blocked", "executed", "audited", "review_checkpoint_recorded"] },
+    "requested_by": { "type": "string", "minLength": 1 },
+    "approved_by": { "type": "string", "minLength": 1 },
+    "repository": { "type": "string", "pattern": "^[^/]+/[^/]+$" },
+    "target_commit": { "type": "string", "pattern": "^[a-fA-F0-9]{40,64}$" },
+    "operation": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "scope": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "policy_version": { "const": "1.0.0" },
+    "request_digest": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" },
+    "evidence": { "type": "array", "items": { "type": "string" } },
+    "validation_summary": { "type": "string" },
+    "requested_at": { "type": "string", "format": "date-time" },
+    "approved_at": { "type": "string", "format": "date-time" },
+    "expires_at": { "type": "string", "format": "date-time" },
+    "execution_record": { "type": "string" },
+    "denial_reason": { "type": "string" },
+    "recovery_plan": { "type": "string" },
+    "audit_record_digest": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "approved" } } },
+      "then": { "required": ["approved_by", "approved_at"] }
+    },
+    {
+      "if": { "properties": { "status": { "const": "denied" } } },
+      "then": { "required": ["denial_reason"] }
+    }
+  ]
+}
