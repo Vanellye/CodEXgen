@@ -1,0 +1,55 @@
+{
+  "format": "ERIA_ONION_LAYERS",
+  "version": 1,
+  "mode": "READ_ONLY",
+  "layers": [
+    {
+      "id": "L0",
+      "name": "Repository boundary and identity",
+      "purpose": "Pin repository, branch, commit and scan root"
+    },
+    {
+      "id": "L1",
+      "name": "Source files and authored assets",
+      "purpose": "Inventory paths and file classifications without executing"
+    },
+    {
+      "id": "L2",
+      "name": "Contracts, schemas, manifests and interfaces",
+      "purpose": "Map declared data shapes and boundaries"
+    },
+    {
+      "id": "L3",
+      "name": "Modules, libraries and adapters",
+      "purpose": "Map code units and connection surfaces"
+    },
+    {
+      "id": "L4",
+      "name": "Dependencies, workflows and build wiring",
+      "purpose": "Map declared dependencies and CI/build flow"
+    },
+    {
+      "id": "L5",
+      "name": "Runtime, authorization and capability gates",
+      "purpose": "Map privileged boundaries; no runtime activation"
+    },
+    {
+      "id": "L6",
+      "name": "History, provenance and lineage",
+      "purpose": "Connect observations to historical source references"
+    },
+    {
+      "id": "L7",
+      "name": "Tests, CI evidence and generated reports",
+      "purpose": "Record exact tests and artifacts tied to commits"
+    }
+  ],
+  "invariants": [
+    "Unknown remains unknown",
+    "Source files are never executed by inventory",
+    "Symlinks are recorded but never followed",
+    "Sensitive path/content candidates are not hashed or exported",
+    "Readiness is not execution authority",
+    "Live financial execution remains disabled"
+  ]
+}
