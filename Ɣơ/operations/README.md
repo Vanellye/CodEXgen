@@ -10,7 +10,7 @@ This module connects source-linked narratives to a local runnable terminal witho
 - `src/gamma_ops/coddoc.py`: validates and hashes .coddoc records.
 - `src/gamma_ops/readiness.py`: fail-closed READY_TO_OPEN qualification.
 - `src/gamma_ops/cli.py`: read-only terminal commands.
-- `src/gamma_ops/repo_eyes.py`: recursive, read-only eight-layer repository scanner.
+- `src/gamma_ops/repo_eyes.py`: recursive, read-only eight-layer repository scanner with repository, branch, checkout SHA, PR head SHA and base SHA metadata.
 - `registry/onion-map.json`: layer definitions and safety invariants.
 - `ui/index.html`: offline browser dashboard for inventory and .coddoc files.
 - `registry/discovery-map.json`: inspected source lineage and search limitations.
@@ -27,7 +27,8 @@ PYTHONPATH='Ɣơ/operations/src' python -m gamma_ops.cli validate 'Ɣơ/operatio
 PYTHONPATH='Ɣơ/operations/src' python -m gamma_ops.cli timeline 'Ɣơ/operations/events/TRUE-LIGHTWORK-WAVE-MAVEN.coddoc'
 PYTHONPATH='Ɣơ/operations/src' python -m gamma_ops.cli catalog
 PYTHONPATH='Ɣơ/operations/src' python -m gamma_ops.cli ready
-PYTHONPATH='Ɣơ/operations/src' python -m gamma_ops.cli scan . --output /tmp/eria-repository-eyes.json
+PYTHONPATH='Ɣơ/operations/src' python -m gamma_ops.cli scan . --repository 'owner/repository' --branch 'main' --commit-sha '<checked-out-sha>' --output /tmp/eria-repository-eyes.json
+# Repeat for each local repository checkout and select all resulting JSON reports in the dashboard.
 python -m pytest -q 'Ɣơ/operations/tests'
 
 # Offline dashboard: open Ɣơ/operations/ui/index.html in a browser,
@@ -46,6 +47,10 @@ python -m pytest -q 'Ɣơ/operations/tests'
 - L7 — tests, CI evidence and generated reports
 
 The scanner does not execute files, follow symlinks, return file contents, or hash sensitive-name/content candidates. It excludes tool caches and dependency directories and limits per-file hashing to 8 MiB. Amber and red records require human review; no file is automatically opened or activated.
+
+## Multi-repository review
+
+The scanner accepts any local repository checkout path. Run it once per checkout, supplying its repository name, branch, and exact checkout SHA; for pull requests, also supply the PR head and base SHAs. The offline dashboard accepts multiple JSON reports and .coddoc files in one session, labels each by repository identity, and aggregates onion-layer counts. Reports remain separate; similarly named paths are never treated as the same source. The GitHub Actions workflow in this PR currently scans only `Vanellye/CodEXgen`; it does not automatically enumerate or scan every repository in the account.
 
 Commands are read-only. No watcher is started by importing this package or running the CLI.
 
