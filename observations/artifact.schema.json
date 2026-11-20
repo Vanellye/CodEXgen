@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Artifact Observation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifact_id",
+    "artifact_type",
+    "origin",
+    "observed_at",
+    "content_fingerprint",
+    "status"
+  ],
+  "properties": {
+    "artifact_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_type": {
+      "type": "string",
+      "enum": [
+        "source_file",
+        "generated_file",
+        "blueprint",
+        "prompt_record",
+        "model_output",
+        "dataset",
+        "binary",
+        "unknown"
+      ]
+    },
+    "origin": {
+      "type": "object",
+      "required": [
+        "source_kind",
+        "locator"
+      ],
+      "properties": {
+        "source_kind": {
+          "type": "string"
+        },
+        "locator": {
+          "type": "string"
+        },
+        "authorship": {
+          "type": "string"
+        },
+        "parent_artifact_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "generated_by": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source_created_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "content_fingerprint": {
+      "type": "object",
+      "required": [
+        "algorithm",
+        "value",
+        "input_basis"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "SHA-256"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "input_basis": {
+          "const": "exact_source_bytes"
+        },
+        "byte_length": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "observed",
+        "changed",
+        "missing",
+        "unavailable",
+        "conflicted",
+        "superseded"
+      ]
+    },
+    "scope": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "verified",
+        "observed",
+        "inferred",
+        "uncertain"
+      ]
+    },
+    "conflict_group": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}
