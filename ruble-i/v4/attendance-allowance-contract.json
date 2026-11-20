@@ -1,0 +1,34 @@
+{
+  "schema": "ruble-i.v4.attendance-allowance-contract.v1",
+  "mode": "PREPARE_ONLY",
+  "status": "UNCONFIGURED_HOLD",
+  "trigger": "VERIFIED_ATTENDANCE_EVIDENCE",
+  "attendance": {
+    "source_ref": null,
+    "record_id_required": true,
+    "occurred_at_required": true,
+    "units_required": true,
+    "replay_protection": "unique_source_ref+record_id"
+  },
+  "grant": {
+    "calculation": "UNCONFIGURED",
+    "asset": "USD",
+    "amount_minor": null,
+    "per_attendance_minor": null,
+    "per_unit_minor": null,
+    "period_cap_minor": null
+  },
+  "authorization": {
+    "independent_reviewer_required": true,
+    "registry": "reviewer-registry.example.json",
+    "signature_algorithm": "Ed25519",
+    "exact_proposal_digest_required": true
+  },
+  "execution": {
+    "automatic_proposal_preparation": true,
+    "automatic_approval": false,
+    "automatic_money_movement": false,
+    "live_submission_enabled": false
+  },
+  "note": "No amount or attendance source is configured. Proposals only after the grant formula and trusted attendance source are configured."
+}
