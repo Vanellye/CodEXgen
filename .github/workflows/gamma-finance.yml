@@ -1,4 +1,4 @@
-name: Gamma Finance Isolated CI
+name: Ɣơ Integrity Check (IC) Flow
 on:
   push:
     paths: ['Ɣơ/finance/**', '.github/workflows/gamma-finance.yml']
