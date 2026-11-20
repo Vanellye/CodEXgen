@@ -98,3 +98,13 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew --no-daemon --stacktrace :app:assembleDebug
+
+  bash-storage-rhythm:
+    name: Bash M*ASH storage rhythm tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Bash syntax
+        run: bash -n storage/rhythm-engine.sh storage/tests/test-rhythm-engine.sh
+      - name: Run filesystem-only storage tests
+        run: bash storage/tests/test-rhythm-engine.sh
