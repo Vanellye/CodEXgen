@@ -92,6 +92,12 @@ def test_registry_pin_mismatch_and_revocation_hold(tmp_path,monkeypatch):
     ready,reasons=readiness_result(record,repository_root=tmp_path,now_epoch=now)
     assert not ready and any("revoked" in reason for reason in reasons)
 
+def test_missing_external_registry_pin_means_hold(tmp_path,monkeypatch):
+    record,_,now=_approved_record(tmp_path,monkeypatch)
+    monkeypatch.delenv("ERIA_REVIEWER_REGISTRY_SHA256",raising=False)
+    ready,reasons=readiness_result(record,repository_root=tmp_path,now_epoch=now)
+    assert not ready and any("external reviewer registry digest pin is not configured" in reason for reason in reasons)
+
 def test_live_financial_tier_never_becomes_ready(tmp_path,monkeypatch):
     record,_,now=_approved_record(tmp_path,monkeypatch,tier="LIVE_FINANCIAL")
     ready,reasons=readiness_result(record,repository_root=tmp_path,now_epoch=now)
