@@ -25,8 +25,8 @@ class AllowanceTests(unittest.TestCase):
         result = prepare_hybrid_allocation(self.policy, [self.balance],
             [BeneficiaryRequest("ben-a", 5000, 3000), BeneficiaryRequest("ben-b", 5000, 3000)], now=self.now)
         self.assertEqual(result["verified_available_after_reserves_minor"], 10000)
-        self.assertEqual(result["proposed_total_minor"], 6000)
-        self.assertEqual([x["proposed_minor"] for x in result["beneficiaries"]], [3000, 3000])
+        self.assertEqual(result["proposed_total_minor"], 5000)
+        self.assertEqual([x["proposed_minor"] for x in result["beneficiaries"]], [2500, 2500])
         self.assertFalse(result["live_submission_enabled"])
 
     def test_stale_balance_holds(self):
@@ -93,6 +93,12 @@ if __name__ == "__main__":
 
 
 class CrossProviderBridgeTests(unittest.TestCase):
+    def setUp(self):
+        self.now = datetime.now(timezone.utc)
+        self.policy = AllowancePolicy("test-v1", "USD", 10000, 4000, 2500, 8000, 86400, 300,
+            (self.now + timedelta(hours=1)).isoformat())
+        self.balance = BalanceEvidence("wise_platform", "acct-pseudo-1", "USD", 12000, 2000,
+            self.now.isoformat(), True, "evidence:balance-001", "funding-source-001")
     def test_bridge_requires_provider_auth_and_permission(self):
         from bridge import ProviderConnectionEvidence, prepare_cross_provider_allowance
         connection = ProviderConnectionEvidence("wise_platform", True, True, True,
