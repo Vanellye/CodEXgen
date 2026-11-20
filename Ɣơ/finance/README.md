@@ -2,38 +2,31 @@
 
 Status: experimental / PREPARE_ONLY. Isolated from the Android app and existing Ruble-I flows.
 
-## Scope
-- Reversible UTF-8 bytes ↔ Unicode code-point codec with source digest and provenance.
-- Separate English interpretation; never overwrite source records.
-- Integer minor-unit money for USD, EUR, RUB, KRW; dated rational FX quotes.
-- Evidence-backed funding findings, withdrawal proposals, reconciliation and audit export.
-- Separate pathology/water, shower, fire/environment, and insurance-marker schemas.
-- Versioned .GRSP audit export and .og presentation contract.
-- ARM/NDK preflight. No native ARM binary is claimed in this milestone.
+## Progression
+- **LOOK / RED-LIGHT:** read-only inventory classifies readable source, binaries, unknown formats, symlinks, and sensitive-name candidates. It does not execute or rewrite inspected files.
+- **CODEC:** reversible UTF-8 bytes ↔ Unicode code points, source digest, and preserved zero bytes.
+- **ARM:** CI cross-compiles a harmless ARM64 codec smoke binary. It is not a wallet or finance executor.
+- **FIRECRAWL:** opt-in HTTPS REST adapter; requires FIRECRAWL_API_KEY in the environment and exact hostname allowlisting.
+- **VALUATION:** .rock, .air, .ether, .excedra markers remain metadata until an independent valuation report and reviewer reference are supplied.
+- **FINANCE:** integer minor units for USD/EUR/RUB/KRW; dated rational FX; evidence-backed proposals and audit exports.
+- **WITHDRAWALS:** PREPARE_ONLY; live submission remains disabled.
 
 ## Safety contract
 1. Preserve zero bytes and zero-valued source terms. A derived view may omit additive zero terms only without changing canonical source.
 2. Never replace zero or missing data with invented positive values.
 3. Missing, malformed, stale, duplicate, or unverifiable evidence => HOLD/DENY.
-4. .rock, .air, .ether, and .excedra are insurance-marker labels only; they do not prove ownership, collateral, price, liquidity, or deposit value.
-5. Firecrawl is an ingestion boundary only; no crawler or credentials are enabled.
-6. Bots may prepare and validate; independent human authorization is required. Live money movement is disabled.
-7. Inventory native, binary, and Excedra artifacts before migration. Originals remain untouched; conversions go to staging.
+4. Insurance markers do not prove ownership, collateral, price, liquidity, or deposit value.
+5. Crawled content is untrusted source material, not proof of funds or authorization.
+6. Bots may prepare and validate; independent human authorization is required.
+7. Native, binary, and Excedra artifacts are inventoried before migration. Originals remain untouched; conversions go to staging.
 
-## Layout
-- src/gamma_finance/codec.py — reversible codec.
-- src/gamma_finance/money.py — integer minor units and rational FX.
-- src/gamma_finance/runflow.py — fail-closed proposal state machine.
-- schemas/ — independent observation and marker schemas.
-- scripts/arm-build.sh — ARM/NDK preflight.
-- scripts/export-grsp.py — deterministic audit export.
-- tests/ — positive and negative fixtures.
-
-## Local checks
+## Commands
     python3 -m venv .venv
     . .venv/bin/activate
     python -m pip install -e '.[test]'
     pytest -q
+    python scripts/look-readonly.py ../../ --output /tmp/gamma-inventory.json
     bash scripts/arm-build.sh
+    python scripts/export-grsp.py tests/fixtures/sample-audit.jsonl /tmp/sample.GRSP
 
-The ARM script reports HOLD unless an NDK is available. Even with an NDK, this Python-only milestone does not claim a native binary build.
+See SECURITY-AND-LIVE-GATE.md before any production integration.
