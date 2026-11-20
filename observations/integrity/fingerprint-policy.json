@@ -1,0 +1,12 @@
+{
+  "algorithm": "SHA-256",
+  "input": "exact_source_bytes",
+  "normalization": "none",
+  "source_and_derivative_hashes_separate": true,
+  "hash_proves_authority": false,
+  "hash_proves_authorship": false,
+  "missing_bytes_policy": "fingerprint_unavailable",
+  "record_byte_length": true,
+  "record_media_type": true,
+  "record_encoding_when_text": true
+}
