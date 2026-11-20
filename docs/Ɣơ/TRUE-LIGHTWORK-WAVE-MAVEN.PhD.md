@@ -41,6 +41,15 @@ The historical directory references `pantheon/signed-package-exchange` (PR #13),
 - **watch policy:** GitHub repository events are read-only; Firecrawl is disabled until individually approved hostnames exist.
 - **notification adapter:** sends email only when the registry record is explicitly READY_TO_OPEN and all checks pass. SMTP credentials are supplied as GitHub Actions secrets, never committed.
 
+
+### 3A. Multi-repository Repository Eyes
+
+Repository Eyes is a reusable local scanner, not a single-repository parser. Each run can attach the repository name, branch, checked-out commit SHA, PR head SHA, base SHA and event type. The scanner inspects only the selected checkout working tree; it does not assume that the PR head SHA equals the checkout SHA, and it does not infer other branches or linked repositories from one scan.
+
+The offline dashboard accepts multiple Repository Eyes JSON reports and multiple .coddoc files in one session. It labels every row by repository identity, displays the recorded branch and commit context, and aggregates the L0–L7 layer counts while retaining distinct repository records. Repositories with missing metadata remain labeled as unidentified rather than being guessed from directory names.
+
+For local cross-repository review, clone or otherwise obtain each repository independently, run `gamma_ops.cli scan` separately for each checkout with its exact identity arguments, and load all generated JSON reports into the dashboard. The current GitHub Actions workflow is still scoped to the CodEXgen checkout. Account-wide automatic discovery is not yet implemented.
+
 ### 4. Narrative record model
 
 Each `.coddoc` event retains:
