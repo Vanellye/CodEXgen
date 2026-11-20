@@ -93,7 +93,7 @@ These commands read and display records only. They do not activate a watcher, cr
 
 ### 9. Email readiness notification
 
-The IC workflow has a notification job that reads the operable registry after validation jobs succeed. To enable email delivery, configure a repository variable `OPERABLE_NOTIFY_TO` and Actions secrets `OPERABLE_SMTP_HOST`, `OPERABLE_SMTP_PORT`, `OPERABLE_SMTP_USER`, `OPERABLE_SMTP_PASSWORD`, and `OPERABLE_SMTP_FROM`. A mail is sent only for records meeting the READY_TO_OPEN checks. Missing configuration produces a visible skip; it never claims a message was delivered.
+The IC workflow has a notification job that runs only on a push to protected `main`, after all validation jobs pass; SMTP secrets are never exposed to pull-request code. To enable email delivery, configure `OPERABLE_NOTIFY_TO`, protected repository variable `ERIA_REVIEWER_REGISTRY_SHA256` with the digest of the independently administered `Ɣơ/operations/registry/reviewers.json`, and Actions secrets `OPERABLE_SMTP_HOST`, `OPERABLE_SMTP_PORT` (SSL), `OPERABLE_SMTP_USER`, `OPERABLE_SMTP_PASSWORD`, and `OPERABLE_SMTP_FROM`. Approvals must have Ed25519 signatures bound to the exact artifact digest, commit SHA, scope, review reference and expiry. A missing or mismatched external registry pin means HOLD. The notifier compares the prior registry to the current one and sends only on a new READY_TO_OPEN transition. Missing config produces a visible skip; it never claims delivery without SMTP success.
 
 ### 10. Acceptance statement
 
