@@ -1,0 +1,25 @@
+name: TRUE DANCER Intelligence Read-Only Tests
+
+on:
+  push:
+    paths:
+      - "true_dancer/intelligence/**"
+      - ".github/workflows/true-dancer-intelligence.yml"
+  pull_request:
+    paths:
+      - "true_dancer/intelligence/**"
+      - ".github/workflows/true-dancer-intelligence.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-readonly-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run synthetic PONS, AVS, and PostgreSQL adapter tests
+        run: python -m unittest discover -s true_dancer/intelligence/tests -v
