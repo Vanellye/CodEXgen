@@ -1,0 +1,29 @@
+name: Ŷæṛö frontpage checks
+
+on:
+  pull_request:
+    paths:
+      - "apps/yaero-frontpage/**"
+      - "language/yaero/**"
+      - ".github/workflows/yaero-frontpage.yml"
+  push:
+    branches:
+      - "feature/yaero-atomic-ir-vercel-frontpage"
+
+permissions:
+  contents: read
+
+jobs:
+  frontpage:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/yaero-frontpage
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install
+      - run: npm test
+      - run: npm run build
