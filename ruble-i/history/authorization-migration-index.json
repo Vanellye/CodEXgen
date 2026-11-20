@@ -1,0 +1,67 @@
+{
+  "index_schema": "ruble-i.authorization-history.v1",
+  "status": "initial_inventory_partial",
+  "policy": {
+    "preserve_original_history": true,
+    "rewrite_or_delete_legacy_records": false,
+    "legacy_approval_is_new_ruble_i_permission": false,
+    "retirement_state": "RETIREMENT_PENDING_REPLACEMENT_VALIDATION",
+    "until_replacement_is_validated": "legacy_fail_closed_controls_remain_protective"
+  },
+  "entries": [
+    {
+      "record_id": "legacy-red-write-policy",
+      "system": "ERIA red-write-only authorization policy",
+      "source_branch": "recovery/eria-ci-green-2026-11-18",
+      "source_path": "security/red-write-only/policy.json",
+      "known_source_blob_sha": "c40da6b8020ddbf667ce632c22126139d91ecacc",
+      "observed_status": "draft",
+      "observed_mode": "proposal_and_report_creation_only",
+      "historical_disposition": "preserve",
+      "migration_state": "indexed_pending_independent_review"
+    },
+    {
+      "record_id": "legacy-pantheon-do-gate",
+      "system": "Pantheon DO.c scope-matching gate",
+      "source_branch": "recovery/eria-ci-green-2026-11-18",
+      "source_path": "pantheon/DO.c",
+      "known_source_blob_sha": "37e0aa7f3454e0e6076ea448820bf7864d60ee5f",
+      "observed_behavior": "missing_or_mismatched_approval_denies",
+      "historical_disposition": "preserve",
+      "migration_state": "indexed_pending_independent_review"
+    },
+    {
+      "record_id": "legacy-pons-avs-inventory",
+      "system": "PONS and AVS implementations",
+      "source_branch": "inventory_required",
+      "source_path": "inventory_required",
+      "known_source_blob_sha": null,
+      "observed_status": "not_fully_inventoried",
+      "historical_disposition": "preserve_all_discovered_records",
+      "migration_state": "discovery_required"
+    }
+  ],
+  "required_fields_for_future_entries": [
+    "record_id",
+    "system",
+    "source_repository",
+    "source_branch",
+    "source_commit_sha",
+    "source_path",
+    "source_blob_sha",
+    "event_timestamp",
+    "actor_or_reviewer_reference",
+    "decision",
+    "scope",
+    "signature_verification_result",
+    "revocation_state",
+    "evidence_references",
+    "migration_disposition"
+  ],
+  "integrity": {
+    "append_only": true,
+    "corrections_are_new_records": true,
+    "missing_metadata_is_unknown_not_inferred": true,
+    "external_checkpoint_anchor": "required_before_production_use"
+  }
+}
