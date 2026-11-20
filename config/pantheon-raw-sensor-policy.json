@@ -1,0 +1,54 @@
+{
+  "schema": "pantheon.raw.sensor-policy.v1",
+  "name": "PANTHEON RAW Sensor Integration",
+  "status": "proposal_only",
+  "activation_mode": "controlled",
+  "targets": {
+    "microphone": {
+      "enabled": false,
+      "purpose": "acoustic measurement only",
+      "capture_requires_explicit_approval": true,
+      "default_recording": false
+    },
+    "accelerometer": {
+      "enabled": false,
+      "purpose": "motion and vibration measurement only",
+      "continuous_sampling": false,
+      "sampling_rate_hz": null
+    }
+  },
+  "hardware_outputs": {
+    "speaker_playback": false,
+    "contact_actuator": false,
+    "vibration_motor": false,
+    "external_transmission": false
+  },
+  "safety": {
+    "fail_closed": true,
+    "human_approval_required": true,
+    "device_identity_required": true,
+    "permission_check_required": true,
+    "calibration_required": true,
+    "sensor_self_test_required": true,
+    "emergency_stop_required": true,
+    "max_session_seconds": null,
+    "max_sample_rate_hz": null,
+    "limits_must_be_set_from_device_documentation": true
+  },
+  "provenance": {
+    "hash_algorithm": "sha256",
+    "preserve_originals": true,
+    "record_policy_hash": true,
+    "record_source_revision": true,
+    "record_device_model_and_sensor_id": true,
+    "record_operator_approval": true,
+    "audit_format": "jsonl",
+    "audit_path": ".eria/pantheon-sensor-audit.jsonl"
+  },
+  "implementation": {
+    "discovery_adapter": "not_implemented",
+    "microphone_adapter": "not_implemented",
+    "accelerometer_adapter": "not_implemented",
+    "platform_api": "must_be_verified_before_activation"
+  }
+}
