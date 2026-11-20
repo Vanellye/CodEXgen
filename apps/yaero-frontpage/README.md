@@ -13,7 +13,10 @@ npm run build
 
 ## Vercel
 
-Create a Vercel project connected to `Vanellye/CodEXgen`, with root directory `apps/yaero-frontpage`, framework Vite, and build command `npm run build`. The app is intended for a preview deployment first.
+A Vercel project named `yaero-frontpage` exists. Its current READY preview deployment was built from the feature branch snapshot:
+`https://yaero-frontpage-264x4yb6w-tkoester0126-5442.vercel.app`
+
+The project is not Git-connected yet. Vercel requires a GitHub Login Connection before it can link `Vanellye/CodEXgen` for automatic branch deployments. After that connection is added, set the project root directory to `apps/yaero-frontpage`, framework to Vite, and build command to `npm run build`. The current preview has no alias or custom domain and is not a production release.
 
 ## Runway Dev integration
 
