@@ -12,7 +12,9 @@ This module connects source-linked narratives to a local runnable terminal witho
 - `src/gamma_ops/cli.py`: read-only terminal commands.
 - `src/gamma_ops/repo_eyes.py`: recursive, read-only eight-layer repository scanner with repository, branch, checkout SHA, PR head SHA and base SHA metadata.
 - `registry/onion-map.json`: layer definitions and safety invariants.
-- `ui/index.html`: offline browser dashboard for inventory and .coddoc files.
+- `ui/index.html`: multi-report browser dashboard for inventory and .coddoc files.
+- `ui/manifest.webmanifest` and `ui/service-worker.js`: installable offline PWA shell; caches only its own static UI assets.
+- `scripts/serve-ui.sh`: starts a loopback-only local HTTP server for Android or desktop browsers.
 - `registry/discovery-map.json`: inspected source lineage and search limitations.
 - `registry/operables.json`: staged, review-only, PREPARE_ONLY and not-implemented module states.
 - `watchers/watch-policy.json`: read-only GitHub watch contract and disabled Firecrawl policy.
@@ -31,8 +33,10 @@ PYTHONPATH='Ɣơ/operations/src' python -m gamma_ops.cli scan . --repository 'ow
 # Repeat for each local repository checkout and select all resulting JSON reports in the dashboard.
 python -m pytest -q 'Ɣơ/operations/tests'
 
-# Offline dashboard: open Ɣơ/operations/ui/index.html in a browser,
-# then load /tmp/eria-repository-eyes.json or the .coddoc event file.
+# Start the installable local PWA (keep Termux running):
+bash 'Ɣơ/operations/scripts/serve-ui.sh'
+# Open http://127.0.0.1:8765/ in the browser and use its local install option.
+# Load several /tmp/repo-eyes-*.json reports and .coddoc records together.
 ```
 
 ## Repository Eyes onion model
@@ -45,6 +49,8 @@ python -m pytest -q 'Ɣơ/operations/tests'
 - L5 — runtime, authorization and capability gates
 - L6 — history, provenance and lineage
 - L7 — tests, CI evidence and generated reports
+
+The scanner accepts any local checkout path and can stamp the report with repository, branch, checkout SHA, PR head SHA and base SHA. The local dashboard can load multiple reports together. The CI workflow still scans CodEXgen only; it does not enumerate all account repositories.
 
 The scanner does not execute files, follow symlinks, return file contents, or hash sensitive-name/content candidates. It excludes tool caches and dependency directories and limits per-file hashing to 8 MiB. Amber and red records require human review; no file is automatically opened or activated.
 
