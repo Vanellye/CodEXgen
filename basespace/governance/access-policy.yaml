@@ -1,0 +1,39 @@
+version: "0.1"
+principle: "Reduce friction in lawful discovery; never bypass authorization."
+access_classes:
+  PUBLIC:
+    discovery: automatic
+    acquisition: allowed_under_source_terms
+  LICENSED:
+    discovery: automatic
+    acquisition: license_required
+  PERMISSION_REQUIRED:
+    discovery: public_metadata_only
+    acquisition: explicit_institutional_permission
+  RESTRICTED:
+    discovery: authorized_metadata_only
+    acquisition: explicit_authorization_required
+  SEALED:
+    discovery: lawful_metadata_only
+    acquisition: prohibited_until_lawfully_unsealed_or_authorized
+  UNKNOWN:
+    discovery: metadata_only
+    acquisition: hold_for_review
+controls:
+  preserve_original_bytes: true
+  append_only_revisions: true
+  sha256_required_for_acquired_bytes: true
+  record_hash_scope_byte_length_and_timestamp: true
+  separate_transcription_translation_and_interpretation: true
+  retain_source_license_and_terms: true
+  prohibit_credential_sharing_and_impersonation: true
+  prohibit_access_control_bypass: true
+  prohibit_unreviewed_private_data_publication: true
+  risk_based_human_review: true
+automation:
+  public_catalogue_discovery: automatic
+  public_metadata_registration: automatic
+  ocr_and_transcription: allowed_with_confidence_labels
+  translation: allowed_with_source_and_version_links
+  source_download: only_when_lawful_and_terms_allow
+  permission_escalation: never_automatic
