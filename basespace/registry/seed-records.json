@@ -1,0 +1,762 @@
+{
+  "schema_version": "0.1",
+  "records": [
+    {
+      "record_id": "BS-LAW-MAGNA-CARTA-1215",
+      "title": "Magna Carta (1215)",
+      "collection": [
+        "HUMAN",
+        "LAW"
+      ],
+      "record_kind": "primary_document",
+      "date": {
+        "display": "1215 CE",
+        "start_year": 1215,
+        "end_year": 1215,
+        "certainty": "approximate",
+        "notes": "The 1215 issue; separate from later reissues."
+      },
+      "source": {
+        "institution_or_publisher": "University of East Anglia Magna Carta Project",
+        "catalogue_reference": null,
+        "landing_page": "https://magnacarta.cmp.uea.ac.uk/read/magna_carta_copies/The_Magna_Carta_1215",
+        "source_type": "official_catalogue",
+        "rights_or_terms": "Check item-level terms and reproduction rights."
+      },
+      "access": {
+        "classification": "PUBLIC",
+        "content_acquisition_status": "metadata_only",
+        "conditions": "The 1215 issue; separate from later reissues.",
+        "permission_reference": null,
+        "review_required": false
+      },
+      "provenance": {
+        "registered_at": "2026-11-22T17:07:00-06:00",
+        "registered_by": "BaseSpace seed registry",
+        "acquisition_method": "public_catalogue",
+        "lineage": [],
+        "source_snapshot_uri": null,
+        "source_last_checked": "2026-11-22"
+      },
+      "integrity": {
+        "algorithm": "SHA-256",
+        "digest": null,
+        "scope": "Metadata only; exact source bytes not acquired.",
+        "byte_length": null,
+        "computed_at": null,
+        "status": "not_computed"
+      },
+      "revision": {
+        "revision_id": "BS-LAW-MAGNA-CARTA-1215-r1",
+        "revision_number": 1,
+        "status": "current",
+        "supersedes": null,
+        "change_note": "Initial catalogue registration; not a claim of possessing original source bytes."
+      },
+      "tags": [
+        "historical-source",
+        "provenance",
+        "seed-record"
+      ]
+    },
+    {
+      "record_id": "BS-LAW-MAGNA-CARTA-1216",
+      "title": "Magna Carta (1216 reissue)",
+      "collection": [
+        "HUMAN",
+        "LAW"
+      ],
+      "record_kind": "primary_document",
+      "date": {
+        "display": "1216 CE",
+        "start_year": 1216,
+        "end_year": 1216,
+        "certainty": "approximate",
+        "notes": "Separate reissue under Henry III's regency."
+      },
+      "source": {
+        "institution_or_publisher": "University of East Anglia Magna Carta Project",
+        "catalogue_reference": null,
+        "landing_page": "https://magnacarta.cmp.uea.ac.uk/read/magna_carta_copies/Magna_Carta_1216",
+        "source_type": "official_catalogue",
+        "rights_or_terms": "Check item-level terms and reproduction rights."
+      },
+      "access": {
+        "classification": "PUBLIC",
+        "content_acquisition_status": "metadata_only",
+        "conditions": "Separate reissue under Henry III's regency.",
+        "permission_reference": null,
+        "review_required": false
+      },
+      "provenance": {
+        "registered_at": "2026-11-22T17:07:00-06:00",
+        "registered_by": "BaseSpace seed registry",
+        "acquisition_method": "public_catalogue",
+        "lineage": [],
+        "source_snapshot_uri": null,
+        "source_last_checked": "2026-11-22"
+      },
+      "integrity": {
+        "algorithm": "SHA-256",
+        "digest": null,
+        "scope": "Metadata only; exact source bytes not acquired.",
+        "byte_length": null,
+        "computed_at": null,
+        "status": "not_computed"
+      },
+      "revision": {
+        "revision_id": "BS-LAW-MAGNA-CARTA-1216-r1",
+        "revision_number": 1,
+        "status": "current",
+        "supersedes": null,
+        "change_note": "Initial catalogue registration; not a claim of possessing original source bytes."
+      },
+      "tags": [
+        "historical-source",
+        "provenance",
+        "seed-record"
+      ]
+    },
+    {
+      "record_id": "BS-LAW-MAGNA-CARTA-1217",
+      "title": "Magna Carta (1217 reissue)",
+      "collection": [
+        "HUMAN",
+        "LAW"
+      ],
+      "record_kind": "primary_document",
+      "date": {
+        "display": "1217 CE",
+        "start_year": 1217,
+        "end_year": 1217,
+        "certainty": "approximate",
+        "notes": "Separate reissue; do not merge with 1215 text."
+      },
+      "source": {
+        "institution_or_publisher": "The National Archives",
+        "catalogue_reference": null,
+        "landing_page": "https://www.nationalarchives.gov.uk/explore-the-collection/explore-by-time-period/medieval/magna-carta/",
+        "source_type": "official_catalogue",
+        "rights_or_terms": "Check item-level terms and reproduction rights."
+      },
+      "access": {
+        "classification": "PUBLIC",
+        "content_acquisition_status": "metadata_only",
+        "conditions": "Separate reissue; do not merge with 1215 text.",
+        "permission_reference": null,
+        "review_required": false
+      },
+      "provenance": {
+        "registered_at": "2026-11-22T17:07:00-06:00",
+        "registered_by": "BaseSpace seed registry",
+        "acquisition_method": "public_catalogue",
+        "lineage": [],
+        "source_snapshot_uri": null,
+        "source_last_checked": "2026-11-22"
+      },
+      "integrity": {
+        "algorithm": "SHA-256",
+        "digest": null,
+        "scope": "Metadata only; exact source bytes not acquired.",
+        "byte_length": null,
+        "computed_at": null,
+        "status": "not_computed"
+      },
+      "revision": {
+        "revision_id": "BS-LAW-MAGNA-CARTA-1217-r1",
+        "revision_number": 1,
+        "status": "current",
+        "supersedes": null,
+        "change_note": "Initial catalogue registration; not a claim of possessing original source bytes."
+      },
+      "tags": [
+        "historical-source",
+        "provenance",
+        "seed-record"
+      ]
+    },
+    {
+      "record_id": "BS-LAW-MAGNA-CARTA-1225",
+      "title": "Magna Carta (1225 reissue)",
+      "collection": [
+        "HUMAN",
+        "LAW"
+      ],
+      "record_kind": "primary_document",
+      "date": {
+        "display": "1225 CE",
+        "start_year": 1225,
+        "end_year": 1225,
+        "certainty": "approximate",
+        "notes": "Later definitive issue in subsequent legal history."
+      },
+      "source": {
+        "institution_or_publisher": "The National Archives",
+        "catalogue_reference": null,
+        "landing_page": "https://www.nationalarchives.gov.uk/explore-the-collection/explore-by-time-period/medieval/magna-carta/",
+        "source_type": "official_catalogue",
+        "rights_or_terms": "Check item-level terms and reproduction rights."
+      },
+      "access": {
+        "classification": "PUBLIC",
+        "content_acquisition_status": "metadata_only",
+        "conditions": "Later definitive issue in subsequent legal history.",
+        "permission_reference": null,
+        "review_required": false
+      },
+      "provenance": {
+        "registered_at": "2026-11-22T17:07:00-06:00",
+        "registered_by": "BaseSpace seed registry",
+        "acquisition_method": "public_catalogue",
+        "lineage": [],
+        "source_snapshot_uri": null,
+        "source_last_checked": "2026-11-22"
+      },
+      "integrity": {
+        "algorithm": "SHA-256",
+        "digest": null,
+        "scope": "Metadata only; exact source bytes not acquired.",
+        "byte_length": null,
+        "computed_at": null,
+        "status": "not_computed"
+      },
+      "revision": {
+        "revision_id": "BS-LAW-MAGNA-CARTA-1225-r1",
+        "revision_number": 1,
+        "status": "current",
+        "supersedes": null,
+        "change_note": "Initial catalogue registration; not a claim of possessing original source bytes."
+      },
+      "tags": [
+        "historical-source",
+        "provenance",
+        "seed-record"
+      ]
+    },
+    {
+      "record_id": "BS-LAW-MAGNA-CARTA-1297",
+      "title": "Magna Carta (1297 confirmation/reissue)",
+      "collection": [
+        "HUMAN",
+        "LAW"
+      ],
+      "record_kind": "primary_document",
+      "date": {
+        "display": "1297 CE",
+        "start_year": 1297,
+        "end_year": 1297,
+        "certainty": "approximate",
+        "notes": "Edward I's reissue; separate historical state."
+      },
+      "source": {
+        "institution_or_publisher": "The National Archives",
+        "catalogue_reference": null,
+        "landing_page": "https://www.nationalarchives.gov.uk/explore-the-collection/explore-by-time-period/medieval/magna-carta/",
+        "source_type": "official_catalogue",
+        "rights_or_terms": "Check item-level terms and reproduction rights."
+      },
+      "access": {
+        "classification": "PUBLIC",
+        "content_acquisition_status": "metadata_only",
+        "conditions": "Edward I's reissue; separate historical state.",
+        "permission_reference": null,
+        "review_required": false
+      },
+      "provenance": {
+        "registered_at": "2026-11-22T17:07:00-06:00",
+        "registered_by": "BaseSpace seed registry",
+        "acquisition_method": "public_catalogue",
+        "lineage": [],
+        "source_snapshot_uri": null,
+        "source_last_checked": "2026-11-22"
+      },
+      "integrity": {
+        "algorithm": "SHA-256",
+        "digest": null,
+        "scope": "Metadata only; exact source bytes not acquired.",
+        "byte_length": null,
+        "computed_at": null,
+        "status": "not_computed"
+      },
+      "revision": {
+        "revision_id": "BS-LAW-MAGNA-CARTA-1297-r1",
+        "revision_number": 1,
+        "status": "current",
+        "supersedes": null,
+        "change_note": "Initial catalogue registration; not a claim of possessing original source bytes."
+      },
+      "tags": [
+        "historical-source",
+        "provenance",
+        "seed-record"
+      ]
+    },
+    {
+      "record_id": "BS-REL-VATICAN-APOSTOLIC-ARCHIVES",
+      "title": "Vatican Apostolic Archives",
+      "collection": [
+        "HUMAN",
+        "RELIGION"
+      ],
+      "record_kind": "archive_institution",
+      "date": {
+        "display": "Institutional collection",
+        "start_year": null,
+        "end_year": null,
+        "certainty": "unknown",
+        "notes": "Institutional metadata only; document-level rules and qualifications apply."
+      },
+      "source": {
+        "institution_or_publisher": "Vatican Apostolic Archives",
+        "catalogue_reference": null,
+        "landing_page": "https://www.archivioapostolicovaticano.va/content/aav/en/l-archivio.html",
+        "source_type": "official_catalogue",
+        "rights_or_terms": "Check item-level terms and reproduction rights."
+      },
+      "access": {
+        "classification": "PERMISSION_REQUIRED",
+        "content_acquisition_status": "metadata_only",
+        "conditions": "Institutional metadata only; document-level rules and qualifications apply.",
+        "permission_reference": null,
+        "review_required": true
+      },
+      "provenance": {
+        "registered_at": "2026-11-22T17:07:00-06:00",
+        "registered_by": "BaseSpace seed registry",
+        "acquisition_method": "public_catalogue",
+        "lineage": [],
+        "source_snapshot_uri": null,
+        "source_last_checked": "2026-11-22"
+      },
+      "integrity": {
+        "algorithm": "SHA-256",
+        "digest": null,
+        "scope": "Metadata only; exact source bytes not acquired.",
+        "byte_length": null,
+        "computed_at": null,
+        "status": "not_computed"
+      },
+      "revision": {
+        "revision_id": "BS-REL-VATICAN-APOSTOLIC-ARCHIVES-r1",
+        "revision_number": 1,
+        "status": "current",
+        "supersedes": null,
+        "change_note": "Initial catalogue registration; not a claim of possessing original source bytes."
+      },
+      "tags": [
+        "historical-source",
+        "provenance",
+        "seed-record"
+      ]
+    },
+    {
+      "record_id": "BS-REL-DIGIVATLIB",
+      "title": "Digital Vatican Library",
+      "collection": [
+        "HUMAN",
+        "LAW"
+      ],
+      "record_kind": "archive_institution",
+      "date": {
+        "display": "2010 CE",
+        "start_year": 2010,
+        "end_year": 2010,
+        "certainty": "approximate",
+        "notes": "Searchable digital catalogue; check item-level rights."
+      },
+      "source": {
+        "institution_or_publisher": "Digital Vatican Library",
+        "catalogue_reference": null,
+        "landing_page": "https://digi.vatlib.it/mss/",
+        "source_type": "official_catalogue",
+        "rights_or_terms": "Check item-level terms and reproduction rights."
+      },
+      "access": {
+        "classification": "PUBLIC",
+        "content_acquisition_status": "metadata_only",
+        "conditions": "Searchable digital catalogue; check item-level rights.",
+        "permission_reference": null,
+        "review_required": false
+      },
+      "provenance": {
+        "registered_at": "2026-11-22T17:07:00-06:00",
+        "registered_by": "BaseSpace seed registry",
+        "acquisition_method": "public_catalogue",
+        "lineage": [],
+        "source_snapshot_uri": null,
+        "source_last_checked": "2026-11-22"
+      },
+      "integrity": {
+        "algorithm": "SHA-256",
+        "digest": null,
+        "scope": "Metadata only; exact source bytes not acquired.",
+        "byte_length": null,
+        "computed_at": null,
+        "status": "not_computed"
+      },
+      "revision": {
+        "revision_id": "BS-REL-DIGIVATLIB-r1",
+        "revision_number": 1,
+        "status": "current",
+        "supersedes": null,
+        "change_note": "Initial catalogue registration; not a claim of possessing original source bytes."
+      },
+      "tags": [
+        "historical-source",
+        "provenance",
+        "seed-record"
+      ]
+    },
+    {
+      "record_id": "BS-REL-CODEX-VATICANUS-VAT-GR-1209",
+      "title": "Codex Vaticanus — Vat.gr.1209",
+      "collection": [
+        "HUMAN",
+        "RELIGION"
+      ],
+      "record_kind": "manuscript",
+      "date": {
+        "display": "350 CE",
+        "start_year": 350,
+        "end_year": 350,
+        "certainty": "approximate",
+        "notes": "4th-century Greek manuscript; catalogue date approximate; page-image reuse terms apply."
+      },
+      "source": {
+        "institution_or_publisher": "Digital Vatican Library",
+        "catalogue_reference": null,
+        "landing_page": "https://digi.vatlib.it/view/MSS_Vat.gr.1209/980",
+        "source_type": "official_catalogue",
+        "rights_or_terms": "Check item-level terms and reproduction rights."
+      },
+      "access": {
+        "classification": "PUBLIC",
+        "content_acquisition_status": "metadata_only",
+        "conditions": "4th-century Greek manuscript; catalogue date approximate; page-image reuse terms apply.",
+        "permission_reference": null,
+        "review_required": false
+      },
+      "provenance": {
+        "registered_at": "2026-11-22T17:07:00-06:00",
+        "registered_by": "BaseSpace seed registry",
+        "acquisition_method": "public_catalogue",
+        "lineage": [],
+        "source_snapshot_uri": null,
+        "source_last_checked": "2026-11-22"
+      },
+      "integrity": {
+        "algorithm": "SHA-256",
+        "digest": null,
+        "scope": "Metadata only; exact source bytes not acquired.",
+        "byte_length": null,
+        "computed_at": null,
+        "status": "not_computed"
+      },
+      "revision": {
+        "revision_id": "BS-REL-CODEX-VATICANUS-VAT-GR-1209-r1",
+        "revision_number": 1,
+        "status": "current",
+        "supersedes": null,
+        "change_note": "Initial catalogue registration; not a claim of possessing original source bytes."
+      },
+      "tags": [
+        "historical-source",
+        "provenance",
+        "seed-record"
+      ]
+    },
+    {
+      "record_id": "BS-LAW-HAMMURABI-STELE",
+      "title": "Code of Hammurabi — stele SB 8",
+      "collection": [
+        "HUMAN",
+        "LAW"
+      ],
+      "record_kind": "inscription",
+      "date": {
+        "display": "1750 BCE",
+        "start_year": -1750,
+        "end_year": -1750,
+        "certainty": "approximate",
+        "notes": "Louvre describes a collection of jurisprudence/case law; not a modern statutory code."
+      },
+      "source": {
+        "institution_or_publisher": "Musée du Louvre",
+        "catalogue_reference": null,
+        "landing_page": "https://collections.louvre.fr/en/ark:/53355/cl010174436",
+        "source_type": "official_catalogue",
+        "rights_or_terms": "Check item-level terms and reproduction rights."
+      },
+      "access": {
+        "classification": "PUBLIC",
+        "content_acquisition_status": "metadata_only",
+        "conditions": "Louvre describes a collection of jurisprudence/case law; not a modern statutory code.",
+        "permission_reference": null,
+        "review_required": false
+      },
+      "provenance": {
+        "registered_at": "2026-11-22T17:07:00-06:00",
+        "registered_by": "BaseSpace seed registry",
+        "acquisition_method": "public_catalogue",
+        "lineage": [],
+        "source_snapshot_uri": null,
+        "source_last_checked": "2026-11-22"
+      },
+      "integrity": {
+        "algorithm": "SHA-256",
+        "digest": null,
+        "scope": "Metadata only; exact source bytes not acquired.",
+        "byte_length": null,
+        "computed_at": null,
+        "status": "not_computed"
+      },
+      "revision": {
+        "revision_id": "BS-LAW-HAMMURABI-STELE-r1",
+        "revision_number": 1,
+        "status": "current",
+        "supersedes": null,
+        "change_note": "Initial catalogue registration; not a claim of possessing original source bytes."
+      },
+      "tags": [
+        "historical-source",
+        "provenance",
+        "seed-record"
+      ]
+    },
+    {
+      "record_id": "BS-LAW-ASHOKA-EDICTS",
+      "title": "Edicts of Ashoka — Girnar representation",
+      "collection": [
+        "HUMAN",
+        "LAW"
+      ],
+      "record_kind": "inscription",
+      "date": {
+        "display": "250 BCE",
+        "start_year": -250,
+        "end_year": -250,
+        "certainty": "approximate",
+        "notes": "Group-level record; site-specific inscription witnesses should be separate."
+      },
+      "source": {
+        "institution_or_publisher": "National Museum, New Delhi",
+        "catalogue_reference": null,
+        "landing_page": "https://nationalmuseumindia.gov.in/en/collections/index/21",
+        "source_type": "official_catalogue",
+        "rights_or_terms": "Check item-level terms and reproduction rights."
+      },
+      "access": {
+        "classification": "PUBLIC",
+        "content_acquisition_status": "metadata_only",
+        "conditions": "Group-level record; site-specific inscription witnesses should be separate.",
+        "permission_reference": null,
+        "review_required": false
+      },
+      "provenance": {
+        "registered_at": "2026-11-22T17:07:00-06:00",
+        "registered_by": "BaseSpace seed registry",
+        "acquisition_method": "public_catalogue",
+        "lineage": [],
+        "source_snapshot_uri": null,
+        "source_last_checked": "2026-11-22"
+      },
+      "integrity": {
+        "algorithm": "SHA-256",
+        "digest": null,
+        "scope": "Metadata only; exact source bytes not acquired.",
+        "byte_length": null,
+        "computed_at": null,
+        "status": "not_computed"
+      },
+      "revision": {
+        "revision_id": "BS-LAW-ASHOKA-EDICTS-r1",
+        "revision_number": 1,
+        "status": "current",
+        "supersedes": null,
+        "change_note": "Initial catalogue registration; not a claim of possessing original source bytes."
+      },
+      "tags": [
+        "historical-source",
+        "provenance",
+        "seed-record"
+      ]
+    },
+    {
+      "record_id": "BS-SCI-GALILEO-SIDEREUS-1610",
+      "title": "Sidereus Nuncius",
+      "collection": [
+        "HUMAN",
+        "SCIENCE",
+        "SPACE"
+      ],
+      "record_kind": "scientific_publication",
+      "date": {
+        "display": "1610 CE",
+        "start_year": 1610,
+        "end_year": 1610,
+        "certainty": "approximate",
+        "notes": "Galileo's 1610 astronomical publication; Smithsonian identifies the digital item as CC0."
+      },
+      "source": {
+        "institution_or_publisher": "Smithsonian Libraries and Archives",
+        "catalogue_reference": null,
+        "landing_page": "https://library.si.edu/digital-library/book/sidereusnuncius00gali",
+        "source_type": "official_catalogue",
+        "rights_or_terms": "Check item-level terms and reproduction rights."
+      },
+      "access": {
+        "classification": "PUBLIC",
+        "content_acquisition_status": "metadata_only",
+        "conditions": "Galileo's 1610 astronomical publication; Smithsonian identifies the digital item as CC0.",
+        "permission_reference": null,
+        "review_required": false
+      },
+      "provenance": {
+        "registered_at": "2026-11-22T17:07:00-06:00",
+        "registered_by": "BaseSpace seed registry",
+        "acquisition_method": "public_catalogue",
+        "lineage": [],
+        "source_snapshot_uri": null,
+        "source_last_checked": "2026-11-22"
+      },
+      "integrity": {
+        "algorithm": "SHA-256",
+        "digest": null,
+        "scope": "Metadata only; exact source bytes not acquired.",
+        "byte_length": null,
+        "computed_at": null,
+        "status": "not_computed"
+      },
+      "revision": {
+        "revision_id": "BS-SCI-GALILEO-SIDEREUS-1610-r1",
+        "revision_number": 1,
+        "status": "current",
+        "supersedes": null,
+        "change_note": "Initial catalogue registration; not a claim of possessing original source bytes."
+      },
+      "tags": [
+        "historical-source",
+        "provenance",
+        "seed-record"
+      ]
+    },
+    {
+      "record_id": "BS-SPACE-VENUS-TABLET-K160",
+      "title": "Venus Tablet of Ammisaduqa — K.160",
+      "collection": [
+        "HUMAN",
+        "SCIENCE",
+        "SPACE"
+      ],
+      "record_kind": "observation_record",
+      "date": {
+        "display": "650 BCE",
+        "start_year": -650,
+        "end_year": -650,
+        "certainty": "approximate",
+        "notes": "Surviving copy date differs from the debated date of the transmitted observations."
+      },
+      "source": {
+        "institution_or_publisher": "British Museum / Google Arts & Culture",
+        "catalogue_reference": null,
+        "landing_page": "https://artsandculture.google.com/asset/cuneiform-tablet-with-observations-of-venus/uQGtUbfuWfzvLQ",
+        "source_type": "official_catalogue",
+        "rights_or_terms": "Check item-level terms and reproduction rights."
+      },
+      "access": {
+        "classification": "PUBLIC",
+        "content_acquisition_status": "metadata_only",
+        "conditions": "Surviving copy date differs from the debated date of the transmitted observations.",
+        "permission_reference": null,
+        "review_required": false
+      },
+      "provenance": {
+        "registered_at": "2026-11-22T17:07:00-06:00",
+        "registered_by": "BaseSpace seed registry",
+        "acquisition_method": "public_catalogue",
+        "lineage": [],
+        "source_snapshot_uri": null,
+        "source_last_checked": "2026-11-22"
+      },
+      "integrity": {
+        "algorithm": "SHA-256",
+        "digest": null,
+        "scope": "Metadata only; exact source bytes not acquired.",
+        "byte_length": null,
+        "computed_at": null,
+        "status": "not_computed"
+      },
+      "revision": {
+        "revision_id": "BS-SPACE-VENUS-TABLET-K160-r1",
+        "revision_number": 1,
+        "status": "current",
+        "supersedes": null,
+        "change_note": "Initial catalogue registration; not a claim of possessing original source bytes."
+      },
+      "tags": [
+        "historical-source",
+        "provenance",
+        "seed-record"
+      ]
+    },
+    {
+      "record_id": "BS-SPACE-BABYLONIAN-ASTRONOMICAL-DIARIES",
+      "title": "Babylonian Astronomical Diaries — corpus",
+      "collection": [
+        "HUMAN",
+        "SCIENCE",
+        "SPACE"
+      ],
+      "record_kind": "observation_record",
+      "date": {
+        "display": "400 BCE",
+        "start_year": -400,
+        "end_year": -400,
+        "certainty": "approximate",
+        "notes": "Corpus-level record; individual tablets require separate entries."
+      },
+      "source": {
+        "institution_or_publisher": "Oxford Classical Dictionary",
+        "catalogue_reference": null,
+        "landing_page": "https://academic.oup.com/edited-volume/61673/chapter-abstract/548063489",
+        "source_type": "official_catalogue",
+        "rights_or_terms": "Check item-level terms and reproduction rights."
+      },
+      "access": {
+        "classification": "PUBLIC",
+        "content_acquisition_status": "metadata_only",
+        "conditions": "Corpus-level record; individual tablets require separate entries.",
+        "permission_reference": null,
+        "review_required": false
+      },
+      "provenance": {
+        "registered_at": "2026-11-22T17:07:00-06:00",
+        "registered_by": "BaseSpace seed registry",
+        "acquisition_method": "public_catalogue",
+        "lineage": [],
+        "source_snapshot_uri": null,
+        "source_last_checked": "2026-11-22"
+      },
+      "integrity": {
+        "algorithm": "SHA-256",
+        "digest": null,
+        "scope": "Metadata only; exact source bytes not acquired.",
+        "byte_length": null,
+        "computed_at": null,
+        "status": "not_computed"
+      },
+      "revision": {
+        "revision_id": "BS-SPACE-BABYLONIAN-ASTRONOMICAL-DIARIES-r1",
+        "revision_number": 1,
+        "status": "current",
+        "supersedes": null,
+        "change_note": "Initial catalogue registration; not a claim of possessing original source bytes."
+      },
+      "tags": [
+        "historical-source",
+        "provenance",
+        "seed-record"
+      ]
+    }
+  ]
+}
