@@ -1,18 +1,18 @@
 {
-  "suite": "eria-transfer-pipeline-safety-v1",
+  "suite": "eria-transfer-pipeline-safety-v2",
   "mode": "offline_contract_tests",
   "cases": [
     {"id":"T01","given":"valid IBAN checksum only","expect":"HOLD; no account ownership inference"},
     {"id":"T02","given":"authenticated webhook says payment accepted","expect":"SETTLEMENT_PENDING; never POSTED"},
     {"id":"T03","given":"duplicate webhook event ID","expect":"idempotent no-op; append duplicate-observation audit event"},
-    {"id":"T04","given":"missing PONS approval","expect":"HOLD; no provider submission"},
-    {"id":"T05","given":"PONS scope amount/currency/beneficiary mismatch","expect":"HOLD; require fresh approval"},
-    {"id":"T06","given":"expired, revoked, or replayed PONS approval","expect":"HOLD; no provider submission"},
-    {"id":"T07","given":"human confirmation missing","expect":"HOLD; no provider submission"},
+    {"id":"T04","given":"account-holder confirmation missing","expect":"HOLD; no provider submission"},
+    {"id":"T05","given":"confirmation amount, currency, source, or beneficiary does not match the transfer","expect":"HOLD; require fresh account-holder confirmation"},
+    {"id":"T06","given":"expired, replayed, or session-mismatched confirmation receipt","expect":"HOLD; no provider submission"},
+    {"id":"T07","given":"account-holder confirmation is present but limits or beneficiary verification are missing","expect":"HOLD; no provider submission"},
     {"id":"T08","given":"amount denomination or currency allocation unresolved","expect":"HOLD; amount is non-executable"},
     {"id":"T09","given":"bank evidence amount or currency mismatch","expect":"RECONCILIATION_REQUIRED; no credit posting"},
     {"id":"T10","given":"provider webhook but no independent bank record","expect":"SETTLEMENT_PENDING; no credit posting"},
-    {"id":"T11","given":"verified bank-originated final credit and all PONS/audit checks pass","expect":"eligible for separately authorized POSTED transition"},
+    {"id":"T11","given":"verified bank-originated final credit and all non-PONS controls pass","expect":"eligible for separately controlled POSTED transition"},
     {"id":"T12","given":"reversal after posting","expect":"append compensating reversal event; preserve original posting"}
   ]
 }
