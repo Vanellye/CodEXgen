@@ -99,6 +99,22 @@ export function createExternalProfileServer(deps: {
         return send(res, 200, { profile });
       }
 
+      if (req.method === "GET" && url.pathname === "/v1/admin/code-change-proposals") {
+        if (!profile.roles.includes("profile_admin")) return send(res, 403, { error: "PROFILE_ADMIN_REQUIRED" });
+        const proposals = await deps.store.listCodeChangeProposals();
+        const queue = await Promise.all(proposals.map(async (proposal) => {
+          const decision = await deps.store.getCodeChangeDecision(proposal.id);
+          return {
+            proposalId: proposal.id, proposerSubject: proposal.proposerSubject,
+            repository: proposal.repository, branch: proposal.branch, baseSha: proposal.baseSha,
+            files: proposal.files, patchSha256: proposal.patchSha256, createdAt: proposal.createdAt,
+            decision: decision?.decision ?? null,
+            status: decision ? (decision.decision === "ALLOW" ? "APPROVED_NOT_APPLIED" : "REJECTED") : "PENDING_ADMIN_REVIEW",
+          };
+        }));
+        return send(res, 200, { proposals: queue });
+      }
+
       // Any active profile may submit a proposal; only a different profile_admin may decide it.
       if (req.method === "POST" && url.pathname === "/v1/code-change-proposals") {
         const input = await bodyJson(req);
