@@ -4,21 +4,21 @@ A standalone identity-profile and authorization-evidence service with an indepen
 
 ## Integration target: Auth0 development tenant
 
-The service uses standard OIDC access-token validation and is provider-neutral. Auth0 is the documented sandbox target. No tenant is provisioned or connected by this repository change; the tenant owner must supply the issuer and API audience.
+The service uses standard OIDC access-token validation and is provider-neutral. The tenant domain and ERIA API Identifier below were supplied for the development integration. Repository configuration does not itself prove that the Auth0 API exists, that a client is configured, or that authentication has succeeded.
 
-1. Create or select a dedicated **development** Auth0 tenant.
-2. Under **Applications → APIs**, create an API named `ERIA External Profile Sandbox`. Set a unique API Identifier such as `https://eria-financial-tunnel-sandbox.example/api` and use RS256 signing.
+1. In the Auth0 development tenant, confirm the tenant domain is `dev-ekleezvw1eidw3w4.us.auth0.com`.
+2. Under **Applications → APIs**, create or select an API named `ERIA External Profile Sandbox`. Its Identifier must exactly equal `https://eria-financial-tunnel-sandbox.example/api`. Use RS256 signing. Do not use the Auth0 Management API audience (`https://TENANT/api/v2/`) for ERIA.
 3. Create a Native or SPA application for the test client. Use Authorization Code Flow with PKCE; do not enable the Resource Owner Password flow.
-4. Configure the client to request an access token for the API Identifier audience. The client should request only the scopes it needs. Do not put a client secret in this service.
-5. Copy the tenant domain and API Identifier into the environment variables below. The issuer must include its trailing slash. The JWKS endpoint is the tenant's `/.well-known/jwks.json`.
+4. Configure the client to request an access token for the ERIA API Identifier audience. The client should request only the scopes it needs. Do not put a client secret in this service.
+5. The issuer and JWKS endpoint are derived from the tenant domain and are configured in `.env.example`. The issuer includes its trailing slash.
 6. Obtain an access token through the provider's hosted login flow and call `GET /v1/profiles/me`. The service creates a `member` profile on first login. It ignores role claims supplied by the token.
 7. Provision the initial `profile_admin` out-of-band through a reviewed database operation after verifying the exact issuer and subject. There is deliberately no self-service admin bootstrap endpoint.
 
-For Auth0, the expected values have these forms:
+Configured OIDC values:
 
-- `OIDC_ISSUER=https://YOUR_TENANT_DOMAIN/`
+- `OIDC_ISSUER=https://dev-ekleezvw1eidw3w4.us.auth0.com/`
 - `OIDC_AUDIENCE=https://eria-financial-tunnel-sandbox.example/api`
-- `OIDC_JWKS_URL=https://YOUR_TENANT_DOMAIN/.well-known/jwks.json`
+- `OIDC_JWKS_URL=https://dev-ekleezvw1eidw3w4.us.auth0.com/.well-known/jwks.json`
 
 Auth0's API audience must match the access token's `aud` claim exactly. The issuer must match its `iss` claim exactly. Do not use an ID token as the API bearer token.
 
@@ -44,7 +44,7 @@ Apply `schema.sql` to a dedicated PostgreSQL database, then copy `.env.example` 
 
 Optional: `DATABASE_SSL=true`, `EXTERNAL_PROFILE_HOST=127.0.0.1`, `EXTERNAL_PROFILE_PORT=8787`.
 
-Never commit real tenant values, access tokens, client secrets, or database credentials. Keep the database private and use TLS in deployed environments. Configure the application database role with least privilege; the immutable triggers do not protect against a database owner or superuser.
+Never commit access tokens, client secrets, or database credentials. Keep the database private and use TLS in deployed environments. Configure the application database role with least privilege; the immutable triggers do not protect against a database owner or superuser.
 
 ## API
 
@@ -81,4 +81,4 @@ Run the focused tests with:
 
 `node --experimental-strip-types --test financial-tunnel/external-profile/service.test.ts`
 
-The API binds to loopback by default. A successful health check does not mean an identity tenant is connected; verify with a real sandbox-issued access token and `GET /v1/profiles/me`. The repository does not contain tenant credentials, so provider connectivity remains pending until the tenant owner supplies the three OIDC values and the database is provisioned.
+The API binds to loopback by default. A successful health check does not mean an identity tenant is connected; verify with a real sandbox-issued access token and `GET /v1/profiles/me`. The supplied tenant and audience values are configured, but provider connectivity remains unverified until a token is obtained and validated and the database is provisioned.
