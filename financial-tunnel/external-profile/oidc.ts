@@ -10,7 +10,12 @@ export function createOidcVerifier(env: NodeJS.ProcessEnv = process.env): OidcVe
   if (!issuer || !audience || !jwksUrl) {
     throw new Error("OIDC_ISSUER, OIDC_AUDIENCE and OIDC_JWKS_URL are required.");
   }
-  const jwks = createRemoteJWKSet(new URL(jwksUrl));
+  const issuerUrl = new URL(issuer);
+  const jwksEndpoint = new URL(jwksUrl);
+  if (issuerUrl.protocol !== "https:" || jwksEndpoint.protocol !== "https:") {
+    throw new Error("OIDC issuer and JWKS endpoints must use HTTPS.");
+  }
+  const jwks = createRemoteJWKSet(jwksEndpoint);
   return {
     async verify(token) {
       const { payload } = await jwtVerify(token, jwks, {
