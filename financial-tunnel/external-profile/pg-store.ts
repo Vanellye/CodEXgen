@@ -103,6 +103,18 @@ export class PostgresExternalProfileStore implements ExternalProfileStore {
     };
   }
 
+  async listCodeChangeProposals(): Promise<CodeChangeProposal[]> {
+    const r = await this.pool.query(
+      "SELECT * FROM external_code_change_proposals ORDER BY created_at DESC LIMIT 50",
+    );
+    return r.rows.map((x) => ({
+      id:x.id, proposerProfileId:x.proposer_profile_id, proposerSubject:x.proposer_subject,
+      repository:x.repository, branch:x.branch, baseSha:x.base_sha,
+      files:x.files, patch:x.patch, patchSha256:x.patch_sha256,
+      createdAt:new Date(x.created_at).toISOString(),
+    }));
+  }
+
   async decideCodeChangeProposal(d: CodeChangeDecision): Promise<CodeChangeDecision | null> {
     const r = await this.pool.query(
       `INSERT INTO external_code_change_decisions
