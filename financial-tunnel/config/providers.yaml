@@ -1,7 +1,9 @@
-# Non-secret registry. External provider profiles remain disabled pending verification.
-default_environment: INTERNAL_SIMULATOR
+# Non-secret provider registry. Selection is explicit; there is no automatic fallback.
+default_provider: internal_simulator
 execution_mode: SIMULATION_ONLY
 live_execution: DISABLED
+provider_selection: EXPLICIT
+fallback_policy: NONE
 providers:
   internal_simulator:
     provider_id: internal_simulator
@@ -9,20 +11,14 @@ providers:
     enabled: true
     environment: INTERNAL_SIMULATOR
     capabilities:
-      account.read: true
-      account.synthetic_create: true
-      payment.quote: true
-      bank.transfer.simulate: true
-      crypto.market.quote: true
-      crypto.order.preview: true
-      chain.read.simulate: true
-      chain.broadcast: false
-      ledger.reconcile: true
-    regions: [US]
-    currencies: [USD, EUR, GBP]
-    assets: [BTC, ETH]
-    networks: [BITCOIN_TESTNET, ETHEREUM_TESTNET, BASE_SEPOLIA]
+      accounts.read: true
+      balances.read: true
+      transactions.read: true
+      transfers.preview: true
+      transfers.simulate: true
+      reconciliation.read: true
     credentials: NONE
+    network_access: false
     health_check: deterministic_local
   plaid:
     provider_id: plaid
