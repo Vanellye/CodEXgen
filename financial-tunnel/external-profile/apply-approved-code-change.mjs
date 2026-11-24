@@ -21,8 +21,9 @@ function fail(message) {
   process.stderr.write(`REFUSED: ${message}\n`);
   process.exit(1);
 }
+let repoRoot;
 function git(args) {
-  return execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+  return execFileSync("git", args, { cwd: repoRoot ?? process.cwd(), encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
 }
 function validPath(path) {
   return typeof path === "string" &&
@@ -70,6 +71,7 @@ if (!headers.length || headers.some((match) => match[1] !== match[2] || !validPa
 let root, currentBranch, head, remoteHead, status;
 try {
   root = git(["rev-parse", "--show-toplevel"]);
+  repoRoot = root;
   currentBranch = git(["branch", "--show-current"]);
   head = git(["rev-parse", "HEAD"]);
   remoteHead = git(["ls-remote", "origin", `refs/heads/${BRANCH}`]).split(/\s+/)[0];
@@ -93,7 +95,7 @@ try {
   } else {
     execFileSync("git", ["apply", "--index", patchFile], { cwd: root, stdio: "inherit" });
     const staged = git(["diff", "--cached", "--name-only"]).split("\n").filter(Boolean);
-    if (!sortedEqual(staged, proposal.files)) fail("Staged file list differs from the approved allowlist; inspect the working tree before proceeding.");
+    if (!sortedEqual(staged, proposal.files)) throw new Error("Staged file list differs from the approved allowlist; inspect the working tree before proceeding.");
     execFileSync("git", ["diff", "--cached", "--check"], { cwd: root, stdio: "inherit" });
     const message = [
       `Apply ADMIN-approved code change ${proposalId}`,
