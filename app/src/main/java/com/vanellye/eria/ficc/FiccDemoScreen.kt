@@ -31,11 +31,11 @@ fun FiccDemoScreen(onBack:()->Unit,modifier:Modifier=Modifier) {
  val sandbox=remember { DeterministicProviderSandbox() }
  var session by remember { mutableStateOf(sessions.current()) }
  var counts by remember { mutableStateOf(FiccStoreCounts(0,0,0,0,0,0)) }
- var names by remember { mutableStateOf(emptyList<String>()) }
+ var names by remember { mutableStateOf(emptyList<String>()) }\n var journalSummaries by remember { mutableStateOf(emptyList<String>()) }
  var auditValid by remember { mutableStateOf(false) }
  var balance by remember { mutableStateOf("Not loaded") }
  DisposableEffect(store) {
-  store.seedIfEmpty(DemoLedgerFactory.create());counts=store.counts();names=store.entityNames();auditValid=store.verifyAuditChain()
+  store.seedIfEmpty(DemoLedgerFactory.create());counts=store.counts();names=store.entityNames();journalSummaries=store.journalSummaries();auditValid=store.verifyAuditChain()
   onDispose { store.close() }
  }
  Column(modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
@@ -73,7 +73,7 @@ fun FiccDemoScreen(onBack:()->Unit,modifier:Modifier=Modifier) {
     Text("No bank, wallet, payment, transfer, or external API is connected.")
    }
   }
-  Text("Fictional entities",style=MaterialTheme.typography.subtitle1)
+  Text("Recent synthetic journals",style=MaterialTheme.typography.subtitle1)\n  journalSummaries.forEach { Text("• "+it) }\n  Text("Fictional entities",style=MaterialTheme.typography.subtitle1)
   names.forEach { Text("• "+it) }
   Text("Demo data persists across app restarts on this device. Local SQLite is not a production or tamper-proof accounting system.",style=MaterialTheme.typography.caption)
  }
