@@ -18,8 +18,9 @@ function fail(message) {
   process.stderr.write(`REFUSED: ${message}\n`);
   process.exit(1);
 }
+let repoRoot;
 function git(command, options = {}) {
-  return execFileSync("git", command, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], ...options }).trimEnd();
+  return execFileSync("git", command, { cwd: repoRoot ?? process.cwd(), encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], ...options }).trimEnd();
 }
 function validPath(path) {
   return typeof path === "string" &&
@@ -32,6 +33,7 @@ if (!files.length || files.length > 20 || new Set(files).size !== files.length |
   fail("Provide 1-20 unique paths under financial-tunnel/ or financial/; environment and secret paths are excluded.");
 }
 const root = git(["rev-parse", "--show-toplevel"]);
+repoRoot = root;
 const branch = git(["branch", "--show-current"]);
 if (branch !== BRANCH) fail(`Checkout ${BRANCH} before preparing a proposal.`);
 const baseSha = git(["rev-parse", "HEAD"]);
