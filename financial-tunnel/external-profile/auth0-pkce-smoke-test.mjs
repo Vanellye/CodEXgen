@@ -16,7 +16,7 @@ const redirectUri = process.env.AUTH0_REDIRECT_URI ?? "http://localhost:3000/cal
 const apiBase = (process.env.ERIA_API_BASE ?? "http://127.0.0.1:8787").replace(/\/$/, "");
 const port = Number(new URL(redirectUri).port || 80);
 
-if (!/^https:\/\//.test(`https://${domain}`) || !clientId || !audience) {
+if (!/^[A-Za-z0-9.-]+$/.test(domain) || !clientId || !audience) {
   throw new Error("Invalid Auth0 configuration.");
 }
 if (new URL(redirectUri).hostname !== "localhost" || new URL(redirectUri).pathname !== "/callback") {
