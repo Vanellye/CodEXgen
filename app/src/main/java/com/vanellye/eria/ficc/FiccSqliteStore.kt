@@ -51,7 +51,8 @@ class FiccSqliteStore(context:Context):SQLiteOpenHelper(context.applicationConte
   fun n(table:String)=db.rawQuery("SELECT COUNT(*) FROM $table",null).use { it.moveToFirst();it.getInt(0) }
   return FiccStoreCounts(n("entities"),n("accounts"),n("journals"),n("journal_lines"),n("audit_events"),n("reconciliations"))
  }
- fun entityNames():List<String> = readableDatabase.rawQuery("SELECT legal_name FROM entities ORDER BY id",null).use { c -> buildList { while(c.moveToNext()) add(c.getString(0)) } }\n fun journalSummaries(limit:Int=12):List<String> = readableDatabase.rawQuery("SELECT description,occurred_at FROM journals ORDER BY occurred_at DESC LIMIT ?",arrayOf(limit.coerceIn(1,100).toString())).use { c -> buildList { while(c.moveToNext()) add(c.getString(0)+" • "+c.getString(1)) } }
+ fun entityNames():List<String> = readableDatabase.rawQuery("SELECT legal_name FROM entities ORDER BY id",null).use { c -> buildList { while(c.moveToNext()) add(c.getString(0)) } }
+ fun journalSummaries(limit:Int=12):List<String> = readableDatabase.rawQuery("SELECT description,occurred_at FROM journals ORDER BY occurred_at DESC LIMIT ?",arrayOf(limit.coerceIn(1,100).toString())).use { c -> buildList { while(c.moveToNext()) add(c.getString(0)+" • "+c.getString(1)) } }
 
  fun postJournal(actor:DemoIdentity,entry:JournalEntry) {
   val authLog=InMemoryAuditLog()
