@@ -15,7 +15,7 @@ const CODE_BRANCH = "feature/eria-financial-tunnel" as const;
 const MAX_CODE_PATCH_BYTES = 128 * 1024;
 
 function validCodePath(path: unknown): path is string {
-  if (typeof path !== "string" || path.length > 240 || !/^(financial-tunnel|financial)\/[A-Za-z0-9._\\/-]+$/.test(path)) return false;
+  if (typeof path !== "string" || path.length > 240 || !/^(financial-tunnel|financial)\/[A-Za-z0-9._\/-]+$/.test(path)) return false;
   const parts = path.split("/");
   if (parts.some((part) => !part || part === "." || part === "..")) return false;
   if (/(^|\/)(\.env(?:\.|$)|\.git|secrets?)(\/|$)/i.test(path)) return false;
