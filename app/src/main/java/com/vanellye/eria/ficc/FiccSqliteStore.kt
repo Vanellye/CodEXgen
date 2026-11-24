@@ -143,6 +143,7 @@ class FiccSqliteStore(context:Context):SQLiteOpenHelper(context.applicationConte
    put("event_id",e.id);put("actor_id",e.actorId);put("actor_role",e.actorRole.name);put("action",e.action);put("target_id",e.targetId);put("outcome",e.outcome.name);put("reason",e.reason);put("occurred_at",e.occurredAt.toString());put("provenance_ref",provenanceToken(e.provenance));put("previous_hash",previous);put("event_hash",digest)
   })
  }
- private fun provenanceToken(p:DataProvenance):String = listOf(p.classification.name,p.sourceType.name,p.verified.toString(),p.providerConnected.toString(),p.sourceReference).joinToString("|")\n private fun sha256(s:String)=MessageDigest.getInstance("SHA-256").digest(s.toByteArray()).joinToString("") { "%02x".format(it) }
+ private fun provenanceToken(p:DataProvenance):String = listOf(p.classification.name,p.sourceType.name,p.verified.toString(),p.providerConnected.toString(),p.sourceReference).joinToString("|")
+ private fun sha256(s:String)=MessageDigest.getInstance("SHA-256").digest(s.toByteArray()).joinToString("") { "%02x".format(it) }
  companion object { private const val GENESIS="FICC-DEMO-AUDIT-GENESIS-v1" }
 }
