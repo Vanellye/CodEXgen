@@ -59,7 +59,7 @@ export class SimulatorProvider implements FinancialProvider {
       "transfers.preview",
       "transfers.simulate",
       "reconciliation.read",
-    ]),
+    ] as const),
   });
 
   readonly #accounts: FinancialAccount[] = [
