@@ -20,7 +20,7 @@ function fail(message) {
 }
 let repoRoot;
 function git(command, options = {}) {
-  return execFileSync("git", command, { cwd: repoRoot ?? process.cwd(), encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], ...options }).trimEnd();
+  return execFileSync("git", command, { cwd: repoRoot ?? process.cwd(), encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], ...options });
 }
 function validPath(path) {
   return typeof path === "string" &&
@@ -32,14 +32,14 @@ function validPath(path) {
 if (!files.length || files.length > 20 || new Set(files).size !== files.length || !files.every(validPath)) {
   fail("Provide 1-20 unique paths under financial-tunnel/ or financial/; environment and secret paths are excluded.");
 }
-const root = git(["rev-parse", "--show-toplevel"]);
+const root = git(["rev-parse", "--show-toplevel"]).trim();
 repoRoot = root;
 const remoteUrl = git(["remote", "get-url", "origin"]).replace(/\.git$/, "").toLowerCase();
-const branch = git(["branch", "--show-current"]);
+const branch = git(["branch", "--show-current"]).trim();
 if (!["https://github.com/vanellye/codexgen", "git@github.com:vanellye/codexgen", "ssh://git@github.com/vanellye/codexgen"].includes(remoteUrl)) fail("Origin remote is not Vanellye/CodEXgen.");
 if (branch !== BRANCH) fail(`Checkout ${BRANCH} before preparing a proposal.`);
-const baseSha = git(["rev-parse", "HEAD"]);
-const remoteHead = git(["ls-remote", "origin", `refs/heads/${BRANCH}`]).split(/\s+/)[0];
+const baseSha = git(["rev-parse", "HEAD"]).trim();
+const remoteHead = git(["ls-remote", "origin", `refs/heads/${BRANCH}`]).trim().split(/\s+/)[0];
 if (remoteHead !== baseSha) fail("Local HEAD must equal the current remote feature-branch HEAD before proposing changes.");
 let patch = "";
 try {
