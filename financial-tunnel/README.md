@@ -29,7 +29,7 @@ Deterministic in-memory simulator established before external provider sandboxes
 14. Settlement reconciliation
 15. Provider timeout and recovery evidence
 
-Each scenario runs against a fresh deterministic fixture. Webhook, chain confirmation, and timeout/recovery are local state simulations, not external integrations. The shared provider contract and explicit registry live in `../financial/`; `internal_simulator` is the initial contract-compliant provider adapter.
+Each scenario runs against a fresh deterministic fixture. Webhook, chain confirmation, and timeout/recovery are local state simulations, not external integrations. The shared provider contract and explicit registry live in `../financial/`. Import them through `financial-tunnel/index.ts`, the tunnel-facing composition entry point. `internal_simulator` is the initial contract-compliant provider adapter.
 
 ## Provider gate
 Do not enable an external adapter until official project ownership, sandbox credentials, endpoint, scopes, capabilities, and webhook verification are independently checked. Live execution remains disabled.
