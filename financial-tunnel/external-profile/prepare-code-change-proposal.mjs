@@ -37,7 +37,7 @@ repoRoot = root;
 const branch = git(["branch", "--show-current"]);
 if (branch !== BRANCH) fail(`Checkout ${BRANCH} before preparing a proposal.`);
 const baseSha = git(["rev-parse", "HEAD"]);
-const remoteHead = git(["ls-remote", "origin", `refs/heads/${BRANCH}`]).split(/\\s+/)[0];
+const remoteHead = git(["ls-remote", "origin", `refs/heads/${BRANCH}`]).split(/\s+/)[0];
 if (remoteHead !== baseSha) fail("Local HEAD must equal the current remote feature-branch HEAD before proposing changes.");
 let patch = "";
 try {
