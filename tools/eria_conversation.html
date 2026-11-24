@@ -67,7 +67,7 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
     ["darkness surrounds you", "May clarity and understanding illuminate your path."]
   ]);
   function birthCursivePossibility(origin) {
-    const key = String(origin).trim().toLowerCase().replace(/[.!?]+$/, "").replace(/\\s+/g, " ");
+    const key = String(origin).trim().toLowerCase().replace(/[.!?]+$/, "").replace(/\s+/g, " ");
     return oppositionRules.get(key) || null;
   }
   const birthTextFields = new Set(["text","content","label","title","description","message","tooltip","placeholder","ariaLabel","aria_label","alt","notification","caption","summary"]);
@@ -123,7 +123,7 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
           const blocked = task.blocked || birthNeverFields.has(field);
           stack.push({
             kind:"visit", value:value[field],
-            path:task.path+"/"+field.replace(/~/g,"~0").replace(/\\//g,"~1"),
+            path:task.path+"/"+field.replace(/~/g,"~0").replace(/\//g,"~1"),
             depth:task.depth+1,
             textContext:!blocked && birthTextFields.has(field),
             blocked,
