@@ -62,7 +62,7 @@ class BirthCursiveEngineTest {
         assertEquals("NOT_PERFORMED_BY_THIS_MODULE", record.signatureVerification)
     }
 
-    @Test fun cycleIsRejectedWithoutRecursiveDescent() {
+    @Test fun cycleIsRejectedByIterativeVisitor() {
         val cycle = mutableMapOf<String, Any?>()
         cycle["nested"] = cycle
         var rejected = false
