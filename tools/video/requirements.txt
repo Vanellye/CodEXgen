@@ -1,0 +1,1 @@
+# Standard library only; FFmpeg/ffprobe must be installed separately.
