@@ -4,8 +4,9 @@ The source value is never mutated. Only allowlisted presentation fields are
 eligible for exact, reviewed phrase rules. Unknown text remains unchanged and
 is marked for review rather than being rewritten by guesswork.
 
-Co-signation metadata links the origin and derivative. A reference attached
-here is not a cryptographic signature and must be verified by a trusted host.
+Traversal is iterative: nested objects are processed with an explicit stack.
+Co-signation metadata links the origin and derivative; references are not
+cryptographic signatures and must be verified by a trusted host.
 """
 from __future__ import annotations
 
@@ -15,7 +16,7 @@ from typing import Any, Dict, List, Mapping, Optional, Sequence, Set, Tuple
 
 
 TEXT_FIELDS = frozenset({
-    "text", "label", "title", "description", "message", "tooltip",
+    "text", "content", "label", "title", "description", "message", "tooltip",
     "placeholder", "accessibility_label", "accessibilityLabel",
     "aria_label", "ariaLabel", "alt", "notification", "dialog_text",
     "button_text", "helper_text", "caption", "summary",
@@ -38,41 +39,26 @@ class OppositionRule:
 
 
 DEFAULT_RULES: Tuple[OppositionRule, ...] = (
-    OppositionRule(
-        "oppositio.failure.v1",
-        "May you fail",
-        "A wish for an unsuccessful outcome",
-        "Learning, adaptation, and achievement remain possible",
-        "May your efforts open paths to learning, growth, and success.",
-    ),
-    OppositionRule(
-        "oppositio.suffering.v1",
-        "May you suffer",
-        "A wish for another person's suffering",
-        "Relief, care, peace, and healing are constructive possibilities",
-        "May you find relief, peace, care, and healing.",
-    ),
-    OppositionRule(
-        "oppositio.worth.v1",
-        "You are worthless",
-        "A statement denying a person's worth",
-        "Human dignity and belonging can be affirmed",
-        "Your life has inherent worth and dignity.",
-    ),
-    OppositionRule(
-        "oppositio.trapped.v1",
-        "You are trapped",
-        "A statement that presents a person as having no way forward",
-        "Safe choices and paths toward freedom may be discovered",
-        "May you discover a safe path toward freedom.",
-    ),
-    OppositionRule(
-        "oppositio.darkness.v1",
-        "Darkness surrounds you",
-        "A statement expressing obscurity or disorientation",
-        "Clarity, understanding, and guidance are possible",
-        "May clarity and understanding illuminate your path.",
-    ),
+    OppositionRule("oppositio.failure.v1", "May you fail",
+                   "A wish for an unsuccessful outcome",
+                   "Learning, adaptation, and achievement remain possible",
+                   "May your efforts open paths to learning, growth, and success."),
+    OppositionRule("oppositio.suffering.v1", "May you suffer",
+                   "A wish for another person's suffering",
+                   "Relief, care, peace, and healing are constructive possibilities",
+                   "May you find relief, peace, care, and healing."),
+    OppositionRule("oppositio.worth.v1", "You are worthless",
+                   "A statement denying a person's worth",
+                   "Human dignity and belonging can be affirmed",
+                   "Your life has inherent worth and dignity."),
+    OppositionRule("oppositio.trapped.v1", "You are trapped",
+                   "A statement that presents a person as having no way forward",
+                   "Safe choices and paths toward freedom may be discovered",
+                   "May you discover a safe path toward freedom."),
+    OppositionRule("oppositio.darkness.v1", "Darkness surrounds you",
+                   "A statement expressing obscurity or disorientation",
+                   "Clarity, understanding, and guidance are possible",
+                   "May clarity and understanding illuminate your path."),
 )
 
 
@@ -136,28 +122,27 @@ class BirthCursiveEngine:
         co_signature_ref: Optional[str] = None,
     ) -> BirthCursiveRecord:
         signers = tuple(dict.fromkeys(
-            signer.strip() for signer in co_signers if isinstance(signer, str) and signer.strip()
+            signer.strip() for signer in co_signers
+            if isinstance(signer, str) and signer.strip()
         ))
-        signature_ref = co_signature_ref.strip() if isinstance(co_signature_ref, str) and co_signature_ref.strip() else None
+        signature_ref = (
+            co_signature_ref.strip()
+            if isinstance(co_signature_ref, str) and co_signature_ref.strip()
+            else None
+        )
         rule = self._rules.get(_match_key(source_text))
-
         if rule is None:
-            derived = source_text
-            meaning = None
-            possibility = None
-            rule_id = None
-            status = "REVIEW_REQUIRED"
+            derived, meaning, possibility, rule_id, status = (
+                source_text, None, None, None, "REVIEW_REQUIRED"
+            )
         else:
-            derived = rule.blessing
-            meaning = rule.meaning
-            possibility = rule.possibility
-            rule_id = rule.rule_id
-            status = "DERIVED"
-
+            derived, meaning, possibility, rule_id, status = (
+                rule.blessing, rule.meaning, rule.possibility,
+                rule.rule_id, "DERIVED"
+            )
         co_status = (
             "REFERENCE_ATTACHED_UNVERIFIED"
-            if signature_ref is not None and signers
-            else "PENDING"
+            if signature_ref is not None and signers else "PENDING"
         )
         return BirthCursiveRecord(
             schema="yaero.birth-cursive/1",
@@ -181,11 +166,32 @@ class BirthCursiveEngine:
         co_signers: Sequence[str] = (),
         co_signature_ref: Optional[str] = None,
     ) -> Tuple[Any, List[BirthCursiveRecord]]:
-        """Return a derived copy and lineage records; never mutate source."""
+        """Return a derived copy and lineage records using an explicit work stack."""
         records: List[BirthCursiveRecord] = []
         active: Set[int] = set()
+        root: List[Any] = [None]
 
-        def visit(value: Any, path: str, depth: int, text_context: bool = False, blocked: bool = False) -> Any:
+        def assign_root(value: Any) -> None:
+            root[0] = value
+
+        # Tasks are tuples: visit, exit, or tuple_finalize. No Python call
+        # recursively descends the input structure.
+        stack = [("visit", source, "", 0, False, False, assign_root)]
+        while stack:
+            task = stack.pop()
+            kind = task[0]
+
+            if kind == "exit":
+                active.remove(task[1])
+                continue
+
+            if kind == "tuple_finalize":
+                _, identity, values, setter = task
+                setter(tuple(values))
+                active.remove(identity)
+                continue
+
+            _, value, path, depth, text_context, blocked, setter = task
             if depth > self.max_depth:
                 raise CursiveDepthError(
                     "maximum nested UI depth exceeded at " + (path or "/")
@@ -193,52 +199,67 @@ class BirthCursiveEngine:
 
             if isinstance(value, str):
                 if blocked or not text_context:
-                    return value
-                record = self.transform_text(
-                    value, path or "/", co_signers, co_signature_ref
-                )
-                records.append(record)
-                return record.derived_text
+                    setter(value)
+                else:
+                    record = self.transform_text(
+                        value, path or "/", co_signers, co_signature_ref
+                    )
+                    records.append(record)
+                    setter(record.derived_text)
+                continue
 
             if isinstance(value, Mapping):
                 identity = id(value)
                 if identity in active:
                     raise CursiveCycleError("cycle detected at " + (path or "/"))
                 active.add(identity)
-                try:
-                    derived: Dict[Any, Any] = {}
-                    for key, child in value.items():
-                        key_text = key if isinstance(key, str) else str(key)
-                        child_path = path + "/" + key_text.replace("~", "~0").replace("/", "~1")
-                        if key_text in NEVER_TRANSFORM_FIELDS:
-                            derived[key] = visit(child, child_path, depth + 1, False, True)
-                        else:
-                            derived[key] = visit(
-                                child,
-                                child_path,
-                                depth + 1,
-                                key_text in TEXT_FIELDS,
-                                blocked,
-                            )
-                    return derived
-                finally:
-                    active.remove(identity)
+                derived: Dict[Any, Any] = {}
+                setter(derived)
+                stack.append(("exit", identity))
+                entries = list(value.items())
+                for key, child in reversed(entries):
+                    key_text = key if isinstance(key, str) else str(key)
+                    child_path = path + "/" + key_text.replace("~", "~0").replace("/", "~1")
+                    child_blocked = blocked or key_text in NEVER_TRANSFORM_FIELDS
+                    child_text = (not child_blocked and key_text in TEXT_FIELDS)
+                    stack.append((
+                        "visit", child, child_path, depth + 1,
+                        child_text, child_blocked,
+                        lambda result, target=derived, target_key=key: target.__setitem__(target_key, result),
+                    ))
+                continue
 
-            if isinstance(value, (list, tuple)):
+            if isinstance(value, list):
                 identity = id(value)
                 if identity in active:
                     raise CursiveCycleError("cycle detected at " + (path or "/"))
                 active.add(identity)
-                try:
-                    items = [
-                        visit(item, path + "/" + str(index), depth + 1, text_context, blocked)
-                        for index, item in enumerate(value)
-                    ]
-                    return tuple(items) if isinstance(value, tuple) else items
-                finally:
-                    active.remove(identity)
+                derived_list: List[Any] = [None] * len(value)
+                setter(derived_list)
+                stack.append(("exit", identity))
+                for index in range(len(value) - 1, -1, -1):
+                    stack.append((
+                        "visit", value[index], path + "/" + str(index),
+                        depth + 1, text_context, blocked,
+                        lambda result, target=derived_list, target_index=index: target.__setitem__(target_index, result),
+                    ))
+                continue
 
-            return value
+            if isinstance(value, tuple):
+                identity = id(value)
+                if identity in active:
+                    raise CursiveCycleError("cycle detected at " + (path or "/"))
+                active.add(identity)
+                values: List[Any] = [None] * len(value)
+                stack.append(("tuple_finalize", identity, values, setter))
+                for index in range(len(value) - 1, -1, -1):
+                    stack.append((
+                        "visit", value[index], path + "/" + str(index),
+                        depth + 1, text_context, blocked,
+                        lambda result, target=values, target_index=index: target.__setitem__(target_index, result),
+                    ))
+                continue
 
-        derived_tree = visit(source, "", 0, False, False)
-        return derived_tree, records
+            setter(value)
+
+        return root[0], records
