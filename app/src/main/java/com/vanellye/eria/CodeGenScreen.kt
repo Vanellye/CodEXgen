@@ -22,8 +22,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.vanellye.eria.ficc.FiccDemoScreen
 
-/** Stateful wrapper: owns ViewModel + local text field state. */
+/** Stateful wrapper: existing code-generation route plus the FICC demo workspace. */
 @Composable
 fun CodeGenRoute(
     modifier: Modifier = Modifier,
@@ -31,16 +32,24 @@ fun CodeGenRoute(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var moduleName by remember { mutableStateOf("") }
+    var showFicc by remember { mutableStateOf(false) }
 
-    CodeGenScreen(
-        uiState = uiState,
-        moduleName = moduleName,
-        onModuleNameChange = { moduleName = it },
-        onGenerateClick = { name ->
-            viewModel.generateCode(name, "BaseModel", listOf("id", "timestamp"))
-        },
-        modifier = modifier
-    )
+    if (showFicc) {
+        FiccDemoScreen(onBack = { showFicc = false }, modifier = modifier)
+    } else {
+        Column(modifier = modifier.fillMaxSize()) {
+            Button(onClick = { showFicc = true }, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+                Text("Open FICC demo workspace")
+            }
+            CodeGenScreen(
+                uiState = uiState,
+                moduleName = moduleName,
+                onModuleNameChange = { moduleName = it },
+                onGenerateClick = { name -> viewModel.generateCode(name, "BaseModel", listOf("id", "timestamp")) },
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
 }
 
 /** Stateless UI: draws from inputs and hoists events. */
@@ -59,41 +68,22 @@ fun CodeGenScreen(
             label = { Text("Module Name") },
             modifier = Modifier.fillMaxWidth()
         )
-
         Spacer(modifier = Modifier.height(12.dp))
-
         Button(
             onClick = { onGenerateClick(moduleName) },
             enabled = moduleName.isNotBlank() && uiState !is CodeGenUiState.Loading,
             modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Generate Code Index")
-        }
-
+        ) { Text("Generate Code Index") }
         Spacer(modifier = Modifier.height(24.dp))
-
         when (uiState) {
-            is CodeGenUiState.Idle -> {
-                Text("Enter a module name and tap generate.")
-            }
-            is CodeGenUiState.Loading -> {
-                CircularProgressIndicator()
-            }
-            is CodeGenUiState.Success -> {
-                Text(
-                    text = uiState.code,
-                    style = MaterialTheme.typography.body2,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .verticalScroll(rememberScrollState())
-                )
-            }
-            is CodeGenUiState.Error -> {
-                Text(
-                    text = uiState.message,
-                    color = MaterialTheme.colors.error
-                )
-            }
+            is CodeGenUiState.Idle -> Text("Enter a module name and tap generate.")
+            is CodeGenUiState.Loading -> CircularProgressIndicator()
+            is CodeGenUiState.Success -> Text(
+                text = uiState.code,
+                style = MaterialTheme.typography.body2,
+                modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())
+            )
+            is CodeGenUiState.Error -> Text(text = uiState.message, color = MaterialTheme.colors.error)
         }
     }
 }
