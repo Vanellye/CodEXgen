@@ -141,6 +141,46 @@ function renderLux(){
  $("luxPossibility").textContent=record.possibility;
  $("luxCoSign").textContent="Pending. No cryptographic signature is claimed or verified.";
 }
+const birthTextFields=new Set(["text","content","label","title","description","message","tooltip","placeholder","aria_label","ariaLabel","alt","notification","caption","summary","reason"]);
+const birthNeverFields=new Set(["code","command","route","url","uri","id","key","status","error_code","errorCode","security_warning","securityWarning","shortcut","hotkey","escape_sequence"]);
+function deriveBirthCursiveTree(origin){
+ const root={value:null},active=new WeakSet(),records=[];
+ const stack=[{kind:"visit",value:origin,path:"",depth:0,text:false,blocked:false,assign:value=>{root.value=value}}];
+ while(stack.length){
+  const task=stack.pop();
+  if(task.kind==="exit"){active.delete(task.identity);continue}
+  if(task.depth>64)throw new RangeError("Birth-cursive maximum depth exceeded at "+(task.path||"/"));
+  const value=task.value;
+  if(typeof value==="string"){
+   if(task.blocked||!task.text){task.assign(value);continue}
+   const record=birthCursiveRecord(value);
+   records.push({...record,fieldPath:task.path||"/"});
+   task.assign(record.derived);
+   continue;
+  }
+  if(Array.isArray(value)){
+   if(active.has(value))throw new TypeError("Birth-cursive cycle detected at "+(task.path||"/"));
+   active.add(value);
+   const copy=new Array(value.length);task.assign(copy);stack.push({kind:"exit",identity:value});
+   for(let i=value.length-1;i>=0;i--)stack.push({kind:"visit",value:value[i],path:task.path+"/"+i,depth:task.depth+1,text:task.text,blocked:task.blocked,assign:result=>{copy[i]=result}});
+   continue;
+  }
+  if(value&&typeof value==="object"){
+   if(active.has(value))throw new TypeError("Birth-cursive cycle detected at "+(task.path||"/"));
+   active.add(value);
+   const copy={};task.assign(copy);stack.push({kind:"exit",identity:value});
+   const keys=Object.keys(value);
+   for(let i=keys.length-1;i>=0;i--){
+    const field=keys[i],blocked=task.blocked||birthNeverFields.has(field);
+    const safeField=field.replace(/~/g,"~0").split("/").join("~1");
+    stack.push({kind:"visit",value:value[field],path:task.path+"/"+safeField,depth:task.depth+1,text:!blocked&&birthTextFields.has(field),blocked,assign:result=>{copy[field]=result}});
+   }
+   continue;
+  }
+  task.assign(value);
+ }
+ return {origin,derived:root.value,records};
+}
 document.querySelectorAll("nav button").forEach(button=>button.addEventListener("click",()=>{
  activeView=button.dataset.view;
  document.querySelectorAll("nav button").forEach(item=>item.classList.toggle("active",item===button));
@@ -210,16 +250,24 @@ async function loadProvenance(){
  }catch(error){target.textContent="Provenance unavailable: "+error.message}
 }
 function renderRequests(requests){
- const target=$("requestResults");target.replaceChildren();
- if(!requests.length){target.textContent="No review requests.";return}
- requests.forEach(request=>{
-  const item=document.createElement("div");item.className="result";
-  const title=document.createElement("b");title.textContent=request.capability+" · "+request.status;
-  const detail=document.createElement("div");detail.className="muted";
-  detail.textContent="Scope: "+request.scope+" · "+request.created_at+" · "+request.request_id;
-  const reason=document.createElement("div");reason.textContent=request.reason;
-  item.append(title,detail,reason);target.append(item);
- });
+  const target=$("requestResults");target.replaceChildren();
+  if(!requests.length){target.textContent="No review requests.";return}
+  const lineage=deriveBirthCursiveTree(requests);
+  const records=new Map(lineage.records.map(record=>[record.fieldPath,record]));
+  requests.forEach((request,index)=>{
+   const item=document.createElement("div");item.className="result";
+   const title=document.createElement("b");title.textContent=request.capability+" · "+request.status;
+   const detail=document.createElement("div");detail.className="muted";
+   detail.textContent="Scope: "+request.scope+" · "+request.created_at+" · "+request.request_id;
+   const reason=document.createElement("div");reason.textContent=request.reason;
+   item.append(title,detail,reason);
+   const record=records.get("/"+index+"/reason");
+   if(record&&record.status==="DERIVED"){
+    const note=document.createElement("small");note.className="birth-cursive-note";
+    note.textContent="✧ Positive possibility: "+record.derived;item.append(note);
+   }
+   target.append(item);
+  });
 }
 $("searchForm").addEventListener("submit",async event=>{
  event.preventDefault();const q=$("query").value.trim();const target=$("fileResults");
