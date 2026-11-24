@@ -110,7 +110,7 @@ class FiccDemoLedgerTest {
 
     @Test fun demoPrincipalCannotCrossWorkspaceBoundary() {
         val bundle = fixture()
-        val auth = DemoAuthorizationService(bundle.auditLog)
+        val auth = DemoAuthorizationService(InMemoryAuditLog())
         val decision = auth.authorize(
             identity("demo-owner").copy(workspaceId = "production"),
             DemoPermission.LEDGER_READ,
