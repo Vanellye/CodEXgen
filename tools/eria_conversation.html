@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b1020">
-<title>ERIA ÂÆị Conversation</title>
+<title>Ŷæṛö LUX — Light Direction</title>
 <style>
 :root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:#0b1020;color:#e9eef7;--panel:#141d31;--panel2:#10182a;--line:#2a3852;--muted:#9aabc3;--accent:#83d6c2;--blue:#6e9eff}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#172744 0,#0b1020 55%);display:flex;justify-content:center}
@@ -15,7 +15,7 @@ header{padding:22px 4px 14px;display:flex;align-items:center;justify-content:spa
 main{flex:1;display:flex;flex-direction:column;min-height:0}.overview{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:14px 0}.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px}.stat b{font-size:16px;display:block}.stat span{font-size:10px;color:var(--muted)}
 .chat{flex:1;min-height:300px;overflow:auto;padding:12px 2px 18px;display:flex;flex-direction:column;gap:12px}
 .welcome{background:linear-gradient(135deg,#172943,#141d31);border:1px solid var(--line);border-radius:16px;padding:17px}.welcome h2{font-size:18px;margin:0 0 7px}.welcome p{font-size:13px;color:var(--muted);line-height:1.5;margin:0}
-.message{max-width:92%;padding:12px 14px;border-radius:15px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.55}.user{align-self:flex-end;background:#254466;border:1px solid #3c6086}.assistant{align-self:flex-start;background:var(--panel);border:1px solid var(--line)}.meta{font-size:10px;color:var(--muted);margin-bottom:5px}
+.message{max-width:92%;padding:12px 14px;border-radius:15px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.55}.user{align-self:flex-end;background:#254466;border:1px solid #3c6086}.assistant{align-self:flex-start;background:var(--panel);border:1px solid var(--line)}.meta{font-size:10px;color:var(--muted);margin-bottom:5px}.birth-cursive-note{margin-top:8px;padding-top:7px;border-top:1px solid #31594f;color:var(--accent);font-size:12px;line-height:1.45}
 .composer{position:sticky;bottom:0;background:linear-gradient(transparent,#0b1020 20%);padding:12px 0 calc(12px + env(safe-area-inset-bottom))}
 form{display:flex;gap:8px;background:var(--panel);border:1px solid #3b4c68;border-radius:15px;padding:8px}
 textarea{flex:1;resize:none;min-height:42px;max-height:130px;background:transparent;color:inherit;border:0;outline:0;padding:10px;font:inherit;font-size:14px}
@@ -26,7 +26,7 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
 </style>
 </head>
 <body><div class="app">
-<header><div class="brand"><div class="mark">Æ</div><div><h1>ERIA ÂÆị Conversation</h1><p>Termux · Repository intelligence · Provenance-aware</p></div></div><div id="connection" class="status">Connecting…</div></header>
+<header><div class="brand"><div class="mark">Æ</div><div><h1>Ŷæṛö LUX</h1><p>Light Direction · Termux · Birth-cursive co-signation</p></div></div><div id="connection" class="status">Connecting…</div></header>
 <main>
 <section class="overview">
 <div class="stat"><b id="fileCount">—</b><span>Indexed files</span></div>
@@ -34,7 +34,7 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
 <div class="stat"><b id="engineState">—</b><span>Conversation engine</span></div>
 </section>
 <section id="chat" class="chat" aria-live="polite">
-<div class="welcome"><h2>Welcome to ERIA</h2><p>Ask questions about repository files, branches, commits, architecture, provenance, or the PONS bridge. Original source remains non-authoritative; translations are derived records, not replacements.</p></div>
+<div class="welcome"><h2>Welcome to ERIA</h2><p>Ask about repository files, branches, commits, architecture, provenance, and source lineage. Original text remains unchanged; constructive possibilities appear as separate, source-linked notes.</p></div>
 </section>
 <div class="composer">
 <form id="form"><textarea id="message" rows="1" placeholder="Ask ERIA about your repository…" aria-label="Message"></textarea><button id="send" type="submit">Send</button></form>
@@ -59,7 +59,84 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
   })();
   const chat = $("chat");
   let busy = false;
-  function addMessage(role, content) {
+  const oppositionRules = new Map([
+    ["may you fail", "May your efforts open paths to learning, growth, and success."],
+    ["may you suffer", "May you find relief, peace, care, and healing."],
+    ["you are worthless", "Your life has inherent worth and dignity."],
+    ["you are trapped", "May you discover a safe path toward freedom."],
+    ["darkness surrounds you", "May clarity and understanding illuminate your path."]
+  ]);
+  function birthCursivePossibility(origin) {
+    const key = String(origin).trim().toLowerCase().replace(/[.!?]+$/, "").replace(/\s+/g, " ");
+    return oppositionRules.get(key) || null;
+  }
+  const birthTextFields = new Set(["text","content","label","title","description","message","tooltip","placeholder","ariaLabel","aria_label","alt","notification","caption","summary"]);
+  const birthNeverFields = new Set(["code","command","route","url","uri","id","key","status","error_code","errorCode","security_warning","securityWarning","shortcut","hotkey","escape_sequence"]);
+  function deriveBirthCursiveTree(origin) {
+    const root = {value:null};
+    const active = new WeakSet();
+    const records = [];
+    const stack = [{
+      kind:"visit", value:origin, path:"", depth:0,
+      textContext:false, blocked:false, assign:value=>{root.value=value;}
+    }];
+    while (stack.length) {
+      const task = stack.pop();
+      if (task.kind === "exit") { active.delete(task.identity); continue; }
+      if (task.depth > 64) throw new RangeError("Birth-cursive maximum depth exceeded at " + (task.path || "/"));
+      const value = task.value;
+      if (typeof value === "string") {
+        if (task.blocked || !task.textContext) { task.assign(value); continue; }
+        const possibility = birthCursivePossibility(value);
+        records.push({
+          fieldPath:task.path || "/", originText:value,
+          derivedText:possibility || value,
+          status:possibility ? "DERIVED" : "REVIEW_REQUIRED"
+        });
+        task.assign(possibility || value);
+        continue;
+      }
+      if (Array.isArray(value)) {
+        if (active.has(value)) throw new TypeError("Birth-cursive cycle detected at " + (task.path || "/"));
+        active.add(value);
+        const copy = new Array(value.length);
+        task.assign(copy);
+        stack.push({kind:"exit",identity:value});
+        for (let index=value.length-1;index>=0;index--) {
+          stack.push({
+            kind:"visit", value:value[index], path:task.path+"/"+index,
+            depth:task.depth+1, textContext:task.textContext,
+            blocked:task.blocked, assign:result=>{copy[index]=result;}
+          });
+        }
+        continue;
+      }
+      if (value && typeof value === "object") {
+        if (active.has(value)) throw new TypeError("Birth-cursive cycle detected at " + (task.path || "/"));
+        active.add(value);
+        const copy = {};
+        task.assign(copy);
+        stack.push({kind:"exit",identity:value});
+        const keys = Object.keys(value);
+        for (let index=keys.length-1;index>=0;index--) {
+          const field = keys[index];
+          const blocked = task.blocked || birthNeverFields.has(field);
+          stack.push({
+            kind:"visit", value:value[field],
+            path:task.path+"/"+field.replace(/~/g,"~0").replace(/\//g,"~1"),
+            depth:task.depth+1,
+            textContext:!blocked && birthTextFields.has(field),
+            blocked,
+            assign:result=>{copy[field]=result;}
+          });
+        }
+        continue;
+      }
+      task.assign(value);
+    }
+    return {origin, derived:root.value, records};
+  }
+  function addMessage(role, content, lineage=null) {
     const wrap = document.createElement("div");
     wrap.className = "message " + role;
     const meta = document.createElement("div");
@@ -68,6 +145,15 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
     const body = document.createElement("div");
     body.textContent = content;
     wrap.append(meta, body);
+    const possibility = lineage && lineage.status === "DERIVED"
+      ? lineage.derivedText
+      : birthCursivePossibility(content);
+    if (possibility) {
+      const note = document.createElement("div");
+      note.className = "birth-cursive-note";
+      note.textContent = "✧ Positive possibility: " + possibility;
+      wrap.append(note);
+    }
     chat.append(wrap);
     chat.scrollTop = chat.scrollHeight;
   }
@@ -100,7 +186,11 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
       const data = await api("/api/history");
       if (data.messages.length) {
         chat.innerHTML = "";
-        data.messages.forEach(item => addMessage(item.role, item.content));
+        const lineage = deriveBirthCursiveTree(data.messages);
+        const records = new Map(lineage.records.map(record => [record.fieldPath, record]));
+        data.messages.forEach((item, index) => {
+          addMessage(item.role, item.content, records.get("/" + index + "/content"));
+        });
       }
     } catch (_) {}
   }

@@ -1,5 +1,5 @@
 {
-  "schema_version": "eria.transfer-policy.v1",
+  "schema_version": "eria.transfer-policy.v2",
   "environment": "production",
   "provider_family": "open_banking_api",
   "provider_connection": "not_configured",
@@ -10,28 +10,32 @@
     "currency_allocation": "MULTI",
     "allocation_semantics": "multiple currencies may be supported across separate transfers; each transfer must specify exactly one ISO-4217 currency",
     "executable": false,
-    "note": "Major-unit amount confirmed by user. No currency or distribution among currencies has been specified. Never split or convert this amount automatically."
+    "note": "No currency or distribution among currencies has been specified. Never split or convert this amount automatically."
   },
   "controls": {
     "live_transfer_enabled": false,
     "transfer_submission_enabled": false,
     "withdrawal_enabled": false,
     "credit_posting_enabled": false,
-    "pons_required": true,
-    "human_confirmation_required": true,
+    "authenticated_account_holder_confirmation_required": true,
+    "independent_bank_credit_verification_required": true,
+    "beneficiary_verification_required": true,
+    "bounded_transfer_and_fee_limits_required": true,
+    "idempotency_required": true,
     "webhook_is_settlement_evidence": false,
     "iban_checksum_is_account_ownership_evidence": false,
-    "independent_bank_credit_verification_required": true,
     "append_only_audit_required": true,
-    "fail_closed": true
+    "fail_closed": true,
+    "transaction_authorization": "authenticated_account_holder_confirmation"
   },
   "required_per_transfer": {
     "currency": "exactly one ISO-4217 code",
     "amount": "integer minor units after currency-specific conversion",
     "beneficiary_verification": true,
     "unique_idempotency_key": true,
-    "pons_signed_scope": [
+    "account_holder_confirmation_binding": [
       "transaction_id",
+      "authenticated_account_holder_session_ref",
       "source_account_fingerprint",
       "beneficiary_account_fingerprint",
       "amount_minor_units",
@@ -42,8 +46,10 @@
       "purpose",
       "provider",
       "policy_version",
+      "confirmation_screen_version",
+      "confirmed_at",
       "expires_at",
-      "nonce"
+      "one_time_nonce"
     ]
   },
   "posting_gate": {
@@ -63,6 +69,7 @@
     "format": "append_only_hash_chained_events",
     "store_full_iban": false,
     "store_credentials_or_tokens": false,
+    "record_account_holder_confirmation_receipt": true,
     "reversals_are_new_events": true,
     "external_checkpoint_anchor_required": true
   },
@@ -70,7 +77,7 @@
     "per_transfer_currency_and_allocation_not_specified",
     "beneficiary_not_verified",
     "provider_connection_not_configured",
-    "production_trust_services_not_verified",
+    "account_holder_confirmation_not_implemented_or_verified",
     "bank_credit_not_independently_verified"
   ]
 }

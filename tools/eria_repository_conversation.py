@@ -3,7 +3,26 @@
 import argparse, json, re, subprocess, sys
 from pathlib import Path
 
+try:
+    from .eria_birth_cursive import BirthCursiveEngine
+except ImportError:  # direct Termux script execution
+    from eria_birth_cursive import BirthCursiveEngine
+
 VERSION = "1.1"
+_TERMINAL_BIRTH_CUR = BirthCursiveEngine()
+
+
+def render_terminal_message(message):
+    """Display an origin unchanged and append a separate known possibility."""
+    rendered = []
+    for index, line in enumerate(str(message).splitlines()):
+        rendered.append(line)
+        record = _TERMINAL_BIRTH_CUR.transform_text(
+            line.strip(), "/terminal/output/" + str(index)
+        )
+        if record.status == "DERIVED" and record.derived_text != record.origin_text:
+            rendered.append("  ✧ Positive possibility: " + record.derived_text)
+    return "\n".join(rendered)
 MAX_BYTES = 1_000_000
 MAX_HITS = 30
 SKIP_DIRS = {".git", ".gradle", ".idea", "node_modules", "__pycache__", ".venv", "venv", "build", "dist"}
@@ -105,7 +124,7 @@ class Conversation:
 
     def ask(self, q):
         low = q.lower().strip()
-        out = [f"ERIA Repository Conversation Engine {VERSION}", f"Repository: {self.r.root}"]
+        out = [f"Ŷæṛö LUX · Birth-cursive repository intelligence {VERSION}", f"Repository: {self.r.root}"]
         try:
             if low.startswith(("integration.", "bridge.", "pons.", "code.bypass ", "repository.ask ")):
                 if self.integration is None:
@@ -157,7 +176,7 @@ class Conversation:
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Read-only ERIA repository conversation engine")
+    ap = argparse.ArgumentParser(description="Read-only Ŷæṛö LUX birth-cursive repository conversation")
     ap.add_argument("repo", nargs="?", default=".")
     ap.add_argument("-q", "--question")
     a = ap.parse_args()
@@ -167,10 +186,10 @@ def main():
         print("ERIA:", e, file=sys.stderr)
         return 2
     if a.question:
-        print(chat.ask(a.question))
+        print(render_terminal_message(chat.ask(a.question)))
         return 0
     print(
-        f"ERIA Repository Conversation Engine {VERSION}\n"
+        f"Ŷæṛö LUX · Birth-cursive repository intelligence {VERSION}\n"
         f"Repository: {chat.r.root}\nRead-only. Type quit to exit."
     )
     while True:
@@ -182,7 +201,7 @@ def main():
         if q.lower() in {"quit", "exit"}:
             break
         if q:
-            print(chat.ask(q))
+            print(render_terminal_message(chat.ask(q)))
     return 0
 
 

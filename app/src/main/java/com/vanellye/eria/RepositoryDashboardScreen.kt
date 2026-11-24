@@ -21,7 +21,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.Text as MaterialText
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -64,7 +64,8 @@ private enum class DashboardTab(val label: String) {
     FILES("Files"),
     PROVENANCE("Provenance"),
     AUDIT("Audit"),
-    PONS("PONS")
+    GOVERNANCE("Governance"),
+    LUX("LUX")
 }
 
 private data class RepositoryFile(
@@ -108,7 +109,7 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
     var engineName by remember { mutableStateOf("ERIA Repository Conversation Engine") }
     var engineMode by remember { mutableStateOf("Offline") }
 
-    var ponsPolicy by remember { mutableStateOf("PONS status unavailable") }
+    var ponsPolicy by remember { mutableStateOf("Governance status unavailable") }
     var executionEnabled by remember { mutableStateOf(false) }
     var gitMutationEnabled by remember { mutableStateOf(false) }
     var transmissionEnabled by remember { mutableStateOf(false) }
@@ -129,6 +130,7 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
     var capability by remember { mutableStateOf("repository.read") }
     var requestedScope by remember { mutableStateOf("") }
     var requestReason by remember { mutableStateOf("") }
+    var birthCursivePreview by remember { mutableStateOf("May you fail") }
 
     var statusMessage by remember {
         mutableStateOf("Connect to the local ERIA server to inspect repository metadata.")
@@ -171,7 +173,7 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
         } catch (error: CancellationException) {
             throw error
         } catch (error: Exception) {
-            ponsError = "PONS policy unavailable: " + error.javaClass.simpleName
+            ponsError = "Governance policy unavailable: " + error.javaClass.simpleName
         }
 
         try {
@@ -328,20 +330,20 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            "ERIA Repository",
+                        BirthCursiveText(
+                            "Ŷæṛö LUX",
                             color = ERIA_TEXT,
                             style = MaterialTheme.typography.h5,
                             fontWeight = FontWeight.Bold
                         )
-                        Text(
-                            "Repository intelligence · PONS governance",
+                        BirthCursiveText(
+                            "Light Direction · provenance & co-signation",
                             color = ERIA_MUTED,
                             style = MaterialTheme.typography.caption
                         )
                     }
                     Column(horizontalAlignment = androidx.compose.ui.Alignment.End) {
-                        Text(
+                        BirthCursiveText(
                             if (connected) "CONNECTED" else "OFFLINE",
                             color = if (connected) ERIA_MINT else ERIA_RED,
                             style = MaterialTheme.typography.caption,
@@ -364,7 +366,7 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
                 ) {
                     DashboardTab.values().forEach { item ->
                         TextButton(onClick = { tab = item }) {
-                            Text(
+                            BirthCursiveText(
                                 item.label,
                                 color = if (tab == item) ERIA_MINT else ERIA_MUTED,
                                 fontWeight = if (tab == item) FontWeight.Bold else FontWeight.Normal
@@ -402,7 +404,7 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
                                     Button(
                                         onClick = { coroutineScope.launch { refreshAll() } },
                                         enabled = !loading
-                                    ) { Text("Refresh dashboard") }
+                                    ) { BirthCursiveText("Refresh dashboard") }
                                     Button(
                                         onClick = {
                                             coroutineScope.launch {
@@ -422,7 +424,7 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
                                             }
                                         },
                                         enabled = connected && !loading
-                                    ) { Text("Refresh index") }
+                                    ) { BirthCursiveText("Refresh index") }
                                 }
                             }
                         }
@@ -434,10 +436,10 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
                                 value = fileQuery,
                                 onValueChange = { fileQuery = it },
                                 modifier = Modifier.fillMaxWidth(),
-                                label = { Text("Search repository paths") },
+                                label = { BirthCursiveText("Search repository paths") },
                                 singleLine = true
                             )
-                            Text(
+                            BirthCursiveText(
                                 if (fileQuery.trim().length < 2) {
                                     "Type at least two characters. Results are indexed paths."
                                 } else {
@@ -460,8 +462,8 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
                                         shape = RoundedCornerShape(12.dp)
                                     ) {
                                         Column(Modifier.padding(12.dp)) {
-                                            Text(file.path, color = ERIA_TEXT, fontWeight = FontWeight.Medium)
-                                            Text(
+                                            MaterialText(file.path, color = ERIA_TEXT, fontWeight = FontWeight.Medium)
+                                            MaterialText(
                                                 file.size.toString() + " bytes · " + file.extension,
                                                 color = ERIA_MUTED,
                                                 style = MaterialTheme.typography.caption
@@ -487,15 +489,15 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
                                 value = provenanceQuery,
                                 onValueChange = { provenanceQuery = it },
                                 modifier = Modifier.fillMaxWidth(),
-                                label = { Text("Filter provenance by path") },
+                                label = { BirthCursiveText("Filter provenance by path") },
                                 singleLine = true
                             )
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Button(
                                     onClick = { coroutineScope.launch { loadProvenance(provenanceQuery) } },
                                     enabled = connected
-                                ) { Text("Filter") }
-                                Text(
+                                ) { BirthCursiveText("Filter") }
+                                BirthCursiveText(
                                     "SHA-256 indexed for eligible files up to 5 MiB",
                                     color = ERIA_MUTED,
                                     style = MaterialTheme.typography.caption,
@@ -533,7 +535,7 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text(
+                                BirthCursiveText(
                                     "Append-only local event history",
                                     color = ERIA_TEXT,
                                     fontWeight = FontWeight.SemiBold
@@ -541,7 +543,7 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
                                 TextButton(
                                     onClick = { coroutineScope.launch { loadAudit() } },
                                     enabled = connected
-                                ) { Text("Refresh", color = ERIA_MINT) }
+                                ) { BirthCursiveText("Refresh", color = ERIA_MINT) }
                             }
                             if (auditError.isNotBlank()) StatusCard(auditError, false)
                             if (auditEvents.isEmpty() && auditError.isBlank()) {
@@ -561,12 +563,73 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
                         }
                     }
 
-                    DashboardTab.PONS -> {
+                    DashboardTab.LUX -> {
+                        val record = remember(birthCursivePreview) {
+                            BirthCursiveEngine.transformText(
+                                birthCursivePreview,
+                                "/android/dashboard/lux-preview"
+                            )
+                        }
                         LazyColumn(
                             modifier = Modifier.weight(1f),
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            item { InfoCard("PONS ethics & authorization", "FAIL-CLOSED") }
+                            item {
+                                InfoCard(
+                                    "Birth-cursive co-signation",
+                                    "Create a constructive derivative from an exact origin. The origin remains visible and unchanged; the possibility is a separate expression."
+                                )
+                            }
+                            item {
+                                OutlinedTextField(
+                                    value = birthCursivePreview,
+                                    onValueChange = { birthCursivePreview = it },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    label = { BirthCursiveText("Origin message") }
+                                )
+                            }
+                            item { InfoCard("Immutable origin", record.originText) }
+                            item {
+                                InfoCard(
+                                    if (record.status == "DERIVED") "Positive possibility" else "Review required",
+                                    record.derivedText
+                                )
+                            }
+                            item {
+                                InfoCard(
+                                    "Meaning",
+                                    record.meaning ?: "No exact reviewed rule matches this wording. The original remains unchanged."
+                                )
+                            }
+                            item {
+                                InfoCard(
+                                    "Constructive possibility",
+                                    record.possibility ?: "Contextual review is needed before proposing a positive alternative."
+                                )
+                            }
+                            item {
+                                InfoCard(
+                                    "Origin & co-signation",
+                                    "Origin SHA-256: " + record.originSha256 +
+                                        "\\nDerived SHA-256: " + record.derivedSha256 +
+                                        "\\nCo-signature: pending; no signature is claimed or verified."
+                                )
+                            }
+                            item {
+                                InfoCard(
+                                    "Traversal architecture",
+                                    "Nested UI values use an explicit work stack, cycle detection, and a depth limit. The visitor emits a separate derived message while retaining the origin."
+                                )
+                            }
+                        }
+                    }
+
+                    DashboardTab.GOVERNANCE -> {
+                        LazyColumn(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            item { InfoCard("Governance & authorization", "FAIL-CLOSED") }
                             item { InfoCard("Decision policy", ponsPolicy) }
                             item {
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -608,7 +671,7 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
                                     value = capability,
                                     onValueChange = { capability = it },
                                     modifier = Modifier.fillMaxWidth(),
-                                    label = { Text("Capability") },
+                                    label = { BirthCursiveText("Capability") },
                                     singleLine = true
                                 )
                             }
@@ -617,7 +680,7 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
                                     value = requestedScope,
                                     onValueChange = { requestedScope = it },
                                     modifier = Modifier.fillMaxWidth(),
-                                    label = { Text("Exact scope") },
+                                    label = { BirthCursiveText("Exact scope") },
                                     singleLine = true
                                 )
                             }
@@ -626,7 +689,7 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
                                     value = requestReason,
                                     onValueChange = { requestReason = it },
                                     modifier = Modifier.fillMaxWidth(),
-                                    label = { Text("Reason") }
+                                    label = { BirthCursiveText("Reason") }
                                 )
                             }
                             item {
@@ -636,11 +699,11 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
                                         capability.isNotBlank() && requestedScope.isNotBlank() &&
                                         requestReason.isNotBlank()
                                 ) {
-                                    Text(if (submittingRequest) "Submitting…" else "Submit review request · HOLD")
+                                    BirthCursiveText(if (submittingRequest) "Submitting…" else "Submit review request · HOLD")
                                 }
                             }
                             item {
-                                Text(
+                                BirthCursiveText(
                                     if (approvalSupported) {
                                         "An external approval authority is configured; this screen still only submits requests."
                                     } else {
@@ -651,7 +714,7 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
                                 )
                             }
                             if (ponsError.isNotBlank()) item { StatusCard(ponsError, false) }
-                            item { Text("Authorization requests", color = ERIA_TEXT, fontWeight = FontWeight.SemiBold) }
+                            item { BirthCursiveText("Authorization requests", color = ERIA_TEXT, fontWeight = FontWeight.SemiBold) }
                             if (authorizationRequests.isEmpty()) {
                                 item { InfoCard("Request queue", "No authorization requests have been recorded.") }
                             }
@@ -669,7 +732,7 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
                 }
 
                 Spacer(Modifier.height(6.dp))
-                Text(
+                BirthCursiveText(
                     "Local Termux API · 127.0.0.1:8765 · source-preserving · no automatic repository mutation",
                     color = Color(0xFF71829D),
                     style = MaterialTheme.typography.caption
@@ -687,8 +750,8 @@ private fun MetricCard(label: String, value: String, modifier: Modifier = Modifi
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(Modifier.padding(10.dp)) {
-            Text(value, color = ERIA_TEXT, fontWeight = FontWeight.Bold)
-            Text(label, color = ERIA_MUTED, style = MaterialTheme.typography.caption)
+            MaterialText(value, color = ERIA_TEXT, fontWeight = FontWeight.Bold)
+            MaterialText(label, color = ERIA_MUTED, style = MaterialTheme.typography.caption)
         }
     }
 }
@@ -701,9 +764,9 @@ private fun InfoCard(title: String, body: String) {
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(Modifier.padding(12.dp)) {
-            Text(title, color = ERIA_MINT, fontWeight = FontWeight.SemiBold)
+            MaterialText(title, color = ERIA_MINT, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(4.dp))
-            Text(body, color = ERIA_TEXT, style = MaterialTheme.typography.body2)
+            MaterialText(body, color = ERIA_TEXT, style = MaterialTheme.typography.body2)
         }
     }
 }
@@ -715,7 +778,7 @@ private fun StatusCard(message: String, success: Boolean) {
         backgroundColor = ERIA_PANEL,
         shape = RoundedCornerShape(10.dp)
     ) {
-        Text(
+        MaterialText(
             message,
             modifier = Modifier.padding(10.dp),
             color = if (success) ERIA_MINT else ERIA_AMBER,
