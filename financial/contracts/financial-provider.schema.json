@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://eria.local/contracts/financial-provider.v1.schema.json",
+  "$id": "urn:eria:financial-provider:v1",
   "title": "ERIA Financial Provider Contract",
   "description": "Language-neutral contract shared by ERIA financial gateway implementations. Simulation is not authorization for live financial actions.",
   "type": "object",
@@ -8,10 +8,19 @@
     "Money": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["amount", "currency"],
+      "required": [
+        "amount",
+        "currency"
+      ],
       "properties": {
-        "amount": { "type": "string", "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,8})?$" },
-        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" }
+        "amount": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,8})?$"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        }
       }
     },
     "Capability": {
@@ -28,53 +37,292 @@
     "ProviderDescriptor": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "displayName", "mode", "capabilities"],
+      "required": [
+        "id",
+        "displayName",
+        "mode",
+        "capabilities"
+      ],
       "properties": {
-        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{1,63}$" },
-        "displayName": { "type": "string", "minLength": 1 },
-        "mode": { "const": "SIMULATION_ONLY" },
-        "capabilities": { "type": "array", "items": { "$ref": "#/$defs/Capability" }, "uniqueItems": true }
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{1,63}$"
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mode": {
+          "const": "SIMULATION_ONLY"
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Capability"
+          },
+          "uniqueItems": true
+        }
       }
     },
     "TransferDraft": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["sourceAccountId", "destinationAccountId", "amount"],
+      "required": [
+        "sourceAccountId",
+        "destinationAccountId",
+        "amount"
+      ],
       "properties": {
-        "sourceAccountId": { "type": "string", "minLength": 1 },
-        "destinationAccountId": { "type": "string", "minLength": 1 },
-        "amount": { "$ref": "#/$defs/Money" },
-        "memo": { "type": "string", "maxLength": 140 }
+        "sourceAccountId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "destinationAccountId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "amount": {
+          "$ref": "#/$defs/Money"
+        },
+        "memo": {
+          "type": "string",
+          "maxLength": 140
+        }
       }
     },
     "TransferPreview": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "providerId", "mode", "draft", "fee", "totalDebit", "expiresAt", "digest", "status"],
+      "required": [
+        "id",
+        "providerId",
+        "mode",
+        "draft",
+        "fee",
+        "totalDebit",
+        "expiresAt",
+        "digest",
+        "status"
+      ],
       "properties": {
-        "id": { "type": "string", "minLength": 1 },
-        "providerId": { "type": "string" },
-        "mode": { "const": "SIMULATION_ONLY" },
-        "draft": { "$ref": "#/$defs/TransferDraft" },
-        "fee": { "$ref": "#/$defs/Money" },
-        "totalDebit": { "$ref": "#/$defs/Money" },
-        "expiresAt": { "type": "string", "format": "date-time" },
-        "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
-        "status": { "const": "PREVIEW" }
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "providerId": {
+          "type": "string"
+        },
+        "mode": {
+          "const": "SIMULATION_ONLY"
+        },
+        "draft": {
+          "$ref": "#/$defs/TransferDraft"
+        },
+        "fee": {
+          "$ref": "#/$defs/Money"
+        },
+        "totalDebit": {
+          "$ref": "#/$defs/Money"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "status": {
+          "const": "PREVIEW"
+        }
       }
     },
     "SimulationReceipt": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "previewId", "providerId", "mode", "status", "simulated", "createdAt"],
+      "required": [
+        "id",
+        "previewId",
+        "providerId",
+        "mode",
+        "status",
+        "simulated",
+        "createdAt"
+      ],
       "properties": {
-        "id": { "type": "string" },
-        "previewId": { "type": "string" },
-        "providerId": { "type": "string" },
-        "mode": { "const": "SIMULATION_ONLY" },
-        "status": { "const": "SIMULATED" },
-        "simulated": { "const": true },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "id": {
+          "type": "string"
+        },
+        "previewId": {
+          "type": "string"
+        },
+        "providerId": {
+          "type": "string"
+        },
+        "mode": {
+          "const": "SIMULATION_ONLY"
+        },
+        "status": {
+          "const": "SIMULATED"
+        },
+        "simulated": {
+          "const": true
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "FinancialAccount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "providerId",
+        "name",
+        "type",
+        "currency",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "providerId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "enum": [
+            "checking",
+            "savings",
+            "wallet",
+            "clearing"
+          ]
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "status": {
+          "enum": [
+            "open",
+            "restricted",
+            "closed"
+          ]
+        }
+      }
+    },
+    "AccountBalance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "accountId",
+        "available",
+        "ledger",
+        "asOf"
+      ],
+      "properties": {
+        "accountId": {
+          "type": "string"
+        },
+        "available": {
+          "$ref": "#/$defs/Money"
+        },
+        "ledger": {
+          "$ref": "#/$defs/Money"
+        },
+        "asOf": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "FinancialTransaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "providerId",
+        "accountId",
+        "direction",
+        "amount",
+        "status",
+        "description",
+        "createdAt",
+        "simulated"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "providerId": {
+          "type": "string"
+        },
+        "accountId": {
+          "type": "string"
+        },
+        "direction": {
+          "enum": [
+            "debit",
+            "credit"
+          ]
+        },
+        "amount": {
+          "$ref": "#/$defs/Money"
+        },
+        "status": {
+          "enum": [
+            "posted",
+            "pending"
+          ]
+        },
+        "description": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "simulated": {
+          "const": true
+        }
+      }
+    },
+    "ReconciliationSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "providerId",
+        "mode",
+        "accountCount",
+        "transactionCount",
+        "generatedAt"
+      ],
+      "properties": {
+        "providerId": {
+          "type": "string"
+        },
+        "mode": {
+          "const": "SIMULATION_ONLY"
+        },
+        "accountCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "transactionCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
       }
     }
   }
