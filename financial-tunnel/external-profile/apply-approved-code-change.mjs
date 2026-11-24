@@ -47,7 +47,7 @@ if (!response.ok) fail(`Proposal lookup returned HTTP ${response.status}.`);
 const result = await response.json();
 const proposal = result.proposal;
 const decision = result.decision;
-if (!proposal || !decision || result.status !== "APPROVED_NOT_APPLIED" || decision.decision !== "ALLOW") {
+if (!proposal || !decision || decision.proposalId !== proposal.id || result.status !== "APPROVED_NOT_APPLIED" || decision.decision !== "ALLOW") {
   fail("Proposal does not have a recorded ADMIN ALLOW decision.");
 }
 if (proposal.repository !== REPOSITORY || proposal.branch !== BRANCH) fail("Proposal repository or target branch is not permitted.");
@@ -66,6 +66,12 @@ if (digest !== proposal.patchSha256) fail("Patch digest does not match the appro
 const headers = [...proposal.patch.matchAll(/^diff --git a\/([^\n]+) b\/([^\n]+)$/gm)];
 const patchFiles = headers.map((match) => match[1]);
 const contentHeaders = [...proposal.patch.matchAll(/^(---|\+\+\+) (?:([ab]\/[^\n]+)|(\/dev\/null))$/gm)];
+
+if (proposal.patch.includes("GIT binary patch") || /^rename (from|to) /m.test(proposal.patch) ||
+    /^(new|old) (?:file )?mode (120000|160000)$/m.test(proposal.patch) ||
+    /^\+\+\+ \/dev\/null$/m.test(proposal.patch)) {
+  fail("Binary, rename, deletion, symlink, and submodule patches are not permitted.");
+}
 if (!headers.length || headers.some((match) => match[1] !== match[2] || !validPath(match[1])) ||
     !sortedEqual(patchFiles, proposal.files) || contentHeaders.length !== headers.length * 2 ||
     contentHeaders.some((match) => match[1] === "+++" ? !match[2] || !validPath(match[2].slice(2)) || !proposal.files.includes(match[2].slice(2)) :
