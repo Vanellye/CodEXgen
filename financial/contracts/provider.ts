@@ -8,7 +8,7 @@ import type {
   SimulationReceipt,
   TransferDraft,
   TransferPreview,
-} from "./types";
+} from "./types.ts;
 
 export interface FinancialProvider {
   readonly descriptor: ProviderDescriptor;
