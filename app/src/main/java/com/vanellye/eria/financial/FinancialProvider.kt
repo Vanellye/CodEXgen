@@ -23,7 +23,7 @@ data class Money(
     val currency: String,
 ) {
     init {
-        require(runCatching { BigDecimal(amount) }.isSuccess && BigDecimal(amount) >= BigDecimal.ZERO) { "Money amount must be a non-negative decimal string." }
+        require(amount.matches(Regex("^(0|[1-9][0-9]*)(\\\\.[0-9]{1,8})?$")) && BigDecimal(amount) >= BigDecimal.ZERO) { "Money amount must be a non-negative decimal string with at most 8 fractional digits." }
         require(currency.matches(Regex("^[A-Z]{3}$"))) { "Currency must be an ISO-style uppercase code." }
     }
 }
