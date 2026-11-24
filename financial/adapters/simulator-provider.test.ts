@@ -4,28 +4,28 @@ import { createDefaultFinancialRegistry, ProviderRegistryError } from "../index.
 
 test("default registry exposes the simulator and no live mode", () => {
   const registry = createDefaultFinancialRegistry();
-  const provider = registry.resolve("eria-simulator", [
+  const provider = registry.resolve("internal_simulator", [
     "accounts.read",
     "balances.read",
     "transfers.preview",
     "transfers.simulate",
   ]);
   assert.equal(provider.descriptor.mode, "SIMULATION_ONLY");
-  assert.deepEqual(registry.descriptors().map((item) => item.id), ["eria-simulator"]);
+  assert.deepEqual(registry.descriptors().map((item) => item.id), ["internal_simulator"]);
 });
 
 test("registry fails explicitly instead of silently substituting providers", () => {
   const registry = createDefaultFinancialRegistry();
   assert.throws(() => registry.get("plaid"), ProviderRegistryError);
   assert.throws(
-    () => registry.resolve("eria-simulator", ["transfers.execute" as never]),
+    () => registry.resolve("internal_simulator", ["transfers.execute" as never]),
     ProviderRegistryError,
   );
 });
 
 test("simulator previews and applies an in-memory transfer exactly once", async () => {
   const registry = createDefaultFinancialRegistry();
-  const provider = registry.resolve("eria-simulator");
+  const provider = registry.resolve("internal_simulator");
   const beforeSource = await provider.getBalance("sim-checking-usd");
   const beforeDestination = await provider.getBalance("sim-wallet-usd");
 
@@ -56,7 +56,7 @@ test("simulator previews and applies an in-memory transfer exactly once", async 
 });
 
 test("simulator rejects invalid amounts, currencies, accounts, and insufficient funds", async () => {
-  const provider = createDefaultFinancialRegistry().get("eria-simulator");
+  const provider = createDefaultFinancialRegistry().get("internal_simulator");
 
   await assert.rejects(
     () => provider.createTransferPreview({
