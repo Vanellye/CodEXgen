@@ -31,12 +31,16 @@ function validateCodePatch(input: any): { files: string[]; patch: string; patchS
   const files = [...new Set(input.files)];
   if (files.length !== input.files.length || !files.every(validCodePath)) return null;
   if (input.patch.includes("GIT binary patch") || /^rename (from|to) /m.test(input.patch) ||
-      /^\+\+\+ \/dev\/null$/m.test(input.patch)) return null;
-  const headers = [...input.patch.matchAll(/^diff --git a\/([^\n]+) b\/([^\n]+)$/gm)];
+      /^(new|old) file mode (120000|160000)$/m.test(input.patch) ||
+      /^\\+\\+\\+ \\/dev\\/null$/m.test(input.patch)) return null;
+  const headers = [...input.patch.matchAll(/^diff --git a\\/([^\\n]+) b\\/([^\\n]+)$/gm)];
   if (!headers.length) return null;
   const patchFiles = headers.map((m) => m[1]);
+  const contentHeaders = [...input.patch.matchAll(/^(---|\\+\\+\\+) ([ab]\\/[^\\n]+)$/gm)];
   if (headers.some((m) => m[1] !== m[2] || !validCodePath(m[1])) ||
-      patchFiles.length !== files.length || patchFiles.some((p) => !files.includes(p))) return null;
+      patchFiles.length !== files.length || patchFiles.some((p) => !files.includes(p)) ||
+      contentHeaders.length !== headers.length * 2 ||
+      contentHeaders.some((m) => !validCodePath(m[2].slice(2)) || !files.includes(m[2].slice(2)))) return null;
   return {
     files, patch: input.patch, baseSha: input.baseSha,
     patchSha256: createHash("sha256").update(input.patch, "utf8").digest("hex"),
