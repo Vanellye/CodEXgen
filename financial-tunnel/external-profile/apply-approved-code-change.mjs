@@ -63,10 +63,15 @@ if (typeof proposal.patch !== "string" || Buffer.byteLength(proposal.patch, "utf
 }
 const digest = createHash("sha256").update(proposal.patch, "utf8").digest("hex");
 if (digest !== proposal.patchSha256) fail("Patch digest does not match the approved proposal.");
-const headers = [...proposal.patch.matchAll(/^diff --git a\/([^\n]+) b\/([^\n]+)$/gm)];
+const headers = [...proposal.patch.matchAll(/^diff --git a\\/([^\\n]+) b\\/([^\\n]+)$/gm)];
 const patchFiles = headers.map((match) => match[1]);
+const contentHeaders = [...proposal.patch.matchAll(/^(---|\\+\\+\\+) (?:([ab]\\/[^\\n]+)|(\\/dev\\/null))$/gm)];
 if (!headers.length || headers.some((match) => match[1] !== match[2] || !validPath(match[1])) ||
-    !sortedEqual(patchFiles, proposal.files)) fail("Patch file headers do not exactly match the approved file allowlist.");
+    !sortedEqual(patchFiles, proposal.files) || contentHeaders.length !== headers.length * 2 ||
+    contentHeaders.some((match) => match[1] === "+++" ? !match[2] || !validPath(match[2].slice(2)) || !proposal.files.includes(match[2].slice(2)) :
+      (match[3] !== "/dev/null" && (!match[2] || !validPath(match[2].slice(2)) || !proposal.files.includes(match[2].slice(2)))))) {
+  fail("Patch file headers do not exactly match the approved file allowlist.");
+}
 
 let root, currentBranch, head, remoteHead, status;
 try {
