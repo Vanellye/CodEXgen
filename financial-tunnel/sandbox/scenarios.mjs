@@ -6,7 +6,7 @@ export const scenarios=[
 ['invalid identity rejection',s=>expectCode(()=>s.account('real-customer-identity'),'ACCOUNT_NOT_FOUND')],
 ['insufficient balance rejection',s=>expectCode(()=>s.transfer({from:'acct-empty-001',to:'acct-savings-001',amount:100,idempotencyKey:'low-funds'}),'INSUFFICIENT_FUNDS')],
 ['successful internal transfer',s=>{const before=s.account('acct-checking-001').balance,tx=simulatedTransfer(s);if(tx.status!=='SETTLED'||s.account('acct-checking-001').balance!==before-1000)throw Error('Transfer did not settle');}],
-['failed external transfer',s=>expectCode(()=>s.transfer({from:'acct-checking-001',to:'external-bank',amount:100,idempotencyKey:'external',approved:true,approvalHash:'preview'}),'ACCOUNT_NOT_FOUND')],
+['failed external transfer',s=>expectCode(()=>s.transfer({from:'acct-checking-001',to:'external-bank',amount:100,idempotencyKey:'external'}),'ACCOUNT_NOT_FOUND')],
 ['duplicate transaction detection',s=>{simulatedTransfer(s);expectCode(()=>simulatedTransfer(s,1000,'transfer-001'),'DUPLICATE_TRANSACTION');}],
 ['expired transaction quote',s=>{const q=s.quote({amount:10000});if(q.label!=='SIMULATED')throw Error('Quote not labeled');expectCode(()=>s.assertQuoteFresh({...q,expiresAt:1},2),'QUOTE_EXPIRED');}],
 ['synthetic transfer is independent of gateway approvals',s=>{const tx=simulatedTransfer(s,100,'no-approval');if(tx.status!=='SETTLED')throw Error('Synthetic transfer was unexpectedly gated');}],
