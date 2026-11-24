@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity() {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
-                                BirthCursiveText("ERIA", style = MaterialTheme.typography.h6)
+                                BirthCursiveText("Ŷæṛö LUX", style = MaterialTheme.typography.h6)
                                 BirthCursiveText(
                                     if (showRepositoryDashboard) {
                                         "Native repository dashboard · local Termux API"
