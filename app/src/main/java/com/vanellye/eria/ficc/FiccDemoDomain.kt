@@ -436,4 +436,4 @@ object DemoLedgerFactory {
 
 private const val DEMO_WORKSPACE_ID = "ficc-demo-workspace"
 private fun nextId(prefix: String): String = "$prefix-${java.util.UUID.randomUUID()}"
-internal fun demoProvenance(reference: String) = DataProvenance(sourceReference = reference)
+fun demoProvenance(reference: String) = DataProvenance(sourceReference = reference)
