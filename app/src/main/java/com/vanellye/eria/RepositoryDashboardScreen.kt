@@ -21,6 +21,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
+import androidx.compose.material.Text as MaterialText
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -461,8 +462,8 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
                                         shape = RoundedCornerShape(12.dp)
                                     ) {
                                         Column(Modifier.padding(12.dp)) {
-                                            BirthCursiveText(file.path, color = ERIA_TEXT, fontWeight = FontWeight.Medium)
-                                            BirthCursiveText(
+                                            MaterialText(file.path, color = ERIA_TEXT, fontWeight = FontWeight.Medium)
+                                            MaterialText(
                                                 file.size.toString() + " bytes · " + file.extension,
                                                 color = ERIA_MUTED,
                                                 style = MaterialTheme.typography.caption
@@ -749,8 +750,8 @@ private fun MetricCard(label: String, value: String, modifier: Modifier = Modifi
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(Modifier.padding(10.dp)) {
-            BirthCursiveText(value, color = ERIA_TEXT, fontWeight = FontWeight.Bold)
-            BirthCursiveText(label, color = ERIA_MUTED, style = MaterialTheme.typography.caption)
+            MaterialText(value, color = ERIA_TEXT, fontWeight = FontWeight.Bold)
+            MaterialText(label, color = ERIA_MUTED, style = MaterialTheme.typography.caption)
         }
     }
 }
@@ -763,9 +764,9 @@ private fun InfoCard(title: String, body: String) {
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(Modifier.padding(12.dp)) {
-            BirthCursiveText(title, color = ERIA_MINT, fontWeight = FontWeight.SemiBold)
+            MaterialText(title, color = ERIA_MINT, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(4.dp))
-            BirthCursiveText(body, color = ERIA_TEXT, style = MaterialTheme.typography.body2)
+            MaterialText(body, color = ERIA_TEXT, style = MaterialTheme.typography.body2)
         }
     }
 }
@@ -777,7 +778,7 @@ private fun StatusCard(message: String, success: Boolean) {
         backgroundColor = ERIA_PANEL,
         shape = RoundedCornerShape(10.dp)
     ) {
-        BirthCursiveText(
+        MaterialText(
             message,
             modifier = Modifier.padding(10.dp),
             color = if (success) ERIA_MINT else ERIA_AMBER,
