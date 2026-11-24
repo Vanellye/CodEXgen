@@ -22,7 +22,7 @@ def render_terminal_message(message):
         )
         if record.status == "DERIVED" and record.derived_text != record.origin_text:
             rendered.append("  ✧ Positive possibility: " + record.derived_text)
-    return "\\n".join(rendered)
+    return "\n".join(rendered)
 MAX_BYTES = 1_000_000
 MAX_HITS = 30
 SKIP_DIRS = {".git", ".gradle", ".idea", "node_modules", "__pycache__", ".venv", "venv", "build", "dist"}
