@@ -22,6 +22,7 @@ function fixture(roles: ProfileRole[] = ["member"]) {
     async setRoles(id, next) { if(id!==profile.id)return null; profile.roles=next; return profile; },
     async createCodeChangeProposal(p) { proposals.set(p.id,p); },
     async getCodeChangeProposal(id) { return proposals.get(id) ?? null; },
+    async listCodeChangeProposals() { return [...proposals.values()]; },
     async decideCodeChangeProposal(d) { if(decisions.has(d.proposalId))return null; decisions.set(d.proposalId,d); return d; },
     async getCodeChangeDecision(id) { return decisions.get(id) ?? null; },
   };
@@ -155,5 +156,22 @@ test("code change self-approval and protected target branches are rejected",asyn
   const proposal=await created.json() as any;
   const self=await fetch(base+"/v1/code-change-proposals/"+proposal.proposalId+"/decision",{method:"POST",headers:{authorization:"Bearer admin-2","content-type":"application/json"},body:JSON.stringify({decision:"ALLOW",reason:"self"})});
   assert.equal(self.status,403);
+ });
+});
+
+
+test("ADMIN can list the code change review queue; members cannot",async()=>{
+ const {store}=fixture(["member"]);
+ const server=createExternalProfileServer({store,verifier:{async verify(token:string){return{issuer:"https://issuer.example",subject:token};}}});
+ await withServer(server,async base=>{
+  const created=await fetch(base+"/v1/code-change-proposals",{method:"POST",headers:{authorization:"Bearer subject-1","content-type":"application/json"},body:JSON.stringify(codeProposalBody)});
+  assert.equal(created.status,201);
+  const memberQueue=await fetch(base+"/v1/admin/code-change-proposals",{headers:{authorization:"Bearer subject-1"}});
+  assert.equal(memberQueue.status,403);
+  const adminQueue=await fetch(base+"/v1/admin/code-change-proposals",{headers:{authorization:"Bearer admin-2"}});
+  assert.equal(adminQueue.status,200);
+  const body=await adminQueue.json() as any;
+  assert.equal(body.proposals.length,1);
+  assert.equal(body.proposals[0].status,"PENDING_ADMIN_REVIEW");
  });
 });
