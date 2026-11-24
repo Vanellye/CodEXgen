@@ -58,6 +58,18 @@ class DataEnvelopeValidatorTest {
         assertTrue(DataEnvelopeValidator.validate(authorized).isEmpty())
     }
 
+    @Test fun deeplyNestedJsonUsesBoundedIterativeValidation() {
+        var withinLimit: Any? = "leaf"
+        repeat(64) { withinLimit = listOf(withinLimit) }
+        val accepted = validRecord().copy(payload = mapOf("nested" to withinLimit))
+        assertTrue(DataEnvelopeValidator.validate(accepted).none { it.contains("maximum nesting") })
+
+        var beyondLimit: Any? = "leaf"
+        repeat(65) { beyondLimit = listOf(beyondLimit) }
+        val rejected = validRecord().copy(payload = mapOf("nested" to beyondLimit))
+        assertTrue(DataEnvelopeValidator.validate(rejected).any { it.contains("maximum nesting") })
+    }
+
     @Test fun rejectsNegativeMonotonicTimeAndInvalidQualityIsNotRepresentable() {
         val bad = validRecord().copy(monotonicTime = MonotonicTime(-1L, "device.boot-7"))
         assertTrue(DataEnvelopeValidator.validate(bad).any { it.contains("non-negative") })
