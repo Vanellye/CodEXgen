@@ -53,12 +53,16 @@ class BirthCursiveTests(unittest.TestCase):
             "error_code": "May you fail",
             "command": "May you fail",
             "url": "May you fail",
+            "security_warning": {"message": "May you fail"},
+            "command": {"label": "May you fail"},
         }
         derived, records = self.engine.transform_tree(source)
         self.assertEqual(derived["message"], "May your efforts open paths to learning, growth, and success.")
         self.assertEqual(derived["error_code"], "May you fail")
         self.assertEqual(derived["command"], "May you fail")
         self.assertEqual(derived["url"], "May you fail")
+        self.assertEqual(derived["security_warning"]["message"], "May you fail")
+        self.assertEqual(derived["command"]["label"], "May you fail")
         self.assertEqual(len(records), 1)
 
     def test_unknown_text_is_preserved_and_flagged(self):
