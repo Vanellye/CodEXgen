@@ -168,3 +168,22 @@ Content-Type: application/json
 ```
 
 Use `DENY` to reject. Decisions cannot be overwritten; submit a new proposal for revised code. A successful approval returns `APPROVED_NOT_APPLIED`, never a claim that repository files have been changed.
+
+
+### Apply an approved proposal locally
+
+The companion writer applies an approved diff only after checking the recorded ADMIN decision, distinct proposer/approver identities, patch SHA-256, exact file allowlist, repository, feature branch, local and remote base SHA, and a clean working tree. It never switches branches, pushes, merges, or writes to `main`.
+
+From a clean checkout of `feature/eria-financial-tunnel`, first run a dry check:
+
+```bash
+node financial-tunnel/external-profile/auth0-pkce-smoke-test.mjs --proposal-id <proposal-uuid> --check
+```
+
+Complete the Auth0 browser login when prompted. If the check passes, run the same command without `--check` to apply the patch and create a local Git commit:
+
+```bash
+node financial-tunnel/external-profile/auth0-pkce-smoke-test.mjs --proposal-id <proposal-uuid>
+```
+
+The PKCE helper passes the access token to the writer process in memory only; it is not printed or written to disk. The writer creates a local commit with the ADMIN decision ID, approved patch digest, and base SHA in its commit message. Review the commit before any separate push or pull-request action. If your current checkout has unrelated staged or untracked changes, use a separate clean clone of this feature branch rather than discarding or resetting those changes.
