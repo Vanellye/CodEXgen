@@ -1,4 +1,4 @@
-import type { FinancialProvider } from "../contracts/provider";
+import type { FinancialProvider } from "../contracts/provider.ts";
 import type {
   AccountBalance,
   FinancialAccount,
@@ -8,7 +8,7 @@ import type {
   SimulationReceipt,
   TransferDraft,
   TransferPreview,
-} from "../contracts/types";
+} from "../contracts/types.ts";
 
 const SCALE = 8n;
 const SCALE_FACTOR = 10n ** SCALE;
