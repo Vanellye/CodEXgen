@@ -84,6 +84,7 @@ class FiccSqliteStore(context:Context):SQLiteOpenHelper(context.applicationConte
   val decision=auth.authorize(actor,DemoPermission.LEDGER_RECONCILE,targetId=record.entityId,classification=record.provenance.classification)
   val authorizationEvents=authLog.snapshot()
   if(!decision.allowed) { persistAuditOnly(authorizationEvents);error(decision.reason) }
+  require(record.statementBalance>=BigDecimal.ZERO) { "Statement balance cannot be negative" }
   require(record.provenance.classification==DataClassification.DEMO && record.provenance.sourceType==DataSourceType.SYNTHETIC && !record.provenance.verified && !record.provenance.providerConnected) { "Only synthetic statement fixtures can be reconciled" }
   val db=writableDatabase;db.beginTransaction()
   try {
