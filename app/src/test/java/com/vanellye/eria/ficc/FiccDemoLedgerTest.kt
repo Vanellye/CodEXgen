@@ -130,7 +130,44 @@ class FiccDemoLedgerTest {
         assertTrue(bundle.ledger.delete(
             owner, entry.id, DestructiveConfirmation(true, entry.id, "Demo fixture cleanup")
         ))
-        assertTrue(bundle.auditLog.all().any { it.action == "ledger:delete" && it.targetId == entry.id })
+        assertTrue(bundle.auditReader.events(owner).any { it.action == "ledger:delete" && it.targetId == entry.id })
+    }
+
+
+    @Test fun realProviderRecordCannotEnterSyntheticLedger() {
+        val bundle = fixture()
+        val entity = bundle.entities.first()
+        val error = runCatching {
+            bundle.ledger.post(
+                identity("demo-owner"),
+                JournalEntry(
+                    id = "real-record",
+                    entityId = entity.id,
+                    description = "Provider-origin data is outside this ledger",
+                    occurredAt = Instant.parse("2026-02-01T00:00:00Z"),
+                    lines = listOf(
+                        JournalLine("${entity.id}-cash", EntrySide.DEBIT, BigDecimal("10.00"), "USD"),
+                        JournalLine("${entity.id}-capital", EntrySide.CREDIT, BigDecimal("10.00"), "USD")
+                    ),
+                    provenance = DataProvenance(
+                        classification = DataClassification.REAL,
+                        sourceType = DataSourceType.PROVIDER,
+                        verified = true,
+                        providerConnected = true,
+                        sourceReference = "provider:fixture"
+                    )
+                )
+            )
+        }.exceptionOrNull()
+        assertNotNull(error)
+    }
+
+    @Test fun accountantCannotReadAuditHistory() {
+        val bundle = fixture()
+        val error = runCatching {
+            bundle.auditReader.events(identity("demo-accountant"))
+        }.exceptionOrNull()
+        assertNotNull(error)
     }
 
     @Test fun auditorCannotDeleteLedgerEntries() {
