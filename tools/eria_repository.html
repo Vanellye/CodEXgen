@@ -115,7 +115,7 @@ const oppositionRules=new Map([
  ["darkness surrounds you",["May clarity and understanding illuminate your path.","A statement expressing obscurity or disorientation","Clarity, understanding, and guidance are possible"]]
 ]);
 function birthCursiveRecord(origin){
- const key=String(origin).trim().toLowerCase().replace(/[.!?]+$/,"").replace(/\\s+/g," ");
+ const key=String(origin).trim().toLowerCase().replace(/[.!?]+$/,"").replace(/\s+/g," ");
  const rule=oppositionRules.get(key);
  return rule?{origin:String(origin),derived:rule[0],meaning:rule[1],possibility:rule[2],status:"DERIVED"}:{origin:String(origin),derived:String(origin),meaning:"No exact reviewed rule matches this wording.",possibility:"Contextual review is needed before proposing a positive alternative.",status:"REVIEW_REQUIRED"};
 }
