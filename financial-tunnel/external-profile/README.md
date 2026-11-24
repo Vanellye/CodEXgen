@@ -114,3 +114,57 @@ node --experimental-strip-types --test financial-tunnel/external-profile/service
 ```
 
 The API binds to loopback by default. A successful health check does not mean an identity tenant is connected; verify with a real sandbox-issued access token and `GET /v1/profiles/me`. The supplied tenant and audience values are configured, but provider connectivity remains unverified until a token is obtained and validated and the database is provisioned.
+
+
+## ADMIN-controlled code change workflow
+
+The External Profile API includes a proposal-and-approval gate for code changes in this repository. It is deliberately separate from financial authorization.
+
+- An authenticated, active profile may submit a unified text diff proposal.
+- The target is fixed to repository `Vanellye/CodEXgen` and branch `feature/eria-financial-tunnel`; `main` and other branches are rejected.
+- The proposal records the base commit SHA, exact file list, complete patch, server-computed SHA-256 digest, proposer identity, and timestamp.
+- Paths are limited to `financial-tunnel/` and `financial/`; traversal, environment files, secret paths, binary patches, renames, and file deletions are rejected.
+- Only a `profile_admin` may approve or reject. The approving profile and subject must differ from the proposer. One immutable decision is allowed per proposal.
+- Proposals and decisions are stored in separate append-only PostgreSQL tables. Apply the updated `schema.sql` before using these endpoints.
+- An `ALLOW` response is `APPROVED_NOT_APPLIED`: it is authorization evidence only. This service does not possess a GitHub token, execute patches, create commits, or merge pull requests. A separate reviewed GitHub writer must re-check the approval, patch digest, base SHA, and feature-branch restriction before applying a change. Human review and GitHub repository permissions remain required.
+
+### Submit a proposal
+
+Authenticated bearer token required:
+
+```http
+POST /v1/code-change-proposals
+Content-Type: application/json
+Authorization: Bearer <access-token>
+```
+
+```json
+{
+  "repository": "Vanellye/CodEXgen",
+  "branch": "feature/eria-financial-tunnel",
+  "baseSha": "<40-character-current-feature-branch-commit-sha>",
+  "files": ["financial-tunnel/example.ts"],
+  "patch": "diff --git a/financial-tunnel/example.ts b/financial-tunnel/example.ts\\n..."
+}
+```
+
+The patch must be a unified text diff whose `diff --git` file headers exactly match the supplied file list. Maximum patch size is 128 KiB and maximum file count is 20.
+
+### Review and decide
+
+The proposer or a `profile_admin` can retrieve a proposal:
+
+```http
+GET /v1/code-change-proposals/<proposal-id>
+```
+
+A different `profile_admin` records the one-time decision:
+
+```http
+POST /v1/code-change-proposals/<proposal-id>/decision
+Content-Type: application/json
+
+{"decision":"ALLOW","reason":"Independent code review completed."}
+```
+
+Use `DENY` to reject. Decisions cannot be overwritten; submit a new proposal for revised code. A successful approval returns `APPROVED_NOT_APPLIED`, never a claim that repository files have been changed.
