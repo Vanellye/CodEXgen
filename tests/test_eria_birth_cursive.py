@@ -55,6 +55,7 @@ class BirthCursiveTests(unittest.TestCase):
             "url": "May you fail",
             "security_warning": {"message": "May you fail"},
             "command": {"label": "May you fail"},
+            "security_warning": {"message": "May you fail"},
         }
         derived, records = self.engine.transform_tree(source)
         self.assertEqual(derived["message"], "May your efforts open paths to learning, growth, and success.")
@@ -63,6 +64,7 @@ class BirthCursiveTests(unittest.TestCase):
         self.assertEqual(derived["url"], "May you fail")
         self.assertEqual(derived["security_warning"]["message"], "May you fail")
         self.assertEqual(derived["command"]["label"], "May you fail")
+        self.assertEqual(derived["security_warning"]["message"], "May you fail")
         self.assertEqual(len(records), 1)
 
     def test_unknown_text_is_preserved_and_flagged(self):
@@ -93,6 +95,15 @@ class BirthCursiveTests(unittest.TestCase):
         source = {"a": {"b": {"c": {"label": "May you fail"}}}}
         with self.assertRaises(CursiveDepthError):
             engine.transform_tree(source)
+
+    def test_deep_structure_uses_iterative_work_stack(self):
+        engine = BirthCursiveEngine(max_depth=1500)
+        source = {"label": "May you fail"}
+        for _ in range(1100):
+            source = {"nested": source}
+        derived, records = engine.transform_tree(source)
+        self.assertEqual(len(records), 1)
+        self.assertIn("learning, growth, and success", str(derived))
 
 
 if __name__ == "__main__":
