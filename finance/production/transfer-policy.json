@@ -17,7 +17,6 @@
     "transfer_submission_enabled": false,
     "withdrawal_enabled": false,
     "credit_posting_enabled": false,
-    "pons_transaction_authorization": false,
     "authenticated_account_holder_confirmation_required": true,
     "independent_bank_credit_verification_required": true,
     "beneficiary_verification_required": true,
@@ -26,7 +25,8 @@
     "webhook_is_settlement_evidence": false,
     "iban_checksum_is_account_ownership_evidence": false,
     "append_only_audit_required": true,
-    "fail_closed": true
+    "fail_closed": true,
+    "transaction_authorization": "authenticated_account_holder_confirmation"
   },
   "required_per_transfer": {
     "currency": "exactly one ISO-4217 code",
@@ -69,7 +69,6 @@
     "format": "append_only_hash_chained_events",
     "store_full_iban": false,
     "store_credentials_or_tokens": false,
-    "record_pons_transaction_approval": false,
     "record_account_holder_confirmation_receipt": true,
     "reversals_are_new_events": true,
     "external_checkpoint_anchor_required": true
