@@ -66,10 +66,11 @@ for (const path of files) {
   }
 }
 if (!patch.trim()) fail("No changes found in the selected paths.");
+if (!patch.endsWith("\n")) patch += "\n";
 const headers = [...patch.matchAll(/^diff --git a\/([^\n]+) b\/([^\n]+)$/gm)];
 const patchFiles = headers.map((match) => match[1]);
 if (headers.some((match) => match[1] !== match[2]) ||
-    patchFiles.length !== files.length || files.some((path) => !patchFiles.includes(path))) {
+    patchFiles.length !== files.length || new Set(patchFiles).size !== files.length || files.some((path) => !patchFiles.includes(path))) {
   fail("Generated patch does not exactly match the selected file list. Renames and deletions are not supported.");
 }
 const payload = { repository: REPOSITORY, branch: BRANCH, baseSha, files, patch };
