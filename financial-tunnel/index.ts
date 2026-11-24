@@ -1,7 +1,7 @@
 /**
  * Financial Tunnel composition entry point.
- * The shared provider contract and explicit registry are implemented in ../financial.
- * No PONS services or external provider connections are required.
+ * The provider contract and explicit registry are implemented in ../financial.
+ * External identity and authorization run as an independent service under ./external-profile.
  */
 export {
   createDefaultFinancialRegistry,
