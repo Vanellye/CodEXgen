@@ -185,14 +185,14 @@ class BirthCursiveEngine:
         records: List[BirthCursiveRecord] = []
         active: Set[int] = set()
 
-        def visit(value: Any, path: str, depth: int, text_context: bool = False) -> Any:
+        def visit(value: Any, path: str, depth: int, text_context: bool = False, blocked: bool = False) -> Any:
             if depth > self.max_depth:
                 raise CursiveDepthError(
                     "maximum nested UI depth exceeded at " + (path or "/")
                 )
 
             if isinstance(value, str):
-                if not text_context:
+                if blocked or not text_context:
                     return value
                 record = self.transform_text(
                     value, path or "/", co_signers, co_signature_ref
@@ -211,13 +211,14 @@ class BirthCursiveEngine:
                         key_text = key if isinstance(key, str) else str(key)
                         child_path = path + "/" + key_text.replace("~", "~0").replace("/", "~1")
                         if key_text in NEVER_TRANSFORM_FIELDS:
-                            derived[key] = visit(child, child_path, depth + 1, False)
+                            derived[key] = visit(child, child_path, depth + 1, False, True)
                         else:
                             derived[key] = visit(
                                 child,
                                 child_path,
                                 depth + 1,
                                 key_text in TEXT_FIELDS,
+                                blocked,
                             )
                     return derived
                 finally:
@@ -230,7 +231,7 @@ class BirthCursiveEngine:
                 active.add(identity)
                 try:
                     items = [
-                        visit(item, path + "/" + str(index), depth + 1, text_context)
+                        visit(item, path + "/" + str(index), depth + 1, text_context, blocked)
                         for index, item in enumerate(value)
                     ]
                     return tuple(items) if isinstance(value, tuple) else items
@@ -239,5 +240,5 @@ class BirthCursiveEngine:
 
             return value
 
-        derived_tree = visit(source, "", 0, False)
+        derived_tree = visit(source, "", 0, False, False)
         return derived_tree, records
