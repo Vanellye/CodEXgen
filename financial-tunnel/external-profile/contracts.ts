@@ -54,4 +54,32 @@ export interface ExternalProfileStore {
   appendAuthorizationEvidence(evidence: AuthorizationEvidence): Promise<void>;
   getAuthorizationEvidence(id: string): Promise<AuthorizationEvidence | null>;
   setRoles(profileId: string, roles: ProfileRole[], actorSubject: string): Promise<ExternalProfile | null>;
+  createCodeChangeProposal(proposal: CodeChangeProposal): Promise<void>;
+  getCodeChangeProposal(id: string): Promise<CodeChangeProposal | null>;
+  decideCodeChangeProposal(decision: CodeChangeDecision): Promise<CodeChangeDecision | null>;
+  getCodeChangeDecision(proposalId: string): Promise<CodeChangeDecision | null>;
+}
+
+
+export interface CodeChangeProposal {
+  id: string;
+  proposerProfileId: string;
+  proposerSubject: string;
+  repository: "Vanellye/CodEXgen";
+  branch: "feature/eria-financial-tunnel";
+  baseSha: string;
+  files: string[];
+  patch: string;
+  patchSha256: string;
+  createdAt: string;
+}
+
+export interface CodeChangeDecision {
+  id: string;
+  proposalId: string;
+  approverProfileId: string;
+  approverSubject: string;
+  decision: "ALLOW" | "DENY";
+  reason: string;
+  createdAt: string;
 }
