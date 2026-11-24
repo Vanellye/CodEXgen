@@ -1,0 +1,44 @@
+# Non-secret registry. External provider profiles remain disabled pending verification.
+default_environment: INTERNAL_SIMULATOR
+execution_mode: SIMULATION_ONLY
+live_execution: DISABLED
+providers:
+  internal_simulator:
+    provider_id: internal_simulator
+    family: simulator
+    enabled: true
+    environment: INTERNAL_SIMULATOR
+    capabilities:
+      account.read: true
+      account.synthetic_create: true
+      payment.quote: true
+      bank.transfer.simulate: true
+      crypto.market.quote: true
+      crypto.order.preview: true
+      chain.read.simulate: true
+      chain.broadcast: false
+      ledger.reconcile: true
+    regions: [US]
+    currencies: [USD, EUR, GBP]
+    assets: [BTC, ETH]
+    networks: [BITCOIN_TESTNET, ETHEREUM_TESTNET, BASE_SEPOLIA]
+    credentials: NONE
+    health_check: deterministic_local
+  plaid:
+    provider_id: plaid
+    family: account_data
+    enabled: false
+    environment: SANDBOX
+    status: NOT_CONFIGURED
+  coinbase_cdp:
+    provider_id: coinbase_cdp
+    family: crypto_custody
+    enabled: false
+    environment: TESTNET
+    status: NOT_CONFIGURED
+  wise:
+    provider_id: wise
+    family: payments
+    enabled: false
+    environment: SANDBOX
+    status: NOT_CONFIGURED
