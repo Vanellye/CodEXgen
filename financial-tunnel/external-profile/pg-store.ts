@@ -15,7 +15,11 @@ const mapProfile = (r: ProfileRow): ExternalProfile => ({
 });
 
 export class PostgresExternalProfileStore implements ExternalProfileStore {
-  constructor(private readonly pool: Pool) {}
+  private readonly pool: Pool;
+
+  constructor(pool: Pool) {
+    this.pool = pool;
+  }
 
   async upsertIdentity(identity: ExternalIdentity): Promise<ExternalProfile> {
     const result = await this.pool.query<ProfileRow>(
