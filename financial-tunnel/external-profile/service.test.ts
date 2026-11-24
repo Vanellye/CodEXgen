@@ -175,3 +175,17 @@ test("ADMIN can list the code change review queue; members cannot",async()=>{
   assert.equal(body.proposals[0].status,"PENDING_ADMIN_REVIEW");
  });
 });
+
+
+test("code change proposal rejects traversal and deletion patches",async()=>{
+ const {store}=fixture(["member"]);
+ const server=createExternalProfileServer({store,verifier:{async verify(){return{issuer:"https://issuer.example",subject:"subject-1"};}}});
+ await withServer(server,async base=>{
+  const traversalPatch=codePatch.replaceAll("financial-tunnel/index.ts","financial-tunnel/../README.md");
+  const traversal=await fetch(base+"/v1/code-change-proposals",{method:"POST",headers:{authorization:"Bearer valid","content-type":"application/json"},body:JSON.stringify({...codeProposalBody,files:["financial-tunnel/../README.md"],patch:traversalPatch})});
+  assert.equal(traversal.status,400);
+  const deletionPatch=codePatch.replace("+++ b/financial-tunnel/index.ts","+++ /dev/null");
+  const deletion=await fetch(base+"/v1/code-change-proposals",{method:"POST",headers:{authorization:"Bearer valid","content-type":"application/json"},body:JSON.stringify({...codeProposalBody,patch:deletionPatch})});
+  assert.equal(deletion.status,400);
+ });
+});
