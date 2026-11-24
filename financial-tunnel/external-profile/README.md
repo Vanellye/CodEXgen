@@ -187,3 +187,38 @@ node financial-tunnel/external-profile/auth0-pkce-smoke-test.mjs --proposal-id <
 ```
 
 The PKCE helper passes the access token to the writer process in memory only; it is not printed or written to disk. The writer creates a local commit with the ADMIN decision ID, approved patch digest, and base SHA in its commit message. Review the commit before any separate push or pull-request action. If your current checkout has unrelated staged or untracked changes, use a separate clean clone of this feature branch rather than discarding or resetting those changes.
+
+
+### Provision the first profile administrator
+
+After the first successful PKCE login, verify the profile's issuer and subject from the authenticated `GET /v1/profiles/me` response. Then, using a trusted local PostgreSQL administrator session, replace the subject placeholder below with that exact verified subject. This is an explicit out-of-band bootstrap; there is no self-service admin endpoint.
+
+```sql
+WITH promoted AS (
+  UPDATE external_profiles
+     SET roles = ARRAY['member','profile_admin']::text[],
+         updated_at = now()
+   WHERE issuer = 'https://dev-ekleezvw1eidw3w4.us.auth0.com/'
+     AND subject = 'REPLACE_WITH_VERIFIED_SUBJECT'
+   RETURNING id
+)
+INSERT INTO external_profile_events
+  (id, profile_id, actor_subject, event_type, roles)
+SELECT gen_random_uuid(), id, 'bootstrap:out-of-band-operator',
+       'PROFILE_ROLES_CHANGED', ARRAY['member','profile_admin']::text[]
+FROM promoted
+RETURNING profile_id;
+```
+
+Confirm exactly one row was returned. The first administrator cannot approve their own proposal; provision a second independently authenticated `profile_admin` account for maker-checker approval.
+
+### ADMIN review queue
+
+A profile administrator can list up to 50 newest proposals without exposing patch bodies in the queue:
+
+```http
+GET /v1/admin/code-change-proposals
+Authorization: Bearer <access-token>
+```
+
+Open a specific proposal with `GET /v1/code-change-proposals/<proposal-id>`, inspect the complete diff and digest, then record the decision using the endpoint above.
