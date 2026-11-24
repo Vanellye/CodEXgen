@@ -17,7 +17,7 @@ export class ProviderRegistry {
 
   register(provider: FinancialProvider): void {
     const { id, mode, capabilities } = provider.descriptor;
-    if (!/^[a-z][a-z0-9-]{1,63}$/.test(id)) {
+    if (!/^[a-z][a-z0-9_-]{1,63}$/.test(id)) {
       throw new ProviderRegistryError(`Invalid provider id: ${id}`);
     }
     if (mode !== "SIMULATION_ONLY") {
