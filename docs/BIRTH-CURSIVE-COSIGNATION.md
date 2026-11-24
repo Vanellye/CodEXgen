@@ -26,4 +26,4 @@ Run:
 
     python -m unittest discover -s tests -p 'test_eria_birth_cursive.py' -v
 
-Android Compose, the Termux conversation browser, the repository browser, and terminal output display the origin unchanged with a separate constructive possibility when an exact rule matches. Nested native data validation and birth-cursive tree traversal use explicit work stacks rather than recursive calls.\n\nThe module is a deterministic exact-rule engine, not an unrestricted sentiment rewrite or a factual-outcome generator.
+Android Compose, the Termux conversation browser, the repository browser, and terminal output display the origin unchanged with a separate constructive possibility when an exact rule matches. Nested native data validation and birth-cursive tree traversal use explicit work stacks rather than call-stack descent.\n\nThe module is a deterministic exact-rule engine, not an unrestricted sentiment rewrite or a factual-outcome generator.
