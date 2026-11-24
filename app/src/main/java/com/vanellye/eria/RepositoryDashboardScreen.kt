@@ -617,7 +617,7 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
                             item {
                                 InfoCard(
                                     "Traversal architecture",
-                                    "Nested UI values use an explicit work stack, cycle detection, and a depth limit. No recursive call is used by the birth-cursive visitor."
+                                    "Nested UI values use an explicit work stack, cycle detection, and a depth limit. The visitor emits a separate derived message while retaining the origin."
                                 )
                             }
                         }
