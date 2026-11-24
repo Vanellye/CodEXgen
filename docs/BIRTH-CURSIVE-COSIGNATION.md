@@ -9,7 +9,7 @@ Birth-cursive is the origin-linked creation of a derived expression. Co-signatio
 ## Processing contract
 
 1. Preserve the original UI tree and exact source text.
-2. Visit nested mappings, lists, and tuples with cycle detection and a maximum depth.
+2. Visit nested mappings and lists with cycle detection and a maximum depth.
 3. Transform only strings under allowlisted presentation fields.
 4. Keep code, commands, routes, URLs, identifiers, status codes, and security warnings unchanged.
 5. Apply exact, versioned opposition rules. Unknown or ambiguous text remains unchanged and is marked REVIEW_REQUIRED.
@@ -26,4 +26,4 @@ Run:
 
     python -m unittest discover -s tests -p 'test_eria_birth_cursive.py' -v
 
-The module is a deterministic exact-rule engine, not an unrestricted sentiment rewrite or a factual-outcome generator.
+Android Compose, the Termux conversation browser, the repository browser, and terminal output display the origin unchanged with a separate constructive possibility when an exact rule matches. Nested native data validation and birth-cursive tree traversal use explicit work stacks rather than recursive calls.\n\nThe module is a deterministic exact-rule engine, not an unrestricted sentiment rewrite or a factual-outcome generator.
