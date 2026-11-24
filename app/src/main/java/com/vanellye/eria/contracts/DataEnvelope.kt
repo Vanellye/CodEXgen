@@ -4,6 +4,7 @@ import java.text.ParsePosition
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
+import java.util.ArrayDeque
 
 enum class DataQuality {
     VALID, STALE, OUT_OF_RANGE, UNCALIBRATED, SENSOR_FAULT, UNKNOWN
@@ -133,32 +134,57 @@ object DataEnvelopeValidator {
         return parsed != null && position.index == value.length
     }
 
+    private data class JsonVisit(val value: Any?, val path: String, val depth: Int)
+
+    /**
+     * Validate nested JSON values iteratively. The explicit stack avoids call-stack
+     * growth for deeply nested inputs; maximum depth remains a deterministic limit.
+     */
     private fun validateJsonValue(
         value: Any?,
         path: String,
         depth: Int,
         errors: MutableList<String>
     ) {
-        if (depth > 64) {
-            errors += "$path exceeds maximum nesting depth"
-            return
-        }
-        when (value) {
-            null, is String, is Boolean, is Byte, is Short, is Int, is Long -> Unit
-            is Float -> if (!value.isFinite()) errors += "$path contains a non-finite number"
-            is Double -> if (!value.isFinite()) errors += "$path contains a non-finite number"
-            is Number -> Unit
-            is List<*> -> value.forEachIndexed { index, item ->
-                validateJsonValue(item, "$path[$index]", depth + 1, errors)
+        val pending = ArrayDeque<JsonVisit>()
+        pending.addLast(JsonVisit(value, path, depth))
+        while (pending.isNotEmpty()) {
+            val item = pending.removeLast()
+            if (item.depth > 64) {
+                errors += "${item.path} exceeds maximum nesting depth"
+                continue
             }
-            is Map<*, *> -> value.forEach { (key, item) ->
-                if (key !is String) {
-                    errors += "$path object keys must be strings"
-                } else {
-                    validateJsonValue(item, "$path.$key", depth + 1, errors)
+            when (val current = item.value) {
+                null, is String, is Boolean, is Byte, is Short, is Int, is Long -> Unit
+                is Float -> if (!current.isFinite()) {
+                    errors += "${item.path} contains a non-finite number"
                 }
+                is Double -> if (!current.isFinite()) {
+                    errors += "${item.path} contains a non-finite number"
+                }
+                is Number -> Unit
+                is List<*> -> {
+                    for (index in current.indices.reversed()) {
+                        pending.addLast(JsonVisit(
+                            current[index], "${item.path}[$index]", item.depth + 1
+                        ))
+                    }
+                }
+                is Map<*, *> -> {
+                    val entries = current.entries.toList()
+                    for (index in entries.indices.reversed()) {
+                        val entry = entries[index]
+                        if (entry.key !is String) {
+                            errors += "${item.path} object keys must be strings"
+                        } else {
+                            pending.addLast(JsonVisit(
+                                entry.value, "${item.path}.${entry.key}", item.depth + 1
+                            ))
+                        }
+                    }
+                }
+                else -> errors += "${item.path} contains unsupported type ${current::class.java.simpleName}"
             }
-            else -> errors += "$path contains unsupported type ${value::class.java.simpleName}"
         }
     }
 }
