@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createDefaultFinancialRegistry, ProviderRegistryError } from "../index";
+import { createDefaultFinancialRegistry, ProviderRegistryError } from "../index.ts";
 
 test("default registry exposes the simulator and no live mode", () => {
   const registry = createDefaultFinancialRegistry();
