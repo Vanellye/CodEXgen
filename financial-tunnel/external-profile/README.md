@@ -2,27 +2,49 @@
 
 A standalone identity-profile and authorization-evidence service with an independently deployed API and PostgreSQL evidence store. It does **not** execute transactions.
 
-## Boundaries
+## Integration target: Auth0 development tenant
+
+The service uses standard OIDC access-token validation and is provider-neutral. Auth0 is the documented sandbox target. No tenant is provisioned or connected by this repository change; the tenant owner must supply the issuer and API audience.
+
+1. Create or select a dedicated **development** Auth0 tenant.
+2. Under **Applications → APIs**, create an API named `ERIA External Profile Sandbox`. Set a unique API Identifier such as `https://eria-financial-tunnel-sandbox.example/api` and use RS256 signing.
+3. Create a Native or SPA application for the test client. Use Authorization Code Flow with PKCE; do not enable the Resource Owner Password flow.
+4. Configure the client to request an access token for the API Identifier audience. The client should request only the scopes it needs. Do not put a client secret in this service.
+5. Copy the tenant domain and API Identifier into the environment variables below. The issuer must include its trailing slash. The JWKS endpoint is the tenant's `/.well-known/jwks.json`.
+6. Obtain an access token through the provider's hosted login flow and call `GET /v1/profiles/me`. The service creates a `member` profile on first login. It ignores role claims supplied by the token.
+7. Provision the initial `profile_admin` out-of-band through a reviewed database operation after verifying the exact issuer and subject. There is deliberately no self-service admin bootstrap endpoint.
+
+For Auth0, the expected values have these forms:
+
+- `OIDC_ISSUER=https://YOUR_TENANT_DOMAIN/`
+- `OIDC_AUDIENCE=https://eria-financial-tunnel-sandbox.example/api`
+- `OIDC_JWKS_URL=https://YOUR_TENANT_DOMAIN/.well-known/jwks.json`
+
+Auth0's API audience must match the access token's `aud` claim exactly. The issuer must match its `iss` claim exactly. Do not use an ID token as the API bearer token.
+
+## Boundaries and authorization
 
 - Identity is authenticated by an external OIDC issuer (JWT signature, issuer, audience, expiry and allowed algorithm are verified against its JWKS).
+- OIDC issuer and JWKS endpoints must use HTTPS.
 - Roles are stored server-side; token-supplied role claims are ignored.
-- New identities receive only the `member` role. An existing `profile_admin` provisions roles through the admin API.
-- Authorization decisions require `financial_approver` or `profile_admin`, a fresh preview and an exact SHA-256 hash of the canonical preview.
+- New identities receive only the `member` role. A trusted operator provisions the first administrator out-of-band; existing admins may provision subsequent roles.
+- Authorization decisions require `financial_approver` or `profile_admin`, a fresh preview, a matching SHA-256 hash, and an approver subject different from the transaction initiator.
 - Every decision, including denials, is appended to the evidence table. Evidence and profile-role events reject UPDATE/DELETE.
 - The service returns a decision and evidence identifier only. A separate financial execution adapter must verify the evidence and apply its own execution controls.
-- No provider SDKs, wallet keys, or live transaction calls.
+- No provider SDKs, wallet keys, bank connections, or live transaction calls are included. Financial execution remains disabled.
 
-## Configuration
+## Database and environment
 
-Apply `schema.sql` to a dedicated PostgreSQL database, then set:
+Apply `schema.sql` to a dedicated PostgreSQL database, then copy `.env.example` to a private local environment file and set:
 
 - `DATABASE_URL`
 - `OIDC_ISSUER`
 - `OIDC_AUDIENCE`
 - `OIDC_JWKS_URL`
-- Optional: `DATABASE_SSL=true`, `EXTERNAL_PROFILE_HOST=127.0.0.1`, `EXTERNAL_PROFILE_PORT=8787`
 
-No default issuer, credentials, admin profile, or production endpoint is supplied. The service fails startup if OIDC configuration is absent. Keep the database private and use TLS in deployed environments.
+Optional: `DATABASE_SSL=true`, `EXTERNAL_PROFILE_HOST=127.0.0.1`, `EXTERNAL_PROFILE_PORT=8787`.
+
+Never commit real tenant values, access tokens, client secrets, or database credentials. Keep the database private and use TLS in deployed environments. Configure the application database role with least privilege; the immutable triggers do not protect against a database owner or superuser.
 
 ## API
 
@@ -38,6 +60,7 @@ Authorization request body:
 {
   "action": "transfer.execute",
   "preview": {
+    "initiatedBySubject": "OIDC_SUBJECT_OF_TRANSACTION_INITIATOR",
     "amountMinor": 1250,
     "currency": "USD",
     "destinationRef": "synthetic-destination-001",
@@ -48,10 +71,14 @@ Authorization request body:
 }
 ```
 
-## Run
+## Run and verify
 
 After applying the schema and setting the environment:
 
 `node --experimental-strip-types financial-tunnel/external-profile/service.ts`
 
-This is an implementation scaffold, not a connected identity tenant. No OIDC issuer, database, user, or external profile has been provisioned or tested in this commit. The API binds to loopback by default.
+Run the focused tests with:
+
+`node --experimental-strip-types --test financial-tunnel/external-profile/service.test.ts`
+
+The API binds to loopback by default. A successful health check does not mean an identity tenant is connected; verify with a real sandbox-issued access token and `GET /v1/profiles/me`. The repository does not contain tenant credentials, so provider connectivity remains pending until the tenant owner supplies the three OIDC values and the database is provisioned.
