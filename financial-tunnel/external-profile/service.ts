@@ -13,7 +13,7 @@ const ROLE_SET = new Set<ProfileRole>(["member", "financial_approver", "profile_
 
 export function hashTransactionPreview(action: string, preview: TransactionPreview): string {
   const canonical = JSON.stringify({
-    action, amountMinor: preview.amountMinor, currency: preview.currency.toUpperCase(),
+    action, initiatedBySubject: preview.initiatedBySubject, amountMinor: preview.amountMinor, currency: preview.currency.toUpperCase(),
     destinationRef: preview.destinationRef, network: preview.network ?? "",
     expiresAt: new Date(preview.expiresAt).toISOString(),
   });
@@ -68,6 +68,7 @@ export function createExternalProfileServer(deps: {
         const action = input.action;
         const p = input.preview as TransactionPreview | undefined;
         if (typeof action !== "string" || !ALLOWED_ACTIONS.has(action) || !p ||
+            typeof p.initiatedBySubject !== "string" || p.initiatedBySubject.length < 1 || p.initiatedBySubject.length > 200 ||
             !Number.isSafeInteger(p.amountMinor) || p.amountMinor <= 0 ||
             typeof p.currency !== "string" || !/^[A-Za-z]{3}$/.test(p.currency) ||
             typeof p.destinationRef !== "string" || p.destinationRef.length < 3 || p.destinationRef.length > 200 ||
@@ -81,12 +82,13 @@ export function createExternalProfileServer(deps: {
         }
         const isApprover = profile.roles.includes("financial_approver") || profile.roles.includes("profile_admin");
         const notExpired = Date.parse(p.expiresAt) > now().getTime();
-        const allowed = isApprover && notExpired;
+        const differentActor = identity.subject !== p.initiatedBySubject;
+        const allowed = isApprover && notExpired && differentActor;
         const evidence: AuthorizationEvidence = {
           id: randomUUID(), profileId: profile.id, actorSubject: identity.subject, action,
           preview: { ...p, currency: p.currency.toUpperCase() }, previewHash: expectedHash,
           decision: allowed ? "ALLOW" : "DENY",
-          reason: allowed ? "APPROVER_ROLE_AND_FRESH_PREVIEW" : (!notExpired ? "PREVIEW_EXPIRED" : "APPROVER_ROLE_REQUIRED"),
+          reason: allowed ? "INDEPENDENT_APPROVER_AND_FRESH_PREVIEW" : (!differentActor ? "SELF_APPROVAL_PROHIBITED" : (!notExpired ? "PREVIEW_EXPIRED" : "APPROVER_ROLE_REQUIRED")),
           policyVersion: POLICY_VERSION, createdAt: now().toISOString(),
         };
         await deps.store.appendAuthorizationEvidence(evidence);
