@@ -22,6 +22,26 @@ Configured OIDC values:
 
 Auth0's API audience must match the access token's `aud` claim exactly. The issuer must match its `iss` claim exactly. Do not use an ID token as the API bearer token.
 
+## Browser-independent local PKCE smoke test
+
+A browser dashboard session is not needed to test the public OIDC discovery/JWKS endpoints. For interactive user authentication, use the local PKCE helper from your own device; it opens no remote automation session, stores no client secret, and never prints or writes the access token.
+
+Before running it:
+
+- The Auth0 SPA/Native application must already allow `http://localhost:3000/callback`.
+- The ERIA API must be running at `http://127.0.0.1:8787`.
+- PostgreSQL schema must be provisioned and `.env` configured for the service.
+
+Run:
+
+```bash
+node financial-tunnel/external-profile/auth0-pkce-smoke-test.mjs
+```
+
+Open the authorization URL printed in the local terminal, complete Auth0 login, and the helper will exchange the authorization code using PKCE and call `GET /v1/profiles/me` directly. The bearer token remains in process memory and is not displayed. If Auth0 reports `unauthorized_client` or `callback URL mismatch`, the client grant or callback settings still need to be corrected in Auth0. If the API returns a database error, provision PostgreSQL before retrying.
+
+The helper defaults to the tenant, client ID, audience, callback URI and local API base recorded above. Override them with `AUTH0_DOMAIN`, `AUTH0_CLIENT_ID`, `AUTH0_AUDIENCE`, `AUTH0_REDIRECT_URI` or `ERIA_API_BASE` environment variables when needed.
+
 ## Boundaries and authorization
 
 - Identity is authenticated by an external OIDC issuer (JWT signature, issuer, audience, expiry and allowed algorithm are verified against its JWKS).
