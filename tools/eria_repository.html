@@ -13,14 +13,14 @@ nav{display:flex;gap:6px;overflow:auto;padding:14px 0}nav button,.action{border:
 main{padding:8px 0 30px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:15px;margin-bottom:12px;min-width:0}.metric b{display:block;font-size:24px}.metric span,.muted{font-size:11px;color:var(--muted)}h2{font-size:18px;margin:5px 0 12px}h3{font-size:14px;margin:0 0 9px}.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.kv{display:grid;grid-template-columns:125px 1fr;gap:8px;padding:8px 0;border-bottom:1px solid #25324a;font-size:12px}.kv:last-child{border:0}.kv span:first-child{color:var(--muted)}code,pre{font-size:11px;overflow-wrap:anywhere;color:#b8d6ff;white-space:pre-wrap;word-break:break-word}
 .search{display:flex;gap:8px;margin:12px 0}.search input,.field{width:100%;min-width:0;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:inherit;padding:11px}.action.primary{background:var(--mint);color:#071b20;border:0;font-weight:700}.action:disabled{opacity:.5}
 .file{padding:11px 0;border-bottom:1px solid #25324a;display:flex;justify-content:space-between;gap:12px;font-size:12px;cursor:pointer}.file:last-child{border:0}.file small{color:var(--muted);white-space:nowrap}.policy{display:grid;grid-template-columns:1fr 1fr;gap:9px}.policy div{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:11px;font-size:12px}.policy b{display:block;margin-bottom:5px}
-.view[hidden]{display:none!important}.notice{border-left:3px solid var(--amber);padding:10px 12px;background:#282318;border-radius:8px;font-size:12px;color:#e9d9b3;line-height:1.5}.formgrid{display:grid;gap:9px}.result{padding:10px 0;border-bottom:1px solid #25324a;font-size:12px}.result:last-child{border:0}.hash{overflow-wrap:anywhere;color:#b8d6ff}.file-detail{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:12px}.file-detail pre{max-height:340px;overflow:auto}footer{text-align:center;color:var(--muted);font-size:10px;padding:18px 0}
+.view[hidden]{display:none!important}.birth-cursive-note{display:block;margin-top:6px;color:var(--mint);font-size:11px;line-height:1.4}.notice{border-left:3px solid var(--amber);padding:10px 12px;background:#282318;border-radius:8px;font-size:12px;color:#e9d9b3;line-height:1.5}.formgrid{display:grid;gap:9px}.result{padding:10px 0;border-bottom:1px solid #25324a;font-size:12px}.result:last-child{border:0}.hash{overflow-wrap:anywhere;color:#b8d6ff}.file-detail{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:12px}.file-detail pre{max-height:340px;overflow:auto}footer{text-align:center;color:var(--muted);font-size:10px;padding:18px 0}
 @media(max-width:620px){.grid{grid-template-columns:1fr 1fr}.metric:last-child{grid-column:1/-1}.policy{grid-template-columns:1fr}.kv{grid-template-columns:105px 1fr}nav button{padding:8px 10px}}
 </style>
 </head>
 <body><div class="shell">
-<header><div class="brand"><div class="mark">Æ</div><div><h1>ERIA Repository</h1><p>Repository intelligence · PONS governance</p></div></div><span id="connection" class="pill">Connecting…</span></header>
+<header><div class="brand"><div class="mark">Æ</div><div><h1>ERIA Repository</h1><p>Repository intelligence · provenance & co-signation</p></div></div><span id="connection" class="pill">Connecting…</span></header>
 <nav>
-<button class="active" data-view="overview">Overview</button><button data-view="files">Files</button><button data-view="provenance">Provenance</button><button data-view="audit">Audit</button><button data-view="pons">PONS</button>
+<button class="active" data-view="overview">Overview</button><button data-view="files">Files</button><button data-view="provenance">Provenance</button><button data-view="audit">Audit</button><button data-view="governance">Governance</button><button data-view="lux">LUX</button>
 </nav>
 <main>
 <section id="overview" class="view">
@@ -56,12 +56,12 @@ main{padding:8px 0 30px}.grid{display:grid;grid-template-columns:repeat(3,minmax
 </section>
 
 <section id="audit" class="view" hidden>
-<div class="card"><div class="row"><h2>Local audit history</h2><button id="refreshAudit" class="action">Refresh</button></div><p class="muted">Append-only SQLite event log for index refreshes and PONS review requests. The log is local to this Termux installation.</p><div id="auditResults">Loading audit events…</div></div>
+<div class="card"><div class="row"><h2>Local audit history</h2><button id="refreshAudit" class="action">Refresh</button></div><p class="muted">Append-only SQLite event log for index refreshes and internal governance review requests. The log is local to this Termux installation.</p><div id="auditResults">Loading audit events…</div></div>
 </section>
 
-<section id="pons" class="view" hidden>
-<div class="card"><div class="row"><h2>PONS ethics & authorization</h2><span class="tag warn">Fail-closed</span></div>
-<p class="muted">PONS is an application-level capability gate. Missing, unverified, or out-of-scope authorization remains HOLD.</p>
+<section id="governance" class="view" hidden>
+<div class="card"><div class="row"><h2>Governance & authorization</h2><span class="tag warn">Fail-closed</span></div>
+<p class="muted">Internal review policy is separate from public Ŷæṛö LUX identity. Missing, unverified, or out-of-scope evidence remains HOLD.</p>
 <div class="kv"><span>Decision policy</span><b id="decisionPolicy">—</b></div>
 <div class="kv"><span>Execution</span><span id="executionState" class="tag stop">Disabled</span></div>
 <div class="kv"><span>Git mutation</span><span id="gitState" class="tag stop">Disabled</span></div>
@@ -83,6 +83,22 @@ main{padding:8px 0 30px}.grid{display:grid;grid-template-columns:repeat(3,minmax
 <div class="card"><h2>Authorization requests</h2><div id="requestResults">Loading requests…</div></div>
 <div class="notice">Inspection and proposal only. This interface cannot approve grants, verify an identity, or execute protected actions. Approval requires a separate trusted authority and backend enforcement.</div>
 </section>
+
+<section id="lux" class="view" hidden>
+<div class="card">
+  <h2>Ŷæṛö LUX · Birth-cursive co-signation</h2>
+  <p class="muted">Enter an origin message. The original remains unchanged; an exact reviewed rule may produce a separate constructive possibility.</p>
+  <div class="formgrid">
+    <textarea class="field" id="luxOrigin" rows="3" aria-label="Origin message">May you fail</textarea>
+    <div><span class="muted">Immutable origin</span><pre id="luxOriginValue">May you fail</pre></div>
+    <div><span class="muted">Derived possibility</span><pre id="luxDerived">May your efforts open paths to learning, growth, and success.</pre></div>
+    <div><span class="muted">Reasoning</span><p id="luxMeaning" class="muted">A wish for an unsuccessful outcome</p></div>
+    <div><span class="muted">Constructive possibility</span><p id="luxPossibility" class="muted">Learning, adaptation, and achievement remain possible</p></div>
+    <div><span class="muted">Co-signation status</span><p id="luxCoSign" class="muted">Pending. No cryptographic signature is claimed or verified.</p></div>
+  </div>
+</div>
+<div class="notice">Birth-cursive is an origin-linked derivation, not a guarantee that a hoped-for outcome will occur. Ambiguous messages remain unchanged for review.</div>
+</section>
 </main>
 <footer>Local Termux interface · 127.0.0.1 only · no automatic repository mutation</footer>
 </div>
@@ -91,14 +107,48 @@ main{padding:8px 0 30px}.grid{display:grid;grid-template-columns:repeat(3,minmax
 const $=id=>document.getElementById(id);
 let activeView="overview";
 const esc=value=>String(value==null?"":value);
-function showText(node,value){node.textContent=esc(value)}
+const oppositionRules=new Map([
+ ["may you fail",["May your efforts open paths to learning, growth, and success.","A wish for an unsuccessful outcome","Learning, adaptation, and achievement remain possible"]],
+ ["may you suffer",["May you find relief, peace, care, and healing.","A wish for another person's suffering","Relief, care, peace, and healing are constructive possibilities"]],
+ ["you are worthless",["Your life has inherent worth and dignity.","A statement denying a person's worth","Human dignity and belonging can be affirmed"]],
+ ["you are trapped",["May you discover a safe path toward freedom.","A statement that presents a person as having no way forward","Safe choices and paths toward freedom may be discovered"]],
+ ["darkness surrounds you",["May clarity and understanding illuminate your path.","A statement expressing obscurity or disorientation","Clarity, understanding, and guidance are possible"]]
+]);
+function birthCursiveRecord(origin){
+ const key=String(origin).trim().toLowerCase().replace(/[.!?]+$/,"").replace(/\\s+/g," ");
+ const rule=oppositionRules.get(key);
+ return rule?{origin:String(origin),derived:rule[0],meaning:rule[1],possibility:rule[2],status:"DERIVED"}:{origin:String(origin),derived:String(origin),meaning:"No exact reviewed rule matches this wording.",possibility:"Contextual review is needed before proposing a positive alternative.",status:"REVIEW_REQUIRED"};
+}
+function showText(node,value,allowPossibility=true){
+ const origin=esc(value);
+ node.textContent=origin;
+ const sibling=node.nextElementSibling;
+ if(sibling&&sibling.dataset.birthCursiveFor===node.id)sibling.remove();
+ const derived=allowPossibility?birthCursiveRecord(origin):null;
+ if(derived&&derived.status==="DERIVED"&&derived.derived!==origin){
+  const note=document.createElement("small");
+  note.className="birth-cursive-note";
+  note.dataset.birthCursiveFor=node.id;
+  note.textContent="✧ Positive possibility: "+derived.derived;
+  node.insertAdjacentElement("afterend",note);
+ }
+}
+function renderLux(){
+ const record=birthCursiveRecord($("luxOrigin").value);
+ $("luxOriginValue").textContent=record.origin;
+ $("luxDerived").textContent=record.derived;
+ $("luxMeaning").textContent=record.meaning;
+ $("luxPossibility").textContent=record.possibility;
+ $("luxCoSign").textContent="Pending. No cryptographic signature is claimed or verified.";
+}
 document.querySelectorAll("nav button").forEach(button=>button.addEventListener("click",()=>{
  activeView=button.dataset.view;
  document.querySelectorAll("nav button").forEach(item=>item.classList.toggle("active",item===button));
  document.querySelectorAll(".view").forEach(section=>section.hidden=section.id!==activeView);
  if(activeView==="provenance")loadProvenance();
  if(activeView==="audit")loadAudit();
- if(activeView==="pons")loadPons();
+ if(activeView==="governance")loadPons();
+ if(activeView==="lux")renderLux();
 }));
 async function api(path,options){
  const response=await fetch(path,options||{});
@@ -123,7 +173,7 @@ async function loadPons(){
  try{
   const p=await api("/api/pons/status");showText($("decisionPolicy"),p.capability_policy);
   setState("executionState",!!p.execution_enabled);setState("gitState",!!p.git_mutation_enabled);setState("transmissionState",!!p.transmission_enabled);
- }catch(error){showText($("decisionPolicy"),"PONS unavailable: "+error.message)}
+ }catch(error){showText($("decisionPolicy"),"Governance status unavailable: "+error.message)}
  try{
   const data=await api("/api/pons/requests");renderRequests(data.requests||[]);
   showText($("requestMessage"),data.note||"Requests remain HOLD. No approval authority is connected.");
@@ -187,13 +237,13 @@ $("searchForm").addEventListener("submit",async event=>{
  }catch(error){target.textContent="Search failed: "+error.message}
 });
 async function loadFileDetail(path){
- const panel=$("fileDetail");panel.hidden=false;showText($("detailTitle"),path);showText($("detailPreview"),"Loading…");
+ const panel=$("fileDetail");panel.hidden=false;showText($("detailTitle"),path);showText($("detailPreview"),"Loading…",false);
  try{
   const data=await api("/api/files/detail?path="+encodeURIComponent(path));
   const hash=data.provenance&&data.provenance.source_sha256||"not computed";
   showText($("detailHash"),"Indexed source SHA-256: "+hash+" · Authority: "+data.source_authority);
   showText($("detailPreview"),data.content_preview+(data.truncated?"\n[Preview truncated]":""));
- }catch(error){showText($("detailPreview"),"Inspection failed: "+error.message)}
+ }catch(error){showText($("detailPreview"),"Inspection failed: "+error.message,false)}
 }
 $("provenanceForm").addEventListener("submit",event=>{event.preventDefault();loadProvenance()});
 $("refreshAudit").addEventListener("click",loadAudit);
@@ -203,6 +253,8 @@ $("refreshIndex").addEventListener("click",async()=>{
  catch(error){showText($("statusMessage"),"Index refresh failed: "+error.message)}
  finally{button.disabled=false}
 });
+$("luxOrigin").addEventListener("input",renderLux);
+renderLux();
 $("requestForm").addEventListener("submit",async event=>{
  event.preventDefault();const button=event.submitter;button.disabled=true;
  try{
