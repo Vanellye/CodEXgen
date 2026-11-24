@@ -36,11 +36,12 @@ function validateCodePatch(input: any): { files: string[]; patch: string; patchS
   const headers = [...input.patch.matchAll(/^diff --git a\\/([^\\n]+) b\\/([^\\n]+)$/gm)];
   if (!headers.length) return null;
   const patchFiles = headers.map((m) => m[1]);
-  const contentHeaders = [...input.patch.matchAll(/^(---|\\+\\+\\+) ([ab]\\/[^\\n]+)$/gm)];
+  const contentHeaders = [...input.patch.matchAll(/^(---|\\+\\+\\+) (?:([ab]\\/[^\\n]+)|(\\/dev\\/null))$/gm)];
   if (headers.some((m) => m[1] !== m[2] || !validCodePath(m[1])) ||
       patchFiles.length !== files.length || patchFiles.some((p) => !files.includes(p)) ||
       contentHeaders.length !== headers.length * 2 ||
-      contentHeaders.some((m) => !validCodePath(m[2].slice(2)) || !files.includes(m[2].slice(2)))) return null;
+      contentHeaders.some((m) => m[1] === "+++" ? !m[2] || !validCodePath(m[2].slice(2)) || !files.includes(m[2].slice(2)) :
+        (m[3] !== "/dev/null" && (!m[2] || !validCodePath(m[2].slice(2)) || !files.includes(m[2].slice(2)))))) return null;
   return {
     files, patch: input.patch, baseSha: input.baseSha,
     patchSha256: createHash("sha256").update(input.patch, "utf8").digest("hex"),
