@@ -3,7 +3,7 @@
 import argparse, json, re, subprocess, sys
 from pathlib import Path
 
-from eria_birth_cursive import BirthCursiveEngine
+try:\n    from .eria_birth_cursive import BirthCursiveEngine\nexcept ImportError:  # direct Termux script execution\n    from eria_birth_cursive import BirthCursiveEngine
 
 VERSION = "1.1"
 _TERMINAL_BIRTH_CUR = BirthCursiveEngine()
