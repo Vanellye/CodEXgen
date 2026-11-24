@@ -8,6 +8,8 @@
  */
 import { createServer } from "node:http";
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
 const domain = (process.env.AUTH0_DOMAIN ?? "dev-ekleezvw1eidw3w4.us.auth0.com").replace(/^https?:\/\//, "").replace(/\/$/, "");
 const clientId = process.env.AUTH0_CLIENT_ID ?? "8aBZEd7KvARDB7jecLL8NOIc3F61PBuF";
@@ -15,6 +17,15 @@ const audience = process.env.AUTH0_AUDIENCE ?? "https://eria-financial-tunnel-sa
 const redirectUri = process.env.AUTH0_REDIRECT_URI ?? "http://localhost:3000/callback";
 const apiBase = (process.env.ERIA_API_BASE ?? "http://127.0.0.1:8787").replace(/\/$/, "");
 const port = Number(new URL(redirectUri).port || 80);
+
+const cliArgs = process.argv.slice(2);
+const proposalArg = cliArgs.indexOf("--proposal-id");
+const proposalId = proposalArg >= 0 ? cliArgs[proposalArg + 1] : undefined;
+const checkOnly = cliArgs.includes("--check");
+if (proposalArg >= 0 && (!proposalId || !/^[0-9a-f-]{36}$/i.test(proposalId))) {
+  throw new Error("Use --proposal-id <proposal-uuid>.");
+}
+if (checkOnly && !proposalId) throw new Error("--check requires --proposal-id.");
 
 if (!/^[A-Za-z0-9.-]+$/.test(domain) || !clientId || !audience) {
   throw new Error("Invalid Auth0 configuration.");
@@ -92,6 +103,19 @@ const server = createServer(async (req, res) => {
     process.stdout.write(`GET /v1/profiles/me -> HTTP ${profileResponse.status}\n`);
     process.stdout.write(profileBody + "\n");
     if (!profileResponse.ok) process.exitCode = 1;
+
+    if (profileResponse.ok && proposalId) {
+      const writerPath = fileURLToPath(new URL("./apply-approved-code-change.mjs", import.meta.url));
+      const writerArgs = [writerPath, proposalId, ...(checkOnly ? ["--check"] : [])];
+      const applied = spawnSync(process.execPath, writerArgs, {
+        encoding: "utf8",
+        env: { ...process.env, ERIA_API_TOKEN: tokenBody.access_token, ERIA_API_BASE: apiBase },
+      });
+      if (applied.stdout) process.stdout.write(applied.stdout);
+      if (applied.stderr) process.stderr.write(applied.stderr);
+      if (applied.error) throw applied.error;
+      if (applied.status !== 0) process.exitCode = applied.status ?? 1;
+    }
   } catch (error) {
     process.stderr.write((error instanceof Error ? error.message : String(error)) + "\n");
     process.exitCode = 1;
