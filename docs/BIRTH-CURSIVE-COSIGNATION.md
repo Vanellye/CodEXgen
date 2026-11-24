@@ -24,6 +24,6 @@ The transfer policy no longer depends on PONS transaction authorization. It stil
 
 Run:
 
-    python -m unittest tests.test_eria_birth_cursive -v
+    python -m unittest discover -s tests -p 'test_eria_birth_cursive.py' -v
 
 The module is a deterministic exact-rule engine, not an unrestricted sentiment rewrite or a factual-outcome generator.
