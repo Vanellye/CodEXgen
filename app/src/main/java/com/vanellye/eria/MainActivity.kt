@@ -16,7 +16,6 @@ import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,8 +39,8 @@ class MainActivity : ComponentActivity() {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text("ERIA", style = MaterialTheme.typography.h6)
-                                Text(
+                                BirthCursiveText("ERIA", style = MaterialTheme.typography.h6)
+                                BirthCursiveText(
                                     if (showRepositoryDashboard) {
                                         "Native repository dashboard · local Termux API"
                                     } else {
@@ -67,10 +66,10 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             ) {
-                                Text(if (showRepositoryDashboard) "Conversation" else "Dashboard")
+                                BirthCursiveText(if (showRepositoryDashboard) "Conversation" else "Dashboard")
                             }
                             if (!showRepositoryDashboard) {
-                                Button(onClick = { reloadKey++ }) { Text("Reload") }
+                                Button(onClick = { reloadKey++ }) { BirthCursiveText("Reload") }
                             }
                         }
 
