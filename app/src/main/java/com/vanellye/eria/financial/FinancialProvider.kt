@@ -23,7 +23,7 @@ data class Money(
     val currency: String,
 ) {
     init {
-        require(amount.matches(Regex("^(0|[1-9][0-9]*)(\\\\.[0-9]{1,8})?$")) && BigDecimal(amount) >= BigDecimal.ZERO) { "Money amount must be a non-negative decimal string with at most 8 fractional digits." }
+        require(amount.matches(Regex("^(0|[1-9][0-9]*)(\\.[0-9]{1,8})?$")) && BigDecimal(amount) >= BigDecimal.ZERO) { "Money amount must be a non-negative decimal string with at most 8 fractional digits." }
         require(currency.matches(Regex("^[A-Z]{3}$"))) { "Currency must be an ISO-style uppercase code." }
     }
 }
@@ -123,7 +123,7 @@ class ProviderRegistry {
 
     fun register(provider: FinancialProvider) {
         val descriptor = provider.descriptor
-        require(descriptor.id.matches(Regex("^[a-z][a-z0-9-]{1,63}$"))) {
+        require(descriptor.id.matches(Regex("^[a-z][a-z0-9_-]{1,63}$"))) {
             "Invalid provider id: ${descriptor.id}"
         }
         require(descriptor.mode == ExecutionMode.SIMULATION_ONLY) {
