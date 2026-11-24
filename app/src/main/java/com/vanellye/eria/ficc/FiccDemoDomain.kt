@@ -9,8 +9,8 @@ enum class DemoPermission {
     WORKSPACE_READ, WORKSPACE_MANAGE, ENTITY_READ, ENTITY_MANAGE,
     LEDGER_READ, LEDGER_POST, LEDGER_RECONCILE, LEDGER_DELETE, AUDIT_READ
 }
-enum class DataClassification { DEMO }
-enum class DataSourceType { SYNTHETIC }
+enum class DataClassification { DEMO, REAL }
+enum class DataSourceType { SYNTHETIC, PROVIDER }
 enum class AuditOutcome { ALLOWED, DENIED, POSTED, DELETED }
 
 data class DemoIdentity(
@@ -130,7 +130,7 @@ class DemoAuthorizationService(private val auditLog: AuditLog) {
                 outcome = if (allowed) AuditOutcome.ALLOWED else AuditOutcome.DENIED,
                 reason = reason,
                 occurredAt = Instant.now(),
-                provenance = demoProvenance("authorization:\u0024{actor.id}")
+                provenance = demoProvenance("authorization:${actor.id}")
             )
         )
         return AuthorizationDecision(allowed, actor.id, permission, workspaceId, reason)
@@ -256,7 +256,7 @@ class InMemoryDemoLedger(
         entry.lines.forEach { line ->
             require(line.amount > BigDecimal.ZERO) { "Journal amounts must be positive" }
             require(line.currency.matches(Regex("[A-Z]{3}"))) { "Currency must be ISO-style 3-letter code" }
-            val account = accountsById[line.accountId] ?: error("Unknown ledger account: \u0024{line.accountId}")
+            val account = accountsById[line.accountId] ?: error("Unknown ledger account: ${line.accountId}")
             require(account.entityId == entry.entityId) { "Journal cannot cross entity boundaries" }
             require(account.currency == line.currency) { "Line currency must match account currency" }
         }
