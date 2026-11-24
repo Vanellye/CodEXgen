@@ -70,7 +70,73 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
     const key = String(origin).trim().toLowerCase().replace(/[.!?]+$/, "").replace(/\\s+/g, " ");
     return oppositionRules.get(key) || null;
   }
-  function addMessage(role, content) {
+  const birthTextFields = new Set(["text","content","label","title","description","message","tooltip","placeholder","ariaLabel","aria_label","alt","notification","caption","summary"]);
+  const birthNeverFields = new Set(["code","command","route","url","uri","id","key","status","error_code","errorCode","security_warning","securityWarning","shortcut","hotkey","escape_sequence"]);
+  function deriveBirthCursiveTree(origin) {
+    const root = {value:null};
+    const active = new WeakSet();
+    const records = [];
+    const stack = [{
+      kind:"visit", value:origin, path:"", depth:0,
+      textContext:false, blocked:false, assign:value=>{root.value=value;}
+    }];
+    while (stack.length) {
+      const task = stack.pop();
+      if (task.kind === "exit") { active.delete(task.identity); continue; }
+      if (task.depth > 64) throw new RangeError("Birth-cursive maximum depth exceeded at " + (task.path || "/"));
+      const value = task.value;
+      if (typeof value === "string") {
+        if (task.blocked || !task.textContext) { task.assign(value); continue; }
+        const possibility = birthCursivePossibility(value);
+        records.push({
+          fieldPath:task.path || "/", originText:value,
+          derivedText:possibility || value,
+          status:possibility ? "DERIVED" : "REVIEW_REQUIRED"
+        });
+        task.assign(possibility || value);
+        continue;
+      }
+      if (Array.isArray(value)) {
+        if (active.has(value)) throw new TypeError("Birth-cursive cycle detected at " + (task.path || "/"));
+        active.add(value);
+        const copy = new Array(value.length);
+        task.assign(copy);
+        stack.push({kind:"exit",identity:value});
+        for (let index=value.length-1;index>=0;index--) {
+          stack.push({
+            kind:"visit", value:value[index], path:task.path+"/"+index,
+            depth:task.depth+1, textContext:task.textContext,
+            blocked:task.blocked, assign:result=>{copy[index]=result;}
+          });
+        }
+        continue;
+      }
+      if (value && typeof value === "object") {
+        if (active.has(value)) throw new TypeError("Birth-cursive cycle detected at " + (task.path || "/"));
+        active.add(value);
+        const copy = {};
+        task.assign(copy);
+        stack.push({kind:"exit",identity:value});
+        const keys = Object.keys(value);
+        for (let index=keys.length-1;index>=0;index--) {
+          const field = keys[index];
+          const blocked = task.blocked || birthNeverFields.has(field);
+          stack.push({
+            kind:"visit", value:value[field],
+            path:task.path+"/"+field.replace(/~/g,"~0").replace(/\\//g,"~1"),
+            depth:task.depth+1,
+            textContext:!blocked && birthTextFields.has(field),
+            blocked,
+            assign:result=>{copy[field]=result;}
+          });
+        }
+        continue;
+      }
+      task.assign(value);
+    }
+    return {origin, derived:root.value, records};
+  }
+  function addMessage(role, content, lineage=null) {
     const wrap = document.createElement("div");
     wrap.className = "message " + role;
     const meta = document.createElement("div");
@@ -79,7 +145,9 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
     const body = document.createElement("div");
     body.textContent = content;
     wrap.append(meta, body);
-    const possibility = birthCursivePossibility(content);
+    const possibility = lineage && lineage.status === "DERIVED"
+      ? lineage.derivedText
+      : birthCursivePossibility(content);
     if (possibility) {
       const note = document.createElement("div");
       note.className = "birth-cursive-note";
@@ -118,7 +186,11 @@ footer{font-size:10px;color:var(--muted);text-align:center;padding:8px 0 12px}
       const data = await api("/api/history");
       if (data.messages.length) {
         chat.innerHTML = "";
-        data.messages.forEach(item => addMessage(item.role, item.content));
+        const lineage = deriveBirthCursiveTree(data.messages);
+        const records = new Map(lineage.records.map(record => [record.fieldPath, record]));
+        data.messages.forEach((item, index) => {
+          addMessage(item.role, item.content, records.get("/" + index + "/content"));
+        });
       }
     } catch (_) {}
   }
