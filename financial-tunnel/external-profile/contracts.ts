@@ -17,6 +17,8 @@ export interface ExternalProfile extends ExternalIdentity {
 }
 
 export interface TransactionPreview {
+  /** Subject of the identity that initiated the transaction; approver must differ. */
+  initiatedBySubject: string;
   amountMinor: number;
   currency: string;
   destinationRef: string;
