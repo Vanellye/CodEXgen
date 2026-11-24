@@ -19,14 +19,14 @@ class FiccDemoLedgerTest {
     @Test fun fixtureContainsTenEntitiesAndFortyAccounts() {
         val bundle = fixture()
         assertEquals(10, bundle.entities.size)
-        assertEquals(40, bundle.accounts.size)
+        assertEquals(60, bundle.accounts.size)
     }
 
     @Test fun fixtureSeedsTwentyBalancedJournalEntries() {
         val bundle = fixture()
         val owner = identity("demo-owner")
         val count = bundle.entities.sumOf { bundle.ledger.entries(owner, it.id).size }
-        assertEquals(20, count)
+        assertEquals(30, count)
     }
 
     @Test fun accountantCanPostBalancedSyntheticJournal() {
@@ -166,6 +166,61 @@ class FiccDemoLedgerTest {
         val bundle = fixture()
         val error = runCatching {
             bundle.auditReader.events(identity("demo-accountant"))
+        }.exceptionOrNull()
+        assertNotNull(error)
+    }
+
+
+    @Test fun accountantCanReconcileMatchingSyntheticStatement() {
+        val bundle = fixture()
+        val entity = bundle.entities.first()
+        val record = AccountReconciliation(
+            id = "cash-recon-1",
+            entityId = entity.id,
+            accountId = "${entity.id}-cash",
+            statementBalance = BigDecimal("100000.00"),
+            currency = "USD"
+        )
+        assertEquals(record, bundle.ledger.reconcile(identity("demo-accountant"), record))
+    }
+
+    @Test fun reconciliationRejectsStatementMismatch() {
+        val bundle = fixture()
+        val entity = bundle.entities.first()
+        val error = runCatching {
+            bundle.ledger.reconcile(
+                identity("demo-accountant"),
+                AccountReconciliation(
+                    id = "cash-recon-mismatch",
+                    entityId = entity.id,
+                    accountId = "${entity.id}-cash",
+                    statementBalance = BigDecimal("99999.99"),
+                    currency = "USD"
+                )
+            )
+        }.exceptionOrNull()
+        assertNotNull(error)
+        assertTrue(error!!.message!!.contains("does not match"))
+    }
+
+    @Test fun journalCannotMixEntities() {
+        val bundle = fixture()
+        val first = bundle.entities[0]
+        val second = bundle.entities[1]
+        val error = runCatching {
+            bundle.ledger.post(
+                identity("demo-accountant"),
+                JournalEntry(
+                    id = "cross-entity-journal",
+                    entityId = first.id,
+                    description = "Must fail entity isolation",
+                    occurredAt = Instant.parse("2026-02-01T00:00:00Z"),
+                    lines = listOf(
+                        JournalLine("${first.id}-cash", EntrySide.DEBIT, BigDecimal("5.00"), "USD"),
+                        JournalLine("${second.id}-capital", EntrySide.CREDIT, BigDecimal("5.00"), "USD")
+                    )
+                )
+            )
         }.exceptionOrNull()
         assertNotNull(error)
     }
