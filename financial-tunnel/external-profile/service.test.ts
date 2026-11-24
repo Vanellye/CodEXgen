@@ -26,7 +26,7 @@ async function withServer(handler: ReturnType<typeof createExternalProfileServer
   if(!address || typeof address==="string") throw new Error("No test server address");
   try { await run(`http://127.0.0.1:${address.port}`); } finally { await new Promise<void>(resolve=>handler.close(()=>resolve())); }
 }
-const preview = {amountMinor:1250,currency:"USD",destinationRef:"synthetic-destination-001",network:"internal",expiresAt:"2030-01-01T00:00:00.000Z"};
+const preview = {initiatedBySubject:"initiator-2",amountMinor:1250,currency:"USD",destinationRef:"synthetic-destination-001",network:"internal",expiresAt:"2030-01-01T00:00:00.000Z"};
 
 test("external identity is required and profile endpoint returns server-side roles",async()=>{
  const {store}=fixture(["member"]);
@@ -73,5 +73,17 @@ test("tampered preview hash is rejected before evidence is written",async()=>{
   const response=await fetch(base+"/v1/authorization-decisions",{method:"POST",headers:{authorization:"Bearer valid","content-type":"application/json"},body:JSON.stringify({action:"transfer.execute",preview,previewHash:"0".repeat(64)})});
   assert.equal(response.status,400);
   assert.equal(evidence.size,0);
+ });
+});
+
+test("initiator cannot approve their own transaction",async()=>{
+ const {store,evidence}=fixture(["financial_approver"]);
+ const server=createExternalProfileServer({store,verifier:{async verify(){return{issuer:"https://issuer.example",subject:"subject-1"};}},now:()=>new Date("2029-01-01T00:00:00.000Z")});
+ await withServer(server,async base=>{
+  const selfPreview={...preview,initiatedBySubject:"subject-1"};
+  const action="transfer.execute";
+  const response=await fetch(base+"/v1/authorization-decisions",{method:"POST",headers:{authorization:"Bearer valid","content-type":"application/json"},body:JSON.stringify({action,preview:selfPreview,previewHash:hashTransactionPreview(action,selfPreview)})});
+  assert.equal(response.status,403);
+  assert.equal([...evidence.values()][0].reason,"SELF_APPROVAL_PROHIBITED");
  });
 });
