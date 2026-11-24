@@ -17,15 +17,15 @@ export function splitIn2(input) {
   }
   const projections = {};
   for (const dimension of DIMENSIONS) {
-    if (Object.prototype.hasOwnProperty.call(input, dimension)) {
-      projections[dimension] = Object.freeze({
-        dimension,
-        value: input[dimension],
-        sourceRef: input.sourceRef,
-        sourceSnapshot: input.sourceSnapshot,
-        status: input[dimension] === null || input[dimension] === undefined ? "UNKNOWN" : "PRESENT"
-      });
-    }
+    const supplied = Object.prototype.hasOwnProperty.call(input, dimension);
+    const value = supplied ? input[dimension] : undefined;
+    projections[dimension] = Object.freeze({
+      dimension,
+      value: value === undefined ? null : value,
+      sourceRef: input.sourceRef,
+      sourceSnapshot: input.sourceSnapshot,
+      status: !supplied || value === null || value === undefined ? "UNKNOWN" : "PRESENT"
+    });
   }
   return Object.freeze({
     operation: "in2",
