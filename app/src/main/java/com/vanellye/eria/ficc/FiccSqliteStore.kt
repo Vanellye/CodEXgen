@@ -8,7 +8,7 @@ import java.math.BigDecimal
 import java.security.MessageDigest
 import java.time.Instant
 
-data class FiccStoreCounts(val entities:Int,val accounts:Int,val journals:Int,val journalLines:Int,val auditEvents:Int)
+data class FiccStoreCounts(val entities:Int,val accounts:Int,val journals:Int,val journalLines:Int,val auditEvents:Int,val reconciliations:Int)
 
 /** App-private SQLite persistence for synthetic FICC fixtures. Local storage is not tamper-proof. */
 class FiccSqliteStore(context:Context):SQLiteOpenHelper(context.applicationContext,"ficc_demo.db",null,1) {
@@ -17,16 +17,17 @@ class FiccSqliteStore(context:Context):SQLiteOpenHelper(context.applicationConte
   db.execSQL("CREATE TABLE accounts(id TEXT PRIMARY KEY, entity_id TEXT NOT NULL, code TEXT NOT NULL, name TEXT NOT NULL, type TEXT NOT NULL, currency TEXT NOT NULL, provenance_ref TEXT NOT NULL)")
   db.execSQL("CREATE TABLE journals(id TEXT PRIMARY KEY, entity_id TEXT NOT NULL, description TEXT NOT NULL, occurred_at TEXT NOT NULL, provenance_ref TEXT NOT NULL)")
   db.execSQL("CREATE TABLE journal_lines(id INTEGER PRIMARY KEY AUTOINCREMENT, journal_id TEXT NOT NULL, account_id TEXT NOT NULL, side TEXT NOT NULL, amount TEXT NOT NULL, currency TEXT NOT NULL)")
+  db.execSQL("CREATE TABLE reconciliations(id TEXT PRIMARY KEY, entity_id TEXT NOT NULL, account_id TEXT NOT NULL, statement_balance TEXT NOT NULL, currency TEXT NOT NULL, reconciled_at TEXT NOT NULL, provenance_ref TEXT NOT NULL)")
   db.execSQL("CREATE TABLE audit_events(sequence INTEGER PRIMARY KEY AUTOINCREMENT,event_id TEXT UNIQUE NOT NULL,actor_id TEXT NOT NULL,actor_role TEXT NOT NULL,action TEXT NOT NULL,target_id TEXT NOT NULL,outcome TEXT NOT NULL,reason TEXT NOT NULL,occurred_at TEXT NOT NULL,provenance_ref TEXT NOT NULL,previous_hash TEXT NOT NULL,event_hash TEXT NOT NULL)")
   db.execSQL("CREATE INDEX idx_accounts_entity ON accounts(entity_id)")
   db.execSQL("CREATE INDEX idx_journals_entity ON journals(entity_id)")
  }
  override fun onUpgrade(db:SQLiteDatabase,oldVersion:Int,newVersion:Int) {
-  // Forward-only schema migrations: never drop user or audit data.
+  // Future schema changes must be implemented as forward-only migrations; never drop ledger/audit data.
  }
 
  fun seedIfEmpty(bundle:DemoLedgerBundle) {
-  val db=writableDatabase; db.beginTransaction()
+  val db=writableDatabase;db.beginTransaction()
   try {
    val count=db.rawQuery("SELECT COUNT(*) FROM entities",null).use { it.moveToFirst();it.getInt(0) }
    if(count==0) {
@@ -47,13 +48,16 @@ class FiccSqliteStore(context:Context):SQLiteOpenHelper(context.applicationConte
  fun counts():FiccStoreCounts {
   val db=readableDatabase
   fun n(table:String)=db.rawQuery("SELECT COUNT(*) FROM $table",null).use { it.moveToFirst();it.getInt(0) }
-  return FiccStoreCounts(n("entities"),n("accounts"),n("journals"),n("journal_lines"),n("audit_events"))
+  return FiccStoreCounts(n("entities"),n("accounts"),n("journals"),n("journal_lines"),n("audit_events"),n("reconciliations"))
  }
  fun entityNames():List<String> = readableDatabase.rawQuery("SELECT legal_name FROM entities ORDER BY id",null).use { c -> buildList { while(c.moveToNext()) add(c.getString(0)) } }
 
  fun postJournal(actor:DemoIdentity,entry:JournalEntry) {
-  val auth=DemoAuthorizationService(InMemoryAuditLog())
-  auth.require(actor,DemoPermission.LEDGER_POST,entry.entityId,entry.provenance.classification)
+  val authLog=InMemoryAuditLog()
+  val auth=DemoAuthorizationService(authLog)
+  val decision=auth.authorize(actor,DemoPermission.LEDGER_POST,targetId=entry.entityId,classification=entry.provenance.classification)
+  val authorizationEvents=authLog.snapshot()
+  if(!decision.allowed) { persistAuditOnly(authorizationEvents);error(decision.reason) }
   require(entry.provenance.classification==DataClassification.DEMO && entry.provenance.sourceType==DataSourceType.SYNTHETIC && !entry.provenance.verified && !entry.provenance.providerConnected) { "Only synthetic DEMO data is accepted" }
   require(entry.lines.size>=2 && entry.lines.all { it.amount>BigDecimal.ZERO }) { "Journal requires at least two positive lines" }
   entry.lines.groupBy { it.currency }.forEach { (currency,lines) ->
@@ -66,10 +70,49 @@ class FiccSqliteStore(context:Context):SQLiteOpenHelper(context.applicationConte
    entry.lines.forEach { l -> db.rawQuery("SELECT entity_id,currency FROM accounts WHERE id=?",arrayOf(l.accountId)).use { c ->
     require(c.moveToFirst() && c.getString(0)==entry.entityId && c.getString(1)==l.currency) { "Account/entity/currency mismatch for " + l.accountId }
    } }
+   authorizationEvents.forEach { appendAudit(db,it) }
    insertJournal(db,entry)
    appendAudit(db,AuditEvent("sqlite-post-"+entry.id,actor.id,actor.role,"ledger:post",entry.id,AuditOutcome.POSTED,"Balanced synthetic journal persisted",Instant.now(),demoProvenance("sqlite-audit:"+entry.id)))
    db.setTransactionSuccessful()
   } finally { db.endTransaction() }
+ }
+
+ fun reconcile(actor:DemoIdentity,record:AccountReconciliation) {
+  val authLog=InMemoryAuditLog()
+  val auth=DemoAuthorizationService(authLog)
+  val decision=auth.authorize(actor,DemoPermission.LEDGER_RECONCILE,targetId=record.entityId,classification=record.provenance.classification)
+  val authorizationEvents=authLog.snapshot()
+  if(!decision.allowed) { persistAuditOnly(authorizationEvents);error(decision.reason) }
+  require(record.provenance.classification==DataClassification.DEMO && record.provenance.sourceType==DataSourceType.SYNTHETIC && !record.provenance.verified && !record.provenance.providerConnected) { "Only synthetic statement fixtures can be reconciled" }
+  val db=writableDatabase;db.beginTransaction()
+  try {
+   var accountType:String?=null
+   db.rawQuery("SELECT entity_id,currency,type FROM accounts WHERE id=?",arrayOf(record.accountId)).use { c ->
+    require(c.moveToFirst()) { "Unknown ledger account" }
+    require(c.getString(0)==record.entityId && c.getString(1)==record.currency) { "Account/entity/currency mismatch" }
+    accountType=c.getString(2)
+   }
+   val debitNormal=accountType=="ASSET" || accountType=="EXPENSE"
+   var net=BigDecimal.ZERO
+   db.rawQuery("SELECT l.side,l.amount FROM journal_lines l JOIN journals j ON j.id=l.journal_id WHERE j.entity_id=? AND l.account_id=? AND l.currency=?",arrayOf(record.entityId,record.accountId,record.currency)).use { c ->
+    while(c.moveToNext()) {
+     val amount=BigDecimal(c.getString(1))
+     net += if((c.getString(0)=="DEBIT")==debitNormal) amount else amount.negate()
+    }
+   }
+   require(net.compareTo(record.statementBalance)==0) { "Statement balance does not match persisted ledger balance $net" }
+   authorizationEvents.forEach { appendAudit(db,it) }
+   db.insertOrThrow("reconciliations",null,ContentValues().apply {
+    put("id",record.id);put("entity_id",record.entityId);put("account_id",record.accountId);put("statement_balance",record.statementBalance.toPlainString());put("currency",record.currency);put("reconciled_at",record.reconciledAt.toString());put("provenance_ref",record.provenance.sourceReference)
+   })
+   appendAudit(db,AuditEvent("sqlite-reconcile-"+record.id,actor.id,actor.role,"ledger:reconcile",record.id,AuditOutcome.RECONCILED,"Synthetic statement matched persisted ledger balance",Instant.now(),demoProvenance("sqlite-audit:"+record.id)))
+   db.setTransactionSuccessful()
+  } finally { db.endTransaction() }
+ }
+
+ private fun persistAuditOnly(events:List<AuditEvent>) {
+  val db=writableDatabase;db.beginTransaction()
+  try { events.forEach { appendAudit(db,it) };db.setTransactionSuccessful() } finally { db.endTransaction() }
  }
 
  fun verifyAuditChain():Boolean {
