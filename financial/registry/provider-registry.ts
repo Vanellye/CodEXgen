@@ -1,5 +1,5 @@
-import { hasCapabilities, type FinancialProvider } from "./provider";
-import type { FinancialCapability, ProviderDescriptor } from "./types";
+import { hasCapabilities, type FinancialProvider } from "./provider.ts;
+import type { FinancialCapability, ProviderDescriptor } from "./types.ts;
 
 export class ProviderRegistryError extends Error {
   constructor(message: string) {
