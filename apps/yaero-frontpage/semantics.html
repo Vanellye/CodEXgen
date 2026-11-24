@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <title>Ŷæṛö · Currency Decode & in2</title>
+  <link rel="stylesheet" href="/src/style.css">
+  <style>
+    .semantic-page{max-width:1100px;margin:0 auto;padding:56px 24px 90px}
+    .semantic-page h1{font-size:clamp(2.4rem,6vw,4.6rem);line-height:1.05;margin:18px 0}
+    .semantic-page .lead{max-width:760px}
+    .semantic-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:34px}
+    .semantic-panel{background:#0d1a2a;border:1px solid #25384c;border-radius:18px;padding:22px}
+    .semantic-panel label{display:block;margin:14px 0 8px;color:#c8d4df}
+    .semantic-panel textarea{width:100%;min-height:180px;background:#07111f;color:#eaf2f8;border:1px solid #33475d;border-radius:10px;padding:14px;font:13px/1.6 ui-monospace,monospace;resize:vertical}
+    .semantic-output{white-space:pre-wrap;overflow-wrap:anywhere;min-height:100px;background:#07111f;border-radius:10px;padding:14px;color:#b9e9e5;font:13px/1.6 ui-monospace,monospace;margin-top:16px}
+    .semantic-note{color:#9aabba;font-size:13px;line-height:1.6}
+    .semantic-page .button{margin-top:12px}
+    @media(max-width:760px){.semantic-grid{grid-template-columns:1fr}.semantic-page{padding:36px 16px 70px}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><span class="brand-mark">Ŷ</span><span>Ŷæṛö</span></a>
+    <nav><a href="/">Home</a><a href="#currency">Currency decode</a><a href="#in2">Singular split</a></nav>
+    <a class="top-cta" href="/">Main frontpage ↗</a>
+  </header>
+  <main class="semantic-page">
+    <div class="eyebrow">SEMANTIC WORKBENCH · SOURCE PRESERVING</div>
+    <h1>Decode the value.<br><em>Separate its dimensions.</em></h1>
+    <p class="lead">Translate literal data into English, then inspect one semantic dimension at a time. The original input is retained; inferred intent is labelled and never promoted to fact.</p>
+    <div class="semantic-grid">
+      <section class="semantic-panel" id="currency">
+        <div class="eyebrow">01 / CURRENCY DECODE</div>
+        <h2>Exact monetary representation</h2>
+        <p class="semantic-note">Paste a yaero.currency/1 JSON record. Amounts use integer minor units, not floating-point arithmetic. No exchange rate or transaction is created.</p>
+        <label for="currency-input">Currency record</label>
+        <textarea id="currency-input" spellcheck="false">{
+  "schema": "yaero.currency/1",
+  "currency": "USD",
+  "minorUnits": "12345",
+  "exponent": 2,
+  "sourceRef": "demo:currency-001",
+  "asOf": "2026-11-23"
+}</textarea>
+        <label for="intent-input">Explicit action evidence (optional)</label>
+        <textarea id="intent-input" rows="3" spellcheck="false">{
+  "action": "payment",
+  "sourceRef": "demo:instruction-001"
+}</textarea>
+        <button id="decode-currency" class="button primary">Decode + translate →</button>
+        <pre id="currency-output" class="semantic-output" aria-live="polite">Waiting for a currency record…</pre>
+      </section>
+      <section class="semantic-panel" id="in2">
+        <div class="eyebrow">02 / SINGULAR DIMENSIONAL SPLIT</div>
+        <h2>in2 · One axis per projection</h2>
+        <p class="semantic-note">Identity (X), relationship (Y), state (Z), and optional time (T). Each projection remains linked to the exact original snapshot.</p>
+        <label for="in2-input">Structured subject</label>
+        <textarea id="in2-input" spellcheck="false">{
+  "sourceRef": "demo:invoice-007",
+  "identity": "invoice-007",
+  "relationship": {"to": "vendor-002"},
+  "state": "unpaid",
+  "time": null
+}</textarea>
+        <button id="split-in2" class="button primary">Split in2 + translate →</button>
+        <pre id="in2-output" class="semantic-output" aria-live="polite">Waiting for a structured subject…</pre>
+      </section>
+    </div>
+    <p class="semantic-note" style="margin-top:22px">“True intent” means the best evidence-supported interpretation available. This tool cannot know private thoughts. If action evidence is absent or ambiguous, the result remains UNKNOWN. Null and missing values are not zero.</p>
+  </main>
+  <script type="module" src="/src/semantics-page.js"></script>
+</body>
+</html>
