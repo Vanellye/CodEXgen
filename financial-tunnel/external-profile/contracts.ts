@@ -56,6 +56,7 @@ export interface ExternalProfileStore {
   setRoles(profileId: string, roles: ProfileRole[], actorSubject: string): Promise<ExternalProfile | null>;
   createCodeChangeProposal(proposal: CodeChangeProposal): Promise<void>;
   getCodeChangeProposal(id: string): Promise<CodeChangeProposal | null>;
+  listCodeChangeProposals(): Promise<CodeChangeProposal[]>;
   decideCodeChangeProposal(decision: CodeChangeDecision): Promise<CodeChangeDecision | null>;
   getCodeChangeDecision(proposalId: string): Promise<CodeChangeDecision | null>;
 }
