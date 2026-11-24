@@ -222,3 +222,38 @@ Authorization: Bearer <access-token>
 ```
 
 Open a specific proposal with `GET /v1/code-change-proposals/<proposal-id>`, inspect the complete diff and digest, then record the decision using the endpoint above.
+
+
+### End-to-end command sequence
+
+Prepare a proposal payload from only the files you name. The helper uses the current feature-branch HEAD as the base, includes tracked changes and selected untracked files, and does not stage or commit:
+
+```bash
+node financial-tunnel/external-profile/prepare-code-change-proposal.mjs \
+  --output /tmp/eria-code-change-proposal.json \
+  financial-tunnel/path/to/changed-file.ts
+```
+
+Submit it through the PKCE login flow (the access token stays in memory):
+
+```bash
+node financial-tunnel/external-profile/auth0-pkce-smoke-test.mjs \
+  --proposal-file /tmp/eria-code-change-proposal.json
+```
+
+A separate administrator signs in and inspects the queue:
+
+```bash
+node financial-tunnel/external-profile/auth0-pkce-smoke-test.mjs --admin-queue
+```
+
+After reviewing the exact proposal diff and digest, the administrator records a decision:
+
+```bash
+node financial-tunnel/external-profile/auth0-pkce-smoke-test.mjs \
+  --approve-proposal <proposal-uuid> \
+  --decision ALLOW \
+  --reason "Independent ADMIN code review completed."
+```
+
+The proposer or administrator can then run the dry check and local apply commands above. Use a clean checkout for application; the prepare step can use a working tree containing only the selected proposal changes, but the apply step intentionally refuses any dirty working tree.
