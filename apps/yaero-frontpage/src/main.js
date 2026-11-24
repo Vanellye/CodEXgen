@@ -4,7 +4,7 @@ const app = document.querySelector("#app");
 app.innerHTML = `
   <header class="topbar">
     <a class="brand" href="#home" aria-label="Ŷæṛö home"><span class="brand-mark">Ŷ</span><span>Ŷæṛö</span></a>
-    <nav><a href="#language">Language</a><a href="#workbench">Workbench</a><a href="/semantics.html">Currency + in2</a><a href="#quantum">Research</a><a href="#runway">Runway</a></nav>
+    <nav><a href="#language">Language</a><a href="#workbench">Workbench</a><a href="/semantics.html">Currency + in2</a><a href="/lux.html">LUX Direction</a><a href="#quantum">Research</a><a href="#runway">Runway</a></nav>
     <a class="top-cta" href="#workbench">Open workbench <span>↗</span></a>
   </header>
   <main id="home">

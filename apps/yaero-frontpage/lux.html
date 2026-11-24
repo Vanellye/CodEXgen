@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <meta name="description" content="Ŷæṛö LUX — light-guided interdimensional direction across semantic spaces.">
+  <title>Ŷæṛö LUX · Direction Domain</title>
+  <link rel="stylesheet" href="/src/style.css">
+  <style>
+    .lux-page{max-width:1100px;margin:0 auto;padding:54px 24px 90px}
+    .lux-hero{display:grid;grid-template-columns:1.1fr .9fr;gap:34px;align-items:center}
+    .lux-mark{font-size:clamp(5rem,13vw,10rem);line-height:1;color:#d6f7f3;text-shadow:0 0 48px #67e5db88}
+    .lux-page h1{font-size:clamp(2.5rem,6vw,5rem);line-height:1.02;margin:18px 0}
+    .lux-panel{background:#0d1a2a;border:1px solid #25384c;border-radius:18px;padding:22px;margin-top:28px}
+    .lux-map{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+    .lux-axis{background:#07111f;border:1px solid #294158;border-radius:14px;padding:16px;min-height:130px}
+    .lux-axis b{font-size:26px;color:#b9f4ee}.lux-axis p{font-size:13px;color:#a8b8c8}
+    .lux-form{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end}
+    .lux-form label{display:block;font-size:13px;color:#bdcad6;margin-bottom:7px}
+    .lux-form input,.lux-form select{width:100%;background:#07111f;color:#edf6ff;border:1px solid #33475d;border-radius:9px;padding:12px}
+    .lux-output{white-space:pre-wrap;background:#07111f;color:#b9e9e5;padding:16px;border-radius:10px;min-height:80px;font:13px/1.6 ui-monospace,monospace;margin-top:16px}
+    .lux-caption{font-size:13px;color:#98aaba;line-height:1.65}
+    @media(max-width:760px){.lux-hero{grid-template-columns:1fr}.lux-map{grid-template-columns:repeat(2,1fr)}.lux-form{grid-template-columns:1fr}.lux-page{padding:34px 16px 70px}}
+  </style>
+</head>
+<body>
+<header class="topbar"><a class="brand" href="/"><span class="brand-mark">Ŷ</span><span>Ŷæṛö</span></a><nav><a href="/">Home</a><a href="/semantics.html">Semantics</a><a href="#axes">Axes</a><a href="#direction">Direction</a></nav><a class="top-cta" href="#direction">Find direction ↗</a></header>
+<main class="lux-page">
+  <section class="lux-hero">
+    <div><div class="eyebrow">LUX · LIGHT-GUIDED DIRECTION DOMAIN</div><h1>Find your way<br><em>through the dimensions.</em></h1><p class="lead">A provenance-aware navigation engine for moving across declared identities, relationships, states and time. Light makes the path visible; evidence makes it trustworthy.</p><p class="lux-caption">Interdimensional here means a connected semantic model—not a claim of physical portals or unverified dimensions.</p></div>
+    <div class="lux-mark" aria-label="Light star symbol">✦ ✨</div>
+  </section>
+  <section class="lux-panel" id="axes"><div class="eyebrow">THE FOUR AXES</div><h2>One domain. Four coordinates.</h2><div class="lux-map">
+    <div class="lux-axis"><b>X</b><h3>Identity</h3><p>What the subject is</p></div>
+    <div class="lux-axis"><b>Y</b><h3>Relationship</h3><p>How it connects</p></div>
+    <div class="lux-axis"><b>Z</b><h3>State</h3><p>What is established</p></div>
+    <div class="lux-axis"><b>T</b><h3>Time</h3><p>When or how it changes</p></div>
+  </div></section>
+  <section class="lux-panel" id="direction"><div class="eyebrow">LIVE ROUTE PROTOTYPE · DECLARED NODES ONLY</div><h2>Follow an evidence-lit path.</h2><p class="lux-caption">This demo graph is illustrative. A route is only returned when supplied beacons and evidence-linked edges connect the selected endpoints. Unverified nodes are excluded by default.</p>
+    <div class="lux-form">
+      <div><label for="origin">Origin beacon</label><select id="origin"><option value="origin">Origin · X / Verified</option></select></div>
+      <div><label for="destination">Destination beacon</label><select id="destination"><option value="horizon">Horizon · T / Partial</option><option value="bridge">Bridge · Y / Verified</option></select></div>
+      <button id="find-path" class="button primary">Illuminate path →</button>
+    </div>
+    <pre id="lux-output" class="lux-output" aria-live="polite">Ready. Choose a destination to calculate a route.</pre>
+  </section>
+  <section class="lux-panel"><div class="eyebrow">DIRECTION OPERATORS</div><h2>OVER · UNDER · THROUGH</h2><p><b>OVER</b> opens broader context. <b>UNDER</b> explores nested layers. <b>THROUGH</b> follows a supported connection. Every transition keeps its evidence reference.</p></section>
+</main>
+<script type="module" src="/src/lux-page.js"></script>
+</body></html>
