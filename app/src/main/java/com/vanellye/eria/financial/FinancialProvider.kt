@@ -7,23 +7,23 @@ import java.math.BigDecimal
  * Keep field names and enum values aligned with the language-neutral schema.
  * This contract contains no gateway approval-service or PONS dependency.
  */
-enum class ExecutionMode { SIMULATION_ONLY }
+enum class ExecutionMode(val wireValue: String) { SIMULATION_ONLY("SIMULATION_ONLY") }
 
-enum class FinancialCapability {
-    ACCOUNTS_READ,
-    BALANCES_READ,
-    TRANSACTIONS_READ,
-    TRANSFERS_PREVIEW,
-    TRANSFERS_SIMULATE,
-    RECONCILIATION_READ,
+enum class FinancialCapability(val wireValue: String) {
+    ACCOUNTS_READ("accounts.read"),
+    BALANCES_READ("balances.read"),
+    TRANSACTIONS_READ("transactions.read"),
+    TRANSFERS_PREVIEW("transfers.preview"),
+    TRANSFERS_SIMULATE("transfers.simulate"),
+    RECONCILIATION_READ("reconciliation.read"),
 }
 
 data class Money(
-    val amount: BigDecimal,
+    val amount: String,
     val currency: String,
 ) {
     init {
-        require(amount >= BigDecimal.ZERO) { "Money amount cannot be negative." }
+        require(runCatching { BigDecimal(amount) }.isSuccess && BigDecimal(amount) >= BigDecimal.ZERO) { "Money amount must be a non-negative decimal string." }
         require(currency.matches(Regex("^[A-Z]{3}$"))) { "Currency must be an ISO-style uppercase code." }
     }
 }
