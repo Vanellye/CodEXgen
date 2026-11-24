@@ -42,3 +42,6 @@ adaptive_agent_telemetry.db
 __pycache__/
 *.py[cod]
 *.egg-info/
+
+# Local service credentials and environment
+financial-tunnel/external-profile/.env
