@@ -33,10 +33,10 @@ class FiccSqliteStore(context:Context):SQLiteOpenHelper(context.applicationConte
    val count=db.rawQuery("SELECT COUNT(*) FROM entities",null).use { it.moveToFirst();it.getInt(0) }
    if(count==0) {
     bundle.entities.forEach { e -> db.insertOrThrow("entities",null,ContentValues().apply {
-     put("id",e.id);put("legal_name",e.legalName);put("jurisdiction",e.jurisdiction);put("currency",e.functionalCurrency);put("provenance_ref",e.provenance.sourceReference)
+     put("id",e.id);put("legal_name",e.legalName);put("jurisdiction",e.jurisdiction);put("currency",e.functionalCurrency);put("provenance_ref",provenanceToken(e.provenance))
     }) }
     bundle.accounts.forEach { a -> db.insertOrThrow("accounts",null,ContentValues().apply {
-     put("id",a.id);put("entity_id",a.entityId);put("code",a.code);put("name",a.name);put("type",a.type.name);put("currency",a.currency);put("provenance_ref",a.provenance.sourceReference)
+     put("id",a.id);put("entity_id",a.entityId);put("code",a.code);put("name",a.name);put("type",a.type.name);put("currency",a.currency);put("provenance_ref",provenanceToken(a.provenance))
     }) }
     val owner=DemoIdentityDirectory.find("demo-owner")!!
     bundle.entities.forEach { e -> bundle.ledger.entries(owner,e.id).forEach { insertJournal(db,it) } }
@@ -106,7 +106,7 @@ class FiccSqliteStore(context:Context):SQLiteOpenHelper(context.applicationConte
    require(net.compareTo(record.statementBalance)==0) { "Statement balance does not match persisted ledger balance $net" }
    authorizationEvents.forEach { appendAudit(db,it) }
    db.insertOrThrow("reconciliations",null,ContentValues().apply {
-    put("id",record.id);put("entity_id",record.entityId);put("account_id",record.accountId);put("statement_balance",record.statementBalance.toPlainString());put("currency",record.currency);put("reconciled_at",record.reconciledAt.toString());put("provenance_ref",record.provenance.sourceReference)
+    put("id",record.id);put("entity_id",record.entityId);put("account_id",record.accountId);put("statement_balance",record.statementBalance.toPlainString());put("currency",record.currency);put("reconciled_at",record.reconciledAt.toString());put("provenance_ref",provenanceToken(record.provenance))
    })
    appendAudit(db,AuditEvent("sqlite-reconcile-"+record.id,actor.id,actor.role,"ledger:reconcile",record.id,AuditOutcome.RECONCILED,"Synthetic statement matched persisted ledger balance",Instant.now(),demoProvenance("sqlite-audit:"+record.id)))
    db.setTransactionSuccessful()
@@ -132,17 +132,17 @@ class FiccSqliteStore(context:Context):SQLiteOpenHelper(context.applicationConte
  }
 
  private fun insertJournal(db:SQLiteDatabase,e:JournalEntry) {
-  db.insertOrThrow("journals",null,ContentValues().apply { put("id",e.id);put("entity_id",e.entityId);put("description",e.description);put("occurred_at",e.occurredAt.toString());put("provenance_ref",e.provenance.sourceReference) })
+  db.insertOrThrow("journals",null,ContentValues().apply { put("id",e.id);put("entity_id",e.entityId);put("description",e.description);put("occurred_at",e.occurredAt.toString());put("provenance_ref",provenanceToken(e.provenance)) })
   e.lines.forEach { l -> db.insertOrThrow("journal_lines",null,ContentValues().apply { put("journal_id",e.id);put("account_id",l.accountId);put("side",l.side.name);put("amount",l.amount.toPlainString());put("currency",l.currency) }) }
  }
  private fun appendAudit(db:SQLiteDatabase,e:AuditEvent) {
   val previous=db.rawQuery("SELECT event_hash FROM audit_events ORDER BY sequence DESC LIMIT 1",null).use { if(it.moveToFirst()) it.getString(0) else GENESIS }
-  val payload=listOf(e.id,e.actorId,e.actorRole.name,e.action,e.targetId,e.outcome.name,e.reason,e.occurredAt.toString(),e.provenance.sourceReference).joinToString("|")
+  val payload=listOf(e.id,e.actorId,e.actorRole.name,e.action,e.targetId,e.outcome.name,e.reason,e.occurredAt.toString(),provenanceToken(e.provenance)).joinToString("|")
   val digest=sha256(previous+payload)
   db.insertOrThrow("audit_events",null,ContentValues().apply {
-   put("event_id",e.id);put("actor_id",e.actorId);put("actor_role",e.actorRole.name);put("action",e.action);put("target_id",e.targetId);put("outcome",e.outcome.name);put("reason",e.reason);put("occurred_at",e.occurredAt.toString());put("provenance_ref",e.provenance.sourceReference);put("previous_hash",previous);put("event_hash",digest)
+   put("event_id",e.id);put("actor_id",e.actorId);put("actor_role",e.actorRole.name);put("action",e.action);put("target_id",e.targetId);put("outcome",e.outcome.name);put("reason",e.reason);put("occurred_at",e.occurredAt.toString());put("provenance_ref",provenanceToken(e.provenance));put("previous_hash",previous);put("event_hash",digest)
   })
  }
- private fun sha256(s:String)=MessageDigest.getInstance("SHA-256").digest(s.toByteArray()).joinToString("") { "%02x".format(it) }
+ private fun provenanceToken(p:DataProvenance):String = listOf(p.classification.name,p.sourceType.name,p.verified.toString(),p.providerConnected.toString(),p.sourceReference).joinToString("|")\n private fun sha256(s:String)=MessageDigest.getInstance("SHA-256").digest(s.toByteArray()).joinToString("") { "%02x".format(it) }
  companion object { private const val GENESIS="FICC-DEMO-AUDIT-GENESIS-v1" }
 }
