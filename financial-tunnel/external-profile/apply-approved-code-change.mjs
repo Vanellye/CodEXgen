@@ -73,10 +73,11 @@ if (!headers.length || headers.some((match) => match[1] !== match[2] || !validPa
   fail("Patch file headers do not exactly match the approved file allowlist.");
 }
 
-let root, currentBranch, head, remoteHead, status;
+let root, currentBranch, head, remoteHead, status, remoteUrl;
 try {
   root = git(["rev-parse", "--show-toplevel"]);
   repoRoot = root;
+  remoteUrl = git(["remote", "get-url", "origin"]).replace(/\\.git$/, "").toLowerCase();
   currentBranch = git(["branch", "--show-current"]);
   head = git(["rev-parse", "HEAD"]);
   remoteHead = git(["ls-remote", "origin", `refs/heads/${BRANCH}`]).split(/\s+/)[0];
@@ -84,6 +85,7 @@ try {
 } catch {
   fail("Run this script inside a Git checkout with an origin remote.");
 }
+if (!["https://github.com/vanellye/codexgen", "git@github.com:vanellye/codexgen", "ssh://git@github.com/vanellye/codexgen"].includes(remoteUrl)) fail("Origin remote is not Vanellye/CodEXgen.");
 if (currentBranch !== BRANCH) fail(`Current branch must be ${BRANCH}; no branch switching is performed.`);
 if (head !== proposal.baseSha || remoteHead !== proposal.baseSha) {
   fail("Local HEAD and remote feature-branch HEAD must both equal the proposal base SHA. Rebase or submit a fresh proposal.");
