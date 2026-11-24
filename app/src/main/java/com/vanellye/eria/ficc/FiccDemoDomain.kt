@@ -43,7 +43,6 @@ data class AuditEvent(
 
 interface AuditLog {
     fun append(event: AuditEvent)
-    fun all(): List<AuditEvent>
 }
 
 /** Append-only in-memory audit log for local demonstration use. */
@@ -57,7 +56,7 @@ class InMemoryAuditLog : AuditLog {
     }
 
     @Synchronized
-    override fun all(): List<AuditEvent> = events.toList()
+    internal fun snapshot(): List<AuditEvent> = events.toList()
 }
 
 object DemoIdentityDirectory {
@@ -70,6 +69,16 @@ object DemoIdentityDirectory {
 
     fun all(): List<DemoIdentity> = identities.values.sortedBy { it.id }
     fun find(identityId: String): DemoIdentity? = identities[identityId]
+}
+
+class DemoAuditReader(
+    private val authorization: DemoAuthorizationService,
+    private val auditLog: InMemoryAuditLog
+) {
+    fun events(actor: DemoIdentity): List<AuditEvent> {
+        authorization.require(actor, DemoPermission.AUDIT_READ, "audit-history")
+        return auditLog.snapshot()
+    }
 }
 
 data class AuthorizationDecision(
@@ -293,7 +302,7 @@ data class DemoLedgerBundle(
     val entities: List<DemoEntity>,
     val accounts: List<LedgerAccount>,
     val ledger: InMemoryDemoLedger,
-    val auditLog: InMemoryAuditLog
+    val auditReader: DemoAuditReader
 )
 
 /** Reproducibly seeds ten fictional companies and balanced opening journals. */
@@ -356,7 +365,9 @@ object DemoLedgerFactory {
                 )
             )
         }
-        return DemoLedgerBundle(DemoIdentityDirectory.all(), entities, accounts, ledger, audit)
+        return DemoLedgerBundle(
+            DemoIdentityDirectory.all(), entities, accounts, ledger, DemoAuditReader(authorization, audit)
+        )
     }
 }
 
