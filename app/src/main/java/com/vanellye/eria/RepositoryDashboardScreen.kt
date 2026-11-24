@@ -108,7 +108,7 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
     var engineName by remember { mutableStateOf("ERIA Repository Conversation Engine") }
     var engineMode by remember { mutableStateOf("Offline") }
 
-    var ponsPolicy by remember { mutableStateOf("PONS status unavailable") }
+    var ponsPolicy by remember { mutableStateOf("Governance status unavailable") }
     var executionEnabled by remember { mutableStateOf(false) }
     var gitMutationEnabled by remember { mutableStateOf(false) }
     var transmissionEnabled by remember { mutableStateOf(false) }
@@ -172,7 +172,7 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
         } catch (error: CancellationException) {
             throw error
         } catch (error: Exception) {
-            ponsError = "PONS policy unavailable: " + error.javaClass.simpleName
+            ponsError = "Governance policy unavailable: " + error.javaClass.simpleName
         }
 
         try {
@@ -330,13 +330,13 @@ fun RepositoryDashboardScreen(modifier: Modifier = Modifier) {
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         BirthCursiveText(
-                            "ERIA Repository",
+                            "Ŷæṛö LUX",
                             color = ERIA_TEXT,
                             style = MaterialTheme.typography.h5,
                             fontWeight = FontWeight.Bold
                         )
                         BirthCursiveText(
-                            "Repository intelligence · provenance & co-signation",
+                            "Light Direction · provenance & co-signation",
                             color = ERIA_MUTED,
                             style = MaterialTheme.typography.caption
                         )
