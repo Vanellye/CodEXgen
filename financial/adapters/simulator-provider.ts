@@ -49,7 +49,7 @@ interface StoredPreview {
 
 export class SimulatorProvider implements FinancialProvider {
   readonly descriptor: ProviderDescriptor = Object.freeze({
-    id: "eria-simulator",
+    id: "internal_simulator",
     displayName: "ERIA In-Memory Financial Simulator",
     mode: "SIMULATION_ONLY",
     capabilities: Object.freeze([
@@ -65,7 +65,7 @@ export class SimulatorProvider implements FinancialProvider {
   readonly #accounts: FinancialAccount[] = [
     {
       id: "sim-checking-usd",
-      providerId: "eria-simulator",
+      providerId: "internal_simulator",
       name: "Synthetic Checking",
       type: "checking",
       currency: "USD",
@@ -73,7 +73,7 @@ export class SimulatorProvider implements FinancialProvider {
     },
     {
       id: "sim-wallet-usd",
-      providerId: "eria-simulator",
+      providerId: "internal_simulator",
       name: "Synthetic Wallet",
       type: "wallet",
       currency: "USD",
