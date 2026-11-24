@@ -16,13 +16,13 @@ class FiccDemoLedgerTest {
         )
     }
 
-    @Test fun fixtureContainsTenEntitiesAndFortyAccounts() {
+    @Test fun fixtureContainsTenEntitiesAndSixtyAccounts() {
         val bundle = fixture()
         assertEquals(10, bundle.entities.size)
         assertEquals(60, bundle.accounts.size)
     }
 
-    @Test fun fixtureSeedsTwentyBalancedJournalEntries() {
+    @Test fun fixtureSeedsThirtyBalancedJournalEntries() {
         val bundle = fixture()
         val owner = identity("demo-owner")
         val count = bundle.entities.sumOf { bundle.ledger.entries(owner, it.id).size }
@@ -236,4 +236,46 @@ class FiccDemoLedgerTest {
         }.exceptionOrNull()
         assertNotNull(error)
     }
+
+    @Test fun everyEntityHasSixUniqueSyntheticAccounts() {
+        val bundle = fixture()
+        assertEquals(bundle.accounts.size, bundle.accounts.map { it.id }.toSet().size)
+        bundle.entities.forEach { entity ->
+            val accounts = bundle.accounts.filter { it.entityId == entity.id }
+            assertEquals(6, accounts.size)
+            assertEquals(setOf("1000", "1100", "2000", "3000", "4000", "5000"), accounts.map { it.code }.toSet())
+            assertTrue(accounts.all {
+                it.provenance.classification == DataClassification.DEMO &&
+                    it.provenance.sourceType == DataSourceType.SYNTHETIC &&
+                    !it.provenance.verified && !it.provenance.providerConnected
+            })
+        }
+    }
+
+    @Test fun eachEntityHasThreeBalancedSyntheticSeedJournals() {
+        val bundle = fixture()
+        val owner = identity("demo-owner")
+        bundle.entities.forEach { entity ->
+            val entries = bundle.ledger.entries(owner, entity.id)
+            assertEquals(3, entries.size)
+            assertEquals(
+                setOf("seed-${entity.id}-capital", "seed-${entity.id}-revenue", "seed-${entity.id}-payable"),
+                entries.map { it.id }.toSet()
+            )
+            entries.forEach { entry ->
+                assertEquals(DataClassification.DEMO, entry.provenance.classification)
+                assertEquals(DataSourceType.SYNTHETIC, entry.provenance.sourceType)
+                assertFalse(entry.provenance.verified)
+                assertFalse(entry.provenance.providerConnected)
+                entry.lines.groupBy { it.currency }.forEach { (_, lines) ->
+                    val debits = lines.filter { it.side == EntrySide.DEBIT }
+                        .fold(BigDecimal.ZERO) { total, line -> total + line.amount }
+                    val credits = lines.filter { it.side == EntrySide.CREDIT }
+                        .fold(BigDecimal.ZERO) { total, line -> total + line.amount }
+                    assertEquals(0, debits.compareTo(credits))
+                }
+            }
+        }
+    }
+
 }
