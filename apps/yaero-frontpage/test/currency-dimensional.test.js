@@ -42,3 +42,11 @@ test("in2 creates independent, provenance-linked projections", () => {
 test("in2 rejects inputs without source provenance", () => {
   assert.throws(() => splitIn2({ sourceSnapshot: "{}", identity: "x" }), /sourceRef/);
 });
+
+test("in2 exposes omitted axes as UNKNOWN rather than dropping them", () => {
+  const split = splitIn2({ sourceRef: "fixture:minimal", sourceSnapshot: "{}", identity: "one" });
+  assert.equal(split.projections.identity.status, "PRESENT");
+  assert.equal(split.projections.relationship.status, "UNKNOWN");
+  assert.equal(split.projections.state.status, "UNKNOWN");
+  assert.equal(split.projections.time.status, "UNKNOWN");
+});
