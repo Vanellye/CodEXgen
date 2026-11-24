@@ -104,7 +104,7 @@ const codePatch = [
   "@@ -1,1 +1,2 @@",
   " export {};",
   "+// ADMIN-reviewed code change test fixture",
-].join("\\n");
+].join("\n");
 const codeProposalBody = {
   repository:"Vanellye/CodEXgen",
   branch:"feature/eria-financial-tunnel",
