@@ -175,7 +175,7 @@ class BirthCursiveEngine:
             root[0] = value
 
         # Tasks are tuples: visit, exit, or tuple_finalize. No Python call
-        # recursively descends the input structure.
+        # descends the input structure.
         stack = [("visit", source, "", 0, False, False, assign_root)]
         while stack:
             task = stack.pop()
