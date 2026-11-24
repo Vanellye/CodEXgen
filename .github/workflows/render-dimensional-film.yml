@@ -1,0 +1,39 @@
+name: Render dimensional film locally
+on:
+  workflow_dispatch:
+    inputs:
+      seconds_per_stage:
+        description: Seconds per dimension (use 1–2 for a quick preview)
+        required: true
+        default: "2"
+        type: string
+permissions:
+  contents: read
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install renderer and FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          python -m pip install -r tools/video/requirements.txt
+      - name: Render 1D–11D sequence
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          python tools/video/render_dimensional_sequence.py \
+            --seconds-per-stage "${{ inputs.seconds_per_stage }}" \
+            --width 1280 --height 720 --fps 24 \
+            --output artifacts/dimensional-1d-11d.mp4
+      - name: Inspect generated video
+        run: |
+          python tools/video/inspect_video.py --pretty artifacts/dimensional-1d-11d.mp4 > artifacts/video-inspection.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dimensional-film-and-provenance
+          path: artifacts/
