@@ -30,7 +30,7 @@ Before running it:
 
 - The Auth0 SPA/Native application must already allow `http://localhost:3000/callback`.
 - The ERIA API must be running at `http://127.0.0.1:8787`.
-- PostgreSQL schema must be provisioned and `.env` configured for the service.
+- PostgreSQL schema must be provisioned and the service environment configured.
 
 Run:
 
@@ -38,7 +38,7 @@ Run:
 node financial-tunnel/external-profile/auth0-pkce-smoke-test.mjs
 ```
 
-Open the authorization URL printed in the local terminal, complete Auth0 login, and the helper will exchange the authorization code using PKCE and call `GET /v1/profiles/me` directly. The bearer token remains in process memory and is not displayed. If Auth0 reports `unauthorized_client` or `callback URL mismatch`, the client grant or callback settings still need to be corrected in Auth0. If the API returns a database error, provision PostgreSQL before retrying.
+Open the authorization URL printed in the local terminal, complete Auth0 login, and the helper will exchange the authorization code using PKCE and call `GET /v1/profiles/me` directly. The bearer token remains in process memory and is not displayed. If Auth0 reports `unauthorized_client` or `callback URL mismatch`, the client grant or callback settings still need to be corrected in Auth0. If the API returns a database error, verify PostgreSQL connectivity and the service's `DATABASE_URL`.
 
 The helper defaults to the tenant, client ID, audience, callback URI and local API base recorded above. Override them with `AUTH0_DOMAIN`, `AUTH0_CLIENT_ID`, `AUTH0_AUDIENCE`, `AUTH0_REDIRECT_URI` or `ERIA_API_BASE` environment variables when needed.
 
@@ -55,7 +55,21 @@ The helper defaults to the tenant, client ID, audience, callback URI and local A
 
 ## Database and environment
 
-Apply `schema.sql` to a dedicated PostgreSQL database, then copy `.env.example` to a private local environment file and set:
+Apply `schema.sql` to the dedicated PostgreSQL database `eria_financial_tunnel`. The checked-in example is aligned to that database. On Termux:
+
+```bash
+cd ~/CodEXgen
+cp financial-tunnel/external-profile/.env.example financial-tunnel/external-profile/.env
+whoami
+```
+
+Edit `financial-tunnel/external-profile/.env` and replace `YOUR_TERMUX_USERNAME` in `DATABASE_URL` with the output of `whoami`. Keep the file local; it is ignored by Git. Then start the service with Node's environment-file support:
+
+```bash
+node --env-file=financial-tunnel/external-profile/.env --experimental-strip-types financial-tunnel/external-profile/service.ts
+```
+
+Required environment variables:
 
 - `DATABASE_URL`
 - `OIDC_ISSUER`
@@ -93,12 +107,10 @@ Authorization request body:
 
 ## Run and verify
 
-After applying the schema and setting the environment:
-
-`node --experimental-strip-types financial-tunnel/external-profile/service.ts`
-
 Run the focused tests with:
 
-`node --experimental-strip-types --test financial-tunnel/external-profile/service.test.ts`
+```bash
+node --experimental-strip-types --test financial-tunnel/external-profile/service.test.ts
+```
 
 The API binds to loopback by default. A successful health check does not mean an identity tenant is connected; verify with a real sandbox-issued access token and `GET /v1/profiles/me`. The supplied tenant and audience values are configured, but provider connectivity remains unverified until a token is obtained and validated and the database is provisioned.
