@@ -5,7 +5,7 @@
 
 ## Persistence
 
-`FiccSqliteStore` uses Android's app-private SQLite database. It persists the ten fictional entities, sixty chart-of-account records, thirty balanced seed journals, journal lines, and audit events. Seeding is idempotent and performed in a database transaction. New journal insertion validates the demo identity's posting permission, synthetic provenance, positive amounts, per-currency debit/credit balance, account ownership, and currency consistency; journal rows, lines, and the corresponding audit event commit atomically.
+`FiccSqliteStore` uses Android's app-private SQLite database. It persists the ten fictional entities, sixty chart-of-account records, thirty balanced seed journals, journal lines, reconciliation records, and audit events. The schema is at version 2; version 1 installations receive a forward-only reconciliation-table migration. Seeding is idempotent and performed in a database transaction. New journal insertion validates the demo identity's posting permission, synthetic provenance, positive amounts, per-currency debit/credit balance, account ownership, and currency consistency; journal rows, lines, authorization decision, and the corresponding audit event commit atomically. Reconciliation compares a synthetic statement amount with the stored account balance and commits the reconciliation and audit event atomically.
 
 Audit events are chained with SHA-256 hashes and can be checked with `verifyAuditChain()`. This detects accidental or unsophisticated modification but is not a secure external anchor: a device owner or compromised process can rewrite the local database and recompute the chain. SQLite is device-local and is not a production accounting system. The schema uses SQLiteOpenHelper versioning; future schema changes must add forward-only migrations and must never drop audit or ledger data.
 
@@ -25,4 +25,4 @@ The existing Compose code-generation route now links to a FICC demonstration scr
 
 - Existing ledger unit tests remain in `FiccDemoLedgerTest.kt`.
 - `FiccProviderSandboxTest.kt` covers deterministic data, provenance, unknown-account rejection, and live-mode denial.
-- Run `./gradlew --no-daemon :app:testDebugUnitTest` and `./gradlew --no-daemon :app:assembleDebug` on this branch. Do not infer success from a workflow that only submits dependency snapshots.
+- `.github/workflows/ficc-android-validation.yml` runs `:app:testDebugUnitTest` and `:app:assembleDebug` on feature-branch pushes and pull requests targeting main, then uploads the debug APK. Do not infer success from a workflow that only submits dependency snapshots.
