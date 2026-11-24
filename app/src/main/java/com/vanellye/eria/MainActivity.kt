@@ -16,6 +16,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.material.Text as MaterialText
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,7 +41,7 @@ class MainActivity : ComponentActivity() {
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 BirthCursiveText("Ŷæṛö LUX", style = MaterialTheme.typography.h6)
-                                BirthCursiveText(
+                                MaterialText(
                                     if (showRepositoryDashboard) {
                                         "Native repository dashboard · local Termux API"
                                     } else {
