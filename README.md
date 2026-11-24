@@ -4,6 +4,12 @@ ERIA is the canonical project identity for this codebase. The GitHub repository 
 `Vanellye/CodEXgen` during this migration so existing clone URLs, issues, pull requests,
 and provenance links continue to resolve.
 
+## I.C. Opposition
+
+The Ɣơ adapter validation workflow is named **I.C. Opposition**. Opposition is a diagnostic instrument: it challenges claims through repeatable cross-implementation checks, exposes discrepancies, and records failures. It is not blind reversal and does not authorize automatic source changes.
+
+The Python, JavaScript, and Kotlin adapter checks and their shared test-vector inputs remain intact. See [I.C. Opposition operating principles](docs/IC-OPPOSITION.md).
+
 ## Android identity
 
 - Gradle root project: `ERIA`
@@ -12,8 +18,8 @@ and provenance links continue to resolve.
 - Display name and theme: `ERIA`
 
 The application ID change creates a distinct Android package identity. Existing
-installations signed under `com.vanellye.codexgen` will not update in place as the
-same app; distribute this as a new app identity unless a separately reviewed
+installations signed under `com.vanellye.codexgen` will not update in place as
+the same app; distribute this as a new app identity unless a separately reviewed
 migration strategy is adopted.
 
 ## Build
