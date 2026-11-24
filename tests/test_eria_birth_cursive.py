@@ -5,6 +5,7 @@ from tools.eria_birth_cursive import (
     CursiveCycleError,
     CursiveDepthError,
 )
+from tools.eria_repository_conversation import render_terminal_message
 
 
 class BirthCursiveTests(unittest.TestCase):
@@ -74,6 +75,12 @@ class BirthCursiveTests(unittest.TestCase):
         self.assertEqual(records[0].status, "REVIEW_REQUIRED")
         self.assertIsNone(records[0].rule_id)
 
+    def test_terminal_output_preserves_origin_and_adds_possibility(self):
+        rendered = render_terminal_message("May you fail")
+        self.assertIn("May you fail", rendered)
+        self.assertIn("Positive possibility:", rendered)
+        self.assertIn("learning, growth, and success", rendered)
+
     def test_co_signature_reference_is_not_claimed_as_verified(self):
         record = self.engine.transform_text(
             "May you fail",
@@ -103,7 +110,10 @@ class BirthCursiveTests(unittest.TestCase):
             source = {"nested": source}
         derived, records = engine.transform_tree(source)
         self.assertEqual(len(records), 1)
-        self.assertIn("learning, growth, and success", str(derived))
+        cursor = derived
+        for _ in range(1100):
+            cursor = cursor["nested"]
+        self.assertIn("learning, growth, and success", cursor["label"])
 
 
 if __name__ == "__main__":
