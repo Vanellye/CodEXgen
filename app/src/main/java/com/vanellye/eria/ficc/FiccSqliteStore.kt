@@ -11,7 +11,7 @@ import java.time.Instant
 data class FiccStoreCounts(val entities:Int,val accounts:Int,val journals:Int,val journalLines:Int,val auditEvents:Int,val reconciliations:Int)
 
 /** App-private SQLite persistence for synthetic FICC fixtures. Local storage is not tamper-proof. */
-class FiccSqliteStore(context:Context):SQLiteOpenHelper(context.applicationContext,"ficc_demo.db",null,1) {
+class FiccSqliteStore(context:Context):SQLiteOpenHelper(context.applicationContext,"ficc_demo.db",null,2) {
  override fun onCreate(db:SQLiteDatabase) {
   db.execSQL("CREATE TABLE entities(id TEXT PRIMARY KEY, legal_name TEXT NOT NULL, jurisdiction TEXT NOT NULL, currency TEXT NOT NULL, provenance_ref TEXT NOT NULL)")
   db.execSQL("CREATE TABLE accounts(id TEXT PRIMARY KEY, entity_id TEXT NOT NULL, code TEXT NOT NULL, name TEXT NOT NULL, type TEXT NOT NULL, currency TEXT NOT NULL, provenance_ref TEXT NOT NULL)")
@@ -23,7 +23,8 @@ class FiccSqliteStore(context:Context):SQLiteOpenHelper(context.applicationConte
   db.execSQL("CREATE INDEX idx_journals_entity ON journals(entity_id)")
  }
  override fun onUpgrade(db:SQLiteDatabase,oldVersion:Int,newVersion:Int) {
-  // Future schema changes must be implemented as forward-only migrations; never drop ledger/audit data.
+  if(oldVersion<2) db.execSQL("CREATE TABLE IF NOT EXISTS reconciliations(id TEXT PRIMARY KEY, entity_id TEXT NOT NULL, account_id TEXT NOT NULL, statement_balance TEXT NOT NULL, currency TEXT NOT NULL, reconciled_at TEXT NOT NULL, provenance_ref TEXT NOT NULL)")
+  // Future schema changes must be forward-only; never drop ledger or audit data.
  }
 
  fun seedIfEmpty(bundle:DemoLedgerBundle) {
