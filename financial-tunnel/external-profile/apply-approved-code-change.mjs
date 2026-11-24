@@ -27,7 +27,7 @@ function git(args) {
 }
 function validPath(path) {
   return typeof path === "string" &&
-    /^(financial-tunnel|financial)\/[A-Za-z0-9._/-]+$/.test(path) &&
+    /^(financial-tunnel|financial)\/[A-Za-z0-9._\\/-]+$/.test(path) &&
     !path.split("/").some((part) => !part || part === "." || part === "..") &&
     !/(^|\/)(\.env(?:\.|$)|\.git|secrets?)(\/|$)/i.test(path);
 }
