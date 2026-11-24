@@ -38,7 +38,7 @@ function validateCodePatch(input: any): { files: string[]; patch: string; patchS
   const patchFiles = headers.map((m) => m[1]);
   const contentHeaders = [...input.patch.matchAll(/^(---|\\+\\+\\+) (?:([ab]\\/[^\\n]+)|(\\/dev\\/null))$/gm)];
   if (headers.some((m) => m[1] !== m[2] || !validCodePath(m[1])) ||
-      patchFiles.length !== files.length || patchFiles.some((p) => !files.includes(p)) ||
+      patchFiles.length !== files.length || new Set(patchFiles).size !== files.length || patchFiles.some((p) => !files.includes(p)) ||
       contentHeaders.length !== headers.length * 2 ||
       contentHeaders.some((m) => m[1] === "+++" ? !m[2] || !validCodePath(m[2].slice(2)) || !files.includes(m[2].slice(2)) :
         (m[3] !== "/dev/null" && (!m[2] || !validCodePath(m[2].slice(2)) || !files.includes(m[2].slice(2)))))) return null;
