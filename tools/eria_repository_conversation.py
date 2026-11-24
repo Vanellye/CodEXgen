@@ -3,7 +3,23 @@
 import argparse, json, re, subprocess, sys
 from pathlib import Path
 
+from eria_birth_cursive import BirthCursiveEngine
+
 VERSION = "1.1"
+_TERMINAL_BIRTH_CUR = BirthCursiveEngine()
+
+
+def render_terminal_message(message):
+    """Display an origin unchanged and append a separate known possibility."""
+    rendered = []
+    for index, line in enumerate(str(message).splitlines()):
+        rendered.append(line)
+        record = _TERMINAL_BIRTH_CUR.transform_text(
+            line.strip(), "/terminal/output/" + str(index)
+        )
+        if record.status == "DERIVED" and record.derived_text != record.origin_text:
+            rendered.append("  ✧ Positive possibility: " + record.derived_text)
+    return "\\n".join(rendered)
 MAX_BYTES = 1_000_000
 MAX_HITS = 30
 SKIP_DIRS = {".git", ".gradle", ".idea", "node_modules", "__pycache__", ".venv", "venv", "build", "dist"}
@@ -167,7 +183,7 @@ def main():
         print("ERIA:", e, file=sys.stderr)
         return 2
     if a.question:
-        print(chat.ask(a.question))
+        print(render_terminal_message(chat.ask(a.question)))
         return 0
     print(
         f"ERIA Repository Conversation Engine {VERSION}\n"
@@ -182,7 +198,7 @@ def main():
         if q.lower() in {"quit", "exit"}:
             break
         if q:
-            print(chat.ask(q))
+            print(render_terminal_message(chat.ask(q)))
     return 0
 
 
