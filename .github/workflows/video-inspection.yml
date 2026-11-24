@@ -1,0 +1,26 @@
+name: Video inspection
+on:
+  workflow_dispatch:
+    inputs:
+      video_path:
+        description: Repository-relative path to a video file
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+      - name: Inspect video metadata
+        run: |
+          python tools/video/inspect_video.py --pretty "${{ inputs.video_path }}" | tee video-inspection.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: video-inspection
+          path: video-inspection.json
