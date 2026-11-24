@@ -99,6 +99,16 @@ Audit records should identify actor, role, action, target, timestamp, source cla
 - Lossy workflows are supported with clear confirmation, audit, and recovery semantics.
 - No production credentials, real account records, or live transactions are introduced.
 
-## 9. Change boundary
+## 9. Implementation status
 
-This commit establishes architecture and governance requirements only. It does not claim that the authentication service, ledger, provider adapters, dashboards, database schema, or tests have already been implemented. Those are subsequent, separately reviewable implementation steps.
+The initial architecture baseline has been followed by a first Kotlin domain implementation on this feature branch:
+
+- Four deterministic local demonstration identities and role-based authorization.
+- Demo-workspace and data-classification boundaries enforced in the service layer.
+- Authorization decisions and ledger mutations recorded in an in-memory audit log; audit-history reads are role-gated.
+- A reproducible synthetic ledger with ten fictional entities, sixty accounts, and thirty balanced journal fixtures.
+- Double-entry, currency, account/entity ownership, provenance, and reconciliation checks.
+- Explicitly confirmed, owner-only journal deletion with a required reason and audit event.
+- Unit tests covering authorization, ledger invariants, provenance, reconciliation, and destructive-action controls.
+
+See [FICC-DEMO-IMPLEMENTATION.md](FICC-DEMO-IMPLEMENTATION.md) for the implementation details and limitations. The current ledger and audit store are in-memory only; durable database persistence, real authentication/session management, UI integration, provider adapters, and dashboards remain subsequent implementation steps. No live provider connection or financial transaction is part of this implementation.
