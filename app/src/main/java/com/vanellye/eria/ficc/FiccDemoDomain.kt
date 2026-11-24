@@ -11,7 +11,7 @@ enum class DemoPermission {
 }
 enum class DataClassification { DEMO, REAL }
 enum class DataSourceType { SYNTHETIC, PROVIDER }
-enum class AuditOutcome { ALLOWED, DENIED, POSTED, DELETED }
+enum class AuditOutcome { ALLOWED, DENIED, POSTED, RECONCILED, DELETED }
 
 data class DemoIdentity(
     val id: String,
@@ -193,6 +193,16 @@ data class JournalEntry(
     val provenance: DataProvenance = demoProvenance("journal:$id")
 )
 
+data class AccountReconciliation(
+    val id: String,
+    val entityId: String,
+    val accountId: String,
+    val statementBalance: BigDecimal,
+    val currency: String,
+    val reconciledAt: Instant = Instant.now(),
+    val provenance: DataProvenance = demoProvenance("reconciliation:$id")
+)
+
 data class DestructiveConfirmation(
     val confirmed: Boolean,
     val targetId: String,
@@ -208,6 +218,7 @@ class InMemoryDemoLedger(
     private val entitiesById = entities.associateBy { it.id }
     private val accountsById = accounts.associateBy { it.id }
     private val journalEntries = mutableListOf<JournalEntry>()
+    private val reconciliationRecords = mutableListOf<AccountReconciliation>()
 
     fun entities(actor: DemoIdentity): List<DemoEntity> {
         authorization.require(actor, DemoPermission.ENTITY_READ, "entities")
@@ -228,6 +239,43 @@ class InMemoryDemoLedger(
         journalEntries += entry
         auditLog.append(audit(actor, "ledger:post", entry.id, AuditOutcome.POSTED, "Balanced synthetic journal posted"))
         return entry
+    }
+
+    @Synchronized
+    fun reconcile(actor: DemoIdentity, record: AccountReconciliation): AccountReconciliation {
+        authorization.require(actor, DemoPermission.LEDGER_RECONCILE, record.entityId, record.provenance.classification)
+        val account = accountsById[record.accountId] ?: error("Unknown ledger account: ${record.accountId}")
+        require(account.entityId == record.entityId) { "Reconciliation cannot cross entity boundaries" }
+        require(record.currency == account.currency) { "Statement currency must match account currency" }
+        require(record.statementBalance >= BigDecimal.ZERO) { "Statement balance cannot be negative" }
+        require(record.provenance.classification == DataClassification.DEMO &&
+            record.provenance.sourceType == DataSourceType.SYNTHETIC &&
+            !record.provenance.verified && !record.provenance.providerConnected
+        ) { "Only unverified synthetic statement fixtures can be reconciled in demo mode" }
+        val debitNormal = account.type == AccountType.ASSET || account.type == AccountType.EXPENSE
+        val net = journalEntries.asSequence()
+            .filter { it.entityId == record.entityId }
+            .flatMap { it.lines.asSequence() }
+            .filter { it.accountId == record.accountId && it.currency == record.currency }
+            .fold(BigDecimal.ZERO) { total, line ->
+                val debit = if (line.side == EntrySide.DEBIT) line.amount else BigDecimal.ZERO
+                val credit = if (line.side == EntrySide.CREDIT) line.amount else BigDecimal.ZERO
+                total + if (debitNormal) debit - credit else credit - debit
+            }
+        require(net.compareTo(record.statementBalance) == 0) {
+            "Statement balance ${record.statementBalance} does not match ledger balance $net"
+        }
+        require(reconciliationRecords.none { it.id == record.id }) { "Reconciliation id already exists" }
+        reconciliationRecords += record
+        auditLog.append(audit(actor, "ledger:reconcile", record.id, AuditOutcome.RECONCILED, "Statement and ledger balances match"))
+        return record
+    }
+
+    @Synchronized
+    fun reconciliations(actor: DemoIdentity, entityId: String): List<AccountReconciliation> {
+        requireEntity(entityId)
+        authorization.require(actor, DemoPermission.LEDGER_READ, entityId)
+        return reconciliationRecords.filter { it.entityId == entityId }.toList()
     }
 
     @Synchronized
@@ -328,8 +376,10 @@ object DemoLedgerFactory {
             listOf(
                 LedgerAccount("${entity.id}-cash", entity.id, "1000", "Demo operating cash", AccountType.ASSET),
                 LedgerAccount("${entity.id}-receivable", entity.id, "1100", "Demo receivables", AccountType.ASSET),
+                LedgerAccount("${entity.id}-payable", entity.id, "2000", "Demo accounts payable", AccountType.LIABILITY),
                 LedgerAccount("${entity.id}-capital", entity.id, "3000", "Demo contributed capital", AccountType.EQUITY),
-                LedgerAccount("${entity.id}-revenue", entity.id, "4000", "Demo service revenue", AccountType.REVENUE)
+                LedgerAccount("${entity.id}-revenue", entity.id, "4000", "Demo service revenue", AccountType.REVENUE),
+                LedgerAccount("${entity.id}-expense", entity.id, "5000", "Demo operating expense", AccountType.EXPENSE)
             )
         }
         val audit = InMemoryAuditLog()
@@ -361,6 +411,19 @@ object DemoLedgerFactory {
                     lines = listOf(
                         JournalLine("${entity.id}-receivable", EntrySide.DEBIT, BigDecimal("1250.00"), "USD"),
                         JournalLine("${entity.id}-revenue", EntrySide.CREDIT, BigDecimal("1250.00"), "USD")
+                    )
+                )
+            )
+            ledger.post(
+                owner,
+                JournalEntry(
+                    id = "seed-${entity.id}-payable",
+                    entityId = entity.id,
+                    description = "Synthetic vendor bill fixture",
+                    occurredAt = Instant.parse("2026-01-20T00:00:00Z"),
+                    lines = listOf(
+                        JournalLine("${entity.id}-expense", EntrySide.DEBIT, BigDecimal("375.00"), "USD"),
+                        JournalLine("${entity.id}-payable", EntrySide.CREDIT, BigDecimal("375.00"), "USD")
                     )
                 )
             )
