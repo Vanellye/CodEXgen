@@ -1,4 +1,4 @@
-name: Ɣơ adapter parity
+name: I.C. Opposition — Ɣơ adapter parity
 
 on:
   pull_request:
@@ -8,12 +8,14 @@ on:
   push:
     branches:
       - "feature/yoro-adapters-grammar-parser"
+      - "feature/ic-opposition-yoro-adapters"
 
 permissions:
   contents: read
 
 jobs:
   python:
+    name: Opposition — Python reference adapter
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,6 +26,7 @@ jobs:
       - run: python -m unittest language/og/tests/test_yoro_adapters.py -v
 
   javascript:
+    name: Opposition — JavaScript adapter and parser
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,6 +36,7 @@ jobs:
       - run: node language/og/javascript/test-yoro.mjs
 
   kotlin:
+    name: Opposition — Kotlin adapter
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
