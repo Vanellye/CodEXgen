@@ -1,6 +1,6 @@
 # ERIA External Profile Service
 
-A standalone identity-profile and authorization-evidence service. It replaces the PONS dependency in this tunnel with an independently deployed API and PostgreSQL evidence store. It does **not** execute transactions.
+A standalone identity-profile and authorization-evidence service with an independently deployed API and PostgreSQL evidence store. It does **not** execute transactions.
 
 ## Boundaries
 
@@ -10,7 +10,7 @@ A standalone identity-profile and authorization-evidence service. It replaces th
 - Authorization decisions require `financial_approver` or `profile_admin`, a fresh preview and an exact SHA-256 hash of the canonical preview.
 - Every decision, including denials, is appended to the evidence table. Evidence and profile-role events reject UPDATE/DELETE.
 - The service returns a decision and evidence identifier only. A separate financial execution adapter must verify the evidence and apply its own execution controls.
-- No PONS imports, PONS endpoints, provider SDKs, wallet keys, or live transaction calls.
+- No provider SDKs, wallet keys, or live transaction calls.
 
 ## Configuration
 
