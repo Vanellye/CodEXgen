@@ -34,7 +34,7 @@ if (!files.length || files.length > 20 || new Set(files).size !== files.length |
 }
 const root = git(["rev-parse", "--show-toplevel"]);
 repoRoot = root;
-const remoteUrl = git(["remote", "get-url", "origin"]).replace(/\\.git$/, "").toLowerCase();
+const remoteUrl = git(["remote", "get-url", "origin"]).replace(/\.git$/, "").toLowerCase();
 const branch = git(["branch", "--show-current"]);
 if (!["https://github.com/vanellye/codexgen", "git@github.com:vanellye/codexgen", "ssh://git@github.com/vanellye/codexgen"].includes(remoteUrl)) fail("Origin remote is not Vanellye/CodEXgen.");
 if (branch !== BRANCH) fail(`Checkout ${BRANCH} before preparing a proposal.`);
