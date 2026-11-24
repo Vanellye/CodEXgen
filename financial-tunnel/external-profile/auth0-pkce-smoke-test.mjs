@@ -130,8 +130,8 @@ const server = createServer(async (req, res) => {
         body: JSON.stringify(proposalPayload),
       });
       const submittedBody = await submitted.text();
-      process.stdout.write(`POST /v1/code-change-proposals -> HTTP ${submitted.status}\\n`);
-      process.stdout.write(submittedBody + "\\n");
+      process.stdout.write(`POST /v1/code-change-proposals -> HTTP ${submitted.status}\n`);
+      process.stdout.write(submittedBody + "\n");
       if (!submitted.ok) process.exitCode = 1;
     }
 
@@ -139,8 +139,8 @@ const server = createServer(async (req, res) => {
       const queue = await fetch(`${apiBase}/v1/admin/code-change-proposals`, {
         headers: { authorization: `Bearer ${tokenBody.access_token}`, accept: "application/json" },
       });
-      process.stdout.write(`GET /v1/admin/code-change-proposals -> HTTP ${queue.status}\\n`);
-      process.stdout.write(await queue.text() + "\\n");
+      process.stdout.write(`GET /v1/admin/code-change-proposals -> HTTP ${queue.status}\n`);
+      process.stdout.write(await queue.text() + "\n");
       if (!queue.ok) process.exitCode = 1;
     }
 
@@ -150,8 +150,8 @@ const server = createServer(async (req, res) => {
         headers: { authorization: `Bearer ${tokenBody.access_token}`, "content-type": "application/json", accept: "application/json" },
         body: JSON.stringify({ decision, reason: reason.trim() }),
       });
-      process.stdout.write(`POST code-change decision -> HTTP ${reviewed.status}\\n`);
-      process.stdout.write(await reviewed.text() + "\\n");
+      process.stdout.write(`POST code-change decision -> HTTP ${reviewed.status}\n`);
+      process.stdout.write(await reviewed.text() + "\n");
       if (!reviewed.ok) process.exitCode = 1;
     }
 
