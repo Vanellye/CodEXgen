@@ -77,7 +77,7 @@ let root, currentBranch, head, remoteHead, status, remoteUrl;
 try {
   root = git(["rev-parse", "--show-toplevel"]);
   repoRoot = root;
-  remoteUrl = git(["remote", "get-url", "origin"]).replace(/\\.git$/, "").toLowerCase();
+  remoteUrl = git(["remote", "get-url", "origin"]).replace(/\.git$/, "").toLowerCase();
   currentBranch = git(["branch", "--show-current"]);
   head = git(["rev-parse", "HEAD"]);
   remoteHead = git(["ls-remote", "origin", `refs/heads/${BRANCH}`]).split(/\s+/)[0];
