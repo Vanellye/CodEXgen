@@ -30,7 +30,7 @@ fun FiccDemoScreen(onBack:()->Unit,modifier:Modifier=Modifier) {
  val store=remember { FiccSqliteStore(context) }
  val sandbox=remember { DeterministicProviderSandbox() }
  var session by remember { mutableStateOf(sessions.current()) }
- var counts by remember { mutableStateOf(FiccStoreCounts(0,0,0,0,0)) }
+ var counts by remember { mutableStateOf(FiccStoreCounts(0,0,0,0,0,0)) }
  var names by remember { mutableStateOf(emptyList<String>()) }
  var auditValid by remember { mutableStateOf(false) }
  var balance by remember { mutableStateOf("Not loaded") }
@@ -59,7 +59,7 @@ fun FiccDemoScreen(onBack:()->Unit,modifier:Modifier=Modifier) {
     Text("Persistent synthetic ledger",style=MaterialTheme.typography.subtitle1)
     Text("Entities: "+counts.entities+" • Accounts: "+counts.accounts)
     Text("Journals: "+counts.journals+" • Lines: "+counts.journalLines)
-    Text("Audit events: "+counts.auditEvents)
+    Text("Audit events: "+counts.auditEvents+" • Reconciliations: "+counts.reconciliations)
     Text("Audit hash chain: "+if(auditValid) "VALID" else "NOT VERIFIED")
     Text("App-private SQLite storage • device-local")
    }
