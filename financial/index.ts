@@ -1,5 +1,5 @@
-import { SimulatorProvider } from "./adapters/simulator-provider";
-import { ProviderRegistry } from "./registry/provider-registry";
+import { SimulatorProvider } from "./adapters/simulator-provider.ts";
+import { ProviderRegistry } from "./registry/provider-registry.ts";
 
 /** Builds the safe default registry: one in-memory simulator, no live adapters. */
 export function createDefaultFinancialRegistry(): ProviderRegistry {
@@ -8,7 +8,7 @@ export function createDefaultFinancialRegistry(): ProviderRegistry {
   return registry;
 }
 
-export { SimulatorProvider } from "./adapters/simulator-provider";
-export { ProviderRegistry, ProviderRegistryError } from "./registry/provider-registry";
-export type * from "./contracts/types";
-export type { FinancialProvider } from "./contracts/provider";
+export { SimulatorProvider } from "./adapters/simulator-provider.ts";
+export { ProviderRegistry, ProviderRegistryError } from "./registry/provider-registry.ts";
+export type * from "./contracts/types.ts";
+export type { FinancialProvider } from "./contracts/provider.ts";
