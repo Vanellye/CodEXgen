@@ -7,7 +7,48 @@ import java.util.UUID
 
 data class OrchidSymbol(val id: String, val name: String, val glyph: String, val meaning: String, val origin: String = "ORCHID_CHRONOGLYPH_02")
 
+data class OrchidWordKey(
+    val id: String,
+    val name: String,
+    val glyph: String,
+    val silhouette: String,
+    val meaning: String
+)
+
+
 class SymbolRegistry(context: Context) {
+
+    // Stable word-expression keys. Silhouettes are native Unicode emoji so the keyboard
+    // remains offline and does not depend on downloaded image assets or a particular font.
+    private val wordKeys = listOf(
+        OrchidWordKey("ORC-300-001","SWERVE","↗","🌪️","Change direction sharply"),
+        OrchidWordKey("ORC-300-002","VEER","➚","🧭","Turn gradually from a course"),
+        OrchidWordKey("ORC-300-003","PIVOT","⦿","🔄","Turn around a fixed point"),
+        OrchidWordKey("ORC-300-004","CONVERGE","⇢⇠","🧲","Move toward a shared point"),
+        OrchidWordKey("ORC-300-005","DIVERGE","↗↖","✴️","Separate into distinct directions"),
+        OrchidWordKey("ORC-300-006","WEAVE","⌘","🧵","Interlace connected paths"),
+        OrchidWordKey("ORC-300-007","FOLD","⌒","📜","Bend one layer over another"),
+        OrchidWordKey("ORC-300-008","UNFOLD","⋀","🦋","Open or extend folded layers"),
+        OrchidWordKey("ORC-300-009","FLOW","≈","🌊","Move continuously"),
+        OrchidWordKey("ORC-300-010","SURGE","≫","🌊","Advance in a strong wave"),
+        OrchidWordKey("ORC-300-011","DRIFT","⋯","🍃","Move gradually without fixed course"),
+        OrchidWordKey("ORC-300-012","OSCILLATE","∿","📳","Move repeatedly between positions"),
+        OrchidWordKey("ORC-300-013","ORBIT","◎","🪐","Travel around an origin"),
+        OrchidWordKey("ORC-300-014","REVOLVE","⟳","🌀","Rotate around an axis"),
+        OrchidWordKey("ORC-300-015","ASCEND","⇡","🚀","Move upward"),
+        OrchidWordKey("ORC-300-016","DESCEND","⇣","🪂","Move downward"),
+        OrchidWordKey("ORC-300-017","RETURN","↶","🪃","Come back toward origin"),
+        OrchidWordKey("ORC-300-018","RETRACE","〰↶","👣","Follow a recorded path backward"),
+        OrchidWordKey("ORC-300-019","REVERSE","↔","🔁","Invert direction or order"),
+        OrchidWordKey("ORC-300-020","EVOLVE","◉∿","🧬","Develop through successive states"),
+        OrchidWordKey("ORC-300-021","TRANSFORM","✥","🦋","Change form while retaining lineage"),
+        OrchidWordKey("ORC-300-022","MERGE","⊗","🤝","Join while preserving provenance"),
+        OrchidWordKey("ORC-300-023","SPLIT","⋔","⚡","Divide into distinct paths"),
+        OrchidWordKey("ORC-300-024","RESOLVE","✓","🎯","Reach a defined outcome")
+    )
+    fun wordKeys(): List<OrchidWordKey> = wordKeys
+
+
     private val prefs = context.getSharedPreferences("orchid_private_symbols", Context.MODE_PRIVATE)
     private val canonical = listOf(
         OrchidSymbol("ORC-CG01-0001","VORA","⧖","TEMPORAL_FLEXIBILITY"),
