@@ -2,6 +2,9 @@ package com.vanellye.eria.orchid
 
 import android.inputmethodservice.InputMethodService
 import android.graphics.Color
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
@@ -36,6 +39,38 @@ class OrchidSymbolImeService : InputMethodService() {
             textSize = 14f
             setPadding(8, 8, 8, 12)
         })
+
+        addSectionTitle(column, "TRYNITI / SOURCE")
+        val trynitiKey = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setPadding(8, 8, 8, 8)
+            background = GradientDrawable().apply {
+                setColor(Color.rgb(39, 46, 59))
+                cornerRadius = dp(14).toFloat()
+                setStroke(dp(1), Color.rgb(145, 125, 220))
+            }
+            isClickable = true
+            isFocusable = true
+            contentDescription = "Insert TRYNITI source symbol"
+            addView(TrynitiGlyphView(this@OrchidSymbolImeService), LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(112)
+            ))
+            addView(TextView(this@OrchidSymbolImeService).apply {
+                text = "TRYNITI  •  3-ON-INFINITY"
+                setTextColor(Color.WHITE)
+                textSize = 12f
+                typeface = Typeface.DEFAULT_BOLD
+                gravity = Gravity.CENTER
+            })
+            setOnClickListener {
+                currentInputConnection?.commitText("\uE3A0", 1)
+                announceForAccessibility("TRYNITI inserted")
+            }
+        }
+        column.addView(trynitiKey, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+        ).apply { setMargins(dp(3), dp(3), dp(3), dp(8)) })
 
         addSectionTitle(column, "CHRONOGLYPH")
         registry.all().chunked(3).forEach { group ->
@@ -192,4 +227,65 @@ class OrchidSymbolImeService : InputMethodService() {
     }
 
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
+}
+
+
+/** Native 2D TRYNITI mark: three braided upper strands over a horizontal infinity. */
+private class TrynitiGlyphView(context: android.content.Context) : View(context) {
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        strokeWidth = 4.2f * resources.displayMetrics.density
+        strokeCap = Paint.Cap.ROUND
+        strokeJoin = Paint.Join.ROUND
+        color = Color.rgb(221, 211, 255)
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        val sx = width / 240f
+        val sy = height / 220f
+        val scale = minOf(sx, sy)
+        val save = canvas.save()
+        canvas.translate((width - 240f * scale) / 2f, (height - 220f * scale) / 2f)
+        canvas.scale(scale, scale)
+
+        val upper = listOf(
+            Path().apply {
+                moveTo(120f, 12f)
+                cubicTo(42f, 12f, 64f, 67f, 120f, 91f)
+                cubicTo(176f, 115f, 198f, 145f, 120f, 174f)
+            },
+            Path().apply {
+                moveTo(120f, 12f)
+                cubicTo(198f, 12f, 176f, 67f, 120f, 91f)
+                cubicTo(64f, 115f, 42f, 145f, 120f, 174f)
+            },
+            Path().apply {
+                moveTo(120f, 12f)
+                cubicTo(91f, 39f, 91f, 67f, 120f, 91f)
+                cubicTo(149f, 115f, 149f, 146f, 120f, 174f)
+            }
+        )
+        upper.forEach { canvas.drawPath(it, paint) }
+
+        val infinity = Path().apply {
+            moveTo(120f, 174f)
+            cubicTo(91f, 128f, 12f, 132f, 12f, 174f)
+            cubicTo(12f, 216f, 83f, 216f, 120f, 174f)
+            cubicTo(157f, 132f, 228f, 132f, 228f, 174f)
+            cubicTo(228f, 216f, 149f, 216f, 120f, 174f)
+        }
+        canvas.drawPath(infinity, paint)
+
+        paint.style = Paint.Style.FILL
+        canvas.drawCircle(120f, 12f, 7f, paint)
+        canvas.drawCircle(12f, 174f, 6f, paint)
+        canvas.drawCircle(228f, 174f, 6f, paint)
+        paint.style = Paint.Style.STROKE
+        canvas.drawCircle(120f, 174f, 16f, paint)
+        canvas.drawLine(120f, 165f, 120f, 183f, paint)
+        canvas.drawLine(111f, 174f, 129f, 174f, paint)
+
+        canvas.restoreToCount(save)
+    }
 }
