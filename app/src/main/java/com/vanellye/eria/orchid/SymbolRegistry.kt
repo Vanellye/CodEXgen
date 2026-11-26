@@ -26,31 +26,39 @@ class SymbolRegistry(context: Context) {
     fun all(): List<OrchidSymbol> = canonical + readPrivate()
 
     fun addPrivate(name: String, glyph: String, meaning: String): OrchidSymbol {
-        require(name.isNotBlank() && glyph.isNotBlank()) { "Name and glyph are required." }
-        require(glyph.codePointCount(0, glyph.length) <= 8) { "Glyph is limited to eight Unicode code points." }
-        val id = "ORC-LOCAL-" + UUID.randomUUID().toString()
-        val symbol = OrchidSymbol(id, name.trim(), glyph, meaning.trim(), "LOCAL_PRIVATE")
-        val values = readPrivate().filterNot { it.id == id } + symbol
-        prefs.edit().putString(KEY_PRIVATE, JSONArray().apply { values.forEach { put(it.toJson()) } }.toString()).apply()
+        require(name.isNotBlank() && name.length <= 80) { "Name must contain 1–80 characters." }
+        require(glyph.isNotBlank() && glyph.codePointCount(0, glyph.length) <= 8) { "Glyph is limited to eight Unicode code points." }
+        require(meaning.length <= 500) { "Meaning is limited to 500 characters." }
+        val symbol = OrchidSymbol("ORC-LOCAL-" + UUID.randomUUID().toString(), name.trim(), glyph, meaning.trim(), "LOCAL_PRIVATE")
+        val values = readPrivate().filterNot { it.id == symbol.id } + symbol
+        savePrivate(values)
         return symbol
     }
 
     fun importPrivate(json: String): Int {
+        require(json.length <= MAX_PACK_CHARS) { "Symbol pack exceeds the 256 KB import limit." }
         val root = JSONObject(json)
         require(root.optString("format") == "ORCHID_SYMBOL_PACK_V1") { "Unsupported symbol pack." }
         val array = root.getJSONArray("symbols")
+        require(array.length() <= MAX_PACK_SYMBOLS) { "Symbol pack exceeds the 500-symbol limit." }
         val values = readPrivate().associateBy { it.id }.toMutableMap()
+        val canonicalIds = canonical.map { it.id }.toSet()
         var count = 0
         for (i in 0 until array.length()) {
             val item = array.getJSONObject(i)
             val glyph = item.getString("glyph")
             val name = item.getString("name")
-            require(glyph.isNotBlank() && name.isNotBlank())
-            val id = item.optString("id").ifBlank { "ORC-LOCAL-" + UUID.randomUUID().toString() }
-            values[id] = OrchidSymbol(id, name, glyph, item.optString("meaning"), "IMPORTED_PRIVATE")
+            val meaning = item.optString("meaning")
+            require(name.isNotBlank() && name.length <= 80) { "Imported symbol name must contain 1–80 characters." }
+            require(glyph.isNotBlank() && glyph.codePointCount(0, glyph.length) <= 8) { "Imported glyph is limited to eight Unicode code points." }
+            require(meaning.length <= 500) { "Imported meaning is limited to 500 characters." }
+            val suppliedId = item.optString("id")
+            val id = if (suppliedId.startsWith("ORC-LOCAL-") && suppliedId !in canonicalIds) suppliedId
+                     else "ORC-LOCAL-" + UUID.randomUUID().toString()
+            values[id] = OrchidSymbol(id, name.trim(), glyph, meaning, "IMPORTED_PRIVATE")
             count++
         }
-        prefs.edit().putString(KEY_PRIVATE, JSONArray().apply { values.values.forEach { put(it.toJson()) } }.toString()).apply()
+        savePrivate(values.values.toList())
         return count
     }
 
@@ -59,6 +67,10 @@ class SymbolRegistry(context: Context) {
         put("visibility", "USER_SHARED_PRIVATE_PACK")
         put("symbols", JSONArray().apply { readPrivate().forEach { put(it.toJson()) } })
     }.toString(2)
+
+    private fun savePrivate(values: List<OrchidSymbol>) {
+        prefs.edit().putString(KEY_PRIVATE, JSONArray().apply { values.forEach { put(it.toJson()) } }.toString()).apply()
+    }
 
     private fun readPrivate(): List<OrchidSymbol> = runCatching {
         val array = JSONArray(prefs.getString(KEY_PRIVATE, "[]"))
@@ -69,5 +81,9 @@ class SymbolRegistry(context: Context) {
         put("id",id); put("name",name); put("glyph",glyph); put("meaning",meaning)
     }
     private fun JSONObject.toSymbol() = OrchidSymbol(getString("id"),getString("name"),getString("glyph"),optString("meaning"),optString("origin","IMPORTED_PRIVATE"))
-    companion object { private const val KEY_PRIVATE = "private_symbols_v1" }
+    companion object {
+        private const val KEY_PRIVATE = "private_symbols_v1"
+        private const val MAX_PACK_CHARS = 256 * 1024
+        private const val MAX_PACK_SYMBOLS = 500
+    }
 }
