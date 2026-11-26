@@ -2,7 +2,8 @@ package com.vanellye.eria.orchid
 
 import android.content.Context
 import org.json.JSONArray
-import org.json.JSONObject\nimport java.util.UUID
+import org.json.JSONObject
+import java.util.UUID
 
 data class OrchidSymbol(val id: String, val name: String, val glyph: String, val meaning: String, val origin: String = "ORCHID_CHRONOGLYPH_02")
 
