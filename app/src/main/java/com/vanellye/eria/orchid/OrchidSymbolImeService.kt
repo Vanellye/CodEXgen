@@ -2,44 +2,194 @@ package com.vanellye.eria.orchid
 
 import android.inputmethodservice.InputMethodService
 import android.graphics.Color
+import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 
-/** Offline symbol keyboard. Text is inserted only after an explicit key tap. */
+/** Offline ORCHID keyboard. Keys commit text only after an explicit user tap. */
 class OrchidSymbolImeService : InputMethodService() {
     private lateinit var registry: SymbolRegistry
-    override fun onCreate() { super.onCreate(); registry = SymbolRegistry(applicationContext) }
+
+    override fun onCreate() {
+        super.onCreate()
+        registry = SymbolRegistry(applicationContext)
+    }
 
     override fun onCreateInputView(): View {
         val scroll = ScrollView(this)
         val column = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(8,8,8,8)
-            setBackgroundColor(Color.rgb(24,27,34))
+            setPadding(8, 8, 8, 8)
+            setBackgroundColor(Color.rgb(24, 27, 34))
         }
+
         column.addView(TextView(this).apply {
             text = "ORCHID  •  PRIVATE SYMBOL KEYBOARD"
-            setTextColor(Color.WHITE); textSize = 14f; setPadding(8,8,8,12)
+            setTextColor(Color.WHITE)
+            textSize = 14f
+            setPadding(8, 8, 8, 12)
         })
+
+        addSectionTitle(column, "CHRONOGLYPH")
         registry.all().chunked(3).forEach { group ->
-            val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+            val row = keyRow()
             group.forEach { item ->
-                row.addView(Button(this).apply {
+                val key = Button(this).apply {
                     text = item.glyph + "\n" + item.name
-                    isAllCaps = false; textSize = 16f
-                    setOnClickListener { currentInputConnection?.commitText(item.glyph,1) }
-                    layoutParams = LinearLayout.LayoutParams(0,ViewGroup.LayoutParams.WRAP_CONTENT,1f)
-                })
+                    isAllCaps = false
+                    textSize = 16f
+                    setOnClickListener { currentInputConnection?.commitText(item.glyph, 1) }
+                    layoutParams = weightedKeyParams()
+                }
+                row.addView(key)
             }
             column.addView(row)
         }
-        column.addView(Button(this).apply { text = "Space"; setOnClickListener { currentInputConnection?.commitText(" ",1) } })
-        column.addView(Button(this).apply { text = "⌫"; setOnClickListener { currentInputConnection?.deleteSurroundingTextInCodePoints(1,0) } })
+
+        addSectionTitle(column, "WORD KEYS  •  DEPTH / MOTION / FORM")
+        registry.wordKeys().chunked(3).forEach { group ->
+            val row = keyRow()
+            group.forEach { item ->
+                row.addView(createDimensionalWordKey(item), weightedKeyParams())
+            }
+            column.addView(row)
+        }
+
+        val controls = keyRow()
+        controls.addView(Button(this).apply {
+            text = "Space"
+            setOnClickListener { currentInputConnection?.commitText(" ", 1) }
+            layoutParams = weightedKeyParams()
+        })
+        controls.addView(Button(this).apply {
+            text = "⌫"
+            setOnClickListener { currentInputConnection?.deleteSurroundingTextInCodePoints(1, 0) }
+            layoutParams = weightedKeyParams()
+        })
+        column.addView(controls)
+
         scroll.addView(column)
         return scroll
     }
+
+    private fun addSectionTitle(parent: LinearLayout, title: String) {
+        parent.addView(TextView(this).apply {
+            text = title
+            setTextColor(Color.rgb(190, 205, 230))
+            textSize = 12f
+            typeface = Typeface.DEFAULT_BOLD
+            setPadding(8, 14, 8, 6)
+        })
+    }
+
+    private fun keyRow() = LinearLayout(this).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER
+    }
+
+    private fun weightedKeyParams() =
+        LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).apply {
+            setMargins(3, 3, 3, 3)
+        }
+
+    /**
+     * A four-plane, 4D-inspired emoji silhouette: three offset depth echoes,
+     * a crisp foreground form, and a small temporal orbit cue. It is a visual
+     * metaphor rendered with native text, not a literal 4D projection.
+     */
+    private fun createDimensionalWordKey(item: OrchidWordKey): View {
+        val key = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setPadding(3, 5, 3, 6)
+            background = GradientDrawable().apply {
+                setColor(Color.rgb(39, 46, 59))
+                cornerRadius = dp(12).toFloat()
+                setStroke(dp(1), Color.rgb(75, 91, 116))
+            }
+            isClickable = true
+            isFocusable = true
+            elevation = dp(3).toFloat()
+        }
+
+        val silhouette = FrameLayout(this).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(54)
+            )
+        }
+        val echoes = listOf(
+            Triple(0.16f, dp(-4), dp(3)),
+            Triple(0.25f, dp(3), dp(-2)),
+            Triple(0.34f, dp(5), dp(3))
+        )
+        echoes.forEach { (alpha, x, y) ->
+            silhouette.addView(TextView(this).apply {
+                text = item.silhouette
+                textSize = 29f
+                this.alpha = alpha
+                gravity = Gravity.CENTER
+                translationX = x.toFloat()
+                translationY = y.toFloat()
+                layoutParams = FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+            })
+        }
+        silhouette.addView(TextView(this).apply {
+            text = item.silhouette
+            textSize = 31f
+            gravity = Gravity.CENTER
+            setShadowLayer(dp(5).toFloat(), dp(1).toFloat(), dp(2).toFloat(), Color.BLACK)
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        })
+        silhouette.addView(TextView(this).apply {
+            text = "↻"
+            textSize = 12f
+            setTextColor(Color.rgb(153, 190, 230))
+            gravity = Gravity.TOP or Gravity.END
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            ).apply { setMargins(0, dp(1), dp(5), 0) }
+        })
+        key.addView(silhouette)
+
+        key.addView(TextView(this).apply {
+            text = item.name
+            textSize = 11f
+            typeface = Typeface.DEFAULT_BOLD
+            setTextColor(Color.WHITE)
+            gravity = Gravity.CENTER
+            maxLines = 1
+        })
+        key.addView(TextView(this).apply {
+            text = item.glyph
+            textSize = 13f
+            setTextColor(Color.rgb(190, 205, 230))
+            gravity = Gravity.CENTER
+            maxLines = 1
+        })
+
+        key.setOnClickListener {
+            // Insert the readable word and its ORCHID expression as one user action.
+            currentInputConnection?.commitText(item.name + " " + item.glyph, 1)
+            key.animate().scaleX(0.96f).scaleY(0.96f).setDuration(65)
+                .withEndAction { key.animate().scaleX(1f).scaleY(1f).setDuration(90).start() }
+                .start()
+        }
+        return key
+    }
+
+    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
 }
