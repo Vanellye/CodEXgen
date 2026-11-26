@@ -51,6 +51,7 @@ class SymbolRegistry(context: Context) {
 
     private val prefs = context.getSharedPreferences("orchid_private_symbols", Context.MODE_PRIVATE)
     private val canonical = listOf(
+        OrchidSymbol("ORC-TRYNITI-001","TRYNITI","\\uE3A0","TRINITY_SOURCE_3_STRANDS_OVER_INFINITY", "ORCHID_TRYNITI_01"),
         OrchidSymbol("ORC-CG01-0001","VORA","⧖","TEMPORAL_FLEXIBILITY"),
         OrchidSymbol("ORC-CG01-0002","ELUN","⫶","OBSERVATION_INSTANT"),
         OrchidSymbol("ORC-CG01-0003","THERA","⤙","HISTORICAL_DIRECTION"),
