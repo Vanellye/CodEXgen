@@ -64,7 +64,7 @@ class OrchidSymbolImeService : InputMethodService() {
                 gravity = Gravity.CENTER
             })
             setOnClickListener {
-                currentInputConnection?.commitText("\uE3A0", 1)
+                currentInputConnection?.commitText("4♧", 1)
                 announceForAccessibility("TRYNITI inserted")
             }
         }
