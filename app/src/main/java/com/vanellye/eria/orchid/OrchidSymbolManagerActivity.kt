@@ -3,7 +3,9 @@ package com.vanellye.eria.orchid
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -22,6 +24,18 @@ class OrchidSymbolManagerActivity : Activity() {
             setPadding(20,20,20,20)
         }
         root.addView(TextView(this).apply { text = "ORCHID • PRIVATE SYMBOLS"; textSize = 20f })
+        root.addView(Button(this).apply {
+            text = "Enable ORCHID keyboard in Android settings"
+            setOnClickListener {
+                startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
+            }
+        })
+        root.addView(Button(this).apply {
+            text = "Select ORCHID as current keyboard"
+            setOnClickListener {
+                (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager).showInputMethodPicker()
+            }
+        })
         val name = EditText(this).apply { hint = "Symbol name" }
         val glyph = EditText(this).apply { hint = "Glyph or short sequence" }
         val meaning = EditText(this).apply { hint = "Meaning (optional)" }
