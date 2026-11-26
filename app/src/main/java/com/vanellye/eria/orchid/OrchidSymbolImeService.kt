@@ -38,7 +38,7 @@ class OrchidSymbolImeService : InputMethodService() {
             column.addView(row)
         }
         column.addView(Button(this).apply { text = "Space"; setOnClickListener { currentInputConnection?.commitText(" ",1) } })
-        column.addView(Button(this).apply { text = "⌫"; setOnClickListener { currentInputConnection?.deleteSurroundingText(1,0) } })
+        column.addView(Button(this).apply { text = "⌫"; setOnClickListener { currentInputConnection?.deleteSurroundingTextInCodePoints(1,0) } })
         scroll.addView(column)
         return scroll
     }
