@@ -9,6 +9,7 @@ This module adds an Android Input Method Service backed by the parserless ORCHID
 
 ## Features
 - Offline symbol keyboard with the 12 Chronoglyph-01 symbols.
+- Canonical **TRYNITI** key (`ORC-TRYNITI-001`) using the visible two-character glyph `4♧`, representing the vertical three-strand form joined to the source/infinity expression. The key inserts the literal `4♧` sequence; it does not rely on a Private Use Area font slot.
 - A separate **WORD KEYS** section for all 24 ORC-300 word expressions, each with its own Unicode emoji silhouette, canonical word, and expression glyph.
 - Four-plane, 4D-inspired key artwork: three offset depth echoes, a foreground silhouette, a temporal orbit cue, and a brief press response. This is a visual metaphor for depth and motion, not a literal four-dimensional projection.
 - Tapping a word key explicitly inserts the readable word plus its ORCHID expression glyph (for example, `SWERVE ↗`). Chronoglyph keys continue to insert only their canonical glyph.
