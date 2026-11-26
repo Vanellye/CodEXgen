@@ -2,7 +2,7 @@ package com.vanellye.eria.orchid
 
 import android.content.Context
 import org.json.JSONArray
-import org.json.JSONObject
+import org.json.JSONObject\nimport java.util.UUID
 
 data class OrchidSymbol(val id: String, val name: String, val glyph: String, val meaning: String, val origin: String = "ORCHID_CHRONOGLYPH_02")
 
@@ -27,7 +27,7 @@ class SymbolRegistry(context: Context) {
     fun addPrivate(name: String, glyph: String, meaning: String): OrchidSymbol {
         require(name.isNotBlank() && glyph.isNotBlank()) { "Name and glyph are required." }
         require(glyph.codePointCount(0, glyph.length) <= 8) { "Glyph is limited to eight Unicode code points." }
-        val id = "ORC-LOCAL-" + glyph.hashCode().toUInt().toString(16).uppercase()
+        val id = "ORC-LOCAL-" + UUID.randomUUID().toString()
         val symbol = OrchidSymbol(id, name.trim(), glyph, meaning.trim(), "LOCAL_PRIVATE")
         val values = readPrivate().filterNot { it.id == id } + symbol
         prefs.edit().putString(KEY_PRIVATE, JSONArray().apply { values.forEach { put(it.toJson()) } }.toString()).apply()
@@ -45,7 +45,7 @@ class SymbolRegistry(context: Context) {
             val glyph = item.getString("glyph")
             val name = item.getString("name")
             require(glyph.isNotBlank() && name.isNotBlank())
-            val id = item.optString("id").ifBlank { "ORC-LOCAL-" + glyph.hashCode().toUInt().toString(16).uppercase() }
+            val id = item.optString("id").ifBlank { "ORC-LOCAL-" + UUID.randomUUID().toString() }
             values[id] = OrchidSymbol(id, name, glyph, item.optString("meaning"), "IMPORTED_PRIVATE")
             count++
         }
