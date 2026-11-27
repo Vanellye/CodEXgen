@@ -115,7 +115,7 @@ class OrchidSymbolImeService : InputMethodService() {
                 val resultRow = keyRow()
                 group.forEach { record ->
                     resultRow.addView(Button(this).apply {
-                        text = record.glyph + "\\n" + record.name
+                        text = record.glyph + "\n" + record.name
                         isAllCaps = false
                         textSize = 13f
                         contentDescription = "Insert ${record.name}: ${record.meaning}"
