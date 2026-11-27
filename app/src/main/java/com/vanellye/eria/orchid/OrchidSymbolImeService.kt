@@ -11,6 +11,9 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
+import android.text.Editable
+import android.text.TextWatcher
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.ScrollView
@@ -19,10 +22,12 @@ import android.widget.TextView
 /** Offline ORCHID keyboard. Keys commit text only after an explicit user tap. */
 class OrchidSymbolImeService : InputMethodService() {
     private lateinit var registry: SymbolRegistry
+    private lateinit var database: OrchidSymbolDatabase
 
     override fun onCreate() {
         super.onCreate()
         registry = SymbolRegistry(applicationContext)
+        database = OrchidSymbolDatabase(applicationContext)
     }
 
     override fun onCreateInputView(): View {
@@ -71,6 +76,66 @@ class OrchidSymbolImeService : InputMethodService() {
         column.addView(trynitiKey, LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
         ).apply { setMargins(dp(3), dp(3), dp(3), dp(8)) })
+
+        addSectionTitle(column, "KEYWORD / SYMBOL DATABASE")
+        val databaseSearch = EditText(this).apply {
+            hint = "Search meaning, keyword, or symbol name"
+            singleLine = true
+            textSize = 14f
+            setTextColor(Color.WHITE)
+            setHintTextColor(Color.LTGRAY)
+            setPadding(dp(12), dp(8), dp(12), dp(8))
+        }
+        column.addView(databaseSearch, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+        ))
+        val databaseResults = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+        }
+        column.addView(databaseResults, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+        ))
+
+        fun showDatabaseResults(query: String) {
+            databaseResults.removeAllViews()
+            val matches = if (query.isBlank()) {
+                database.all().filter { it.kind in setOf("living-symbol", "operator", "concept") }
+            } else {
+                database.search(query)
+            }.take(12)
+            if (matches.isEmpty()) {
+                databaseResults.addView(TextView(this).apply {
+                    text = "No matching ORCHID records"
+                    setTextColor(Color.LTGRAY)
+                    setPadding(dp(8), dp(8), dp(8), dp(8))
+                })
+                return
+            }
+            matches.chunked(3).forEach { group ->
+                val resultRow = keyRow()
+                group.forEach { record ->
+                    resultRow.addView(Button(this).apply {
+                        text = record.glyph + "\\n" + record.name
+                        isAllCaps = false
+                        textSize = 13f
+                        contentDescription = "Insert ${record.name}: ${record.meaning}"
+                        setOnClickListener {
+                            currentInputConnection?.commitText(database.insertText(record.id), 1)
+                            announceForAccessibility("${record.name} inserted")
+                        }
+                    }, weightedKeyParams())
+                }
+                databaseResults.addView(resultRow)
+            }
+        }
+        showDatabaseResults("")
+        databaseSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                showDatabaseResults(s?.toString().orEmpty())
+            }
+            override fun afterTextChanged(s: Editable?) = Unit
+        })
 
         addSectionTitle(column, "CHRONOGLYPH")
         registry.all().chunked(3).forEach { group ->
