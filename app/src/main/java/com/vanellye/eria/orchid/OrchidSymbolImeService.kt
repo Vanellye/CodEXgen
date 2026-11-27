@@ -80,7 +80,7 @@ class OrchidSymbolImeService : InputMethodService() {
         addSectionTitle(column, "KEYWORD / SYMBOL DATABASE")
         val databaseSearch = EditText(this).apply {
             hint = "Search meaning, keyword, or symbol name"
-            singleLine = true
+            setSingleLine(true)
             textSize = 14f
             setTextColor(Color.WHITE)
             setHintTextColor(Color.LTGRAY)
