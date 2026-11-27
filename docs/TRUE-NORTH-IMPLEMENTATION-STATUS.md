@@ -1,7 +1,7 @@
 # ERIA / TRUE NORTH — Branch Implementation Status
 
-**Snapshot:** 2026-11-10  
-**Repository:** `Vanellye/CodEXgen` (historical remote name)  
+**Snapshot:** 2026-11-10\
+**Repository:** `Vanellye/CodEXgen` (historical remote name)\
 **Scope:** Implementation wave 1. Branches remain independent; this record is not merge authorization.
 
 > Orient by truth. Move by purpose. Never mistake momentum for direction.

@@ -1,0 +1,73 @@
+{
+  "policy_id": "ERIA-RED-WRITE-ONLY",
+  "version": "1.0.0",
+  "status": "draft",
+  "mode": "proposal_and_report_creation_only",
+  "default_decision": "DENY",
+  "allowed_operations": [
+    "create_new_report",
+    "create_new_evidence_manifest",
+    "create_new_remediation_proposal"
+  ],
+  "denied_operations": [
+    "read_secrets",
+    "credential_harvesting",
+    "write_existing_source",
+    "overwrite",
+    "delete",
+    "chmod",
+    "execute",
+    "shell",
+    "network_dispatch",
+    "webhook_dispatch",
+    "hardware_activation",
+    "biological_intervention"
+  ],
+  "allowed_output_prefixes": [
+    "reports/",
+    "evidence-manifests/",
+    "proposals/"
+  ],
+  "path_rules": {
+    "require_relative_posix_path": true,
+    "reject_parent_traversal": true,
+    "reject_absolute_paths": true,
+    "reject_backslashes": true,
+    "reject_empty_segments": true,
+    "reject_dot_segments": true,
+    "reject_symlink_targets": true,
+    "create_only": true,
+    "overwrite": false,
+    "delete": false
+  },
+  "authorization": {
+    "require_human_scope_approval": true,
+    "authorization_is_per_operation": true,
+    "authorization_is_time_bounded": true,
+    "authorization_is_revocable": true,
+    "require_audit_record": true,
+    "glyphs_and_symbolic_markers_are_not_authorization": true
+  },
+  "audit": {
+    "append_only": true,
+    "required_fields": [
+      "event_id",
+      "timestamp",
+      "actor",
+      "operation",
+      "target_path",
+      "decision",
+      "reason",
+      "source_revision",
+      "authorization_ref"
+    ],
+    "record_secret_values": false,
+    "record_secret_fingerprints": false
+  },
+  "testing": {
+    "synthetic_fixtures_only": true,
+    "production_targets": false,
+    "exploit_payloads": false,
+    "external_targets": false
+  }
+}
