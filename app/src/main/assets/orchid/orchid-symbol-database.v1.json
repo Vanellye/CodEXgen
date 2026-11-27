@@ -1,0 +1,820 @@
+{
+  "format": "ORCHID_SYMBOL_DATABASE",
+  "schemaVersion": "1.0.0",
+  "databaseId": "ORCHID-KEYWORD-DB-001",
+  "createdAt": "2026-11-27",
+  "encoding": {
+    "text": "UTF-8",
+    "identity": "immutable-record-id",
+    "bitPolicy": "fixed-width; preserve leading zeros and every bit",
+    "digest": "SHA-256 over canonical UTF-8 serialization; digest not included in self-hash"
+  },
+  "records": [
+    {
+      "id": "ORC-CG01-0001",
+      "kind": "chronoglyph",
+      "name": "VORA",
+      "glyph": "⧖",
+      "meaning": "TEMPORAL_FLEXIBILITY",
+      "origin": "ORCHID_CHRONOGLYPH_01",
+      "status": "canonical-baseline",
+      "aliases": [],
+      "keywords": [
+        "vora"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-CG01-0002",
+      "kind": "chronoglyph",
+      "name": "ELUN",
+      "glyph": "⫶",
+      "meaning": "OBSERVATION_INSTANT",
+      "origin": "ORCHID_CHRONOGLYPH_01",
+      "status": "canonical-baseline",
+      "aliases": [],
+      "keywords": [
+        "elun"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-CG01-0003",
+      "kind": "chronoglyph",
+      "name": "THERA",
+      "glyph": "⤙",
+      "meaning": "HISTORICAL_DIRECTION",
+      "origin": "ORCHID_CHRONOGLYPH_01",
+      "status": "canonical-baseline",
+      "aliases": [],
+      "keywords": [
+        "thera"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-CG01-0004",
+      "kind": "chronoglyph",
+      "name": "AVER",
+      "glyph": "⤚",
+      "meaning": "FUTURE_DIRECTION",
+      "origin": "ORCHID_CHRONOGLYPH_01",
+      "status": "canonical-baseline",
+      "aliases": [],
+      "keywords": [
+        "aver"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-CG01-0005",
+      "kind": "chronoglyph",
+      "name": "NOVEX",
+      "glyph": "⧓",
+      "meaning": "TEMPORAL_BRANCHING",
+      "origin": "ORCHID_CHRONOGLYPH_01",
+      "status": "canonical-baseline",
+      "aliases": [],
+      "keywords": [
+        "novex"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-CG01-0006",
+      "kind": "chronoglyph",
+      "name": "SELVA",
+      "glyph": "⫰",
+      "meaning": "DURATION",
+      "origin": "ORCHID_CHRONOGLYPH_01",
+      "status": "canonical-baseline",
+      "aliases": [],
+      "keywords": [
+        "selva"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-CG01-0007",
+      "kind": "chronoglyph",
+      "name": "RUVEN",
+      "glyph": "⧔",
+      "meaning": "RECURRENCE",
+      "origin": "ORCHID_CHRONOGLYPH_01",
+      "status": "canonical-baseline",
+      "aliases": [],
+      "keywords": [
+        "ruven"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-CG01-0008",
+      "kind": "chronoglyph",
+      "name": "KERIN",
+      "glyph": "⫷",
+      "meaning": "SYNCHRONIZATION",
+      "origin": "ORCHID_CHRONOGLYPH_01",
+      "status": "canonical-baseline",
+      "aliases": [],
+      "keywords": [
+        "kerin"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-CG01-0009",
+      "kind": "chronoglyph",
+      "name": "MORIN",
+      "glyph": "⧉",
+      "meaning": "SIMULTANEITY",
+      "origin": "ORCHID_CHRONOGLYPH_01",
+      "status": "canonical-baseline",
+      "aliases": [],
+      "keywords": [
+        "morin"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-CG01-0010",
+      "kind": "chronoglyph",
+      "name": "DEXEN",
+      "glyph": "⤺",
+      "meaning": "REVERSIBLE_TRACE",
+      "origin": "ORCHID_CHRONOGLYPH_01",
+      "status": "canonical-baseline",
+      "aliases": [],
+      "keywords": [
+        "dexen"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-CG01-0011",
+      "kind": "chronoglyph",
+      "name": "ORIEL",
+      "glyph": "⧗",
+      "meaning": "TEMPORAL_UNCERTAINTY",
+      "origin": "ORCHID_CHRONOGLYPH_01",
+      "status": "canonical-baseline",
+      "aliases": [],
+      "keywords": [
+        "oriel"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-CG01-0012",
+      "kind": "chronoglyph",
+      "name": "ZEPHIR",
+      "glyph": "⫯",
+      "meaning": "INTERVAL_COMPLETION",
+      "origin": "ORCHID_CHRONOGLYPH_01",
+      "status": "canonical-baseline",
+      "aliases": [],
+      "keywords": [
+        "zephir"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-TRYNITI-001",
+      "kind": "concept",
+      "name": "TRYNITI",
+      "glyph": "4♧",
+      "meaning": "TRINITY_SOURCE_3_STRANDS_OVER_INFINITY",
+      "origin": "ORCHID_TRYNITI_01",
+      "status": "historical-provisional",
+      "aliases": [
+        "trinity"
+      ],
+      "keywords": [
+        "three strands",
+        "infinity",
+        "interconnected loops"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": "ORC-EVERWEAVE-001"
+      }
+    },
+    {
+      "id": "ORC-EXTEND-001",
+      "kind": "operator",
+      "name": "EXTEND",
+      "glyph": "⤻",
+      "meaning": "Create a connected successor without overwriting the source",
+      "origin": "ORCHID_EXTENSION_OPERATOR_01",
+      "status": "proposed",
+      "aliases": [
+        ":extend:"
+      ],
+      "keywords": [
+        "extension",
+        "successor",
+        "continue",
+        "ascend"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": "ORC-EVERWEAVE-001"
+      }
+    },
+    {
+      "id": "ORC-EVERWEAVE-001",
+      "kind": "living-symbol",
+      "name": "EVERWEAVE",
+      "glyph": "⟲⋈⟲⋈⟲⤻",
+      "meaning": "Three interconnected natural cycles that exchange state and ascend through versioned successors while preserving origin",
+      "origin": "USER_CONCEPT_EVERWEAVE_2026-11-27",
+      "status": "proposed-canonical-candidate",
+      "aliases": [
+        "everweave",
+        "three-loop time ascension"
+      ],
+      "keywords": [
+        "nature",
+        "cycle",
+        "interchange",
+        "renewal",
+        "adaptation",
+        "ascension"
+      ],
+      "structure": {
+        "loopCount": 3,
+        "exchange": "reciprocal",
+        "originProtection": true,
+        "successorOnly": true,
+        "timeModel": "versioned-cycle"
+      },
+      "lineage": {
+        "parent": "ORC-TRYNITI-001",
+        "operator": "ORC-EXTEND-001",
+        "successor": null
+      }
+    }
+  ],
+  "keywordRecords": [
+    {
+      "id": "ORC-300-001",
+      "kind": "keyword",
+      "name": "SWERVE",
+      "glyph": "↗",
+      "meaning": "Change direction sharply",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "swerve"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    },
+    {
+      "id": "ORC-300-002",
+      "kind": "keyword",
+      "name": "VEER",
+      "glyph": "➚",
+      "meaning": "Turn gradually from a course",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "veer"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    },
+    {
+      "id": "ORC-300-003",
+      "kind": "keyword",
+      "name": "PIVOT",
+      "glyph": "⦿",
+      "meaning": "Turn around a fixed point",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "pivot"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    },
+    {
+      "id": "ORC-300-004",
+      "kind": "keyword",
+      "name": "CONVERGE",
+      "glyph": "⇢⇠",
+      "meaning": "Move toward a shared point",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "converge"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    },
+    {
+      "id": "ORC-300-005",
+      "kind": "keyword",
+      "name": "DIVERGE",
+      "glyph": "↗↖",
+      "meaning": "Separate into distinct directions",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "diverge"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    },
+    {
+      "id": "ORC-300-006",
+      "kind": "keyword",
+      "name": "WEAVE",
+      "glyph": "⌘",
+      "meaning": "Interlace connected paths",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "weave"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    },
+    {
+      "id": "ORC-300-007",
+      "kind": "keyword",
+      "name": "FOLD",
+      "glyph": "⌒",
+      "meaning": "Bend one layer over another",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "fold"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    },
+    {
+      "id": "ORC-300-008",
+      "kind": "keyword",
+      "name": "UNFOLD",
+      "glyph": "⋀",
+      "meaning": "Open or extend folded layers",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "unfold"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    },
+    {
+      "id": "ORC-300-009",
+      "kind": "keyword",
+      "name": "FLOW",
+      "glyph": "≈",
+      "meaning": "Move continuously",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "flow"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    },
+    {
+      "id": "ORC-300-010",
+      "kind": "keyword",
+      "name": "SURGE",
+      "glyph": "≫",
+      "meaning": "Advance in a strong wave",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "surge"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    },
+    {
+      "id": "ORC-300-011",
+      "kind": "keyword",
+      "name": "DRIFT",
+      "glyph": "⋯",
+      "meaning": "Move gradually without fixed course",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "drift"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    },
+    {
+      "id": "ORC-300-012",
+      "kind": "keyword",
+      "name": "OSCILLATE",
+      "glyph": "∿",
+      "meaning": "Move repeatedly between positions",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "oscillate"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    },
+    {
+      "id": "ORC-300-013",
+      "kind": "keyword",
+      "name": "ORBIT",
+      "glyph": "◎",
+      "meaning": "Travel around an origin",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "orbit"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    },
+    {
+      "id": "ORC-300-014",
+      "kind": "keyword",
+      "name": "REVOLVE",
+      "glyph": "⟳",
+      "meaning": "Rotate around an axis",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "revolve"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    },
+    {
+      "id": "ORC-300-015",
+      "kind": "keyword",
+      "name": "ASCEND",
+      "glyph": "⇡",
+      "meaning": "Move upward",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "ascend"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    },
+    {
+      "id": "ORC-300-016",
+      "kind": "keyword",
+      "name": "DESCEND",
+      "glyph": "⇣",
+      "meaning": "Move downward",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "descend"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    },
+    {
+      "id": "ORC-300-017",
+      "kind": "keyword",
+      "name": "RETURN",
+      "glyph": "↶",
+      "meaning": "Come back toward origin",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "return"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    },
+    {
+      "id": "ORC-300-018",
+      "kind": "keyword",
+      "name": "RETRACE",
+      "glyph": "〰↶",
+      "meaning": "Follow a recorded path backward",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "retrace"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    },
+    {
+      "id": "ORC-300-019",
+      "kind": "keyword",
+      "name": "REVERSE",
+      "glyph": "↔",
+      "meaning": "Invert direction or order",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "reverse"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    },
+    {
+      "id": "ORC-300-020",
+      "kind": "keyword",
+      "name": "EVOLVE",
+      "glyph": "◉∿",
+      "meaning": "Develop through successive states",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "evolve"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    },
+    {
+      "id": "ORC-300-021",
+      "kind": "keyword",
+      "name": "TRANSFORM",
+      "glyph": "✥",
+      "meaning": "Change form while retaining lineage",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "transform"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    },
+    {
+      "id": "ORC-300-022",
+      "kind": "keyword",
+      "name": "MERGE",
+      "glyph": "⊗",
+      "meaning": "Join while preserving provenance",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "merge"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    },
+    {
+      "id": "ORC-300-023",
+      "kind": "keyword",
+      "name": "SPLIT",
+      "glyph": "⋔",
+      "meaning": "Divide into distinct paths",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "split"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    },
+    {
+      "id": "ORC-300-024",
+      "kind": "keyword",
+      "name": "RESOLVE",
+      "glyph": "✓",
+      "meaning": "Reach a defined outcome",
+      "origin": "ORCHID_WORD_KEYS_V1",
+      "status": "existing-keyboard-key",
+      "aliases": [],
+      "keywords": [
+        "resolve"
+      ],
+      "render": {
+        "mode": "text",
+        "unicodeFallback": true
+      }
+    }
+  ],
+  "encodingProfiles": [
+    {
+      "id": "N8-A1-A8-V1",
+      "name": "N8 phase sequence",
+      "status": "provisional-design-assignment",
+      "unitWidth": 8,
+      "unitCount": 8,
+      "totalBits": 64,
+      "bytes": [
+        {
+          "phase": "A1",
+          "hex": "A1",
+          "decimal": 161,
+          "bits": "10100001"
+        },
+        {
+          "phase": "A2",
+          "hex": "A2",
+          "decimal": 162,
+          "bits": "10100010"
+        },
+        {
+          "phase": "A3",
+          "hex": "A3",
+          "decimal": 163,
+          "bits": "10100011"
+        },
+        {
+          "phase": "A4",
+          "hex": "A4",
+          "decimal": 164,
+          "bits": "10100100"
+        },
+        {
+          "phase": "A5",
+          "hex": "A5",
+          "decimal": 165,
+          "bits": "10100101"
+        },
+        {
+          "phase": "A6",
+          "hex": "A6",
+          "decimal": 166,
+          "bits": "10100110"
+        },
+        {
+          "phase": "A7",
+          "hex": "A7",
+          "decimal": 167,
+          "bits": "10100111"
+        },
+        {
+          "phase": "A8",
+          "hex": "A8",
+          "decimal": 168,
+          "bits": "10101000"
+        }
+      ],
+      "counts": {
+        "zero": 35,
+        "one": 29,
+        "total": 64
+      },
+      "semantics": {
+        "A1": "GENESIS",
+        "A2": "EXCHANGE",
+        "A3": "RESONANCE",
+        "A4": "RECONCILE",
+        "A5": "RECREATION",
+        "A6": "PROTECT_BOUNDARY",
+        "A7": "RELEASE_BOUNDARY",
+        "A8": "REENTER_CYCLE"
+      },
+      "warning": "These byte values are provisional project-assigned identifiers, not a public standard or inherent physical constants."
+    },
+    {
+      "id": "EVERWEAVE-3L-STATE-V1",
+      "name": "Everweave three-loop state",
+      "status": "provisional",
+      "loopCount": 3,
+      "phasesPerLoop": 8,
+      "totalPhaseSlots": 24,
+      "loopRoles": [
+        "ORIGIN_AND_GENERATION",
+        "INTERCHANGE_AND_RESONANCE",
+        "RENEWAL_AND_ASCENSION"
+      ],
+      "transitionOperator": "ORC-EXTEND-001",
+      "rules": [
+        "append successor; never mutate source",
+        "retain loop identity and provenance",
+        "preserve all 64 source bits in N8 payloads",
+        "record every transition with parent id and version"
+      ]
+    }
+  ],
+  "keyboard": {
+    "searchFields": [
+      "name",
+      "aliases",
+      "keywords",
+      "meaning"
+    ],
+    "insertField": "glyph",
+    "stableKey": "id",
+    "caseFold": "Unicode-aware",
+    "offlineFirst": true,
+    "privateOverlayAllowed": true,
+    "unknownGlyphPolicy": "retain original UTF-8 text; never normalize away characters"
+  },
+  "governance": {
+    "canonicalMutation": "new versioned record or successor only",
+    "sourceOverwrite": false,
+    "privateDrafts": "local-only until explicit export",
+    "untrustedPackages": "data-only; never executable"
+  }
+}
