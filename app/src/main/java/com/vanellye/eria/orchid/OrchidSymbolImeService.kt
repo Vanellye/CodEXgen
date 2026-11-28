@@ -191,7 +191,7 @@ class OrchidSymbolImeService : InputMethodService() {
 
     private fun commitGlyph(value: String, label: String? = null) {
         currentInputConnection?.commitText(value, 1)
-        if (label != null) announceForAccessibility("$label inserted")
+        if (label != null) root.announceForAccessibility("$label inserted")
     }
 
     private fun sendEnter() {
