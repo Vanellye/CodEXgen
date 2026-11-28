@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.ScrollView
 import android.widget.Toast
 
 class OrchidSymbolManagerActivity : Activity() {
@@ -67,8 +68,8 @@ class OrchidSymbolManagerActivity : Activity() {
         })
         root.addView(TextView(this).apply { text = "Available symbols"; textSize = 18f })
         listing = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        root.addView(listing,LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,0,1f))
-        setContentView(root)
+        root.addView(listing,LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT))
+        setContentView(ScrollView(this).apply { addView(root) })
         refresh()
         if (intent?.action == Intent.ACTION_SEND) {
             val payload = intent.getStringExtra(Intent.EXTRA_TEXT)
