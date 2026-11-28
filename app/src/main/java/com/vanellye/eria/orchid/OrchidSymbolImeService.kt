@@ -52,9 +52,9 @@ class OrchidSymbolImeService : InputMethodService() {
             showSymbols(true)
         }, weightedParams())
         toolbar.addView(toolButton("⚙", "ORCHID symbol manager") {
-            val intent = packageManager.getLaunchIntentForPackage(packageName)
-            intent?.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-            if (intent != null) startActivity(intent)
+            val intent = android.content.Intent(this, OrchidSymbolManagerActivity::class.java)
+                .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
         }, weightedParams())
         root.addView(toolbar)
 
