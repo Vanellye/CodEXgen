@@ -22,42 +22,51 @@ data class OrchidDatabaseRecord(
 class OrchidSymbolDatabase(context: Context) {
     private val records: List<OrchidDatabaseRecord>
 
+    var loadError: String? = null
+        private set
+
     init {
-        val source = context.applicationContext.assets
-            .open("orchid/orchid-symbol-database.v1.json")
-            .bufferedReader(Charsets.UTF_8)
-            .use { it.readText() }
-        val root = JSONObject(source)
-        require(root.optString("format") == "ORCHID_SYMBOL_DATABASE") {
-            "Unsupported ORCHID database format."
-        }
-        require(root.optString("schemaVersion").startsWith("1.")) {
-            "Unsupported ORCHID database schema version."
-        }
-        val loaded = mutableListOf<OrchidDatabaseRecord>()
-        listOf("records", "keywordRecords").forEach { collection ->
-            val array = root.getJSONArray(collection)
-            for (index in 0 until array.length()) {
-                val item = array.getJSONObject(index)
-                loaded += OrchidDatabaseRecord(
-                    id = item.getString("id"),
-                    kind = item.getString("kind"),
-                    name = item.getString("name"),
-                    glyph = item.getString("glyph"),
-                    meaning = item.optString("meaning"),
-                    status = item.optString("status", "unspecified"),
-                    aliases = item.optStringArray("aliases"),
-                    keywords = item.optStringArray("keywords")
-                )
+        val result = runCatching {
+            val source = context.applicationContext.assets
+                .open("orchid/orchid-symbol-database.v1.json")
+                .bufferedReader(Charsets.UTF_8)
+                .use { it.readText() }
+            val root = JSONObject(source)
+            require(root.optString("format") == "ORCHID_SYMBOL_DATABASE") {
+                "Unsupported ORCHID database format."
             }
+            require(root.optString("schemaVersion").startsWith("1.")) {
+                "Unsupported ORCHID database schema version."
+            }
+            val loaded = mutableListOf<OrchidDatabaseRecord>()
+            listOf("records", "keywordRecords").forEach { collection ->
+                val array = root.getJSONArray(collection)
+                for (index in 0 until array.length()) {
+                    val item = array.getJSONObject(index)
+                    loaded += OrchidDatabaseRecord(
+                        id = item.getString("id"),
+                        kind = item.getString("kind"),
+                        name = item.getString("name"),
+                        glyph = item.getString("glyph"),
+                        meaning = item.optString("meaning"),
+                        status = item.optString("status", "unspecified"),
+                        aliases = item.optStringArray("aliases"),
+                        keywords = item.optStringArray("keywords")
+                    )
+                }
+            }
+            require(loaded.map { it.id }.toSet().size == loaded.size) {
+                "ORCHID database contains duplicate record IDs."
+            }
+            require(loaded.all { it.id.isNotBlank() && it.glyph.isNotBlank() }) {
+                "ORCHID records require stable IDs and non-empty glyphs."
+            }
+            loaded.toList()
         }
-        require(loaded.map { it.id }.toSet().size == loaded.size) {
-            "ORCHID database contains duplicate record IDs."
+        records = result.getOrElse { error ->
+            loadError = error.message ?: "ORCHID symbol database unavailable."
+            emptyList()
         }
-        require(loaded.all { it.id.isNotBlank() && it.glyph.isNotBlank() }) {
-            "ORCHID records require stable IDs and non-empty glyphs."
-        }
-        records = loaded.toList()
     }
 
     fun all(): List<OrchidDatabaseRecord> = records
