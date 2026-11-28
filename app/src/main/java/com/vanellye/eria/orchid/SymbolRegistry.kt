@@ -115,7 +115,7 @@ class SymbolRegistry(context: Context) {
         return nowFavorite
     }
 
-    fun favorites(): Set<String> = keyboardPrefs.getStringSet(KEY_FAVORITES, emptySet())?.toSet() ?: emptySet()
+    fun favorites(): Set<String> = keyboardPrefs.getStringSet(KEY_FAVORITES, null)?.toSet() ?: DEFAULT_FAVORITES
 
     fun recordRecent(id: String) {
         val old = recent().filterNot { it == id }
@@ -156,6 +156,11 @@ class SymbolRegistry(context: Context) {
         private const val KEY_PRIVATE = "private_symbols_v1"
         private const val KEY_FAVORITES = "favorites_v1"
         private const val KEY_RECENTS = "recents_v1"
+        private val DEFAULT_FAVORITES = setOf(
+            "ORC-LAYER-STAR-001", "ORC-LAYER-STAR-002", "ORC-LAYER-STAR-003",
+            "ORC-LAYER-STAR-004", "ORC-LAYER-STAR-005", "ORC-LAYER-STAR-006",
+            "ORC-LAYER-STAR-007", "ORC-LAYER-STAR-008"
+        )
         private const val MAX_RECENT = 24
         private const val MAX_PACK_CHARS = 256 * 1024
         private const val MAX_PACK_SYMBOLS = 500
