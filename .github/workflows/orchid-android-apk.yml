@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - feature/orchid-chronoglyph-transient-compat
+      - feature/orchid-chronoglyph-transient-compat\n      - feature/orchid-fold7-keyboard-refinement
     paths:
       - 'app/**'
       - '.github/workflows/orchid-android-apk.yml'
