@@ -22,6 +22,7 @@
             android:exported="false" />
     <service
             android:name=".orchid.OrchidSymbolImeService"
+            android:process=":orchid_ime"
             android:label="ORCHID Symbol Keyboard"
             android:permission="android.permission.BIND_INPUT_METHOD"
             android:exported="true">
