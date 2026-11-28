@@ -3,6 +3,7 @@ name: ORCHID Android APK
 on:
   push:
     branches:
+      - main
       - feature/orchid-chronoglyph-transient-compat
     paths:
       - 'app/**'
@@ -60,6 +61,7 @@ jobs:
       - name: Assemble debug APK (retry Maven Central HTTP 429)
         shell: bash
         run: |
+          chmod +x ./gradlew
           run_gradle_with_retry() {
             local task="$1"
             local attempt=1
