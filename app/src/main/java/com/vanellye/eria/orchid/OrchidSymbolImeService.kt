@@ -304,11 +304,19 @@ class OrchidSymbolImeService : InputMethodService() {
     private fun vibrateKey() {
         if (!registry.booleanSetting(SymbolRegistry.KEY_VIBRATION, false)) return
         val vibrator = getSystemService(VIBRATOR_SERVICE) as? Vibrator ?: return
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) vibrator.vibrate(VibrationEffect.createOneShot(12, VibrationEffect.DEFAULT_AMPLITUDE))
-        else @Suppress("DEPRECATION") vibrator.vibrate(12)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator.vibrate(VibrationEffect.createOneShot(12, VibrationEffect.DEFAULT_AMPLITUDE))
+        } else {
+            vibrateLegacy(vibrator)
+        }
     }
 
-    @Suppress("DEPRECATION")\n    private fun vibrateLegacy(vibrator: Vibrator) { vibrator.vibrate(12) }\n\n    private fun categoryButton(label: String, action: () -> Unit) = Button(this).apply {
+    @Suppress("DEPRECATION")
+    private fun vibrateLegacy(vibrator: Vibrator) {
+        vibrator.vibrate(12)
+    }
+
+    private fun categoryButton(label: String, action: () -> Unit) = Button(this).apply {
         text = label
         isAllCaps = false
         textSize = 11f
