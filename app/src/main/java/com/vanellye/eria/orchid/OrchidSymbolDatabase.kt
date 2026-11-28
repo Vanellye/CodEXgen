@@ -70,7 +70,7 @@ class OrchidSymbolDatabase(context: Context) {
         if (needle.isEmpty()) return emptyList()
         return records.filter { record ->
             (kind == null || record.kind == kind) &&
-                sequenceOf(record.name, record.meaning)
+                sequenceOf(record.name, record.meaning, record.glyph)
                     .plus(record.aliases.asSequence())
                     .plus(record.keywords.asSequence())
                     .any { it.lowercase(Locale.ROOT).contains(needle) }
