@@ -289,6 +289,634 @@
         "operator": "ORC-EXTEND-001",
         "successor": null
       }
+    },
+    {
+      "id": "ORC-LAYER-CORE-001",
+      "kind": "core-layer",
+      "name": "LEFT",
+      "glyph": "←",
+      "meaning": "Move cursor left",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "left",
+        "previous",
+        "back"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-CORE-002",
+      "kind": "core-layer",
+      "name": "RIGHT",
+      "glyph": "→",
+      "meaning": "Move cursor right",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "right",
+        "next",
+        "forward"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-CORE-003",
+      "kind": "core-layer",
+      "name": "UP",
+      "glyph": "↑",
+      "meaning": "Move upward",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "up",
+        "rise"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-CORE-004",
+      "kind": "core-layer",
+      "name": "DOWN",
+      "glyph": "↓",
+      "meaning": "Move downward",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "down",
+        "fall"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-CORE-005",
+      "kind": "core-layer",
+      "name": "LEFT RIGHT",
+      "glyph": "↔",
+      "meaning": "Bidirectional movement",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "horizontal",
+        "both directions"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-CORE-006",
+      "kind": "core-layer",
+      "name": "UP DOWN",
+      "glyph": "↕",
+      "meaning": "Vertical movement",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "vertical",
+        "both directions"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-CORE-007",
+      "kind": "core-layer",
+      "name": "PLUS",
+      "glyph": "+",
+      "meaning": "Addition or positive direction",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "add",
+        "positive",
+        "math"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-CORE-008",
+      "kind": "core-layer",
+      "name": "MINUS",
+      "glyph": "−",
+      "meaning": "Subtraction or negative direction",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "subtract",
+        "negative",
+        "math"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-CORE-009",
+      "kind": "core-layer",
+      "name": "MULTIPLY",
+      "glyph": "×",
+      "meaning": "Multiplication",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "times",
+        "math"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-CORE-010",
+      "kind": "core-layer",
+      "name": "DIVIDE",
+      "glyph": "÷",
+      "meaning": "Division",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "math"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-CORE-011",
+      "kind": "core-layer",
+      "name": "OPEN BRACKET",
+      "glyph": "[",
+      "meaning": "Open grouping",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "bracket",
+        "group",
+        "left bracket"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-CORE-012",
+      "kind": "core-layer",
+      "name": "CLOSE BRACKET",
+      "glyph": "]",
+      "meaning": "Close grouping",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "bracket",
+        "group",
+        "right bracket"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-STAR-001",
+      "kind": "favorite-layer",
+      "name": "STAR",
+      "glyph": "★",
+      "meaning": "Filled star; favorite marker",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "favorite",
+        "star",
+        "filled star"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-STAR-002",
+      "kind": "favorite-layer",
+      "name": "HOLLOW STAR",
+      "glyph": "☆",
+      "meaning": "Outline star; favorite toggle",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "favorite",
+        "star",
+        "outline"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-STAR-003",
+      "kind": "favorite-layer",
+      "name": "FOUR POINT STAR",
+      "glyph": "✦",
+      "meaning": "Four-point star",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "sparkle",
+        "star"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-STAR-004",
+      "kind": "favorite-layer",
+      "name": "OUTLINE SPARKLE",
+      "glyph": "✧",
+      "meaning": "Outline sparkle",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "sparkle",
+        "star"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-STAR-005",
+      "kind": "favorite-layer",
+      "name": "FIVE POINT STAR",
+      "glyph": "✩",
+      "meaning": "Five-point outline star",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "star",
+        "favorite"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-STAR-006",
+      "kind": "favorite-layer",
+      "name": "CIRCLED STAR",
+      "glyph": "✪",
+      "meaning": "Star inside a circle",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "star",
+        "badge"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-STAR-007",
+      "kind": "favorite-layer",
+      "name": "SHADOW STAR",
+      "glyph": "✫",
+      "meaning": "Decorative star",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "star",
+        "decorative"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-STAR-008",
+      "kind": "favorite-layer",
+      "name": "EIGHT POINT STAR",
+      "glyph": "✴",
+      "meaning": "Eight-point star",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "star",
+        "burst"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-TIME-001",
+      "kind": "time-layer",
+      "name": "CLOCKWISE OPEN CIRCLE",
+      "glyph": "◷",
+      "meaning": "Clockwise time marker",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "clock",
+        "time",
+        "hour"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-TIME-002",
+      "kind": "time-layer",
+      "name": "ANTICLOCKWISE OPEN CIRCLE",
+      "glyph": "◴",
+      "meaning": "Anticlockwise time marker",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "clock",
+        "time",
+        "cycle"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-TIME-003",
+      "kind": "time-layer",
+      "name": "CLOCK FACE THREE",
+      "glyph": "◴",
+      "meaning": "Clock-face reference glyph",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "clock",
+        "time"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-TIME-004",
+      "kind": "time-layer",
+      "name": "CLOCK FACE SIX",
+      "glyph": "◵",
+      "meaning": "Clock-face reference glyph",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "clock",
+        "time"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-TIME-005",
+      "kind": "time-layer",
+      "name": "CLOCK FACE NINE",
+      "glyph": "◶",
+      "meaning": "Clock-face reference glyph",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "clock",
+        "time"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-TIME-006",
+      "kind": "time-layer",
+      "name": "CLOCK FACE TWELVE",
+      "glyph": "◷",
+      "meaning": "Clock-face reference glyph",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "clock",
+        "time"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-TIME-007",
+      "kind": "time-layer",
+      "name": "STOPWATCH",
+      "glyph": "⏱",
+      "meaning": "Elapsed-time measurement",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "stopwatch",
+        "seconds",
+        "timer"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-TIME-008",
+      "kind": "time-layer",
+      "name": "TIMER",
+      "glyph": "⏲",
+      "meaning": "Countdown or interval timer",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "timer",
+        "countdown",
+        "interval"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-TIME-009",
+      "kind": "time-layer",
+      "name": "ALARM CLOCK",
+      "glyph": "⏰",
+      "meaning": "Alarm and scheduled time",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "alarm",
+        "reminder",
+        "time"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-TIME-010",
+      "kind": "time-layer",
+      "name": "WATCH",
+      "glyph": "⌚",
+      "meaning": "Wearable clock",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "watch",
+        "time"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-TIME-011",
+      "kind": "time-layer",
+      "name": "MANTEL CLOCK",
+      "glyph": "🕰",
+      "meaning": "Clock and historical time",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "clock",
+        "history",
+        "time"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-TIME-012",
+      "kind": "time-layer",
+      "name": "CALENDAR",
+      "glyph": "▦",
+      "meaning": "Calendar date and schedule",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "calendar",
+        "date",
+        "day"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-TIME-013",
+      "kind": "time-layer",
+      "name": "HOURGLASS",
+      "glyph": "⌛",
+      "meaning": "Passing time",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "hourglass",
+        "duration",
+        "time"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
+    },
+    {
+      "id": "ORC-LAYER-TIME-014",
+      "kind": "time-layer",
+      "name": "INFINITY CYCLE",
+      "glyph": "∞",
+      "meaning": "Unbounded or repeating time",
+      "origin": "ORCHID_LAYER_FIXTURE_V1",
+      "status": "fixture-seeded-layer-symbol",
+      "aliases": [],
+      "keywords": [
+        "infinity",
+        "cycle",
+        "recurrence"
+      ],
+      "lineage": {
+        "parent": null,
+        "successor": null
+      }
     }
   ],
   "keywordRecords": [

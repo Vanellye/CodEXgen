@@ -15,11 +15,7 @@ data class OrchidWordKey(
     val meaning: String
 )
 
-
 class SymbolRegistry(context: Context) {
-
-    // Stable word-expression keys. Silhouettes are native Unicode emoji so the keyboard
-    // remains offline and does not depend on downloaded image assets or a particular font.
     private val wordKeys = listOf(
         OrchidWordKey("ORC-300-001","SWERVE","↗","🌪️","Change direction sharply"),
         OrchidWordKey("ORC-300-002","VEER","➚","🧭","Turn gradually from a course"),
@@ -48,8 +44,8 @@ class SymbolRegistry(context: Context) {
     )
     fun wordKeys(): List<OrchidWordKey> = wordKeys
 
-
     private val prefs = context.getSharedPreferences("orchid_private_symbols", Context.MODE_PRIVATE)
+    private val keyboardPrefs = context.getSharedPreferences(KEYBOARD_PREFS, Context.MODE_PRIVATE)
     private val canonical = listOf(
         OrchidSymbol("ORC-TRYNITI-001","TRYNITI","4♧","TRINITY_SOURCE_3_STRANDS_OVER_INFINITY", "ORCHID_TRYNITI_01"),
         OrchidSymbol("ORC-CG01-0001","VORA","⧖","TEMPORAL_FLEXIBILITY"),
@@ -65,6 +61,7 @@ class SymbolRegistry(context: Context) {
         OrchidSymbol("ORC-CG01-0011","ORIEL","⧗","TEMPORAL_UNCERTAINTY"),
         OrchidSymbol("ORC-CG01-0012","ZEPHIR","⫯","INTERVAL_COMPLETION")
     )
+
     fun all(): List<OrchidSymbol> = canonical + readPrivate()
 
     fun addPrivate(name: String, glyph: String, meaning: String): OrchidSymbol {
@@ -72,8 +69,7 @@ class SymbolRegistry(context: Context) {
         require(glyph.isNotBlank() && glyph.codePointCount(0, glyph.length) <= 8) { "Glyph is limited to eight Unicode code points." }
         require(meaning.length <= 500) { "Meaning is limited to 500 characters." }
         val symbol = OrchidSymbol("ORC-LOCAL-" + UUID.randomUUID().toString(), name.trim(), glyph, meaning.trim(), "LOCAL_PRIVATE")
-        val values = readPrivate().filterNot { it.id == symbol.id } + symbol
-        savePrivate(values)
+        savePrivate(readPrivate().filterNot { it.id == symbol.id } + symbol)
         return symbol
     }
 
@@ -110,6 +106,33 @@ class SymbolRegistry(context: Context) {
         put("symbols", JSONArray().apply { readPrivate().forEach { put(it.toJson()) } })
     }.toString(2)
 
+    fun isFavorite(id: String): Boolean = favorites().contains(id)
+
+    fun toggleFavorite(id: String): Boolean {
+        val values = favorites().toMutableSet()
+        val nowFavorite = if (values.contains(id)) { values.remove(id); false } else { values.add(id); true }
+        keyboardPrefs.edit().putStringSet(KEY_FAVORITES, values).apply()
+        return nowFavorite
+    }
+
+    fun favorites(): Set<String> = keyboardPrefs.getStringSet(KEY_FAVORITES, null)?.toSet() ?: DEFAULT_FAVORITES
+
+    fun recordRecent(id: String) {
+        val old = recent().filterNot { it == id }
+        val next = (listOf(id) + old).take(MAX_RECENT)
+        keyboardPrefs.edit().putString(KEY_RECENTS, JSONArray(next).toString()).apply()
+    }
+
+    fun recent(): List<String> = runCatching {
+        val array = JSONArray(keyboardPrefs.getString(KEY_RECENTS, "[]"))
+        (0 until array.length()).map { array.getString(it) }
+    }.getOrDefault(emptyList())
+
+    fun setting(key: String, default: String): String = keyboardPrefs.getString(key, default) ?: default
+    fun setSetting(key: String, value: String) { keyboardPrefs.edit().putString(key, value).apply() }
+    fun booleanSetting(key: String, default: Boolean): Boolean = keyboardPrefs.getBoolean(key, default)
+    fun setBooleanSetting(key: String, value: Boolean) { keyboardPrefs.edit().putBoolean(key, value).apply() }
+
     private fun savePrivate(values: List<OrchidSymbol>) {
         prefs.edit().putString(KEY_PRIVATE, JSONArray().apply { values.forEach { put(it.toJson()) } }.toString()).apply()
     }
@@ -123,8 +146,22 @@ class SymbolRegistry(context: Context) {
         put("id",id); put("name",name); put("glyph",glyph); put("meaning",meaning)
     }
     private fun JSONObject.toSymbol() = OrchidSymbol(getString("id"),getString("name"),getString("glyph"),optString("meaning"),optString("origin","IMPORTED_PRIVATE"))
+
     companion object {
+        const val KEYBOARD_PREFS = "orchid_keyboard_preferences"
+        const val KEY_HEIGHT = "key_height"
+        const val KEY_THEME = "keyboard_theme"
+        const val KEY_VIBRATION = "key_vibration"
+        const val KEY_NUMBER_ROW = "number_row"
         private const val KEY_PRIVATE = "private_symbols_v1"
+        private const val KEY_FAVORITES = "favorites_v1"
+        private const val KEY_RECENTS = "recents_v1"
+        private val DEFAULT_FAVORITES = setOf(
+            "ORC-LAYER-STAR-001", "ORC-LAYER-STAR-002", "ORC-LAYER-STAR-003",
+            "ORC-LAYER-STAR-004", "ORC-LAYER-STAR-005", "ORC-LAYER-STAR-006",
+            "ORC-LAYER-STAR-007", "ORC-LAYER-STAR-008"
+        )
+        private const val MAX_RECENT = 24
         private const val MAX_PACK_CHARS = 256 * 1024
         private const val MAX_PACK_SYMBOLS = 500
     }
