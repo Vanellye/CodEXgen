@@ -55,8 +55,24 @@ def main():
     everweave = next((r for r in all_records if r.get("id") == "ORC-EVERWEAVE-001"), None)
     require(everweave is not None, "EVERWEAVE record missing")
     require(everweave.get("glyph") == "⟲⋈⟲⋈⟲⤻", "EVERWEAVE glyph changed")
+    layer_ids = {
+        "ORC-LAYER-CORE-001", "ORC-LAYER-CORE-002", "ORC-LAYER-CORE-003",
+        "ORC-LAYER-STAR-001", "ORC-LAYER-STAR-002", "ORC-LAYER-TIME-001",
+        "ORC-LAYER-TIME-007", "ORC-LAYER-TIME-008", "ORC-LAYER-TIME-009",
+    }
+    layer_records = {record["id"]: record for record in all_records}
+    require(layer_ids.issubset(layer_records), "Core, star, or clock-time fixture records missing")
+    require(all(layer_records[item].get("origin") == "ORCHID_LAYER_FIXTURE_V1" for item in layer_ids),
+            "Layer fixture provenance missing or changed")
+    require(sum(record.get("kind") == "core-layer" for record in all_records) >= 12,
+            "Far-left Core layer is not populated")
+    require(sum(record.get("kind") == "favorite-layer" for record in all_records) >= 8,
+            "Star/Favorites layer is not populated")
+    require(sum(record.get("kind") == "time-layer" for record in all_records) >= 12,
+            "Clock/Time layer is not populated")
+
     print(f"ORCHID fixture PASS: {len(records)} records + {len(keywords)} keywords; "
-          f"N8=64 bits (35 zero, 29 one); IDs unique; glyphs present.")
+          f"N8=64 bits (35 zero, 29 one); IDs unique; glyphs present; Core/Star/Time layers populated.")
 
 
 if __name__ == "__main__":
