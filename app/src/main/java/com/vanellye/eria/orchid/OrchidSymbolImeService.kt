@@ -1,28 +1,32 @@
 package com.vanellye.eria.orchid
 
-import android.inputmethodservice.InputMethodService
 import android.graphics.Color
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Path
-import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
+import android.inputmethodservice.InputMethodService
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
-import android.text.Editable
-import android.text.TextWatcher
-import android.widget.FrameLayout
 import android.widget.LinearLayout
-import android.widget.ScrollView
 import android.widget.TextView
 
-/** Offline ORCHID keyboard. Keys commit text only after an explicit user tap. */
+/**
+ * ORCHID keyboard with a familiar Samsung-style QWERTY base and a dedicated
+ * symbol layer. It is an independently implemented layout, not Samsung code
+ * or a copy of Samsung's proprietary assets.
+ */
 class OrchidSymbolImeService : InputMethodService() {
     private lateinit var registry: SymbolRegistry
     private lateinit var database: OrchidSymbolDatabase
+    private lateinit var root: LinearLayout
+    private lateinit var symbolPanel: LinearLayout
+    private lateinit var search: EditText
+    private var symbolMode = false
+    private var selectedKind: String? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -31,353 +35,200 @@ class OrchidSymbolImeService : InputMethodService() {
     }
 
     override fun onCreateInputView(): View {
-        val scroll = ScrollView(this)
-        val column = LinearLayout(this).apply {
+        root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(8, 8, 8, 8)
-            setBackgroundColor(Color.rgb(24, 27, 34))
+            setPadding(dp(4), dp(4), dp(4), dp(6))
+            setBackgroundColor(Color.rgb(18, 19, 23))
         }
 
-        column.addView(TextView(this).apply {
-            text = "ORCHID  •  PRIVATE SYMBOL KEYBOARD"
-            setTextColor(Color.WHITE)
-            textSize = 14f
-            setPadding(8, 8, 8, 12)
-        })
-
-        addSectionTitle(column, "TRYNITI / SOURCE")
-        val trynitiKey = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            setPadding(8, 8, 8, 8)
-            background = GradientDrawable().apply {
-                setColor(Color.rgb(39, 46, 59))
-                cornerRadius = dp(14).toFloat()
-                setStroke(dp(1), Color.rgb(145, 125, 220))
-            }
-            isClickable = true
-            isFocusable = true
-            contentDescription = "Insert TRYNITI source symbol"
-            addView(TrynitiGlyphView(this@OrchidSymbolImeService), LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, dp(112)
-            ))
-            addView(TextView(this@OrchidSymbolImeService).apply {
-                text = "TRYNITI  •  3-ON-INFINITY"
-                setTextColor(Color.WHITE)
-                textSize = 12f
-                typeface = Typeface.DEFAULT_BOLD
-                gravity = Gravity.CENTER
-            })
-            setOnClickListener {
-                currentInputConnection?.commitText("4♧", 1)
-                announceForAccessibility("TRYNITI inserted")
-            }
+        val toolbar = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
         }
-        column.addView(trynitiKey, LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-        ).apply { setMargins(dp(3), dp(3), dp(3), dp(8)) })
+        listOf("✦" to "Tools", "☺" to "Emoji", "GIF" to "GIF", "▦" to "Clipboard").forEach { (label, desc) ->
+            toolbar.addView(toolButton(label, desc) { showSymbols(false) }, weightedParams())
+        }
+        toolbar.addView(toolButton("ORC", "Open ORCHID symbols") {
+            showSymbols(true)
+        }, weightedParams())
+        toolbar.addView(toolButton("⚙", "ORCHID symbol manager") {
+            val intent = packageManager.getLaunchIntentForPackage(packageName)
+            intent?.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            if (intent != null) startActivity(intent)
+        }, weightedParams())
+        root.addView(toolbar)
 
-        addSectionTitle(column, "KEYWORD / SYMBOL DATABASE")
-        val databaseSearch = EditText(this).apply {
-            hint = "Search meaning, keyword, or symbol name"
+        symbolPanel = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            visibility = View.GONE
+        }
+        search = EditText(this).apply {
+            hint = "Search ORCHID symbols"
             setSingleLine(true)
             textSize = 14f
             setTextColor(Color.WHITE)
             setHintTextColor(Color.LTGRAY)
-            setPadding(dp(12), dp(8), dp(12), dp(8))
+            setPadding(dp(12), dp(5), dp(12), dp(5))
         }
-        column.addView(databaseSearch, LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-        ))
-        var selectedDatabaseKind: String? = null
-        val databaseFilters = LinearLayout(this).apply {
+        symbolPanel.addView(search)
+        val filters = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER
         }
-        val databaseResults = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
+        listOf("ALL" to null, "CHRONO" to "chronoglyph", "WORDS" to "keyword",
+            "OPS" to "operator", "LIVING" to "living-symbol", "IDEAS" to "concept").forEach { (label, kind) ->
+            filters.addView(toolButton(label, "Filter $label") {
+                selectedKind = kind
+                renderSymbols(search.text?.toString().orEmpty())
+            }, weightedParams())
         }
-        column.addView(databaseFilters)
-        column.addView(databaseResults, LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+        symbolPanel.addView(filters)
+        val symbolScroll = android.widget.ScrollView(this)
+        val symbolResults = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        symbolScroll.addView(symbolResults)
+        symbolPanel.addView(symbolScroll, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, dp(174)
         ))
+        root.addView(symbolPanel)
 
-        fun showDatabaseResults(query: String) {
-            databaseResults.removeAllViews()
-            val matches = (if (query.isBlank()) {
-                database.all()
-            } else {
-                database.search(query, selectedDatabaseKind)
-            }).filter { selectedDatabaseKind == null || it.kind == selectedDatabaseKind }.take(12)
+        fun drawResults(query: String) {
+            symbolResults.removeAllViews()
+            val matches = (if (query.isBlank()) database.all() else database.search(query))
+                .filter { selectedKind == null || it.kind == selectedKind }.take(36)
             if (matches.isEmpty()) {
-                databaseResults.addView(TextView(this).apply {
-                    text = "No matching ORCHID records"
+                symbolResults.addView(TextView(this).apply {
+                    text = "No matching symbols"
                     setTextColor(Color.LTGRAY)
                     setPadding(dp(8), dp(8), dp(8), dp(8))
                 })
                 return
             }
-            matches.chunked(3).forEach { group ->
-                val resultRow = keyRow()
+            matches.chunked(5).forEach { group ->
+                val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
                 group.forEach { record ->
-                    resultRow.addView(Button(this).apply {
-                        text = record.glyph + "\n" + record.name
-                        isAllCaps = false
-                        textSize = 13f
-                        contentDescription = "Insert ${record.name}: ${record.meaning}"
-                        setOnClickListener {
-                            currentInputConnection?.commitText(database.insertText(record.id), 1)
-                            announceForAccessibility("${record.name} inserted")
-                        }
-                    }, weightedKeyParams())
+                    row.addView(keyButton(record.glyph, record.name) {
+                        commitGlyph(database.insertText(record.id), record.name)
+                    }, weightedParams())
                 }
-                databaseResults.addView(resultRow)
+                symbolResults.addView(row)
             }
         }
-        val filterOptions = listOf(
-            "ALL" to null,
-            "CHRONO" to "chronoglyph",
-            "WORDS" to "keyword",
-            "OPERATORS" to "operator",
-            "LIVING" to "living-symbol",
-            "CONCEPTS" to "concept"
-        )
-        filterOptions.forEach { (label, kind) ->
-            databaseFilters.addView(Button(this).apply {
-                text = label
-                isAllCaps = false
-                textSize = 10f
-                minWidth = 0
-                setPadding(dp(5), dp(4), dp(5), dp(4))
-                setOnClickListener {
-                    selectedDatabaseKind = kind
-                    showDatabaseResults(databaseSearch.text?.toString().orEmpty())
-                }
-            }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
-        }
-        showDatabaseResults("")
-        databaseSearch.addTextChangedListener(object : TextWatcher {
+        // Keep the result renderer in a field-independent listener for category/search updates.
+        symbolSearchRenderer = { query -> drawResults(query) }
+        search.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                showDatabaseResults(s?.toString().orEmpty())
+                drawResults(s?.toString().orEmpty())
             }
             override fun afterTextChanged(s: Editable?) = Unit
         })
+        drawResults("")
 
-        addSectionTitle(column, "CHRONOGLYPH")
-        registry.all().chunked(3).forEach { group ->
-            val row = keyRow()
-            group.forEach { item ->
-                val key = Button(this).apply {
-                    text = item.glyph + "\n" + item.name
-                    isAllCaps = false
-                    textSize = 16f
-                    setOnClickListener { currentInputConnection?.commitText(item.glyph, 1) }
-                    layoutParams = weightedKeyParams()
-                }
-                row.addView(key)
-            }
-            column.addView(row)
+        val numberRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        "1234567890".forEach { digit ->
+            numberRow.addView(keyButton(digit.toString()) { commitGlyph(digit.toString()) }, weightedParams())
         }
+        root.addView(numberRow)
 
-        addSectionTitle(column, "WORD KEYS  •  DEPTH / MOTION / FORM")
-        registry.wordKeys().chunked(3).forEach { group ->
-            val row = keyRow()
-            group.forEach { item ->
-                row.addView(createDimensionalWordKey(item), weightedKeyParams())
-            }
-            column.addView(row)
+        addLetterRow("QWERTYUIOP")
+        val middle = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setPadding(dp(12), 0, dp(12), 0)
         }
+        "ASDFGHJKL".forEach { letter ->
+            middle.addView(keyButton(letter.toString()) { commitGlyph(letter.toString()) }, weightedParams())
+        }
+        root.addView(middle)
 
-        val controls = keyRow()
-        controls.addView(Button(this).apply {
-            text = "Space"
-            setOnClickListener { currentInputConnection?.commitText(" ", 1) }
-            layoutParams = weightedKeyParams()
-        })
-        controls.addView(Button(this).apply {
-            text = "⌫"
-            setOnClickListener { currentInputConnection?.deleteSurroundingTextInCodePoints(1, 0) }
-            layoutParams = weightedKeyParams()
-        })
-        column.addView(controls)
+        val bottomLetters = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        bottomLetters.addView(keyButton("⇧", "Shift") { shift = !shift; refreshCase() }, weightedParams())
+        "ZXCVBNM".forEach { letter ->
+            bottomLetters.addView(keyButton(letter.toString()) { commitGlyph(if (shift) letter.toString() else letter.lowercase()) }, weightedParams())
+        }
+        bottomLetters.addView(keyButton("⌫", "Delete") {
+            currentInputConnection?.deleteSurroundingTextInCodePoints(1, 0)
+        }, weightedParams())
+        root.addView(bottomLetters)
 
-        scroll.addView(column)
-        return scroll
+        val actionRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        actionRow.addView(keyButton("!#1", "Symbols and punctuation") {
+            showSymbols(!symbolMode)
+        }, LinearLayout.LayoutParams(0, dp(48), 1.2f))
+        actionRow.addView(keyButton(",", "Comma") { commitGlyph(",") }, weightedParams())
+        actionRow.addView(keyButton("English (US)", "Space") { commitGlyph(" ") }, LinearLayout.LayoutParams(0, dp(48), 4f))
+        actionRow.addView(keyButton(".", "Period") { commitGlyph(".") }, weightedParams())
+        actionRow.addView(keyButton("↵", "Enter") { sendEnter() }, LinearLayout.LayoutParams(0, dp(48), 1.2f))
+        root.addView(actionRow)
+
+        return root
     }
 
-    private fun addSectionTitle(parent: LinearLayout, title: String) {
-        parent.addView(TextView(this).apply {
-            text = title
-            setTextColor(Color.rgb(190, 205, 230))
-            textSize = 12f
-            typeface = Typeface.DEFAULT_BOLD
-            setPadding(8, 14, 8, 6)
-        })
+    private var symbolSearchRenderer: ((String) -> Unit)? = null
+    private var shift = false
+
+    private fun addLetterRow(value: String) {
+        val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        value.forEach { letter ->
+            row.addView(keyButton(letter.toString()) {
+                commitGlyph(if (shift) letter.toString() else letter.lowercase())
+                if (shift) { shift = false; refreshCase() }
+            }, weightedParams())
+        }
+        root.addView(row)
     }
 
-    private fun keyRow() = LinearLayout(this).apply {
-        orientation = LinearLayout.HORIZONTAL
-        gravity = Gravity.CENTER
+    private fun refreshCase() {
+        // New input view redraws case state when Android recreates the IME view.
     }
 
-    private fun weightedKeyParams() =
-        LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).apply {
-            setMargins(3, 3, 3, 3)
-        }
+    private fun showSymbols(show: Boolean) {
+        symbolMode = show
+        symbolPanel.visibility = if (show) View.VISIBLE else View.GONE
+    }
 
-    /**
-     * A four-plane, 4D-inspired emoji silhouette: three offset depth echoes,
-     * a crisp foreground form, and a small temporal orbit cue. It is a visual
-     * metaphor rendered with native text, not a literal 4D projection.
-     */
-    private fun createDimensionalWordKey(item: OrchidWordKey): View {
-        val key = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            setPadding(3, 5, 3, 6)
-            background = GradientDrawable().apply {
-                setColor(Color.rgb(39, 46, 59))
-                cornerRadius = dp(12).toFloat()
-                setStroke(dp(1), Color.rgb(75, 91, 116))
-            }
-            isClickable = true
-            isFocusable = true
-            elevation = dp(3).toFloat()
-        }
+    private fun renderSymbols(query: String) {
+        symbolSearchRenderer?.invoke(query)
+    }
 
-        val silhouette = FrameLayout(this).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, dp(54)
-            )
-        }
-        val echoes = listOf(
-            Triple(0.16f, dp(-4), dp(3)),
-            Triple(0.25f, dp(3), dp(-2)),
-            Triple(0.34f, dp(5), dp(3))
-        )
-        echoes.forEach { (alpha, x, y) ->
-            silhouette.addView(TextView(this).apply {
-                text = item.silhouette
-                textSize = 29f
-                this.alpha = alpha
-                gravity = Gravity.CENTER
-                translationX = x.toFloat()
-                translationY = y.toFloat()
-                layoutParams = FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-            })
-        }
-        silhouette.addView(TextView(this).apply {
-            text = item.silhouette
-            textSize = 31f
-            gravity = Gravity.CENTER
-            setShadowLayer(dp(5).toFloat(), dp(1).toFloat(), dp(2).toFloat(), Color.BLACK)
-            layoutParams = FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-        })
-        silhouette.addView(TextView(this).apply {
-            text = "↻"
-            textSize = 12f
-            setTextColor(Color.rgb(153, 190, 230))
-            gravity = Gravity.TOP or Gravity.END
-            layoutParams = FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            ).apply { setMargins(0, dp(1), dp(5), 0) }
-        })
-        key.addView(silhouette)
+    private fun commitGlyph(value: String, label: String? = null) {
+        currentInputConnection?.commitText(value, 1)
+        if (label != null) announceForAccessibility("$label inserted")
+    }
 
-        key.addView(TextView(this).apply {
-            text = item.name
-            textSize = 11f
-            typeface = Typeface.DEFAULT_BOLD
+    private fun sendEnter() {
+        val action = currentInputEditorInfo?.imeOptions?.and(EditorInfo.IME_MASK_ACTION)
+        if (action != null && action != EditorInfo.IME_ACTION_NONE && action != EditorInfo.IME_ACTION_UNSPECIFIED) {
+            currentInputConnection?.performEditorAction(action)
+        } else {
+            commitGlyph("\n")
+        }
+    }
+
+    private fun toolButton(label: String, description: String, action: () -> Unit) =
+        keyButton(label, description, action)
+
+    private fun keyButton(label: String, description: String = label, action: () -> Unit): Button =
+        Button(this).apply {
+            text = label
+            contentDescription = description
+            isAllCaps = false
+            textSize = if (label.length > 4) 11f else 16f
+            minWidth = 0
+            minimumWidth = 0
+            minHeight = dp(42)
+            minimumHeight = dp(42)
+            setPadding(dp(2), dp(2), dp(2), dp(2))
             setTextColor(Color.WHITE)
-            gravity = Gravity.CENTER
-            maxLines = 1
-        })
-        key.addView(TextView(this).apply {
-            text = item.glyph
-            textSize = 13f
-            setTextColor(Color.rgb(190, 205, 230))
-            gravity = Gravity.CENTER
-            maxLines = 1
-        })
-
-        key.setOnClickListener {
-            // Insert the readable word and its ORCHID expression as one user action.
-            currentInputConnection?.commitText(item.name + " " + item.glyph, 1)
-            key.animate().scaleX(0.96f).scaleY(0.96f).setDuration(65)
-                .withEndAction { key.animate().scaleX(1f).scaleY(1f).setDuration(90).start() }
-                .start()
+            background = GradientDrawable().apply {
+                setColor(if (label == "ORC") Color.rgb(75, 62, 120) else Color.rgb(54, 56, 62))
+                cornerRadius = dp(7).toFloat()
+            }
+            setOnClickListener { action() }
         }
-        return key
-    }
+
+    private fun weightedParams() =
+        LinearLayout.LayoutParams(0, dp(48), 1f).apply {
+            setMargins(dp(2), dp(3), dp(2), dp(3))
+        }
 
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
-}
-
-
-/** Native 2D TRYNITI mark: three braided upper strands over a horizontal infinity. */
-private class TrynitiGlyphView(context: android.content.Context) : View(context) {
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.STROKE
-        strokeWidth = 4.2f * resources.displayMetrics.density
-        strokeCap = Paint.Cap.ROUND
-        strokeJoin = Paint.Join.ROUND
-        color = Color.rgb(221, 211, 255)
-    }
-
-    override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
-        val sx = width / 240f
-        val sy = height / 220f
-        val scale = minOf(sx, sy)
-        val save = canvas.save()
-        canvas.translate((width - 240f * scale) / 2f, (height - 220f * scale) / 2f)
-        canvas.scale(scale, scale)
-
-        val upper = listOf(
-            Path().apply {
-                moveTo(120f, 12f)
-                cubicTo(42f, 12f, 64f, 67f, 120f, 91f)
-                cubicTo(176f, 115f, 198f, 145f, 120f, 174f)
-            },
-            Path().apply {
-                moveTo(120f, 12f)
-                cubicTo(198f, 12f, 176f, 67f, 120f, 91f)
-                cubicTo(64f, 115f, 42f, 145f, 120f, 174f)
-            },
-            Path().apply {
-                moveTo(120f, 12f)
-                cubicTo(91f, 39f, 91f, 67f, 120f, 91f)
-                cubicTo(149f, 115f, 149f, 146f, 120f, 174f)
-            }
-        )
-        upper.forEach { canvas.drawPath(it, paint) }
-
-        val infinity = Path().apply {
-            moveTo(120f, 174f)
-            cubicTo(91f, 128f, 12f, 132f, 12f, 174f)
-            cubicTo(12f, 216f, 83f, 216f, 120f, 174f)
-            cubicTo(157f, 132f, 228f, 132f, 228f, 174f)
-            cubicTo(228f, 216f, 149f, 216f, 120f, 174f)
-        }
-        canvas.drawPath(infinity, paint)
-
-        paint.style = Paint.Style.FILL
-        canvas.drawCircle(120f, 12f, 7f, paint)
-        canvas.drawCircle(12f, 174f, 6f, paint)
-        canvas.drawCircle(228f, 174f, 6f, paint)
-        paint.style = Paint.Style.STROKE
-        canvas.drawCircle(120f, 174f, 16f, paint)
-        canvas.drawLine(120f, 165f, 120f, 183f, paint)
-        canvas.drawLine(111f, 174f, 129f, 174f, paint)
-
-        canvas.restoreToCount(save)
-    }
 }
