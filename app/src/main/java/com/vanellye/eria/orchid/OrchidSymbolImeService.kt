@@ -47,7 +47,10 @@ class OrchidSymbolImeService : InputMethodService() {
         database = OrchidSymbolDatabase(applicationContext)
     }
 
-    override fun onCreateInputView(): View {
+    override fun onCreateInputView(): View =
+        runCatching { buildInputView() }.getOrElse { error -> buildFallbackInputView(error) }
+
+    private fun buildInputView(): View {
         applyPreferences()
         letterKeys.clear()
         root = LinearLayout(this).apply {
@@ -60,12 +63,12 @@ class OrchidSymbolImeService : InputMethodService() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
         }
-        toolbar.addView(toolButton("⌘", "ORCHID tools") { launchStudio() }, weightedParams())
+        toolbar.addView(toolButton("⌂", "Core symbol layer") { selectedCategory = "Core"; showSymbols(true); renderSymbols() }, weightedParams())
         toolbar.addView(toolButton("☆", "Favorites") {
             selectedCategory = "Favorites"; showSymbols(true); renderSymbols()
         }, weightedParams())
-        toolbar.addView(toolButton("◷", "Recent symbols") {
-            selectedCategory = "Recent"; showSymbols(true); renderSymbols()
+        toolbar.addView(toolButton("◷", "Clock and time layer") {
+            selectedCategory = "Time"; showSymbols(true); renderSymbols()
         }, weightedParams())
         toolbar.addView(toolButton("ORCHID", "Open symbol library") {
             selectedCategory = "All"; showSymbols(!symbolPanel.isShown); renderSymbols()
@@ -92,7 +95,7 @@ class OrchidSymbolImeService : InputMethodService() {
 
         val categoryScroller = HorizontalScrollView(this).apply { isHorizontalScrollBarEnabled = false }
         val categoryRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        val categories = listOf("All", "Recent", "Favorites", "Chrono", "Words", "Operators", "Living", "Concepts", "Private")
+        val categories = listOf("Core", "Favorites", "Time", "All", "Recent", "Chrono", "Words", "Operators", "Living", "Concepts", "Private")
         categories.forEach { category ->
             categoryRow.addView(categoryButton(category) {
                 selectedCategory = category
@@ -117,7 +120,7 @@ class OrchidSymbolImeService : InputMethodService() {
             val entries = matchingEntries(needle).take(80)
             if (entries.isEmpty()) {
                 symbolResults.addView(TextView(this).apply {
-                    text = "No matching symbols"
+                    text = database.loadError?.let { "Symbol fixture unavailable — QWERTY fallback remains active. $it" } ?: "No matching symbols"
                     setTextColor(Color.LTGRAY)
                     setPadding(dp(12), dp(14), dp(12), dp(14))
                 })
@@ -210,6 +213,47 @@ class OrchidSymbolImeService : InputMethodService() {
         return root
     }
 
+    private fun buildFallbackInputView(error: Throwable): View {
+        val panel = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(6), dp(6), dp(6), dp(6))
+            setBackgroundColor(Color.rgb(22, 24, 29))
+        }
+        panel.addView(TextView(this).apply {
+            text = "ORCHID safe keyboard · symbol layer paused"
+            setTextColor(Color.WHITE)
+            textSize = 12f
+            setPadding(dp(6), dp(4), dp(6), dp(8))
+            contentDescription = error.message ?: "Symbol browser unavailable"
+        })
+        listOf("qwertyuiop", "asdfghjkl", "⇧zxcvbnm⌫").forEach { letters ->
+            val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+            letters.forEach { character ->
+                row.addView(Button(this).apply {
+                    text = character.toString()
+                    isAllCaps = false
+                    minWidth = 0
+                    setPadding(dp(1), 0, dp(1), 0)
+                    setOnClickListener {
+                        when (character) {
+                            '⌫' -> currentInputConnection?.deleteSurroundingText(1, 0)
+                            '⇧' -> Unit
+                            else -> currentInputConnection?.commitText(character.toString(), 1)
+                        }
+                    }
+                }, LinearLayout.LayoutParams(0, dp(44), 1f).apply {
+                    setMargins(dp(1), dp(1), dp(1), dp(1))
+                })
+            }
+            panel.addView(row)
+        }
+        panel.addView(Button(this).apply {
+            text = "Space"
+            setOnClickListener { currentInputConnection?.commitText(" ", 1) }
+        })
+        return panel
+    }
+
     private var symbolSearchRenderer: ((String) -> Unit)? = null
 
     private fun matchingEntries(query: String): List<Entry> {
@@ -223,6 +267,8 @@ class OrchidSymbolImeService : InputMethodService() {
         val recentIds = registry.recent()
         val favoriteIds = registry.favorites()
         val categoryEntries = when (selectedCategory) {
+            "Core" -> all.filter { it.kind == "core-layer" }
+            "Time" -> all.filter { it.kind == "time-layer" || it.kind == "chronoglyph" }
             "Recent" -> all.filter { it.id in recentIds }.sortedBy { recentIds.indexOf(it.id) }
             "Favorites" -> all.filter { it.id in favoriteIds }
             "Chrono" -> all.filter { it.kind.contains("chrono", true) || it.id.startsWith("ORC-CG") }
