@@ -89,20 +89,26 @@ class OrchidSymbolImeService : InputMethodService() {
         column.addView(databaseSearch, LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
         ))
+        var selectedDatabaseKind: String? = null
+        val databaseFilters = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+        }
         val databaseResults = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
         }
+        column.addView(databaseFilters)
         column.addView(databaseResults, LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
         ))
 
         fun showDatabaseResults(query: String) {
             databaseResults.removeAllViews()
-            val matches = if (query.isBlank()) {
-                database.all().filter { it.kind in setOf("living-symbol", "operator", "concept") }
+            val matches = (if (query.isBlank()) {
+                database.all()
             } else {
-                database.search(query)
-            }.take(12)
+                database.search(query, selectedDatabaseKind)
+            }).filter { selectedDatabaseKind == null || it.kind == selectedDatabaseKind }.take(12)
             if (matches.isEmpty()) {
                 databaseResults.addView(TextView(this).apply {
                     text = "No matching ORCHID records"
@@ -127,6 +133,27 @@ class OrchidSymbolImeService : InputMethodService() {
                 }
                 databaseResults.addView(resultRow)
             }
+        }
+        val filterOptions = listOf(
+            "ALL" to null,
+            "CHRONO" to "chronoglyph",
+            "WORDS" to "keyword",
+            "OPERATORS" to "operator",
+            "LIVING" to "living-symbol",
+            "CONCEPTS" to "concept"
+        )
+        filterOptions.forEach { (label, kind) ->
+            databaseFilters.addView(Button(this).apply {
+                text = label
+                isAllCaps = false
+                textSize = 10f
+                minWidth = 0
+                setPadding(dp(5), dp(4), dp(5), dp(4))
+                setOnClickListener {
+                    selectedDatabaseKind = kind
+                    showDatabaseResults(databaseSearch.text?.toString().orEmpty())
+                }
+            }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
         }
         showDatabaseResults("")
         databaseSearch.addTextChangedListener(object : TextWatcher {
