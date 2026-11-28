@@ -29,6 +29,7 @@ class OrchidSymbolImeService : InputMethodService() {
     private lateinit var database: OrchidSymbolDatabase
     private lateinit var root: LinearLayout
     private lateinit var symbolPanel: LinearLayout
+    private lateinit var keyboardPanel: LinearLayout
     private lateinit var search: EditText
     private var selectedCategory = "All"
     private var shift = false
@@ -108,6 +109,7 @@ class OrchidSymbolImeService : InputMethodService() {
             ViewGroup.LayoutParams.MATCH_PARENT, dp(if (keyHeight >= 52) 202 else 174)
         ))
         root.addView(symbolPanel)
+        keyboardPanel = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
 
         fun drawResults(query: String) {
             symbolResults.removeAllViews()
@@ -193,7 +195,7 @@ class OrchidSymbolImeService : InputMethodService() {
             currentInputConnection?.deleteSurroundingTextInCodePoints(1, 0)
             vibrateKey()
         }, weightedParams(1.25f))
-        root.addView(bottom)
+        keyboardPanel.addView(bottom)
 
         val actions = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         actions.addView(keyButton("!#1", "Symbols and punctuation") {
@@ -203,7 +205,8 @@ class OrchidSymbolImeService : InputMethodService() {
         actions.addView(keyButton("English (US)", "Space") { commitKey(" ") }, weightedParams(4f))
         actions.addView(keyButton(".", "Period") { commitKey(".") }, weightedParams())
         actions.addView(keyButton("↵", "Enter") { sendEnter() }, weightedParams(1.25f))
-        root.addView(actions)
+        keyboardPanel.addView(actions)
+        root.addView(keyboardPanel)
         return root
     }
 
@@ -240,7 +243,10 @@ class OrchidSymbolImeService : InputMethodService() {
     }
 
     private fun renderSymbols() { symbolSearchRenderer?.invoke(search.text?.toString().orEmpty()) }
-    private fun showSymbols(show: Boolean) {\n        symbolPanel.visibility = if (show) View.VISIBLE else View.GONE\n        keyboardPanel.visibility = if (show) View.GONE else View.VISIBLE\n    }
+    private fun showSymbols(show: Boolean) {
+        symbolPanel.visibility = if (show) View.VISIBLE else View.GONE
+        keyboardPanel.visibility = if (show) View.GONE else View.VISIBLE
+    }
 
     private fun launchStudio() {
         startActivity(Intent(this, OrchidSymbolManagerActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
@@ -251,7 +257,7 @@ class OrchidSymbolImeService : InputMethodService() {
         value.forEach { key ->
             row.addView(keyButton(key.toString()) { commitKey(key.toString()) }, weightedParams(weight))
         }
-        root.addView(row)
+        keyboardPanel.addView(row)
     }
 
     private fun addLetterRow(value: String, weight: Float, inset: Int = 0) {
@@ -267,7 +273,7 @@ class OrchidSymbolImeService : InputMethodService() {
             letterKeys.add(key to letter)
             row.addView(key, weightedParams(weight))
         }
-        root.addView(row)
+        keyboardPanel.addView(row)
     }
 
     private fun updateLetterLabels() { letterKeys.forEach { (button, letter) -> button.text = labelFor(letter) } }
