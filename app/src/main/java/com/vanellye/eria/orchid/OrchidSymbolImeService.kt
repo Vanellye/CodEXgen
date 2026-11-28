@@ -246,7 +246,7 @@ class OrchidSymbolImeService : InputMethodService() {
         startActivity(Intent(this, OrchidSymbolManagerActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 
-    private fun addLetterRow(value: String, weight: Float, inset: Int = 0) {
+    private fun addKeyRow(value: String, weight: Float) {\n        val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }\n        value.forEach { key ->\n            row.addView(keyButton(key.toString()) { commitKey(key.toString()) }, weightedParams(weight))\n        }\n        root.addView(row)\n    }\n\n    private fun addLetterRow(value: String, weight: Float, inset: Int = 0) {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             if (inset > 0) setPadding(dp(inset), 0, dp(inset), 0)
@@ -300,7 +300,7 @@ class OrchidSymbolImeService : InputMethodService() {
         else @Suppress("DEPRECATION") vibrator.vibrate(12)
     }
 
-    private fun categoryButton(label: String, action: () -> Unit) = Button(this).apply {
+    @Suppress("DEPRECATION")\n    private fun vibrateLegacy(vibrator: Vibrator) { vibrator.vibrate(12) }\n\n    private fun categoryButton(label: String, action: () -> Unit) = Button(this).apply {
         text = label
         isAllCaps = false
         textSize = 11f
