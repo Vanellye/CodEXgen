@@ -29,6 +29,8 @@ jobs:
           packages: 'platform-tools'
       - name: Install Android platform
         run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Validate ORCHID database fixture
+        run: python3 tools/validate_orchid_database.py
       - name: Run unit tests (retry Maven Central HTTP 429)
         shell: bash
         run: |
