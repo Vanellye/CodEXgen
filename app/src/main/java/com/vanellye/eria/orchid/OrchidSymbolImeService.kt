@@ -240,7 +240,7 @@ class OrchidSymbolImeService : InputMethodService() {
     }
 
     private fun renderSymbols() { symbolSearchRenderer?.invoke(search.text?.toString().orEmpty()) }
-    private fun showSymbols(show: Boolean) { symbolPanel.visibility = if (show) View.VISIBLE else View.GONE }
+    private fun showSymbols(show: Boolean) {\n        symbolPanel.visibility = if (show) View.VISIBLE else View.GONE\n        keyboardPanel.visibility = if (show) View.GONE else View.VISIBLE\n    }
 
     private fun launchStudio() {
         startActivity(Intent(this, OrchidSymbolManagerActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
