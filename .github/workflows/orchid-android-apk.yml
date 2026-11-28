@@ -1,0 +1,92 @@
+name: ORCHID Android APK
+
+on:
+  push:
+    branches:
+      - feature/orchid-chronoglyph-transient-compat
+    paths:
+      - 'app/**'
+      - '.github/workflows/orchid-android-apk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools'
+      - name: Install Android platform
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Validate ORCHID database fixture
+        run: python3 tools/validate_orchid_database.py
+      - name: Run unit tests (retry Maven Central HTTP 429)
+        shell: bash
+        run: |
+          chmod +x ./gradlew
+          run_gradle_with_retry() {
+            local task="$1"
+            local attempt=1
+            local log_file
+            log_file="$(mktemp)"
+            while [ "$attempt" -le 3 ]; do
+              echo "Gradle task $task (attempt $attempt/3)"
+              if ./gradlew --no-daemon --max-workers=2 "$task" 2>&1 | tee "$log_file"; then
+                rm -f "$log_file"
+                return 0
+              fi
+              if ! grep -Eqi 'HTTP 429|status code 429|Too Many Requests' "$log_file" || [ "$attempt" -eq 3 ]; then
+                rm -f "$log_file"
+                return 1
+              fi
+              local delay=$((attempt * 20))
+              echo "Maven Central rate limit detected; retrying after ${delay}s."
+              sleep "$delay"
+              attempt=$((attempt + 1))
+            done
+          }
+          run_gradle_with_retry :app:testDebugUnitTest
+      - name: Assemble debug APK (retry Maven Central HTTP 429)
+        shell: bash
+        run: |
+          run_gradle_with_retry() {
+            local task="$1"
+            local attempt=1
+            local log_file
+            log_file="$(mktemp)"
+            while [ "$attempt" -le 3 ]; do
+              echo "Gradle task $task (attempt $attempt/3)"
+              if ./gradlew --no-daemon --max-workers=2 "$task" 2>&1 | tee "$log_file"; then
+                rm -f "$log_file"
+                return 0
+              fi
+              if ! grep -Eqi 'HTTP 429|status code 429|Too Many Requests' "$log_file" || [ "$attempt" -eq 3 ]; then
+                rm -f "$log_file"
+                return 1
+              fi
+              local delay=$((attempt * 20))
+              echo "Maven Central rate limit detected; retrying after ${delay}s."
+              sleep "$delay"
+              attempt=$((attempt + 1))
+            done
+          }
+          run_gradle_with_retry :app:assembleDebug
+      - name: Verify APK exists
+        run: test -s app/build/outputs/apk/debug/app-debug.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ORCHID-Android-debug-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14

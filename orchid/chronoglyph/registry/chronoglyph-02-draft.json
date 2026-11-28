@@ -1,0 +1,174 @@
+{
+  "system": "ORCHID",
+  "module": "CHRONOGLYPH",
+  "generation": "02",
+  "version": "0.1.0-draft",
+  "status": "PROPOSAL",
+  "governance": {
+    "pons_dependency": "NONE_WITHIN_ORCHID",
+    "pons_scope_note": "No deletion or disabling of PONS outside ORCHID is authorized by this specification.",
+    "human_review_for_shared_release": true,
+    "append_only_release_history": true,
+    "silent_semantic_overwrite": false
+  },
+  "runtime_profiles": [
+    "EPHEMERAL",
+    "CACHE",
+    "OFFLINE",
+    "PERSISTENT",
+    "DISTRIBUTED"
+  ],
+  "transient_scope": {
+    "volatile_memory": true,
+    "disposable_sessions": true,
+    "ephemeral_containers": true,
+    "browser_sessions": true,
+    "restart_recovery": "ONLY_FROM_PERSISTED_OR_EXPORTED_STATE",
+    "unpersisted_change_disclosure": true
+  },
+  "temporal_modes": [
+    "LINEAR",
+    "CYCLIC",
+    "BRANCHING",
+    "LAYERED",
+    "ELASTIC_SCALE",
+    "REVERSIBLE_TRACE",
+    "UNRESOLVED"
+  ],
+  "symbols": [
+    {
+      "id": "ORC-CG01-0001",
+      "name": "VORA",
+      "glyph": "⧖",
+      "meaning": "TEMPORAL_FLEXIBILITY",
+      "parent": null,
+      "generation": 1,
+      "immutable": true
+    },
+    {
+      "id": "ORC-CG01-0002",
+      "name": "ELUN",
+      "glyph": "⫶",
+      "meaning": "OBSERVATION_INSTANT",
+      "parent": null,
+      "generation": 1,
+      "immutable": true
+    },
+    {
+      "id": "ORC-CG01-0003",
+      "name": "THÉRA",
+      "glyph": "⤙",
+      "meaning": "HISTORICAL_DIRECTION",
+      "parent": null,
+      "generation": 1,
+      "immutable": true
+    },
+    {
+      "id": "ORC-CG01-0004",
+      "name": "AVÉR",
+      "glyph": "⤚",
+      "meaning": "FUTURE_DIRECTION",
+      "parent": null,
+      "generation": 1,
+      "immutable": true
+    },
+    {
+      "id": "ORC-CG01-0005",
+      "name": "NŌVEX",
+      "glyph": "⧓",
+      "meaning": "TEMPORAL_BRANCHING",
+      "parent": null,
+      "generation": 1,
+      "immutable": true
+    },
+    {
+      "id": "ORC-CG01-0006",
+      "name": "SÉLVA",
+      "glyph": "⫰",
+      "meaning": "DURATION",
+      "parent": null,
+      "generation": 1,
+      "immutable": true
+    },
+    {
+      "id": "ORC-CG01-0007",
+      "name": "RŪVEN",
+      "glyph": "⧔",
+      "meaning": "RECURRENCE",
+      "parent": null,
+      "generation": 1,
+      "immutable": true
+    },
+    {
+      "id": "ORC-CG01-0008",
+      "name": "KÉRIN",
+      "glyph": "⫷",
+      "meaning": "SYNCHRONIZATION",
+      "parent": null,
+      "generation": 1,
+      "immutable": true
+    },
+    {
+      "id": "ORC-CG01-0009",
+      "name": "MŌRIN",
+      "glyph": "⧉",
+      "meaning": "SIMULTANEITY",
+      "parent": null,
+      "generation": 1,
+      "immutable": true
+    },
+    {
+      "id": "ORC-CG01-0010",
+      "name": "DÉXEN",
+      "glyph": "⤺",
+      "meaning": "REVERSIBLE_TRACE",
+      "parent": null,
+      "generation": 1,
+      "immutable": true
+    },
+    {
+      "id": "ORC-CG01-0011",
+      "name": "ŌRIEL",
+      "glyph": "⧗",
+      "meaning": "TEMPORAL_UNCERTAINTY",
+      "parent": null,
+      "generation": 1,
+      "immutable": true
+    },
+    {
+      "id": "ORC-CG01-0012",
+      "name": "ZÉPHIR",
+      "glyph": "⫯",
+      "meaning": "INTERVAL_COMPLETION",
+      "parent": null,
+      "generation": 1,
+      "immutable": true
+    }
+  ],
+  "localization_targets": [
+    "en",
+    "es",
+    "fr",
+    "de",
+    "pt",
+    "ar",
+    "hi",
+    "ja",
+    "zh-Hans",
+    "zh-Hant",
+    "ko"
+  ],
+  "adapters": [
+    "ANDROID_IME",
+    "DESKTOP_INPUT",
+    "WEB_EDITOR",
+    "APPLICATION_SDK"
+  ],
+  "validation": {
+    "schema_defined": true,
+    "compiler_verified": false,
+    "keyboard_runtime_verified": false,
+    "multilingual_review_complete": false,
+    "transient_runtime_verified": false
+  }
+}
